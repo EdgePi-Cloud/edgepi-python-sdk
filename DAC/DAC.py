@@ -26,8 +26,14 @@ class EdgePi_DAC():
     def write_and_update(self, ch, data):
         command = self.combine_command(command.COM_WRITE_UPDATE.value, address(ch).value)
         self.cs.off()
-        spi.xfer(command)
+        self.spi.xfer(command)
         self.cs.on()
-        
+
+    def sw_reset(self):
+        command = self.combine_command(command.COM_SW_RESET, 0, 4660)
+        self.cs.off()
+        self.spi.xfer(command)
+        self.cs.on()
+
         
 
