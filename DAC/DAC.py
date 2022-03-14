@@ -12,6 +12,7 @@ RANGE = 65536
 
 class EdgePi_DAC():
     def __init__ (self):
+        _logger.info(f'Initializing DAC Bus')
         self.spi = spidev.SpiDev()
         self.spi.no_cs = True
         self.spi.max_speed_hz = 1000000
@@ -23,18 +24,22 @@ class EdgePi_DAC():
     def combine_command(self, op_code, ch, value):
         temp = op_code<<20 + ch<<16 + value
         list = [temp>>16, (temp>>8)&0xFF, temp&0xFF]
+        _logger.debug(f'Combined Command is: {list}')
         return list
 
     def write_and_update(self, ch, data):
         command = self.combine_command(command.COM_WRITE_UPDATE.value, address(ch).value)
+        _logger.info(f'Write and update')
         self.spi.open(6, 0)
         self.cs.off()
         self.spi.xfer(command)
         self.cs.on()
         self.spi.close()
+        _logger.debug(f'Written and updated with {command}')
 
     def sw_reset(self):
         command = self.combine_command(command.COM_SW_RESET, 0, 4660)
+        _logger.info(f'SW Reset')
         self.spi.open(6, 0)
         self.cs.off()
         self.spi.xfer(command)
