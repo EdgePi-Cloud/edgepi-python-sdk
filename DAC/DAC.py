@@ -23,7 +23,7 @@ class EdgePi_DAC():
         self.cs.on()
 
     def combine_command(self, op_code, ch, value):
-        temp = op_code<<20 + ch<<16 + value
+        temp = (op_code<<20) + (ch<<16) + value
         list = [temp>>16, (temp>>8)&0xFF, temp&0xFF]
         _logger.debug(f'Combined Command is: {list}')
         return list
@@ -37,7 +37,7 @@ class EdgePi_DAC():
         _logger.debug(f'Written and updated with {command}')
 
     def sw_reset(self):
-        command = self.combine_command(COMMAND.COM_SW_RESET, 0, 4660)
+        command = self.combine_command(COMMAND.COM_SW_RESET.value, 0, 4660)
         _logger.info(f'SW Reset')
         self.cs.off()
         self.spi.xfer(command)
