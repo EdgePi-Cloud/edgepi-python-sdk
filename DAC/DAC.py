@@ -1,7 +1,7 @@
 import spidev
 from gpiozero import LED as pin
-from DAC_REG import EDGEPI_DAC_ADDRESS as address
-from DAC_REG import EDGEPI_DAC_COM as command
+from DAC_REG import EDGEPI_DAC_ADDRESS as ADDRESS
+from DAC_REG import EDGEPI_DAC_COM as COMMAND
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +29,7 @@ class EdgePi_DAC():
         return list
 
     def write_and_update(self, ch, data):
-        command = self.combine_command(command.COM_WRITE_UPDATE.value, address(ch).value)
+        command = self.combine_command(COMMAND.COM_WRITE_UPDATE.value, ADDRESS(ch).value)
         _logger.info(f'Write and update')
         self.cs.off()
         self.spi.xfer(command)
@@ -37,7 +37,7 @@ class EdgePi_DAC():
         _logger.debug(f'Written and updated with {command}')
 
     def sw_reset(self):
-        command = self.combine_command(command.COM_SW_RESET, 0, 4660)
+        command = self.combine_command(COMMAND.COM_SW_RESET, 0, 4660)
         _logger.info(f'SW Reset')
         self.cs.off()
         self.spi.xfer(command)
