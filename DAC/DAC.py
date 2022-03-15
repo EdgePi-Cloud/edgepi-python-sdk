@@ -14,6 +14,7 @@ class EdgePi_DAC():
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
         self.spi = spidev.SpiDev()
+        self.spi.open(6, 0)
         self.spi.no_cs = True
         self.spi.max_speed_hz = 1000000
         self.spi.mode = 2
@@ -30,21 +31,17 @@ class EdgePi_DAC():
     def write_and_update(self, ch, data):
         command = self.combine_command(command.COM_WRITE_UPDATE.value, address(ch).value)
         _logger.info(f'Write and update')
-        self.spi.open(6, 0)
         self.cs.off()
         self.spi.xfer(command)
         self.cs.on()
-        self.spi.close()
         _logger.debug(f'Written and updated with {command}')
 
     def sw_reset(self):
         command = self.combine_command(command.COM_SW_RESET, 0, 4660)
         _logger.info(f'SW Reset')
-        self.spi.open(6, 0)
         self.cs.off()
         self.spi.xfer(command)
         self.cs.on()
-        self.spi.close()
 
     def write_voltage_channel(self, ch, voltage):
         code = self.voltage_to_code(voltage)
