@@ -29,7 +29,7 @@ class EdgePi_DAC():
         return list
 
     def write_and_update(self, ch, data):
-        command = self.combine_command(COMMAND.COM_WRITE_UPDATE.value, ADDRESS(ch).value)
+        command = self.combine_command(COMMAND.COM_WRITE_UPDATE.value, ADDRESS(ch).value, data)
         _logger.info(f'Write and update')
         self.cs.off()
         self.spi.xfer(command)
