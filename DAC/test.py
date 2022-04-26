@@ -1,10 +1,13 @@
-from DAC import EdgePi_DAC
+import pytest
+from DAC_Methods import DAC_Methods
 
 
-def main():
-    dac = EdgePi_DAC()
-    dac.write_and_update(0, 3000)
-    dac.sw_reset()
+@pytest.fixture(name='dac_ops')
+def fixture_test_DAC_ops():
+    dac_ops = DAC_Methods()
+    yield dac_ops
 
-if __name__ == '__main__':
-    main()
+@pytest.mark.parametrize("a, b, c, d",[(3, 1, 1000, [49, 3, 232]), (3, 0, 1000, [48, 3, 232]), (3, 3, 1000, [51, 3, 232])])
+def test_write_and_update(a, b, c, d, dac_ops):
+    assert dac_ops.combine_command(a, b, c) == d
+
