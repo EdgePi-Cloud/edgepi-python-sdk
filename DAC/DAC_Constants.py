@@ -23,3 +23,7 @@ class EDGEPI_DAC_ADDRESS(Enum):
     DAC5 = 0x5
     DAC6 = 0x6
     DAC7 = 0x7
+
+class EDGEPI_DAC_CALIBRATION_CONSTANTS(Enum):
+    VOLTAGE_REF = 2.047
+    RANGE = 65536
