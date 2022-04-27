@@ -27,3 +27,23 @@ class EDGEPI_DAC_ADDRESS(Enum):
 class EDGEPI_DAC_CALIBRATION_CONSTANTS(Enum):
     VOLTAGE_REF = 2.047
     RANGE = 65536
+    DAC_GAIN = 0
+    DAC_OFFSET = 0
+
+class EDGEPI_DAC_AMP_CONSTANTS(Enum):
+    AMP_GAIN_1 = 0
+    AMP_GAIN_2 = 0
+    AMP_GAIN_3 = 0
+    AMP_GAIN_4 = 0
+    AMP_GAIN_5 = 0
+    AMP_GAIN_6 = 0
+    AMP_GAIN_7 = 0
+    AMP_GAIN_8 = 0
+    AMP_OFFSET_1 = 0
+    AMP_OFFSET_2 = 0
+    AMP_OFFSET_3 = 0
+    AMP_OFFSET_4 = 0
+    AMP_OFFSET_5 = 0
+    AMP_OFFSET_6 = 0
+    AMP_OFFSET_7 = 0
+    AMP_OFFSET_8 = 0

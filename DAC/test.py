@@ -43,3 +43,11 @@ def test_combine_command(a, b, c, d, dac_ops):
                                     (3, 1000, [51, 3, 232])])
 def test_write_and_update(a, b, c, dac_ops):
     assert dac_ops.write_and_update(a, b) == c
+
+'''
+voltage to code conversion
+voltage = positive floating number 0~5V ideally
+code = positive integer number 0~65535
+rounding up/down during conversion ?
+'''
+# def test_voltage_to_code():
