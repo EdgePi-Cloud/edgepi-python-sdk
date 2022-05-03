@@ -14,7 +14,7 @@ class EDGEPI_DAC_COM(Enum):
     COM_UPDATE_ALL_CH = 0x10 # update all channels of the input register simultaneously with the input data
     COM_UPDATE_ALL_DAC = 0x11 # update all channel of teh input register and DAC register simultaneously with the input data
 
-class EDGEPI_DAC_ADDRESS(Enum):
+class EDGEPI_DAC_CHANNEL(Enum):
     DAC0 = 0x0
     DAC1 = 0x1
     DAC2 = 0x2
@@ -27,23 +27,3 @@ class EDGEPI_DAC_ADDRESS(Enum):
 class EDGEPI_DAC_CALIBRATION_CONSTANTS(Enum):
     VOLTAGE_REF = 2.047
     RANGE = 65536
-    DAC_GAIN = 0
-    DAC_OFFSET = 0
-
-class EDGEPI_DAC_AMP_CONSTANTS(Enum):
-    AMP_GAIN_1 = 0
-    AMP_GAIN_2 = 0
-    AMP_GAIN_3 = 0
-    AMP_GAIN_4 = 0
-    AMP_GAIN_5 = 0
-    AMP_GAIN_6 = 0
-    AMP_GAIN_7 = 0
-    AMP_GAIN_8 = 0
-    AMP_OFFSET_1 = 0
-    AMP_OFFSET_2 = 0
-    AMP_OFFSET_3 = 0
-    AMP_OFFSET_4 = 0
-    AMP_OFFSET_5 = 0
-    AMP_OFFSET_6 = 0
-    AMP_OFFSET_7 = 0
-    AMP_OFFSET_8 = 0

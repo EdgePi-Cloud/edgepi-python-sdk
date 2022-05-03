@@ -1,9 +1,8 @@
 from operator import truediv
 from pickle import EMPTY_LIST
-from DAC_Constants import EDGEPI_DAC_ADDRESS as ADDRESS
+from DAC_Constants import EDGEPI_DAC_CHANNEL as CH
 from DAC_Constants import EDGEPI_DAC_COM as COMMAND
 from DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
-from DAC_Constants import EDGEPI_DAC_AMP_CONSTANTS as AMP_CONSTS
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -13,19 +12,25 @@ _logger=logging.getLogger(__name__)
 class DAC_Methods():
     def __init__(self):
         _logger.info(f'Initializing DAC Methods')
+        self.__amplifier_gain = [2.5] * 8
+        self.__amplifier_offset = [0] * 8
+        self.__dac_gain = 0
+        self.__dac_offset = 0
+        
 
     def write_and_update(self, ch, data):
-        if self.check_range(ch, 0, len(ADDRESS)) and self.check_range(data, 0, 65535):
-            return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, ADDRESS(ch).value, data)
+        if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, 65535):
+            return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
         # Todo: or throw error
         return None
         
-#ToDo: change the formula according to calibration if needed
+    #ToDo: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
-        code = (expected + AMP_CONSTS(ch+8).value) / AMP_CONSTS(ch).value \
-         + CALIB_CONSTS.DAC_OFFSET.value  \
-         / ((CALIB_CONSTS.RANGE.value / CALIB_CONSTS.VOLTAGE_REF.value) + CALIB_CONSTS.DAC_GAIN) 
-        return code
+        code = (((expected + self.__amplifier_offset[ch])  \
+                / self.__amplifier_gain[ch])              \
+                + self.__dac_offset)                      \
+                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.__dac_gain) 
+        return int(code)
 
     @staticmethod
     def combine_command(op_code, ch, value):

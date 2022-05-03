@@ -50,4 +50,9 @@ voltage = positive floating number 0~5V ideally
 code = positive integer number 0~65535
 rounding up/down during conversion ?
 '''
-# def test_voltage_to_code():
+
+@pytest.mark.parametrize("ch, expected, result",[(1, 2.345, 30030), 
+                                    (0, 2.345, 30030), 
+                                    (3, 2.345, 30030)])
+def test_voltage_to_code(ch, expected, result, dac_ops):
+    assert dac_ops.voltage_to_code(ch, expected) == result
