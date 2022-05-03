@@ -11,9 +11,9 @@ setuptools.setup(
     description="EdgePi Python SDK package",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="---to be inserted ---",
+    url="https://github.com/osensa/edgepi-python-sdk",
     project_urls={
-        "Bug Tracker": "---to be inserted ---",
+        "Bug Tracker": "https://github.com/osensa/edgepi-python-sdk/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -24,4 +24,5 @@ setuptools.setup(
                                       include=["DAC"],
                                       exclude=["Tests"]),    
     python_requires=">=3.6",
+    install_requires=["spidev", "gpiozero"]
 )
