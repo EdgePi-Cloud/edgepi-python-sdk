@@ -16,7 +16,7 @@ class DAC_Methods():
         self.__dac_offset = 0
         
 
-    def write_and_update(self, ch, data):
+    def generate_write_and_update_command(self, ch, data):
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, 65535):
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
         # Todo: or throw error
@@ -53,7 +53,4 @@ class DAC_Methods():
         return True
     @staticmethod
     def check_range(target, min, max):
-        if target <= max and target >= min:
-            return True
-        else:
-            return False
+        return target <= max and target >= min
