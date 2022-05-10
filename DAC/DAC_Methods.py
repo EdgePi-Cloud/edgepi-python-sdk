@@ -3,7 +3,6 @@ from DAC.DAC_Constants import EDGEPI_DAC_COM as COMMAND
 from DAC.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
 
 import logging
-logging.basicConfig(level=logging.INFO)
 _logger=logging.getLogger(__name__)
 
 
@@ -51,6 +50,7 @@ class DAC_Methods():
                 _logger.debug(f'Non-Integer number detected: {i}')
                 return False
         return True
+
     @staticmethod
     def check_range(target, min, max):
         return target <= max and target >= min

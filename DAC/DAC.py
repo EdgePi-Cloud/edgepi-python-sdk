@@ -3,7 +3,6 @@ import spidev
 from gpiozero import LED as pin
 
 import logging
-logging.basicConfig(level=logging.INFO)
 _logger=logging.getLogger(__name__)
 
 class EdgePi_DAC():
