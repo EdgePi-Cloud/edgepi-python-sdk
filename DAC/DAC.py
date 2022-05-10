@@ -8,6 +8,7 @@ _logger=logging.getLogger(__name__)
 class EdgePi_DAC():
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
+        # Todo: SPI needs to have separate class and inherited
         self.spi = self.initialize_spi(spidev.SpiDev())
         # CS is connected on GPIO18
         self.cs = pin(18)
@@ -24,7 +25,7 @@ class EdgePi_DAC():
     def write_voltage_channel(self, ch, voltage):
         code = self.dac_ops.voltage_to_code(voltage)
         self.cs.off()
-        self.dac_ops.write_and_update(ch, code)
+        self.spi.tranfer(self.dac_ops.write_and_update(ch, code))
         self.cs.on()
 
     def close_spi(self,):
