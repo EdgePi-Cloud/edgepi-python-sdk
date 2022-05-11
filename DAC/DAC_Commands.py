@@ -6,7 +6,7 @@ import logging
 _logger=logging.getLogger(__name__)
 
 # Todo: change the class name from Methods to DAC_Commands, it is forming opcode and commands to the chip
-class DAC_Methods():
+class DAC_Commands():
     def __init__(self):
         _logger.info(f'Initializing DAC Methods')
         # have a separate class for calibration parameter to intialize and inherit, have DAC calibration dataclass to hold values
@@ -17,7 +17,7 @@ class DAC_Methods():
         
 
     def generate_write_and_update_command(self, ch, data):
-        if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, 65535):
+        if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
         # Todo: or throw error
         return None
@@ -32,11 +32,8 @@ class DAC_Methods():
 
     @staticmethod
     def combine_command(op_code, ch, value):
-        # Todo: why it requires class.staticmethod()? instead of just self.staticmethod?
         # Todo: use exception instead of if-else
-
-        if DAC_Methods.check_for_int([op_code, ch, value]):
-            # Todo: use pack and unpack
+        if DAC_Commands.check_for_int([op_code, ch, value]):
             temp = (op_code<<20) + (ch<<16) + value
             list = [temp>>16, (temp>>8)&0xFF, temp&0xFF]
             _logger.debug(f'Combined Command is: {list}')

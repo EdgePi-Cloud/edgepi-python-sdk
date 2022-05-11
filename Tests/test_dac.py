@@ -1,10 +1,10 @@
 import pytest
-from DAC.DAC_Methods import DAC_Methods
+from DAC.DAC_Commands import DAC_Commands
 
 
 @pytest.fixture(name='dac_ops')
 def fixture_test_DAC_ops():
-    dac_ops = DAC_Methods()
+    dac_ops = DAC_Commands()
     return dac_ops
 
 '''
@@ -41,8 +41,8 @@ def test_combine_command(a, b, c, d, dac_ops):
 @pytest.mark.parametrize("a, b, c",[(1, 1000, [49, 3, 232]), 
                                     (0, 1000, [48, 3, 232]), 
                                     (3, 1000, [51, 3, 232])])
-def test_write_and_update(a, b, c, dac_ops):
-    assert dac_ops.write_and_update(a, b) == c
+def test_generate_write_and_update_command(a, b, c, dac_ops):
+    assert dac_ops.generate_write_and_update_command(a, b) == c
 
 '''
 voltage to code conversion

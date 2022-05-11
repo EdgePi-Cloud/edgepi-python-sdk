@@ -1,4 +1,4 @@
-from DAC.DAC_Methods import DAC_Methods
+from DAC.DAC_Commands import DAC_Methods
 from periphery import SPI
 
 import logging
