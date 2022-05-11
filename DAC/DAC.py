@@ -1,6 +1,5 @@
 from DAC.DAC_Methods import DAC_Methods
-import spidev
-from gpiozero import LED as pin
+from periphery import SPI
 
 import logging
 _logger=logging.getLogger(__name__)
@@ -9,24 +8,17 @@ class EdgePi_DAC():
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
         # Todo: SPI needs to have separate class and inherited
-        self.spi = self.initialize_spi(spidev.SpiDev())
+        self.spi = self.initialize_spi(SPI)
         # CS is connected on GPIO18
-        self.cs = pin(18)
-        self.cs.on()
         self.dac_ops = DAC_Methods()
 
     def initialize_spi(self, spi):
-        spi.open(6, 0)
-        spi.no_cs = True
-        spi.max_speed_hz = 1000000
-        spi.mode = 2
-        return spi
+        # Bus 6 dev 2, mode 1, max_freq = 1MHz
+        return SPI("/dev/spidev6.2", 1, 1000000)
 
     def write_voltage_channel(self, ch, voltage):
         code = self.dac_ops.voltage_to_code(voltage)
-        self.cs.off()
-        self.spi.tranfer(self.dac_ops.write_and_update(ch, code))
-        self.cs.on()
+        self.spi.tranfer(self.dac_ops.generate_write_and_update_command(ch, code))
 
     def close_spi(self,):
         self.spi.close()

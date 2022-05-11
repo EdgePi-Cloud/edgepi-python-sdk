@@ -24,5 +24,5 @@ setuptools.setup(
                                       include=["DAC"],
                                       exclude=["Tests"]),    
     python_requires=">=3.6",
-    install_requires=["spidev", "gpiozero"]
+    install_requires=["python-periphery >= 2.3.0"]
 )
