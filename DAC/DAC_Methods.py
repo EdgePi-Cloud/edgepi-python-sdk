@@ -46,15 +46,8 @@ class DAC_Methods():
         return list
 
     @staticmethod
-    # Todo: this method can be one line (be more pythonic) eturn True if all(isinstance(value, int) for value in target_list) else False
     def check_for_int(target_list):
-        if not target_list:
-            return False
-        for value in range(len(target_list)):
-            if not isinstance(target_list[value], int):
-                _logger.debug(f'Non-Integer number detected: {value}')
-                return False
-        return True
+        return True if all(isinstance(value, int) for value in target_list) and target_list else False
 
     @staticmethod
     def check_range(target, min, max):
