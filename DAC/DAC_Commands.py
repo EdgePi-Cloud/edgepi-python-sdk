@@ -24,7 +24,8 @@ class DAC_Commands():
         code = (((expected + self.dac_sw_calib_consts_list[ch].offset)  \
                 / self.dac_sw_calib_consts_list[ch].gain)              \
                 + self.dac_hw_calib_const.offset)                      \
-                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.dac_hw_calib_const.gain) 
+                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.dac_hw_calib_const.gain)
+        _logger.debug(f'Code generated {int(code)}') 
         return int(code)
 
     @staticmethod
@@ -36,18 +37,19 @@ class DAC_Commands():
             _logger.debug(f'Combined Command is: {list}')
             return list
         except Exception as e:
-            return e
+            _logger.error(f'Exception raised {e}')
+            
 
     @staticmethod
     def check_for_int(target_list):
         if all(isinstance(value, int) for value in target_list) and target_list:
             return True
         else:
-            raise ValueError('Non integer value passed')
+            raise ValueError(f'Non integer value passed{target_list}')
 
     @staticmethod
     def check_range(target, min, max):
         if target <= max and target >= min:
             return True
         else:
-            raise ValueError('Value out of range')
+            raise ValueError(f'Target out of range {target}')
