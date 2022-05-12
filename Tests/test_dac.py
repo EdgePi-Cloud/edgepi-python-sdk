@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import pytest
 from DAC.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
 from DAC.DAC_Commands import DAC_Commands
