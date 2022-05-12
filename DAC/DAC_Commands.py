@@ -1,20 +1,17 @@
 from DAC.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
 from DAC.DAC_Constants import EDGEPI_DAC_COM as COMMAND
 from DAC.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
+from DAC.DAC_Calibration import dac_hw_calib_const, dac_sw_calib_const
+
 
 import logging
 _logger=logging.getLogger(__name__)
 
-# Todo: change the class name from Methods to DAC_Commands, it is forming opcode and commands to the chip
 class DAC_Commands():
     def __init__(self):
         _logger.info(f'Initializing DAC Methods')
-        # have a separate class for calibration parameter to intialize and inherit, have DAC calibration dataclass to hold values
-        self.__amplifier_gain = [2.5] * 8
-        self.__amplifier_offset = [0] * 8
-        self.__dac_gain = 0
-        self.__dac_offset = 0
-        
+        self.dac_hw_calib_const = dac_hw_calib_const
+        self.dac_sw_calib_consts_list = [dac_sw_calib_const]*8        
 
     def generate_write_and_update_command(self, ch, data):
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
@@ -24,10 +21,10 @@ class DAC_Commands():
         
     #ToDo: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
-        code = (((expected + self.__amplifier_offset[ch])  \
-                / self.__amplifier_gain[ch])              \
-                + self.__dac_offset)                      \
-                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.__dac_gain) 
+        code = (((expected + self.dac_sw_calib_consts_list[ch].offset)  \
+                / self.dac_sw_calib_consts_list[ch].gain)              \
+                + self.dac_hw_calib_const.offset)                      \
+                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.dac_hw_calib_const.gain) 
         return int(code)
 
     @staticmethod
