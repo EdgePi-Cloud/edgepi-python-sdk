@@ -10,3 +10,5 @@ class dac_hw_calib_const:
 class dac_sw_calib_const:
     gain: float = 2.5
     offset: float = 0
+
+# ToDo: add functions/classes for calibration
