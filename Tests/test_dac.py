@@ -17,7 +17,7 @@ It also needs to check the range of each value.
                                             ([None, 1, 2, 3], False), 
                                             ([], False), 
                                             ([-1, -2.22], False)])
-
+# TODO: Is this the right way to test exception handler?
 def test_check_for_int(sample, result, dac_ops):
     try:
         assert dac_ops.check_for_int(sample) == result

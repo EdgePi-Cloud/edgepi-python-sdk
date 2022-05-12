@@ -17,10 +17,9 @@ class DAC_Commands():
     def generate_write_and_update_command(self, ch, data):
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
-        # Todo: or throw error
         return None
         
-    #ToDo: change the formula according to calibration if needed
+    #TODO: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
         code = (((expected + self.dac_sw_calib_consts_list[ch].offset)  \
                 / self.dac_sw_calib_consts_list[ch].gain)              \
