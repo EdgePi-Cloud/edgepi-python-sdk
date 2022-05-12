@@ -1,11 +1,11 @@
 import pytest
 from DAC.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
-from DAC.DAC_Commands import DAC_Commands
+from DAC.DAC_Commands import DACCommands
 from DAC.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
 
 @pytest.fixture(name='dac_ops')
 def fixture_test_DAC_ops():
-    dac_ops = DAC_Commands()
+    dac_ops = DACCommands()
     return dac_ops
 
 '''

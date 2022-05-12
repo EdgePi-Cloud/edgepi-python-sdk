@@ -1,18 +1,18 @@
 from DAC.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
 from DAC.DAC_Constants import EDGEPI_DAC_COM as COMMAND
 from DAC.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
-from DAC.DAC_Calibration import dac_hw_calib_const, dac_sw_calib_const
+from DAC.DAC_Calibration import DACHwCalib_const, DACSwCalib_const
 
 from typing import Union
 
 import logging
 _logger=logging.getLogger(__name__)
 
-class DAC_Commands():
+class DACCommands():
     def __init__(self):
         _logger.info(f'Initializing DAC Methods')
-        self.dac_hw_calib_const = dac_hw_calib_const
-        self.dac_sw_calib_consts_list = [dac_sw_calib_const]*8        
+        self.DACHwCalib_const = DACHwCalib_const
+        self.DACSwCalib_consts_list = [DACSwCalib_const]*8        
 
     def generate_write_and_update_command(self, ch, data):
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
@@ -21,17 +21,17 @@ class DAC_Commands():
         
     #TODO: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
-        code = (((expected + self.dac_sw_calib_consts_list[ch].offset)  \
-                / self.dac_sw_calib_consts_list[ch].gain)              \
-                + self.dac_hw_calib_const.offset)                      \
-                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.dac_hw_calib_const.gain)
+        code = (((expected + self.DACSwCalib_consts_list[ch].offset)  \
+                / self.DACSwCalib_consts_list[ch].gain)              \
+                + self.DACHwCalib_const.offset)                      \
+                / ((CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value) + self.DACHwCalib_const.gain)
         _logger.debug(f'Code generated {int(code)}') 
         return int(code)
 
     @staticmethod
     def combine_command(op_code, ch, value) -> Union[float, Exception]:
         try:
-            DAC_Commands.check_for_int([op_code, ch, value])
+            DACCommands.check_for_int([op_code, ch, value])
             temp = (op_code<<20) + (ch<<16) + value
             list = [temp>>16, (temp>>8)&0xFF, temp&0xFF]
             _logger.debug(f'Combined Command is: {list}')

@@ -1,16 +1,16 @@
-from DAC.DAC_Commands import DAC_Commands
+from DAC.DACCommands import DACCommands
 from periphery import SPI
 
 import logging
 _logger=logging.getLogger(__name__)
 
-class EdgePi_DAC():
+class EdgePiDAC():
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
         # Todo: SPI needs to have separate class and inherited
         self.spi = self.initialize_spi(SPI)
         # CS is connected on GPIO18
-        self.dac_ops = DAC_Commands()
+        self.dac_ops = DACCommands()
 
     def initialize_spi(self, spi):
         # Bus 6 dev 2, mode 1, max_freq = 1MHz
