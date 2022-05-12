@@ -7,4 +7,4 @@ class SpiDevice(SPI):
 
 
 
-#TODO: Add other peripherals, I2C, GPIO
+#TODO: Add other peripherals, I2C, GPIO, etc
