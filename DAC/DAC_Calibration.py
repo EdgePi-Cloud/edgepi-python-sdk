@@ -3,7 +3,7 @@ from typing import List
 
 @dataclass
 class dac_hw_calib_const:
-    gain: float = 2.5
+    gain: float = 0
     offset: float = 0
 
 @dataclass

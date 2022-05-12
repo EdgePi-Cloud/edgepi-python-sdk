@@ -19,7 +19,10 @@ It also needs to check the range of each value.
                                             ([-1, -2.22], False)])
 
 def test_check_for_int(sample, result, dac_ops):
-    assert dac_ops.check_for_int(sample) == result
+    try:
+        assert dac_ops.check_for_int(sample) == result
+    except ValueError:
+        assert False == result
 
 @pytest.mark.parametrize("min, target, max, result",[(0, -1, 10, False), 
                                                      (0, 0, 10, True), 
@@ -29,7 +32,10 @@ def test_check_for_int(sample, result, dac_ops):
                                                      (0.5, 1, 1.1, True)])
 
 def test_check_range(min, target, max, result, dac_ops):
-    assert dac_ops.check_range(target, min, max) == result
+    try:
+        assert dac_ops.check_range(target, min, max) == result
+    except ValueError:
+        assert False == result
 
 @pytest.mark.parametrize("a, b, c, d",[(3, 1, 1000, [49, 3, 232]), 
                                        (3, 0, 1000, [48, 3, 232]), 
