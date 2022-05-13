@@ -1,5 +1,5 @@
-from DAC.DAC_Commands import DACCommands
-from Peripherals.Peripherals import SpiDevice as spi
+from edgepi.dac.DAC_Commands import DACCommands
+from edgepi.peripherals.Peripherals import SpiDevice as spi
 
 import logging
 _logger=logging.getLogger(__name__)
