@@ -1,7 +1,7 @@
 import pytest
-from edgepi.dac.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
-from edgepi.dac.DAC_Commands import DACCommands
-from edgepi.dac.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
+from edgepi.dac.dac_constants import EDGEPI_DAC_CHANNEL as CH
+from edgepi.dac.dac_commands import DACCommands
+from edgepi.dac.dac_constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
 
 @pytest.fixture(name='dac_ops')
 def fixture_test_DAC_ops():

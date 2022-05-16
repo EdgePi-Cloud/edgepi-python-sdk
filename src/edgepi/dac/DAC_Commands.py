@@ -1,7 +1,7 @@
-from edgepi.dac.DAC_Constants import EDGEPI_DAC_CHANNEL as CH
-from edgepi.dac.DAC_Constants import EDGEPI_DAC_COM as COMMAND
-from edgepi.dac.DAC_Constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
-from edgepi.dac.DAC_Calibration import DACHwCalib_const, DACSwCalib_const
+from edgepi.dac.dac_constants import EDGEPI_DAC_CHANNEL as CH
+from edgepi.dac.dac_constants import EDGEPI_DAC_COM as COMMAND
+from edgepi.dac.dac_constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
+from edgepi.dac.dac_calibration import DACHwCalib_const, DACSwCalib_const
 
 from typing import Union
 
