@@ -7,7 +7,7 @@ _logger=logging.getLogger(__name__)
 class EdgePiDAC(spi):
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
-        super().__init__(dev_path='/dev/spidev6.3', mode = 1, max_speed=1000000)
+        super().__init__(devID=3, mode = 1, max_speed=1000000)
         self.dac_ops = DACCommands()
 
     def write_voltage_channel(self, ch, voltage):
