@@ -1,7 +1,6 @@
 from edgepi.dac.dac_constants import EDGEPI_DAC_CHANNEL as CH
 from edgepi.dac.dac_constants import EDGEPI_DAC_COM as COMMAND
 from edgepi.dac.dac_constants import EDGEPI_DAC_CALIBRATION_CONSTANTS as CALIB_CONSTS
-from edgepi.dac.dac_calibration import DACHwCalib_const, DACSwCalib_const
 
 from typing import Union
 
@@ -9,10 +8,10 @@ import logging
 _logger=logging.getLogger(__name__)
 
 class DACCommands():
-    def __init__(self):
+    def __init__(self, DACHwCalib_const, DACSwCalib_const):
         _logger.info(f'Initializing DAC Methods')
         self.DACHwCalib_const = DACHwCalib_const
-        self.DACSwCalib_consts_list = [DACSwCalib_const]*8        
+        self.DACSwCalib_consts_list = DACSwCalib_const      
 
     def generate_write_and_update_command(self, ch, data):
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
