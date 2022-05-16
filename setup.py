@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setuptools.setup(
     name="EdgePi-Python-SDK",
-    version="0.0.1",
+    version="0.0.1-5",
     author="S.Park",
     author_email="spark@osensa.com",
     description="EdgePi Python SDK package",
@@ -20,9 +20,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=setuptools.find_packages(where=".",
-                                      include=["DAC"],
-                                      exclude=["Tests"]),    
+    packages=setuptools.find_packages(where="src"),
+    package_dir={"": "src"},    
     python_requires=">=3.6",
     install_requires=["python-periphery >= 2.3.0"]
 )
