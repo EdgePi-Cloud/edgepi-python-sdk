@@ -6,6 +6,13 @@
 - run ```python -m build``` command in root directory of the SDK create distribution
 - run ```py -m twine upload --repository testpypi dist/* --verbose``` command to upload the distribution to TestPyPi
 
+__NOTE__ when package structure name, such as folder or module src file name, changes, delete '.egg-info' file and rebuild. This will ensure the file name in compiled package is changed.
+
+Change in capitalization in file/folder names are recognized by git
+```
+git config --global core.ignorecase false
+```
+
 ## SDK Structure
 ```
 EDGEPI-PYTHON-SDK
