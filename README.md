@@ -1,5 +1,12 @@
 # edgepi-python-sdk
 
+## Develop Environment Setup
+Two separate virtual environment is needed.
+1. venv_build: building environement where the package is compiled and published. import requirements_build.txt for pip dependencies.
+2. venv_test 
+   - TDD environment where the package source tree can be tested as bug fix / new features are implemented.The `testPyPi` tries to install the dependency in `testPyPi` instead of actual `PyPi`. Therefore, the `install_requires` option fails to install the required package. 
+   - This environment is also used to test the package after it is published. Install the package using `pip` and run test scripts inside `test` folder. This will import the installed package, not the modules in the `src` directory.
+
 ## SDK packaging
 
 - Use setup.py file to edit meta-data when building/created new package
@@ -19,17 +26,26 @@ EDGEPI-PYTHON-SDK
 ├── src
 │   └── edgepi
 │       ├── __init__.py
-│       ├── DAC
+│       ├── dac
 │       │   ├── __init__.py
 │       │   └── ...submodules
-│       ├── Peripherals
+│       ├── peripherals
 │       │   ├── __init__.py
 │       │   └── ...submodules
 │       ├── ...subpackages
-│       ├── dac.py
-│       ├── adc.py
-│       ├── tc.py
+│       ├── edgepi_dac.py
+│       ├── edgepi_adc.py
+│       ├── edgepi_tc.py
 │       └── ...modules
+│   └── test_edgepi
+│       ├── __init__.py
+│       ├── test_dac
+│       │   ├── __init__.py
+│       │   └── ...submodules
+│       ├── test_peripherals
+│       │   ├── __init__.py
+│       │   └── ...submodules
+│       ├── ...test_subpackages
 ├── tests
 │   ├── test_dac.py
 │   ├── test_tc.py
@@ -38,13 +54,3 @@ EDGEPI-PYTHON-SDK
 ├── setup.py
 └── requirements.txt
 ```
-
-- test requires the installation of the package to test the package as it is installed on user's machine
-- src structure prevents the improting of modules from the current director
-
-
-Three virtual environment setup
-1. src_venv: virtual environment to develop source tree of the package
-2. build_venv: virtual environment to build and publish the package
-3. test_venv: virtual environment to test the package
-   - The testPyPi tries to install the dependency in testPyPi instead of actual PyPi. Therefore, the `install_requires` option fails to install the required package. 

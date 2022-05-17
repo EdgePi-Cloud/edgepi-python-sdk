@@ -6,5 +6,5 @@ from edgepi.peripherals.spi import SpiDevice
                                                     (2, 6, '/dev/spidev6.2'), 
                                                     (3, 6, '/dev/spidev6.3')])
 def test_check_range(dev_ID, bus_num, result):
-    spi = SpiDevice(dev_ID, bus_num)
-    assert spi.devPath == result
+    spi = SpiDevice(bus_num, dev_ID)
+    assert spi.devpath() == result
