@@ -8,7 +8,7 @@ _logger=logging.getLogger(__name__)
 class EdgePiDAC(spi):
     def __init__ (self):
         _logger.info(f'Initializing DAC Bus')
-        super().__init__(dev_ID=3, mode = 1, max_speed=1000000)
+        super().__init__(dev_ID=3, bus_num=6, mode = 1, max_speed=1000000)
 
         self.dac_ops = DACCommands(DACHwCalib_const, [DACSwCalib_const]*8)
 

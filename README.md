@@ -41,3 +41,10 @@ EDGEPI-PYTHON-SDK
 
 - test requires the installation of the package to test the package as it is installed on user's machine
 - src structure prevents the improting of modules from the current director
+
+
+Three virtual environment setup
+1. src_venv: virtual environment to develop source tree of the package
+2. build_venv: virtual environment to build and publish the package
+3. test_venv: virtual environment to test the package
+   - The testPyPi tries to install the dependency in testPyPi instead of actual PyPi. Therefore, the `install_requires` option fails to install the required package. 
