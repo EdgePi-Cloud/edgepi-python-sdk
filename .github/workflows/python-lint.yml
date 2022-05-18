@@ -26,5 +26,5 @@ jobs:
         python -m pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint ./src/test_edgepi/test_dac
-        pylint ./src/test_edgepi/test_tc
+        cd 
+        pylint $(git ls-files '*.py')

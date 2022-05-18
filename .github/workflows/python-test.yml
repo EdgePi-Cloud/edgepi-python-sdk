@@ -30,4 +30,5 @@ jobs:
     - name: Test with pytest
       run: |
         source venv_test/bin/activate
-        pytest
+        pytest ./src/test_edgepi/test_dac
+        pytest ./src/test_edgepi/test_tc
