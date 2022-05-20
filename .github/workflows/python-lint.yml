@@ -29,4 +29,5 @@ jobs:
         if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
     - name: Analysing the code with pylint
       run: |
+        source venv_test/bin/activate
         pylint --output-format=colorized --disable=C0303 $(git ls-files '*.py')
