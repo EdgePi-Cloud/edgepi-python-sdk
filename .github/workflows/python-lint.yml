@@ -26,4 +26,4 @@ jobs:
         python -m pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint --output-format=colorized --disable=C0303 $(git ls-files '*.py')
