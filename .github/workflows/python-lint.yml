@@ -23,7 +23,10 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
+        python -m venv venv_test
+        source venv_test/bin/activate
         python -m pip install pylint
+        if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
     - name: Analysing the code with pylint
       run: |
         pylint --output-format=colorized --disable=C0303 $(git ls-files '*.py')
