@@ -7,7 +7,7 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -31,4 +31,4 @@ jobs:
       run: |
         source venv_test/bin/activate
         pytest ./src/test_edgepi/test_dac
-        pytest ./src/test_edgepi/test_tc
+        pytest ./src/test_edgepi/test_peripherals
