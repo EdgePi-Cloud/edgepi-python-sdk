@@ -1,7 +1,9 @@
 [MESSAGES CONTROL]
 
 disable=trailing-whitespace,
-        logging-fstring-interpolation
+        logging-fstring-interpolation,
+        line-too-long,
+        invalid-name
 
 [REPORTS]
 
