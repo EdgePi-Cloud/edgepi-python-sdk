@@ -30,4 +30,4 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         source venv_test/bin/activate
-        pylint --output-format=colorized --disable=C0303 $(git ls-files '*.py')
+        pylint $(git ls-files '*.py')
