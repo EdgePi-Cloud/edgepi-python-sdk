@@ -1,5 +1,6 @@
 [MESSAGES CONTROL]
-disable=bad-whitespace,
+
+disable=trailing-whitespace,
         logging-fstring-interpolation
 
 [REPORTS]
