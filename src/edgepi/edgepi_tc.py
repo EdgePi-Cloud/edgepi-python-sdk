@@ -15,17 +15,29 @@ class EdgePiTC(SpiDevice):
         super().__init__(bus_num=6, dev_ID=0)
 
     def set_averaging_mode(self, num_samples:int=1):
-        ''' Set number of replications per sampling event. Options: 1, 2, 4, 8, 16. Default = 1. '''
+        '''
+        Sets number of measurements made per sampling event.   
+        Parameters: and interger from the set {1, 2, 4, 8, 16}. Default = 1. 
+        '''
         pass
 
     def single_sample(self, file_path:str=""):
-        ''' Conduct a single sampling event. Returns measured temperature in degrees Celsius. Optional log results to file. '''
+        '''
+        Conduct a single sampling event. Returns measured temperature in degrees Celsius.
+        Parameters: a string representing a file path to log results to (optional).
+        '''
         pass
 
     def auto_sample(self, file_path:str=""):
-        ''' Conduct sampling events continuously for the specified period of time. Optional log results to file. '''
+        '''
+        Conduct sampling events continuously. Returns measured temperature in degrees Celsius.
+        Parameters: a string representing a file path to log results to (optional).
+        '''
         pass
 
     def set_type(self, tc_type:str):
-        ''' Select thermocouple type. Options: B,E,J,K,N,R,S,T. '''
+        '''
+        Set thermocouple type. 
+        Parameters: a string from the set {B,E,J,K,N,R,S,T}.
+        '''
         pass
