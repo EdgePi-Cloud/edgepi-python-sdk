@@ -21,6 +21,18 @@ class ADCCommands():
         command = [opcode.OP_WREG.value + address, len(values)-1]
         _logger.debug(f'Command to send is {command + values}')
         return command + values
+    
+    def start_adc1(self):
+        _logger.debug(f'Command to send is {[opcode.OP_START1.value]}')
+        return [opcode.OP_START1.value]
+
+    def stop_adc1(self):
+        _logger.debug(f'Command to send is {[opcode.OP_STOP1.value]}')
+        return [opcode.OP_STOP1.value]
+    
+    def reset_adc(self):
+        _logger.debug(f'Command to send is {[opcode.OP_RESET.value]}')
+        return [opcode.OP_RESET.value]
 
     @staticmethod
     def check_for_int(target_list):
