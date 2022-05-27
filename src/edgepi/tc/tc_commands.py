@@ -1,4 +1,4 @@
-from edgepi.tc.tc_constants import *
+from tc.tc_constants import *
 
 register_write_map = {
     TC_OPS.SINGLE_SHOT: TC_ADDRESSES.CR0_W,
@@ -42,8 +42,9 @@ class TCCommands():
     def code_to_temp(self, code):
         ''' converty register binary temperature code to float value'''
         pass
-
-    def find_register(self, setting, register_map: dict):
+    
+    @staticmethod
+    def find_register(setting, register_map: dict = register_write_map):
         ''' 
         Returns address of the register the setting maps to, or None.
 
@@ -52,7 +53,7 @@ class TCCommands():
             register_map (dict): a dictionary mapping setting opcodes to registers
 
         Returns:
-            enum whose value is the address of the register that setting maps to
+            enum whose value is the address of the register that setting maps to, or None if opcode is invalid
 
         Raises:
             AttributeError
@@ -60,3 +61,8 @@ class TCCommands():
         '''
         write_reg = register_map.get(setting)
         return write_reg
+
+    @staticmethod
+    def update_settings(reg_addx, updates):
+        ''' calls appropriate register update method for handling this register's setting update '''
+        pass
