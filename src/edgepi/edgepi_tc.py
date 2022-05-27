@@ -46,25 +46,6 @@ class EdgePiTC(SpiDevice):
         '''
         pass
 
-    setting_to_register = {
-        tc.CONV_MODE: tc.TC_ADDRESSES.CR0_W,
-        tc.CJ_MODE: tc.TC_ADDRESSES.CR0_W,
-        tc.FAULT_MODE: tc.TC_ADDRESSES.CR0_W,
-        tc.NOISE_FILTER_MODE: tc.TC_ADDRESSES.CR0_W,
-        tc.AVG_MODE: tc.TC_ADDRESSES.CR1_W,
-        tc.TC_TYPE: tc.TC_ADDRESSES.CR1_W,
-        tc.VOLT_MODE: tc.TC_ADDRESSES.CR1_W,
-        tc.FAULT_MASKS: tc.TC_ADDRESSES.MASK_W,
-        # TODO: add remaining settings
-    }
-    
-    @staticmethod
-    def find_write_register(setting, register_setting_map):
-        ''' returns address of the register the setting must be written to, or None'''
-        # TODO: input validation
-        write_reg = register_setting_map.get(type(setting))
-        return write_reg
-
     def set_config(
         self,
         conversion_mode: tc.CONV_MODE = None,  
