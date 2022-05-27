@@ -3,17 +3,16 @@ Provides a class for interacting with the EdgePi Thermocouple via SPI.
 '''
 
 import logging
-from edgepi.peripherals.spi import SpiDevice
-from edgepi.tc import tc_constants as tc
+from peripherals.spi import SpiDevice
+from tc import tc_constants as tc
+from tc.tc_commands import TCCommands
 
 _logger = logging.getLogger(__name__)
-
 
 class EdgePiTC(SpiDevice):
     ''' 
     A class used to represent the EdgePi Thermocouple as an SPI device.
     '''
-
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=0)
 
@@ -62,8 +61,37 @@ class EdgePiTC(SpiDevice):
         lt_high_threshold: int=None,
         lt_high_threshold_decimals: tc.DEC_BITS = None,
         lt_low_threshold: int=None,
-        lt_low_threshold_decimals: tc.DEC_BITS=None,
-        cj_offset: int=None,
-        cj_offset_decimals: tc.DEC_BITS=None,
+        lt_low_threshold_decimals: tc.DEC_BITS = None,
+        cj_offset: int = None,
+        cj_offset_decimals: tc.DEC_BITS = None,
         ):
-        pass
+        '''
+        A collective thermocouple settings update method.
+
+        Parameters
+            all (enum): an enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
+        '''
+        args_list = [conversion_mode, oc_fault_mode, cold_junction_mode, fault_mode, noise_filter_mode,
+                    average_mode, tc_type, voltage_mode, fault_mask, cj_high_threshold, cj_low_threshold,
+                    lt_high_threshold, lt_high_threshold_decimals, lt_low_threshold, lt_low_threshold_decimals,
+                    cj_offset, cj_offset_decimals]
+        _logger.info(f'set_config args list: {args_list}')
+
+        # map each command to its register and build dictionary of (register_address : [command_list]) tuples. 
+        # this also validates the command is a valid opcode.
+        add_reg_map = {}
+        for setting in args_list:
+            if setting is not None:
+                reg = TCCommands.find_register(setting)
+                # invalid opcodes return None
+                if reg is None:
+                    continue
+                if reg in add_reg_map:
+                    add_reg_map[reg].append(setting)
+                else:
+                    add_reg_map[reg] = [setting]
+        _logger.info(f'set_config add_reg_map: {add_reg_map}')
+        
+        # for each register, conduct all updates
+        for addx, op_array in add_reg_map.items():    
+            TCCommands.update_settings(addx, op_array)

@@ -1,6 +1,6 @@
 import pytest
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import TCCommands, register_write_map
+from edgepi.tc.tc_commands import TCCommands
 
 @pytest.fixture(name='tc')
 def fixture_init_tc():
@@ -18,4 +18,4 @@ def fixture_init_tc():
     ('invalid-key', None),
 ])
 def test_find_register(opcode, register_address, tc):
-    assert tc.find_register(opcode, register_write_map) == register_address
+    assert tc.find_register(opcode) == register_address
