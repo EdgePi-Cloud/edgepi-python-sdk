@@ -11,8 +11,8 @@ class EDGEPI_DAC_COM(Enum):
     COM_GAIN = 0x7
     COM_DCEN = 0x8 #Daisy chain setup enable
     COM_READBACK = 0x9 # used for daisy chain operation
-    COM_UPDATE_ALL_CH = 0x10 # update all channels of the input register simultaneously with the input data
-    COM_UPDATE_ALL_DAC = 0x11 # update all channel of teh input register and DAC register simultaneously with the input data
+    COM_UPDATE_ALL_CH = 0x0A # update all channels of the input register simultaneously with the input data
+    COM_UPDATE_ALL_DAC = 0x0B # update all channel of teh input register and DAC register simultaneously with the input data
 
 class EDGEPI_DAC_CHANNEL(Enum):
     DAC0 = 0x0
