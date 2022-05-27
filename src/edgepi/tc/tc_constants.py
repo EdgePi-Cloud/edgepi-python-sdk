@@ -34,7 +34,7 @@ class TC_ADDRESSES(Enum):
     CJTH_W = 0x8A
     CJTL_W = 0x8B
 
-class TC_COMMANDS(Enum):
+class TC_OPS(Enum):
     ''' valid hex opcodes for commands that can be sent to thermocouple '''
     SINGLE_SHOT = 0x40      # trigger a single temperature conversion
     CLEAR_FAULTS = 0x02     # clear fault status register, only use with Interrupt Fault Mode
@@ -43,11 +43,11 @@ class TC_COMMANDS(Enum):
 class DEC_BITS:
     ''' valid decimal values for temperature registers with precision up to 2^-4. '''
     # TODO: add entire range of valid values (16 total)
-    p0: 0
-    p1: 0.5
-    p2: 0.75
-    p3: 0.875
-    p4: 0.9375
+    p0 = 0
+    p1 = 0.5
+    p2 = 0.75
+    p3 = 0.875
+    p4 = 0.9375
 
 class CONV_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple conversion mode '''
