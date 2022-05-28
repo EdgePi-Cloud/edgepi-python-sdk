@@ -1,6 +1,7 @@
 import pytest
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import TCCommands
+from contextlib import nullcontext as does_not_raise
 
 @pytest.fixture(name='tc')
 def fixture_init_tc():
@@ -19,3 +20,14 @@ def fixture_init_tc():
 ])
 def test_find_register(opcode, register_address, tc):
     assert tc.find_register(opcode) == register_address
+
+@pytest.mark.parametrize("read_value, ops_list, write_value, exception", [
+    (0x0, [CJ_MODE.DISABLE], 0x8, does_not_raise()),
+    (0x8, [CJ_MODE.ENABLE], 0x0, does_not_raise()),
+    (0x0, [CONV_MODE.AUTO,CJ_MODE.DISABLE], 0x88, does_not_raise()),
+    (0x88, [CONV_MODE.SINGLE,CJ_MODE.ENABLE], 0x00, does_not_raise()),
+    (0x0, [AVG_MODE.AVG_16], 0x0, pytest.raises(ValueError))
+])
+def test_generate_cr0_update(read_value, ops_list, write_value, exception, tc):
+    with exception:
+        assert tc.generate_cr0_update(read_value, ops_list) == write_value

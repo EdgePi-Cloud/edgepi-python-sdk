@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from pyparsing import And
+
 class TC_ADDRESSES(Enum):
     # Read addresses
     CR0_R = 0x00
@@ -79,14 +81,14 @@ class AVG_MODE(Enum):
 
 class TC_TYPE(Enum):
     ''' valid hex opcodes for setting thermocouple type '''
-    TYPE_B = 0x00           # type B thermocouple
-    TYPE_E = 0x01            # type B thermocouple
-    TYPE_J = 0x02            # type B thermocouple
-    TYPE_K = 0x03            # type B thermocouple
-    TYPE_N = 0x04            # type B thermocouple
-    TYPE_R = 0x05            # type B thermocouple
-    TYPE_S = 0x06            # type B thermocouple
-    TYPE_T = 0x07            # type B thermocouple
+    TYPE_B = 0x00            # type B thermocouple
+    TYPE_E = 0x01            # type E thermocouple
+    TYPE_J = 0x02            # type J thermocouple
+    TYPE_K = 0x03            # type K thermocouple
+    TYPE_N = 0x04            # type N thermocouple
+    TYPE_R = 0x05            # type R thermocouple
+    TYPE_S = 0x06            # type S thermocouple
+    TYPE_T = 0x07            # type T thermocouple
 
 class VOLT_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple voltage mode '''
