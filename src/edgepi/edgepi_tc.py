@@ -4,8 +4,8 @@ Provides a class for interacting with the EdgePi Thermocouple via SPI.
 
 import logging
 from peripherals.spi import SpiDevice
-from tc import tc_constants as tc
-from tc.tc_commands import TCCommands
+from edgepi.tc import tc_constants as tc
+from edgepi.tc.tc_commands import TCCommands
 
 _logger = logging.getLogger(__name__)
 
@@ -13,6 +13,7 @@ class EdgePiTC(SpiDevice):
     ''' 
     A class used to represent the EdgePi Thermocouple as an SPI device.
     '''
+
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=0)
 

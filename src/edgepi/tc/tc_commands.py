@@ -1,4 +1,5 @@
-from tc.tc_constants import *
+from array import array
+from edgepi.tc.tc_constants import *
 
 register_write_map = {
     TC_OPS.SINGLE_SHOT: TC_ADDRESSES.CR0_W,
@@ -31,7 +32,7 @@ class TCCommands():
         ''' read the value of any MAX31856 register '''
         pass
 
-    def write_to_register(self):
+    def write_to_register(self, reg_addx):
         ''' write to any MAX31856 register '''
         pass
 
@@ -62,7 +63,42 @@ class TCCommands():
         write_reg = register_map.get(setting)
         return write_reg
 
-    @staticmethod
-    def update_settings(reg_addx, updates):
+    
+    def update_settings(self, reg_addx, updates: list):
         ''' calls appropriate register update method for handling this register's setting update '''
+        if reg_addx == TC_ADDRESSES.CR0_W:
+            self.generate_cr0_update(updates)
+        elif reg_addx == TC_ADDRESSES.CR1_W:
+            self.generate_cr1_update(updates)
+
+    def generate_cr0_update(self, reg_value, updates: list):
+        ''' 
+        combines list of update commands into a single write command for cr0
+
+        Parameters:
+            reg_value (literal): the read value of the register
+            updates (list): a list of valid hex update opcodes for cr0
+
+        Returns:
+            updated register value to be written back to register
+
+        Raises:
+            ValueError: if an invalid CR0 opcode is passed as argument
+         '''
+        value = reg_value
+        # perform each update on value
+        for op_code in updates:
+            # validate only cr0 ops allowed
+            if self.find_register(op_code) != TC_ADDRESSES.CR0_W:
+                raise ValueError('Invalid CR0 opcode.')
+            if 'f' in hex(op_code.value):
+                value &= op_code.value
+            else:
+                value |= op_code.value
+        # write value back to register
+        self.write_to_register(value)
+
+        return value
+                
+    def generate_cr1_update(self, updates):
         pass
