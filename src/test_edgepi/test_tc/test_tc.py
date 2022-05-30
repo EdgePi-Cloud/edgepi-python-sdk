@@ -21,13 +21,19 @@ def fixture_init_tc():
 def test_find_register(opcode, register_address, tc):
     assert tc.find_register(opcode) == register_address
 
-@pytest.mark.parametrize("read_value, ops_list, write_value, exception", [
+@pytest.mark.parametrize("reg_value, ops_list, write_value, exception", [
     (0x0, [CJ_MODE.DISABLE], 0x8, does_not_raise()),
     (0x8, [CJ_MODE.ENABLE], 0x0, does_not_raise()),
     (0x0, [CONV_MODE.AUTO,CJ_MODE.DISABLE], 0x88, does_not_raise()),
     (0x88, [CONV_MODE.SINGLE,CJ_MODE.ENABLE], 0x00, does_not_raise()),
     (0x0, [AVG_MODE.AVG_16], 0x0, pytest.raises(ValueError))
 ])
-def test_generate_cr0_update(read_value, ops_list, write_value, exception, tc):
+def test_generate_cr0_update(reg_value, ops_list, write_value, exception, tc):
     with exception:
-        assert tc.generate_cr0_update(read_value, ops_list) == write_value
+        assert tc.generate_cr0_update(reg_value, ops_list) == write_value
+
+@pytest.mark.parametrize("reg_addx, reg_value, updates_list, output_code", [
+    (TC_ADDRESSES.CR0_W, 0x0, [CONV_MODE.AUTO, CJ_MODE.DISABLE], 0x88),
+])
+def test_get_update_code(reg_addx, reg_value, updates_list, output_code, tc):
+    assert tc.get_update_code(reg_addx, reg_value, updates_list) == output_code

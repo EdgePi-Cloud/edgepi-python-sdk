@@ -44,38 +44,46 @@ class TCCommands():
         ''' converty register binary temperature code to float value'''
         pass
     
-    @staticmethod
-    def find_register(setting, register_map: dict = register_write_map):
+    def find_register(self, setting):
         ''' 
         Returns address of the register the setting maps to, or None.
 
-        Parameters:
-            setting (enum): an enum representing a valid hex opcode
+        Args:
+            setting (Enum): an enum representing a valid hex opcode
             register_map (dict): a dictionary mapping setting opcodes to registers
 
         Returns:
-            enum whose value is the address of the register that setting maps to, or None if opcode is invalid
-
-        Raises:
-            AttributeError
-                If a container other than a dictionary is passed in as register_map
+            TC_ADDRESS | None: address of the register that setting maps to, 
+            or None if opcode is invalid.
         '''
-        write_reg = register_map.get(setting)
+        write_reg = register_write_map.get(setting)
         return write_reg
 
     
-    def update_settings(self, reg_addx, updates: list):
-        ''' calls appropriate register update method for handling this register's setting update '''
+    def get_update_code(self, reg_addx, reg_value, updates: list):
+        """ 
+        Calls register update method for generating this register's setting update code.
+
+        Args:
+            reg_addx (TC_ADDRESSES): address of the register to be updated
+            reg_value (literal): read value of the register to be updated
+            updates (list): a list of setting updates to be applied to this register
+
+        Returns:
+            literal: value representing binary update instruction 
+        """        
         if reg_addx == TC_ADDRESSES.CR0_W:
-            self.generate_cr0_update(updates)
+            code = self.generate_cr0_update(reg_value, updates)
         elif reg_addx == TC_ADDRESSES.CR1_W:
-            self.generate_cr1_update(updates)
+            code = self.generate_cr1_update(reg_value, updates)
+
+        return code
 
     def generate_cr0_update(self, reg_value, updates: list):
         ''' 
-        combines list of update commands into a single write command for cr0
+        Combines list of update commands into a single write command for cr0
 
-        Parameters:
+        Args:
             reg_value (literal): the read value of the register
             updates (list): a list of valid hex update opcodes for cr0
 
@@ -83,7 +91,7 @@ class TCCommands():
             updated register value to be written back to register
 
         Raises:
-            ValueError: if an invalid CR0 opcode is passed as argument
+            ValueError: if an invalid CR0 opcode is passed as argument in updates
          '''
         value = reg_value
         # perform each update on value
@@ -95,10 +103,8 @@ class TCCommands():
                 value &= op_code.value
             else:
                 value |= op_code.value
-        # write value back to register
-        self.write_to_register(value)
 
         return value
                 
-    def generate_cr1_update(self, updates):
+    def generate_cr1_update(self, reg_value, updates: list):
         pass

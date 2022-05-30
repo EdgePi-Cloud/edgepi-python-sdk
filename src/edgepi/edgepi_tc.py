@@ -13,6 +13,7 @@ class EdgePiTC(SpiDevice):
     ''' 
     A class used to represent the EdgePi Thermocouple as an SPI device.
     '''
+    tc_coms = TCCommands()
 
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=0)
@@ -57,11 +58,11 @@ class EdgePiTC(SpiDevice):
         tc_type: tc.TC_TYPE = None,
         voltage_mode: tc.VOLT_MODE = None,
         fault_mask: tc.FAULT_MASKS = None,
-        cj_high_threshold: int=None,
-        cj_low_threshold: int=None,
-        lt_high_threshold: int=None,
+        cj_high_threshold: int = None,
+        cj_low_threshold: int = None,
+        lt_high_threshold: int = None,
         lt_high_threshold_decimals: tc.DEC_BITS = None,
-        lt_low_threshold: int=None,
+        lt_low_threshold: int = None,
         lt_low_threshold_decimals: tc.DEC_BITS = None,
         cj_offset: int = None,
         cj_offset_decimals: tc.DEC_BITS = None,
@@ -69,8 +70,8 @@ class EdgePiTC(SpiDevice):
         '''
         A collective thermocouple settings update method.
 
-        Parameters
-            all (enum): an enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
+        Args:
+            all (Enum): enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
         '''
         args_list = [conversion_mode, oc_fault_mode, cold_junction_mode, fault_mode, noise_filter_mode,
                     average_mode, tc_type, voltage_mode, fault_mask, cj_high_threshold, cj_low_threshold,
@@ -83,7 +84,7 @@ class EdgePiTC(SpiDevice):
         add_reg_map = {}
         for setting in args_list:
             if setting is not None:
-                reg = TCCommands.find_register(setting)
+                reg = self.tc_coms.find_register(setting)
                 # invalid opcodes return None
                 if reg is None:
                     continue
@@ -93,6 +94,10 @@ class EdgePiTC(SpiDevice):
                     add_reg_map[reg] = [setting]
         _logger.info(f'set_config add_reg_map: {add_reg_map}')
         
-        # for each register, conduct all updates
-        for addx, op_array in add_reg_map.items():    
-            TCCommands.update_settings(addx, op_array)
+        # for each register, combine all settings updates into one command
+        for addx, op_array in add_reg_map.items():   
+            # read register value 
+            reg_value = self.tc_coms.read_register(addx)
+            # generate update code for register 
+            update_code = self.tc_coms.get_update_code(addx, reg_value, op_array)
+            # write to register, spi_transfer data
