@@ -4,8 +4,8 @@ Provides a class for interacting with the EdgePi Thermocouple via SPI.
 
 import logging
 from peripherals.spi import SpiDevice
-from edgepi.tc import tc_constants as tc
-from edgepi.tc.tc_commands import TCCommands
+from tc import tc_constants as tc
+from tc.tc_commands import TCCommands
 
 _logger = logging.getLogger(__name__)
 
@@ -46,6 +46,13 @@ class EdgePiTC(SpiDevice):
         Parameters: a string from the set {B,E,J,K,N,R,S,T}.
         '''
         pass
+
+    def read_register(self, reg_addx, bytes_to_read=1):
+        data = [reg_addx] + [0xFF]*bytes_to_read
+        print(f'data before xfer = {data}')
+        new_data = self.transfer(data)
+        print(f'data after xfer = {new_data}')
+        
 
     def set_config(
         self,
@@ -97,7 +104,15 @@ class EdgePiTC(SpiDevice):
         # for each register, combine all settings updates into one command
         for addx, op_array in add_reg_map.items():   
             # read register value 
-            reg_value = self.tc_coms.read_register(addx)
+            reg_value = self.read_register(addx)
             # generate update code for register 
             update_code = self.tc_coms.get_update_code(addx, reg_value, op_array)
             # write to register, spi_transfer data
+            data = [addx, update_code]
+            _logger.info(f'transferring data: {data}')
+            self.transfer(data)
+            _logger.info(f'data transfer output: {data}')
+
+if __name__ == '__main__':
+    tc_dev = EdgePiTC()
+    tc_dev.read_register(tc.TC_ADDRESSES.CR1_R.value)

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, unique
 
 from pyparsing import And
 
+@unique
 class TC_ADDRESSES(Enum):
     # Read addresses
     CR0_R = 0x00
@@ -36,6 +37,7 @@ class TC_ADDRESSES(Enum):
     CJTH_W = 0x8A
     CJTL_W = 0x8B
 
+@unique
 class TC_OPS(Enum):
     ''' valid hex opcodes for commands that can be sent to thermocouple '''
     SINGLE_SHOT = 0x40      # trigger a single temperature conversion
@@ -51,26 +53,31 @@ class DEC_BITS:
     p3 = 0.875
     p4 = 0.9375
 
+@unique
 class CONV_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple conversion mode '''
     SINGLE = 0x7F
     AUTO = 0x80
 
+@unique
 class CJ_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple cold junction mode'''
     ENABLE = 0xF7
     DISABLE = 0x08
 
+@unique
 class FAULT_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple fault mode '''
     COMPARATOR = 0xFB
     INTERRUPT = 0x04
 
+@unique
 class NOISE_FILTER_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple noise rejection filter mode '''
     Hz_60 = 0xFE
     Hz_50 = 0x01
 
+@unique
 class AVG_MODE(Enum):
     ''' valid hex opcodes for setting thermocouple conversion averaging mode '''
     AVG_1 = 0x00         # single sample
@@ -79,6 +86,7 @@ class AVG_MODE(Enum):
     AVG_8 = 0x30         # 8 samples averaged
     AVG_16 = 0x40        # 16 samples averaged
 
+@unique
 class TC_TYPE(Enum):
     ''' valid hex opcodes for setting thermocouple type '''
     TYPE_B = 0x00            # type B thermocouple

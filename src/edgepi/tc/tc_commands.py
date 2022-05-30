@@ -1,5 +1,5 @@
 from array import array
-from edgepi.tc.tc_constants import *
+from tc.tc_constants import *
 
 register_write_map = {
     TC_OPS.SINGLE_SHOT: TC_ADDRESSES.CR0_W,
