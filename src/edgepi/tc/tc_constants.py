@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum, unique
 
-from pyparsing import And
-
 @unique
-class TC_ADDRESSES(Enum):
+class TCAddresses(Enum):
     # Read addresses
     CR0_R = 0x00
     CR1_R = 0x01
@@ -38,13 +36,13 @@ class TC_ADDRESSES(Enum):
     CJTL_W = 0x8B
 
 @unique
-class TC_OPS(Enum):
+class TCOps(Enum):
     ''' valid hex opcodes for commands that can be sent to thermocouple '''
     SINGLE_SHOT = 0x40      # trigger a single temperature conversion
     CLEAR_FAULTS = 0x02     # clear fault status register, only use with Interrupt Fault Mode
 
 @dataclass
-class DEC_BITS:
+class DecBits:
     ''' valid decimal values for temperature registers with precision up to 2^-4. '''
     # TODO: add entire range of valid values (16 total)
     p0 = 0
@@ -54,31 +52,31 @@ class DEC_BITS:
     p4 = 0.9375
 
 @unique
-class CONV_MODE(Enum):
+class ConvMode(Enum):
     ''' valid hex opcodes for setting thermocouple conversion mode '''
     SINGLE = 0x7F
     AUTO = 0x80
 
 @unique
-class CJ_MODE(Enum):
+class CJMode(Enum):
     ''' valid hex opcodes for setting thermocouple cold junction mode'''
     ENABLE = 0xF7
     DISABLE = 0x08
 
 @unique
-class FAULT_MODE(Enum):
+class FaultMode(Enum):
     ''' valid hex opcodes for setting thermocouple fault mode '''
     COMPARATOR = 0xFB
     INTERRUPT = 0x04
 
 @unique
-class NOISE_FILTER_MODE(Enum):
+class NoiseFilterMode(Enum):
     ''' valid hex opcodes for setting thermocouple noise rejection filter mode '''
     Hz_60 = 0xFE
     Hz_50 = 0x01
 
 @unique
-class AVG_MODE(Enum):
+class AvgMode(Enum):
     ''' valid hex opcodes for setting thermocouple conversion averaging mode '''
     AVG_1 = 0x00         # single sample
     AVG_2 = 0x10         # 2 samples averaged
@@ -87,7 +85,7 @@ class AVG_MODE(Enum):
     AVG_16 = 0x40        # 16 samples averaged
 
 @unique
-class TC_TYPE(Enum):
+class TCType(Enum):
     ''' valid hex opcodes for setting thermocouple type '''
     TYPE_B = 0x00            # type B thermocouple
     TYPE_E = 0x01            # type E thermocouple
@@ -98,8 +96,8 @@ class TC_TYPE(Enum):
     TYPE_S = 0x06            # type S thermocouple
     TYPE_T = 0x07            # type T thermocouple
 
-class VOLT_MODE(Enum):
+class VoltageMode(Enum):
     ''' valid hex opcodes for setting thermocouple voltage mode '''
 
-class FAULT_MASKS(Enum):
+class FaultMasks(Enum):
     ''' valid hex opcodes for setting thermocouple fault masks '''
