@@ -70,11 +70,22 @@ class EdgePiTC(SpiDevice):
         _logger.info(f'set_config add_reg_map: {reg_updates_map}')
         return reg_updates_map
 
-    def read_registers(self, start_addx, regs_to_read):
-        reg_values = {}
-        for addx_offset in range(regs_to_read):
-            reg_values[start_addx+addx_offset] = self.read_register(start_addx+addx_offset)
-        return reg_values
+    def read_num_registers(self, start_addx, regs_to_read=16):
+        data = [start_addx] + [0xFF]*regs_to_read
+        _logger.info(f'data before xfer = {data}')
+        new_data = super().transfer(data)
+        _logger.info(f'data after xfer = {new_data}')
+        return new_data
+
+    def read_registers_to_map(self):
+        reg_map = {}
+        num_regs = 16
+        start_addx = tc.TCAddresses.CR0_R.value
+        reg_values = self.read_num_registers(start_addx)
+        for addx_offset in range(num_regs):
+            reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
+        _logger.info(f'register:value map = {reg_map}')
+        return reg_map
 
     def set_config(
         self,
@@ -116,7 +127,7 @@ class EdgePiTC(SpiDevice):
         add_reg_map = self.map_updates_to_address(args_list)
 
         # read value of every write register into dict, starting from CR0_W. Tuples are (register addx : register_value) pairs.
-        w_reg_values = self.read_registers(tc.TCAddresses.CR0_R.value)
+        w_reg_values = self.read_registers_to_map(tc.TCAddresses.CR0_R, 16)
 
         # for each register the user entered updates for, combine all settings updates into one command, 
         # and modify corresponding register value in list. If no updates, keep the read-in register value.
@@ -139,4 +150,5 @@ class EdgePiTC(SpiDevice):
 if __name__ == '__main__':
     tc_dev = EdgePiTC()
     tc_dev.read_register(tc.TCAddresses.CR1_R.value)
-    
+    tc_dev.read_num_registers(tc.TCAddresses.CR0_R.value)
+    tc_dev.read_registers_to_map()
