@@ -9,3 +9,4 @@ pyparsing==3.0.9
 pytest==7.1.2
 python-periphery==2.3.0
 tomli==2.0.1
+gpiozero
