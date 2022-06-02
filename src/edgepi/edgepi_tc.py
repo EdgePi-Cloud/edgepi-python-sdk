@@ -49,13 +49,61 @@ class EdgePiTC(SpiDevice):
         pass
 
     def read_register(self, reg_addx):
+        ''' Reads the value of a single register.
+
+            Args:
+                reg_addx (int|TCAddress.Enum.value): the register's address
+            
+            Returns:
+                a list new_data containing two entries: new_data[0] = register address, new_data[1] = register value
+        '''
         data = [reg_addx] + [0xFF]
-        _logger.info(f'data before xfer = {data}')
+        _logger.info(f'read_register: addx = {reg_addx} => data before xfer = {data}')
         new_data = super().transfer(data)
-        _logger.info(f'data after xfer = {new_data}')
+        _logger.info(f'read_register: addx = {reg_addx} => data after xfer = {new_data}')
         return new_data
 
+    def read_registers(self, start_addx:int=0, regs_to_read:int=16):
+        ''' read a variable number of registers sequentially
+           
+            Args:
+                start_addx (int): address of the register to begin the read at.
+                regs_to_read (int): number of registers to read, including starting register.
+            
+            Returns:
+                a list containing register values starting from start_addx
+        '''
+        data = [start_addx] + [0xFF]*regs_to_read
+        _logger.info(f'read_registers: shifting in data => {data}')
+        new_data = super().transfer(data)
+        _logger.info(f'read_registers: shifted out data => {new_data}')
+        return new_data
+
+    def write_to_registers(self, start_addx, values):
+        ''' write to a variable number of registers sequentially.
+            
+            Args:
+                start_addx (int): address of the register to begin the write at.
+                
+                values (list): a list of values to be written to registers. CAUTION: register writes occur
+                sequentially from start register and include as many registers as there are entries in the list.
+                All registers in this range will be overwritten: it is recommended to read the register values first,
+                in case a register write includes bad values. 
+        '''
+        data = [start_addx] + values
+        _logger.info(f'write_to_registers: shifting in data => {data}')
+        new_data = super().transfer(data)
+        _logger.info(f'write_to_registers: shifted out data => {new_data}')
+
     def map_updates_to_address(self, args_list:list) -> list:
+        ''' Maps a list of register update codes to their corresponding registers
+            
+            Args:
+                args_list (list): a list of valid register opcodes
+            
+            Returns:
+                a dictionary containing {register_address : [update_codes_list]} tuples
+        '''
         reg_updates_map = {}
         for setting in args_list:
             if setting is not None:
@@ -67,24 +115,26 @@ class EdgePiTC(SpiDevice):
                     reg_updates_map[reg_addx].append(setting)
                 else:
                     reg_updates_map[reg_addx] = [setting]
-        _logger.info(f'set_config add_reg_map: {reg_updates_map}')
+        _logger.info(f'map_updates_to_address: reg_updates_map => {reg_updates_map}')
         return reg_updates_map
 
-    def read_num_registers(self, start_addx, regs_to_read=16):
-        data = [start_addx] + [0xFF]*regs_to_read
-        _logger.info(f'data before xfer = {data}')
-        new_data = super().transfer(data)
-        _logger.info(f'data after xfer = {new_data}')
-        return new_data
-
     def read_registers_to_map(self):
+        ''' Builds a map of write register address to corresponding read register value. Note, each register has 
+            a read and write address, but only the read address contains the register's value. Write addresses are only 
+            for writing.
+            
+            Returns:
+                a dictionary containing (write_register_address: read_register_value) entries for each writeable register
+        '''
         reg_map = {}
         num_regs = 16
-        start_addx = tc.TCAddresses.CR0_R.value
-        reg_values = self.read_num_registers(start_addx)
+        read_regs_offset = 0x80
+        start_addx = tc.TCAddresses.CR0_W.value
+        # read values from read_registers, but log values to corresponding write registers 
+        reg_values = self.read_registers(start_addx-read_regs_offset)
         for addx_offset in range(num_regs):
             reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
-        _logger.info(f'register:value map = {reg_map}')
+        _logger.info(f'read_registers_to_map => {reg_map}')
         return reg_map
 
     def set_config(
@@ -124,24 +174,24 @@ class EdgePiTC(SpiDevice):
 
         # map each command to its register and build dictionary of (register_address : [command_list]) tuples. 
         # this also validates the command is a valid opcode.
-        add_reg_map = self.map_updates_to_address(args_list)
+        reg_updates_map = self.map_updates_to_address(args_list)
 
-        # read value of every write register into dict, starting from CR0_W. Tuples are (register addx : register_value) pairs.
-        w_reg_values = self.read_registers_to_map(tc.TCAddresses.CR0_R, 16)
+        # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
+        reg_values = self.read_registers_to_map()
 
         # for each register the user entered updates for, combine all settings updates into one command, 
         # and modify corresponding register value in list. If no updates, keep the read-in register value.
-        for addx, op_array in add_reg_map.items():   
-            # read register value 
-            reg_value = w_reg_values.get(addx)
-            # generate update code for register 
-            update_code = self.tc_coms.get_update_code(addx, reg_value, op_array)
-            # modify register value entry
-            w_reg_values[addx] = update_code
+        for addx, op_array in reg_updates_map.items():   
+            reg_value = reg_values.get(addx.value)
+            # generate update code for register
+            update_code = self.tc_coms.get_update_code(addx.value, reg_value, op_array)
+            # modify register value entry to be written back
+            reg_values[addx.value] = update_code
 
-        update_bytes = [tc.TCAddresses.CR0_W.value] + list(w_reg_values.values())
+        update_bytes = [tc.TCAddresses.CR0_W.value] + list(reg_values.values())
         _logger.info(f'set-config: writing update bytes -> {update_bytes}')
 
+        # TODO: validate registers not updated by user have not been modified and all entries are valid opcodes
         # write multi-byte update transfer starting from CR0_W
         super().transfer(update_bytes)
 
@@ -149,6 +199,7 @@ class EdgePiTC(SpiDevice):
 
 if __name__ == '__main__':
     tc_dev = EdgePiTC()
-    tc_dev.read_register(tc.TCAddresses.CR1_R.value)
-    tc_dev.read_num_registers(tc.TCAddresses.CR0_R.value)
-    tc_dev.read_registers_to_map()
+    tc_dev.set_config(conversion_mode=tc.ConvMode.AUTO, tc_type=tc.TCType.TYPE_N)
+    # values = [0,3,255,127,192,127,255,128,0,0,0,0]
+    # tc_dev.write_to_registers(tc.TCAddresses.CR0_W.value, values)
+    # tc_dev.read_registers(tc.TCAddresses.CR0_R.value)
