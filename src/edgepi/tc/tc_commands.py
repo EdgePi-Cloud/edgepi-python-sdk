@@ -72,9 +72,9 @@ class TCCommands():
         Returns:
             literal: value representing binary update instruction 
         """        
-        if reg_addx == TCAddresses.CR0_W:
+        if reg_addx == TCAddresses.CR0_W.value:
             code = self.generate_cr0_update(reg_value, updates)
-        elif reg_addx == TCAddresses.CR1_W:
+        elif reg_addx == TCAddresses.CR1_W.value:
             code = self.generate_cr1_update(reg_value, updates)
 
         return code
@@ -99,6 +99,8 @@ class TCCommands():
             # validate only cr0 ops allowed
             if self.find_register(op_code) != TCAddresses.CR0_W:
                 raise ValueError('Invalid CR0 opcode.')
+            # TODO: fix NoneType value here
+            print(f'op_code = {op_code}')
             if 'f' in hex(op_code.value):
                 value &= op_code.value
             else:

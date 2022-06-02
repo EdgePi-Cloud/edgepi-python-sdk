@@ -1,6 +1,4 @@
 import pytest
-import edgepi
-from edgepi import edgepi_tc
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import TCCommands
 from edgepi.edgepi_tc import *
@@ -37,7 +35,7 @@ def test_generate_cr0_update(reg_value, ops_list, write_value, exception, tc):
         assert tc.generate_cr0_update(reg_value, ops_list) == write_value
 
 @pytest.mark.parametrize("reg_addx, reg_value, updates_list, output_code", [
-    (TCAddresses.CR0_W, 0x0, [ConvMode.AUTO, CJMode.DISABLE], 0x88),
+    (TCAddresses.CR0_W.value, 0x0, [ConvMode.AUTO, CJMode.DISABLE], 0x88),
 ])
 def test_get_update_code(reg_addx, reg_value, updates_list, output_code, tc):
     assert tc.get_update_code(reg_addx, reg_value, updates_list) == output_code
