@@ -34,7 +34,7 @@ Out: List of bytes Op-code and dummy bytes to transfer
                                                           (3, 5, [0x23, 4, 255, 255, 255, 255, 255]), 
                                                           (10, 7, [0x2A, 6, 255, 255, 255, 255, 255, 255, 255]), 
                                                           (16, 10, [0x30, 9, 255, 255, 255, 255, 255,255, 255, 255, 255, 255]),
-                                                          (16, 10, [0x30, 9, 255])])
+                                                          (16, 1, [0x30, 0, 255])])
 def test_read_register_command(address, num_of_regs, result, adc_ops):
     assert adc_ops.read_register_command(address, num_of_regs) == result
 

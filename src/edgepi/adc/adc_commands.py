@@ -29,7 +29,7 @@ class ADCCommands():
     def stop_adc1(self):
         _logger.debug(f'Command to send is {[opcode.OP_STOP1.value]}')
         return [opcode.OP_STOP1.value]
-    
+      
     def reset_adc(self):
         _logger.debug(f'Command to send is {[opcode.OP_RESET.value]}')
         return [opcode.OP_RESET.value]
