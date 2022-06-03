@@ -56,15 +56,15 @@ def test_generate_cr1_update(reg_value, updates, write_value, tc):
 
 # TODO: these tests for exception type seem to not be checking for the raised exception type,
 # test-case #3 does not raise ValueError as this edge-case is not handled yet. 
-@pytest.mark.parametrize("reg_value, updates, error", [
-    (0x03, [TCType.TYPE_E, TCType.TYPE_N], ValueError),
-    (0x03, [TCType.TYPE_E, AvgMode.AVG_16, VoltageMode.GAIN_32], ValueError),
-    (0x03, [TCType.TYPE_N, VoltageMode.GAIN_32], ValueError)
+@pytest.mark.parametrize("reg_value, updates", [
+    (0x03, [TCType.TYPE_E, TCType.TYPE_N]),
+    (0x03, [TCType.TYPE_E, AvgMode.AVG_16, VoltageMode.GAIN_32]),
+    (0x03, [TCType.TYPE_N, VoltageMode.GAIN_32])
 ])
-def test_generate_cr1_update_exception(reg_value, updates, error, tc):
-    with pytest.raises(Exception) as e:
+def test_generate_cr1_update_exception(reg_value, updates, tc):
+    with pytest.raises(ValueError) as e:
         tc.generate_cr0_update(reg_value, updates)
-    assert e is error
+    assert e.type == ValueError
 
 @pytest.fixture(name='edgepi_tc')
 def fixture_init_edgepi_tc():
