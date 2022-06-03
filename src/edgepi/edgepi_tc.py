@@ -181,7 +181,7 @@ class EdgePiTC(SpiDevice):
 
         # for each register the user entered updates for, combine all settings updates into one command, 
         # and modify corresponding register value in list. If no updates, keep the read-in register value.
-        for addx, op_array in reg_updates_map.items():   
+        for addx, op_array in reg_updates_map.items():
             reg_value = reg_values.get(addx.value)
             # generate update code for register
             update_code = self.tc_coms.get_update_code(addx.value, reg_value, op_array)
@@ -199,7 +199,7 @@ class EdgePiTC(SpiDevice):
 
 if __name__ == '__main__':
     tc_dev = EdgePiTC()
-    tc_dev.set_config(conversion_mode=tc.ConvMode.AUTO, tc_type=tc.TCType.TYPE_N)
+    # tc_dev.set_config(conversion_mode=tc.ConvMode.AUTO, tc_type=tc.TCType.TYPE_N)
     # values = [0,3,255,127,192,127,255,128,0,0,0,0]
     # tc_dev.write_to_registers(tc.TCAddresses.CR0_W.value, values)
     # tc_dev.read_registers(tc.TCAddresses.CR0_R.value)

@@ -3,7 +3,6 @@ from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import TCCommands
 from edgepi.edgepi_tc import *
 from test_edgepi.test_tc.mock_MAX31856 import *
-from contextlib import nullcontext as does_not_raise
 
 @pytest.fixture(name='tc')
 def fixture_init_tc():
@@ -23,22 +22,49 @@ def fixture_init_tc():
 def test_find_register(opcode, register_address, tc):
     assert tc.find_register(opcode) == register_address
 
-@pytest.mark.parametrize("reg_value, ops_list, write_value, exception", [
-    (0x0, [CJMode.DISABLE], 0x8, does_not_raise()),
-    (0x8, [CJMode.ENABLE], 0x0, does_not_raise()),
-    (0x0, [ConvMode.AUTO,CJMode.DISABLE], 0x88, does_not_raise()),
-    (0x88, [ConvMode.SINGLE,CJMode.ENABLE], 0x00, does_not_raise()),
-    (0x0, [AvgMode.AVG_16], 0x0, pytest.raises(ValueError))
+@pytest.mark.parametrize("reg_value, ops_list, write_value", [
+    (0x0, [CJMode.DISABLE], 0x8),
+    (0x8, [CJMode.ENABLE], 0x0),
+    (0x0, [ConvMode.AUTO,CJMode.DISABLE], 0x88),
+    (0x88, [ConvMode.SINGLE,CJMode.ENABLE], 0x00)
 ])
-def test_generate_cr0_update(reg_value, ops_list, write_value, exception, tc):
-    with exception:
-        assert tc.generate_cr0_update(reg_value, ops_list) == write_value
+def test_generate_cr0_update(reg_value, ops_list, write_value, tc):
+    assert tc.generate_cr0_update(reg_value, ops_list) == write_value
+
+@pytest.mark.parametrize("reg_value, ops_list, error", [
+    (0x0, [AvgMode.AVG_16], ValueError)
+])
+def test_generate_cr0_update_exceptions(reg_value, ops_list, error, tc):
+    with pytest.raises(Exception) as e:
+        tc.generate_cr0_update(reg_value, ops_list)
+    assert e.type is error
 
 @pytest.mark.parametrize("reg_addx, reg_value, updates_list, output_code", [
     (TCAddresses.CR0_W.value, 0x0, [ConvMode.AUTO, CJMode.DISABLE], 0x88),
 ])
 def test_get_update_code(reg_addx, reg_value, updates_list, output_code, tc):
     assert tc.get_update_code(reg_addx, reg_value, updates_list) == output_code
+
+@pytest.mark.parametrize("reg_value, updates, write_value", [
+    (0x03, [AvgMode.AVG_8, TCType.TYPE_N], 0x34),
+    (0x34, [AvgMode.AVG_16], 0x44),
+    (0x03, [TCType.TYPE_B], 0x00),
+    (0x03, [AvgMode.AVG_16, VoltageMode.GAIN_32], 0x4C)
+])
+def test_generate_cr1_update(reg_value, updates, write_value, tc):
+    assert tc.generate_cr1_update(reg_value, updates) == write_value
+
+# TODO: these tests for exception type seem to not be checking for the raised exception type,
+# test-case #3 should not be raising ValueError as this edge-case is not handled yet. 
+@pytest.mark.parametrize("reg_value, updates, error", [
+    (0x03, [TCType.TYPE_E, TCType.TYPE_N], ValueError),
+    (0x03, [TCType.TYPE_E, AvgMode.AVG_16, VoltageMode.GAIN_32], ValueError),
+    (0x03, [TCType.TYPE_N, VoltageMode.GAIN_32], ValueError)
+])
+def test_generate_cr1_update_exception(reg_value, updates, error, tc):
+    with pytest.raises(Exception) as e:
+        tc.generate_cr0_update(reg_value, updates)
+    assert e.type is error
 
 @pytest.fixture(name='edgepi_tc')
 def fixture_init_edgepi_tc():
