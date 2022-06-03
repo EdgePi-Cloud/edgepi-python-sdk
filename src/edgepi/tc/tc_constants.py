@@ -35,14 +35,16 @@ class TCAddresses(Enum):
     CJTH_W = 0x8A
     CJTL_W = 0x8B
 
+# TODO: each op/command needs its own mask for generic update code generation logic
+
 @unique
 class TCOps(Enum):
     ''' valid hex opcodes for commands that can be sent to thermocouple '''
     SINGLE_SHOT = 0x40      # trigger a single temperature conversion
     CLEAR_FAULTS = 0x02     # clear fault status register, only use with Interrupt Fault Mode
 
-@dataclass
-class DecBits:
+@unique
+class DecBits(Enum):
     ''' valid decimal values for temperature registers with precision up to 2^-4. '''
     # TODO: add entire range of valid values (16 total)
     p0 = 0
