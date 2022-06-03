@@ -1,0 +1,33 @@
+# This workflow will lint all files in repo using PyLint.
+
+name: PyLint
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m venv venv_test
+        source venv_test/bin/activate
+        python -m pip install pylint
+        if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
+    - name: Analysing the code with pylint
+      run: |
+        source venv_test/bin/activate
+        pylint $(git ls-files '*.py')
