@@ -26,4 +26,4 @@ jobs:
     - name: Test with pytest
       run: |
         source venv_test/bin/activate
-        pytest
+        pytest ./src/test_edgepi

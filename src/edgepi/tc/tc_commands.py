@@ -113,7 +113,7 @@ class TCCommands():
             raise ValueError('too many settings updates passed to CR1, only two settings are configurable at once')
         elif len(updates) > 1 and type(updates[0]) == type(updates[1]):
             # TODO: this misses the case where both voltage mode and tc_type updates are passed in
-            raise ValueError('the same setting cannot receive two update commands at')
+            raise ValueError('the same setting cannot receive two update commands at once')
         for opcode in updates:
             if type(opcode) == AvgMode:
                 mask = 0x0F
