@@ -1,4 +1,3 @@
-from array import array
 from edgepi.tc.tc_constants import *
 
 register_write_map = {
@@ -92,7 +91,8 @@ class TCCommands():
 
         Raises:
             ValueError: if an invalid CR0 opcode is passed as argument in updates
-         '''
+        '''
+        # TODO: validate user isn't trying to pass multiple commands for the same setting
         value = reg_value
         # perform each update on value
         for op_code in updates:
@@ -109,4 +109,20 @@ class TCCommands():
         return value
                 
     def generate_cr1_update(self, reg_value, updates: list):
-        pass
+        if len(updates) > 2:
+            raise ValueError('too many settings updates passed to CR1, only two settings are configurable at once')
+        elif len(updates) > 1 and type(updates[0]) == type(updates[1]):
+            # TODO: this misses the case where both voltage mode and tc_type updates are passed in
+            raise ValueError('the same setting cannot receive two update commands at')
+        for opcode in updates:
+            if type(opcode) == AvgMode:
+                mask = 0x0F
+            elif type(opcode) == TCType or type(opcode) == VoltageMode:
+                mask = 0xF0
+            else:
+                raise ValueError(f'{opcode} is an invalid CR1 setting update code')
+            
+            # clear this byte, and rewrite it with new setting
+            reg_value = reg_value & mask | opcode.value
+
+        return reg_value

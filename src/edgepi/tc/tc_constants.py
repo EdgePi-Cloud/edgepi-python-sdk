@@ -98,6 +98,8 @@ class TCType(Enum):
 
 class VoltageMode(Enum):
     ''' valid hex opcodes for setting thermocouple voltage mode '''
+    GAIN_8 = 0x08
+    GAIN_32 = 0x0C
 
 class FaultMasks(Enum):
     ''' valid hex opcodes for setting thermocouple fault masks '''
