@@ -8,6 +8,7 @@ import time
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import TCCommands
+from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 
 _logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -123,29 +124,6 @@ class EdgePiTC(SpiDevice):
         new_data = super().transfer(data)
         _logger.info(f'write_to_registers: shifted out data => {new_data}')
 
-    def __map_updates_to_address(self, args_list:list) -> list:
-        ''' Maps a list of register update codes to their corresponding registers
-            
-            Args:
-                args_list (list): a list of valid register opcodes
-            
-            Returns:
-                a dictionary containing {register_address : [update_codes_list]} tuples
-        '''
-        reg_updates_map = {}
-        for setting in args_list:
-            if setting is not None:
-                reg_addx = self.tc_coms.find_register(setting)
-                # invalid setting opcodes return None
-                if reg_addx is None:
-                    continue
-                if reg_addx in reg_updates_map:
-                    reg_updates_map[reg_addx].append(setting)
-                else:
-                    reg_updates_map[reg_addx] = [setting]
-        _logger.info(f'__map_updates_to_address: reg_updates_map => {reg_updates_map}')
-        return reg_updates_map
-
     def __read_registers_to_map(self):
         ''' Builds a map of write register address to corresponding read register value. Note, each register has 
             a read and write address, but only the read address contains the register's value. Write addresses are only 
@@ -191,9 +169,6 @@ class EdgePiTC(SpiDevice):
 
         Args:
             all (Enum): enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
-
-        Returns:
-            a list whose entries represent the value to be written to each write register, starting from CR0_W
         '''
         args_list = [conversion_mode, oc_fault_mode, cold_junction_mode, fault_mode, noise_filter_mode,
                     average_mode, tc_type, voltage_mode, fault_mask, cj_high_threshold, cj_low_threshold,
@@ -201,39 +176,32 @@ class EdgePiTC(SpiDevice):
                     cj_offset, cj_offset_decimals]
         _logger.info(f'set_config args list: {args_list}')
 
-        # map each command to its register and build dictionary of (register_address : [command_list]) tuples. 
-        # this also validates the command is a valid opcode.
-        reg_updates_map = self.__map_updates_to_address(args_list)
-
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
+        # TODO: add flags to check later if register value has been modified
         reg_values = self.__read_registers_to_map()
+        _logger.info(f'set_config: register values before updates => {reg_values}')
 
-        # for each register the user entered updates for, combine all settings updates into one command, 
-        # and modify corresponding register value in list. If no updates, keep the read-in register value.
-        for addx, op_array in reg_updates_map.items():
-            reg_value = reg_values.get(addx.value)
-            # generate update code for register
-            update_code = self.tc_coms.get_update_code(addx.value, reg_value, op_array)
-            # modify register value entry to be written back
-            reg_values[addx.value] = update_code
+        # updated register values
+        # TODO: pass by reference, don't really need to return anything
+        apply_opcodes(reg_values, args_list)
+        _logger.info(f'set_config: register values after updates => {reg_values}')
 
+        # TODO: may need some sorting to make sure registers in correct order
         update_bytes = [TCAddresses.CR0_W.value] + list(reg_values.values())
         _logger.info(f'set-config: writing update bytes -> {update_bytes}')
 
         # TODO: validate registers not updated by user have not been modified and all entries are valid opcodes
         # write multi-byte update transfer starting from CR0_W
-        self.transfer(update_bytes)
-
-        return update_bytes
+        # self.transfer(update_bytes)
 
 if __name__ == '__main__':
     tc_dev = EdgePiTC()
-    # tc_dev.set_config(conversion_mode=ConvMode.AUTO, tc_type=TCType.TYPE_N)
+    tc_dev.set_config(conversion_mode=ConvMode.AUTO, tc_type=TCType.TYPE_N)
     # values = [0,3,255,127,192,127,255,128,0,0,0,0]
-    print('cr1 value before transfer')
-    tc_dev.read_registers()
+    # print('cr1 value before transfer')
+    # tc_dev.read_registers()
     # tc_dev.set_average_mode(AvgMode.AVG_4)
-    print('cr1 value after transfer')
-    tc_dev.read_registers()
-    tc_dev.single_sample()
+    # print('cr1 value after transfer')
+    # tc_dev.read_registers()
+    # tc_dev.single_sample()
     # tc_dev.auto_sample()

@@ -1,5 +1,9 @@
-from dataclasses import dataclass
+'''
+OpCodes for thermocouple configuration and command operations
+'''
+
 from enum import Enum, unique
+from edgepi.reg_helper.reg_helper import OpCode
 
 @unique
 class TCAddresses(Enum):
@@ -35,13 +39,22 @@ class TCAddresses(Enum):
     CJTH_W = 0x8A
     CJTL_W = 0x8B
 
-# TODO: each op/command needs its own mask for generic update code generation logic
+class Masks(Enum):
+    CR0_BIT0_MASK = 0xFE
+    CR0_BIT1_MASK = 0xFD
+    CR0_BIT2_MASK = 0xFB
+    CR0_BIT3_MASK = 0xF7
+    CR0_OC_MASK = 0xCF
+    CR0_BIT6_MASK = 0xBF
+    CR0_BIT7_MASK = 0x7F
+    CR1_HIGH_MASK = 0x0F
+    CR1_LOW_MASK = 0xF0
 
 @unique
 class TCOps(Enum):
-    ''' valid hex opcodes for commands that can be sent to thermocouple '''
-    SINGLE_SHOT = 0x40      # trigger a single temperature conversion
-    CLEAR_FAULTS = 0x02     # clear fault status register, only use with Interrupt Fault Mode
+    ''' valid opcodes for commands that can be sent to thermocouple '''
+    SINGLE_SHOT = OpCode(0x40, TCAddresses.CR0_W.value, Masks.CR0_BIT6_MASK.value)      # trigger a single temperature conversion
+    CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.CR0_BIT6_MASK.value)     # clear fault status register, only use with Interrupt Fault Mode
 
 @unique
 class DecBits(Enum):
@@ -55,53 +68,53 @@ class DecBits(Enum):
 
 @unique
 class ConvMode(Enum):
-    ''' valid hex opcodes for setting thermocouple conversion mode '''
-    SINGLE = 0x7F
-    AUTO = 0x80
+    ''' valid opcodes for setting thermocouple conversion mode '''
+    SINGLE = OpCode(0x7F, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
+    AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
 
 @unique
 class CJMode(Enum):
-    ''' valid hex opcodes for setting thermocouple cold junction mode'''
-    ENABLE = 0xF7
-    DISABLE = 0x08
+    ''' valid opcodes for setting thermocouple cold junction mode'''
+    ENABLE = OpCode(0xF7, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
+    DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
 
 @unique
 class FaultMode(Enum):
-    ''' valid hex opcodes for setting thermocouple fault mode '''
-    COMPARATOR = 0xFB
-    INTERRUPT = 0x04
+    ''' valid opcodes for setting thermocouple fault mode '''
+    COMPARATOR = OpCode(0xFB, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
+    INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
 
 @unique
 class NoiseFilterMode(Enum):
-    ''' valid hex opcodes for setting thermocouple noise rejection filter mode '''
-    Hz_60 = 0xFE
-    Hz_50 = 0x01
+    ''' valid opcodes for setting thermocouple noise rejection filter mode '''
+    Hz_60 = OpCode(0xFE, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)  
+    Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)
 
 @unique
 class AvgMode(Enum):
-    ''' valid hex opcodes for setting thermocouple conversion averaging mode '''
-    AVG_1 = 0x00         # single sample
-    AVG_2 = 0x10         # 2 samples averaged
-    AVG_4 = 0x20         # 4 samples averaged
-    AVG_8 = 0x30         # 8 samples averaged
-    AVG_16 = 0x40        # 16 samples averaged
+    ''' valid opcodes for setting thermocouple conversion averaging mode '''
+    AVG_1 = OpCode(0x00, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)     # single sample
+    AVG_2 = OpCode(0x10, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)     # 2 samples averaged
+    AVG_4 = OpCode(0x20, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)     # 4 samples averaged
+    AVG_8 = OpCode(0x30, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)     # 8 samples averaged
+    AVG_16 = OpCode(0x40, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)    # 16 samples averaged
 
 @unique
 class TCType(Enum):
-    ''' valid hex opcodes for setting thermocouple type '''
-    TYPE_B = 0x00            # type B thermocouple
-    TYPE_E = 0x01            # type E thermocouple
-    TYPE_J = 0x02            # type J thermocouple
-    TYPE_K = 0x03            # type K thermocouple
-    TYPE_N = 0x04            # type N thermocouple
-    TYPE_R = 0x05            # type R thermocouple
-    TYPE_S = 0x06            # type S thermocouple
-    TYPE_T = 0x07            # type T thermocouple
+    ''' valid opcodes for setting thermocouple type '''
+    TYPE_B = OpCode(0x00, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type B thermocouple
+    TYPE_E = OpCode(0x01, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type E thermocouple
+    TYPE_J = OpCode(0x02, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type J thermocouple
+    TYPE_K = OpCode(0x03, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type K thermocouple
+    TYPE_N = OpCode(0x04, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type N thermocouple
+    TYPE_R = OpCode(0x05, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type R thermocouple
+    TYPE_S = OpCode(0x06, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type S thermocouple
+    TYPE_T = OpCode(0x07, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type T thermocouple
 
 class VoltageMode(Enum):
-    ''' valid hex opcodes for setting thermocouple voltage mode '''
-    GAIN_8 = 0x08
-    GAIN_32 = 0x0C
+    ''' valid opcodes for setting thermocouple voltage mode '''
+    GAIN_8 = OpCode(0x08, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)
+    GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)
 
 class FaultMasks(Enum):
-    ''' valid hex opcodes for setting thermocouple fault masks '''
+    ''' valid opcodes for setting thermocouple fault masks '''
