@@ -33,9 +33,15 @@ class OpCode:
     reg_address: int
     op_mask: int
 
-class OpCodeMaskIncompatibleError(Exception):
+class OpCodeMaskIncompatibleError(ValueError):
     '''Raised when an OpCode contains an op_code which affects bits not covered by the op_mask'''
-    pass
+    def __init__(self, opcode, mask):
+        self.opcode = opcode
+        self.mask = mask
+    
+    def __str__(self):
+        return f'opcode ({hex(self.opcode)}) affects bits not covered by mask ({hex(self.mask)})'
+
 
 def add_change_flags(register_values:dict):
     '''
@@ -95,7 +101,7 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     # second conditional is to permit edge-case where opcode is 0x00, i.e. 
     # 'do not modify any bits' instruction.
     if not ~opcode.op_mask & opcode.op_code and opcode.op_code:
-        raise OpCodeMaskIncompatibleError
+        raise OpCodeMaskIncompatibleError(opcode.op_code, opcode.op_mask)
 
     register_value &= opcode.op_mask    # clear the bits to be overwritten
     register_value |= opcode.op_code    # apply the opcode opcode to the cleared bits
