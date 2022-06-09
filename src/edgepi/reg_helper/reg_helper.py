@@ -77,7 +77,6 @@ def apply_opcodes(register_values:dict, opcodes:list):
             # apply the opcode to the register
             register_entry['value'] = _apply_opcode(register_entry.get('value'), opcode.value)
             register_entry['flag'] = 1
-            register_values[opcode.value.reg_address] = register_entry
 
     return register_values
 

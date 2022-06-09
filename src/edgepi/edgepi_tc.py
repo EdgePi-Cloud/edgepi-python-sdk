@@ -8,7 +8,7 @@ import time
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import TCCommands
-from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
+from edgepi.reg_helper.reg_helper import apply_opcodes
 
 _logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
