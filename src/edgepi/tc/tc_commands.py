@@ -23,18 +23,25 @@ class TCCommands():
 
         # combine code bytes and eliminate unneeded bits
         cj_code = ((cj_high_byte<<8) + cj_low_byte) >> 2
-        # check if code is negative value and update value
+        # if sign bit is set (negative temp), toggle sign bit off. Compute as positive and then invert.
         if cj_high_byte & 0x80:
-            cj_code -= 2 << (14 - 1)
+            cj_code ^= (0x1 << (14-1))
 
         # combine code bytes and eliminate unneeded bits
         lt_code = ((lt_high_byte<<16) + (lt_mid_byte<<8) + lt_low_byte) >> 5
-        # check if code is negative value and update value
         if lt_high_byte & 0x80:
-            lt_code -= 2 << (19 - 1)
+            lt_code ^= 0x1 << (19-1)
 
-        _logger.info(f'Cold Junction Temp: {cj_code*(2**-6)}')  # >> shift the 6 precision bits behind the decimal point
-        _logger.info(f'LT TC Temp: {lt_code*(2**-7)}')          # >> shift the 7 precision bits behind the decimal point
+        cj_temp = cj_code*(2**-6)   # >> shift the 6 precision bits behind the decimal point
+        lt_temp = lt_code*(2**-7)   # >> shift the 7 precision bits behind the decimal point
 
-        return cj_code, lt_code
+        if cj_high_byte & 0x80:
+            cj_temp = 0 - cj_temp
+        if lt_high_byte & 0x80:
+            lt_temp = 0 - lt_temp
+
+        _logger.info(f'Cold Junction Temp: {cj_code*(2**-6)}')  
+        _logger.info(f'LT TC Temp: {lt_code*(2**-7)}')         
+
+        return cj_temp, lt_temp
     

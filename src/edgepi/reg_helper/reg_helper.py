@@ -53,12 +53,12 @@ def apply_opcodes(register_values:dict, opcodes:list):
             continue
         register_value = register_values.get(opcode.value.reg_address)
         # apply the opcode to the register
-        register_values[opcode.value.reg_address] = _apply_opcodes(register_value, opcode.value)
+        register_values[opcode.value.reg_address] = _apply_opcode(register_value, opcode.value)
 
     return register_values
 
 # TODO: this needs to be very thoroughly unit-tested
-def _apply_opcodes(register_value:int, opcode:OpCode):
+def _apply_opcode(register_value:int, opcode:OpCode):
     '''
     Generates an update code for a specific register by applying an opcode
 

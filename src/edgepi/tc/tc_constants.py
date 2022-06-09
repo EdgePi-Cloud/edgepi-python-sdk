@@ -69,25 +69,25 @@ class DecBits(Enum):
 @unique
 class ConvMode(Enum):
     ''' valid opcodes for setting thermocouple conversion mode '''
-    SINGLE = OpCode(0x7F, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
+    SINGLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
     AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
 
 @unique
 class CJMode(Enum):
     ''' valid opcodes for setting thermocouple cold junction mode'''
-    ENABLE = OpCode(0xF7, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
+    ENABLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
     DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
 
 @unique
 class FaultMode(Enum):
     ''' valid opcodes for setting thermocouple fault mode '''
-    COMPARATOR = OpCode(0xFB, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
+    COMPARATOR = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
     INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
 
 @unique
 class NoiseFilterMode(Enum):
     ''' valid opcodes for setting thermocouple noise rejection filter mode '''
-    Hz_60 = OpCode(0xFE, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)  
+    Hz_60 = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)  
     Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)
 
 @unique
