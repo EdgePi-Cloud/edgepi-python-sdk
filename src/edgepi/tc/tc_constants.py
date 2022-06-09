@@ -54,6 +54,8 @@ class TempBits(Enum):
     ''' number of bits used in MAX31856 temperature registers to store values '''
     CJ_BITS = 14
     LT_BITS = 19
+    CJ_DECIMAL_BITS = 6
+    LT_DECIMAL_BITS = 7
 
 @unique
 class TCOps(Enum):
