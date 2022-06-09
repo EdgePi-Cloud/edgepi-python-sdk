@@ -54,7 +54,7 @@ class Masks(Enum):
 class TCOps(Enum):
     ''' valid opcodes for commands that can be sent to thermocouple '''
     SINGLE_SHOT = OpCode(0x40, TCAddresses.CR0_W.value, Masks.CR0_BIT6_MASK.value)      # trigger a single temperature conversion
-    CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.CR0_BIT6_MASK.value)     # clear fault status register, only use with Interrupt Fault Mode
+    CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.CR0_BIT1_MASK.value)     # clear fault status register, only use with Interrupt Fault Mode
 
 @unique
 class DecBits(Enum):

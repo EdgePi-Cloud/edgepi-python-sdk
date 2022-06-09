@@ -33,6 +33,10 @@ class OpCode:
     reg_address: int
     op_mask: int
 
+class OpCodeMaskIncompatibleError(Exception):
+    '''Raised when an OpCode contains an op_code which affects bits not covered by the op_mask'''
+    pass
+
 # TODO: make more efficient by grouping by address
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
@@ -71,10 +75,16 @@ def _apply_opcode(register_value:int, opcode:OpCode):
         an update code, the value to be written back to the register in order to apply
         the opcode.
     '''
-    # TODO: input validation for op_code: negate op_mask + AND with op_code
-    # to ensure op_code only writes to desired bits
+    # ensure op_code only writes to bits of register covered by mask
+    # second conditional is to permit edge-case where opcode is 0x00, i.e. 
+    # 'do not modify any bits' instruction.
+    if not ~opcode.op_mask & opcode.op_code and opcode.op_code:
+        raise OpCodeMaskIncompatibleError
 
+    print(f'reg_value before ops = {bin(register_value)}')
     register_value &= opcode.op_mask    # clear the bits to be overwritten
+    print(f'reg_value after AND with mask = {bin(register_value)}')
     register_value |= opcode.op_code    # apply the opcode opcode to the cleared bits
+    print(f'reg_value after OR with opcode = {bin(register_value)}')
     
     return register_value
