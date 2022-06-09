@@ -25,12 +25,12 @@ class TCCommands():
         cj_code = ((cj_high_byte<<8) + cj_low_byte) >> 2
         # if sign bit is set (negative temp), toggle sign bit off. Compute as positive and then invert.
         if cj_high_byte & 0x80:
-            cj_code ^= (0x1 << (14-1))
+            cj_code ^= (0x1 << (TempBits.CJ_BITS.value-1))
 
         # combine code bytes and eliminate unneeded bits
         lt_code = ((lt_high_byte<<16) + (lt_mid_byte<<8) + lt_low_byte) >> 5
         if lt_high_byte & 0x80:
-            lt_code ^= 0x1 << (19-1)
+            lt_code ^= 0x1 << (TempBits.LT_BITS.value-1)
 
         cj_temp = cj_code*(2**-6)   # >> shift the 6 precision bits behind the decimal point
         lt_temp = lt_code*(2**-7)   # >> shift the 7 precision bits behind the decimal point

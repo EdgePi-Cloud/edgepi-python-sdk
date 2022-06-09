@@ -50,6 +50,11 @@ class Masks(Enum):
     CR1_HIGH_MASK = 0x0F
     CR1_LOW_MASK = 0xF0
 
+class TempBits(Enum):
+    ''' number of bits used in MAX31856 temperature registers to store values '''
+    CJ_BITS = 14
+    LT_BITS = 19
+
 @unique
 class TCOps(Enum):
     ''' valid opcodes for commands that can be sent to thermocouple '''
