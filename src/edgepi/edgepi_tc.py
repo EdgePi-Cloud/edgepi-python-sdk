@@ -119,9 +119,9 @@ class EdgePiTC(SpiDevice):
                 All registers in this range will be overwritten: it is recommended to read the register values first,
                 in case a register write includes bad values. 
         '''
-        data = [start_addx] + values
+        data = [start_addx] + [values]
         _logger.info(f'write_to_registers: shifting in data => {data}')
-        new_data = super().transfer(data)
+        new_data = self.transfer(data)
         _logger.info(f'write_to_registers: shifted out data => {new_data}')
 
     def __read_registers_to_map(self):
@@ -182,26 +182,25 @@ class EdgePiTC(SpiDevice):
         _logger.info(f'set_config: register values before updates => {reg_values}')
 
         # updated register values
-        # TODO: pass by reference, don't really need to return anything
         apply_opcodes(reg_values, args_list)
         _logger.info(f'set_config: register values after updates => {reg_values}')
 
-        # TODO: may need some sorting to make sure registers in correct order
-        update_bytes = [TCAddresses.CR0_W.value] + list(reg_values.values())
-        _logger.info(f'set-config: writing update bytes -> {update_bytes}')
+        # only update registers whose values have been changed
+        for reg_addx, entry in reg_values.items():
+            if entry.get('flag') == 1:
+                self.write_to_registers(reg_addx, entry.get('value'))
 
-        # TODO: validate registers not updated by user have not been modified and all entries are valid opcodes
-        # write multi-byte update transfer starting from CR0_W
-        # self.transfer(update_bytes)
+        # TODO: validate registers not updated by user have not been modified
+
 
 if __name__ == '__main__':
     tc_dev = EdgePiTC()
-    tc_dev.set_config(conversion_mode=ConvMode.AUTO, tc_type=TCType.TYPE_N)
+    tc_dev.set_config(conversion_mode=ConvMode.SINGLE, tc_type=TCType.TYPE_K, average_mode=AvgMode.AVG_1)
     # values = [0,3,255,127,192,127,255,128,0,0,0,0]
     # print('cr1 value before transfer')
     # tc_dev.read_registers()
     # tc_dev.set_average_mode(AvgMode.AVG_4)
-    # print('cr1 value after transfer')
-    # tc_dev.read_registers()
+    print('cr1 value after transfer')
+    tc_dev.read_registers()
     # tc_dev.single_sample()
     # tc_dev.auto_sample()

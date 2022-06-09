@@ -37,27 +37,43 @@ class OpCodeMaskIncompatibleError(Exception):
     '''Raised when an OpCode contains an op_code which affects bits not covered by the op_mask'''
     pass
 
+def add_change_flags(register_values:dict):
+    '''
+        adds flags to register values for checking to see if register value has been modified later
+
+        Args:
+            register_values (dict): a map of the device's registers to their current values
+    '''
+    for reg_addx, value in register_values.items():
+        register_values[reg_addx] = {'value': value, 'flag': 0}
+
 # TODO: make more efficient by grouping by address
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
-    Generates updated register values after applying opcodes
+    Generates updated register values after applying opcodes, and sets flag for updated registers
 
     Args:
-        register_values (dict): a map of the device's registers to their current values
+        register_values (dict): a map of the device's registers to a dictionary containing the register value
+                                and the change flag
 
         updates (list): a list of valid Enum objects representing opcodes to be applied to registers.
                         See tc_constants.py for for a valid Enums.
 
     Returns:
-        a map of the device's registers to their updated values
+        a map of the device's registers to a dictionary containg the updated values and change flags
     '''
+    add_change_flags(register_values)
+
     # apply each opcode to its corresponding register
     for opcode in opcodes:
         if opcode is None:
             continue
-        register_value = register_values.get(opcode.value.reg_address)
-        # apply the opcode to the register
-        register_values[opcode.value.reg_address] = _apply_opcode(register_value, opcode.value)
+        register_entry = register_values.get(opcode.value.reg_address)
+        if register_entry is not None:
+            # apply the opcode to the register
+            register_entry['value'] = _apply_opcode(register_entry.get('value'), opcode.value)
+            register_entry['flag'] = 1
+            register_values[opcode.value.reg_address] = register_entry
 
     return register_values
 
@@ -81,10 +97,7 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     if not ~opcode.op_mask & opcode.op_code and opcode.op_code:
         raise OpCodeMaskIncompatibleError
 
-    print(f'reg_value before ops = {bin(register_value)}')
     register_value &= opcode.op_mask    # clear the bits to be overwritten
-    print(f'reg_value after AND with mask = {bin(register_value)}')
     register_value |= opcode.op_code    # apply the opcode opcode to the cleared bits
-    print(f'reg_value after OR with opcode = {bin(register_value)}')
-    
+   
     return register_value
