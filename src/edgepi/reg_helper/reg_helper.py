@@ -12,7 +12,6 @@ Functions:
 '''
 
 from dataclasses import dataclass
-from enum import Enum
 
 @dataclass(frozen=True)
 class OpCode:
@@ -28,7 +27,6 @@ class OpCode:
     op_mask : int
         the value to be used to op_mask the register bits whose value will be updated
     '''
-    # needs better name
     op_code: int
     reg_address: int
     op_mask: int
