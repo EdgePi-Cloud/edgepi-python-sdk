@@ -42,15 +42,15 @@ class EdgePiTC(SpiDevice):
         '''
         # TODO: disable auto mode on call, or let user decide?
         reg_value = self.__read_register(TCAddresses.CR0_R.value)
-        command = reg_value[1] | TCOps.SINGLE_SHOT.value
-        self.__write_to_registers(TCAddresses.CR0_W.value, [command])
+        command = reg_value[1] | TCOps.SINGLE_SHOT.value.op_code
+        self.__write_to_registers(TCAddresses.CR0_W.value, command)
         # there is a time delay between register write and update
         time.sleep(0.5)
 
         # read cold junction and linearized TC temperatures
         temp_codes = self.__read_temps()
 
-        _logger.info(f'single sample codes: {temp_codes}')
+        _logger.debug(f'single sample codes: {temp_codes}')
 
         return temp_codes
 
