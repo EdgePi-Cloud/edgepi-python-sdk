@@ -97,7 +97,7 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     # ensure op_code only writes to bits of register covered by mask
     # second conditional is to permit edge-case where opcode is 0x00, i.e. 
     # 'do not modify any bits' instruction.
-    if not ~opcode.op_mask & opcode.op_code and opcode.op_code:
+    if (~opcode.op_mask & opcode.op_code) != opcode.op_code:
         raise OpCodeMaskIncompatibleError(opcode.op_code, opcode.op_mask)
 
     register_value &= opcode.op_mask    # clear the bits to be overwritten
