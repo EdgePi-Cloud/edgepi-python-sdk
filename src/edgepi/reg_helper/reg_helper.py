@@ -21,11 +21,34 @@ class OpCode:
     Attributes
     ----------
     op_code : int
-        the value to be written to the register
+        the value used to update the register bits relevant to this setting or command. 
+        Please see below for a practical example on how to define the op_code.
     reg_address : int
         the register's address in the device's register memory map
     op_mask : int
-        the value to be used to op_mask the register bits whose value will be updated
+        the value used to clear the register bits whose value will be updated
+        when the op_code is applied. Mask bits intended to clear corresponding
+        bts in the target value should be assigned a value of 0. 
+        Please see below for a practical example on how to define the op_mask. 
+        
+    An example of how to define OpCode fields:
+        
+        Assume we have a register with the following bit values: register_value = (0b1010 1101)
+
+        Let's assume we wish to update only the high bits (0b1010) to a new value, (0b0110).
+        So our intended goal is to change the register_value to (0b0110 1101). 
+        
+        To do so, we first need to clear, or in other words, mask these high bits. 
+        The mask to use here should be defined as (0b0000 1111). This allows us to clear the high bits
+        in a single AND operation, as follows:
+        
+            (0b1010 1101) & (0b0000 1111) = (0b0000 1101).
+
+        Now the high bits have been cleared, we can apply our opcode. In order to obtain our final
+        register_value of (0b0110 1101), our opcode should be (0b0110 0000). Applying this opcode
+        to our now 'masked' register_value, with an OR operation, gives us our final register value:
+
+            (0b0000 1101) | (0b0110 1101) = (0b0110 1101)
     '''
     op_code: int
     reg_address: int
@@ -41,15 +64,15 @@ class OpCodeMaskIncompatibleError(ValueError):
         return f'opcode ({hex(self.opcode)}) affects bits not covered by mask ({hex(self.mask)})'
 
 
-def add_change_flags(register_values:dict):
+def _add_change_flags(register_values:dict):
     '''
         adds flags to register values for checking to see if register value has been modified later
 
         Args:
             register_values (dict): a map of the device's registers to their current values
     '''
-    for reg_addx, value in register_values.items():
-        register_values[reg_addx] = {'value': value, 'flag': 0}
+    for key in register_values:
+        register_values[key]['flag'] = False
 
 # TODO: make more efficient by grouping by address
 def apply_opcodes(register_values:dict, opcodes:list):
@@ -66,21 +89,21 @@ def apply_opcodes(register_values:dict, opcodes:list):
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags
     '''
-    add_change_flags(register_values)
+    _add_change_flags(register_values)
 
     # apply each opcode to its corresponding register
     for opcode in opcodes:
         if opcode is None:
             continue
         register_entry = register_values.get(opcode.value.reg_address)
+        # if this opcode maps to a valid register address
         if register_entry is not None:
             # apply the opcode to the register
-            register_entry['value'] = _apply_opcode(register_entry.get('value'), opcode.value)
-            register_entry['flag'] = 1
+            register_entry['value'] = _apply_opcode(register_entry['value'], opcode.value)
+            register_entry['flag'] = True
 
     return register_values
 
-# TODO: this needs to be very thoroughly unit-tested
 def _apply_opcode(register_value:int, opcode:OpCode):
     '''
     Generates an update code for a specific register by applying an opcode
@@ -104,3 +127,22 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     register_value |= opcode.op_code    # apply the opcode opcode to the cleared bits
    
     return register_value
+
+
+def filter_self_from_args(locals_dict:dict):
+    ''' use for filtering the self argument from a functions locals() dictionary
+
+        Args:
+            locals_dict (dict): the dictionary obtained by calling locals() in the function
+
+        Returns:
+            a list of values from the locals() dictionary, with the self entry filtered out
+    '''
+    filtered_args = (dict(filter(_filter_out_self, locals_dict.items()))).values()
+    return filtered_args
+
+def _filter_out_self(dict_entry:dict):
+    '''helper method for filter_self_from_args'''
+    if dict_entry[0] == 'self':
+        return False
+    return True

@@ -7,18 +7,15 @@ import time
 
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import TCCommands
-from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.tc.tc_commands import code_to_temp
+from edgepi.reg_helper.reg_helper import apply_opcodes, filter_self_from_args
 
 _logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 class EdgePiTC(SpiDevice):
     ''' 
     A class used to represent the EdgePi Thermocouple as an SPI device.
-    '''
-    tc_coms = TCCommands()
-
+    ''' 
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=2)
 
@@ -31,8 +28,8 @@ class EdgePiTC(SpiDevice):
         self.set_config(average_mode=num_samples)
 
     def __read_temps(self):
-        temp_bytes = self.read_registers(TCAddresses.CJTH_R.value, 5)
-        return self.tc_coms.code_to_temp(temp_bytes)
+        temp_bytes = self.__read_registers(TCAddresses.CJTH_R.value, 5)
+        return code_to_temp(temp_bytes)
 
     def single_sample(self):
         '''
@@ -44,9 +41,9 @@ class EdgePiTC(SpiDevice):
             tuple containing temperature codes for cold junction and linearized thermocouple temperature
         '''
         # TODO: disable auto mode on call, or let user decide?
-        reg_value = self.read_register(TCAddresses.CR0_R.value)
+        reg_value = self.__read_register(TCAddresses.CR0_R.value)
         command = reg_value[1] | TCOps.SINGLE_SHOT.value
-        self.write_to_registers(TCAddresses.CR0_W.value, [command])
+        self.__write_to_registers(TCAddresses.CR0_W.value, [command])
         # there is a time delay between register write and update
         time.sleep(0.5)
 
@@ -75,7 +72,7 @@ class EdgePiTC(SpiDevice):
     def set_average_mode(self, avg_mode:AvgMode):
         self.set_config(average_mode=avg_mode)
 
-    def read_register(self, reg_addx):
+    def __read_register(self, reg_addx):
         ''' Reads the value of a single register.
 
             Args:
@@ -85,12 +82,12 @@ class EdgePiTC(SpiDevice):
                 a list new_data containing two entries: new_data[0] = register address, new_data[1] = register value
         '''
         data = [reg_addx] + [0xFF]
-        _logger.info(f'read_register: addx = {reg_addx} => data before xfer = {data}')
+        _logger.debug(f'__read_register: addx = {reg_addx} => data before xfer = {data}')
         new_data = super().transfer(data)
-        _logger.info(f'read_register: addx = {reg_addx} => data after xfer = {new_data}')
+        _logger.debug(f'__read_register: addx = {reg_addx} => data after xfer = {new_data}')
         return new_data
 
-    def read_registers(self, start_addx:int=0, regs_to_read:int=16):
+    def __read_registers(self, start_addx:int=0, regs_to_read:int=16):
         ''' read a variable number of registers sequentially
            
             Args:
@@ -102,13 +99,13 @@ class EdgePiTC(SpiDevice):
                 is the start address: register values begin from the second entry.
         '''
         data = [start_addx] + [0xFF]*regs_to_read
-        _logger.info(f'read_registers: shifting in data => {data}')
+        _logger.debug(f'__read_registers: shifting in data => {data}')
         new_data = super().transfer(data)
-        _logger.info(f'read_registers: shifted out data => {new_data}')
+        _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
     # TODO: change to 'private' methods
-    def write_to_registers(self, start_addx, values):
+    def __write_to_registers(self, start_addx, values):
         ''' write to a variable number of registers sequentially.
             
             Args:
@@ -120,9 +117,9 @@ class EdgePiTC(SpiDevice):
                 in case a register write includes bad values. 
         '''
         data = [start_addx] + [values]
-        _logger.info(f'write_to_registers: shifting in data => {data}')
+        _logger.debug(f'__write_to_registers: shifting in data => {data}')
         new_data = self.transfer(data)
-        _logger.info(f'write_to_registers: shifted out data => {new_data}')
+        _logger.debug(f'__write_to_registers: shifted out data => {new_data}')
 
     def __read_registers_to_map(self):
         ''' Builds a map of write register address to corresponding read register value. Note, each register has 
@@ -136,18 +133,18 @@ class EdgePiTC(SpiDevice):
         num_regs = 16
         read_regs_offset = 0x80
         start_addx = TCAddresses.CR0_W.value
-        # read values from read_registers, but log values to corresponding write registers 
-        reg_values = self.read_registers(start_addx-read_regs_offset)
+        # read values from __read_registers, but log values to corresponding write registers 
+        reg_values = self.__read_registers(start_addx-read_regs_offset)
         for addx_offset in range(num_regs):
-            reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
-        _logger.info(f'__read_registers_to_map => {reg_map}')
+            reg_map[start_addx+addx_offset] = {'value': reg_values[addx_offset+1]} # reg_values[0] is start_addx
+        _logger.debug(f'__read_registers_to_map => {reg_map}')
         return reg_map
 
     # TODO: make issue for temp setting
     def set_config(
         self,
         conversion_mode: ConvMode = None,  
-        oc_fault_mode: FaultMode = None, 
+        oc_fault_mode: FaultMode = None,
         cold_junction_mode: CJMode = None, 
         fault_mode: FaultMode = None,
         noise_filter_mode: NoiseFilterMode = None,
@@ -170,37 +167,23 @@ class EdgePiTC(SpiDevice):
         Args:
             all (Enum): enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
         '''
-        args_list = [conversion_mode, oc_fault_mode, cold_junction_mode, fault_mode, noise_filter_mode,
-                    average_mode, tc_type, voltage_mode, fault_mask, cj_high_threshold, cj_low_threshold,
-                    lt_high_threshold, lt_high_threshold_decimals, lt_low_threshold, lt_low_threshold_decimals,
-                    cj_offset, cj_offset_decimals]
-        _logger.info(f'set_config args list: {args_list}')
+        args_list = filter_self_from_args(locals())
+        _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
 
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
         # TODO: add flags to check later if register value has been modified
         reg_values = self.__read_registers_to_map()
-        _logger.info(f'set_config: register values before updates => {reg_values}')
+        _logger.debug(f'set_config: register values before updates => {reg_values}')
 
         # updated register values
         apply_opcodes(reg_values, args_list)
-        _logger.info(f'set_config: register values after updates => {reg_values}')
+        _logger.debug(f'set_config: register values after updates => {reg_values}')
 
         # only update registers whose values have been changed
         for reg_addx, entry in reg_values.items():
-            if entry.get('flag') == 1:
-                self.write_to_registers(reg_addx, entry.get('value'))
+            if entry['flag']:
+                updated_value = entry['value']
+                self.__write_to_registers(reg_addx, updated_value)
+                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')
 
         # TODO: validate registers not updated by user have not been modified
-
-
-if __name__ == '__main__':
-    tc_dev = EdgePiTC()
-    tc_dev.set_config(conversion_mode=ConvMode.SINGLE, tc_type=TCType.TYPE_K, average_mode=AvgMode.AVG_1)
-    # values = [0,3,255,127,192,127,255,128,0,0,0,0]
-    # print('cr1 value before transfer')
-    # tc_dev.read_registers()
-    # tc_dev.set_average_mode(AvgMode.AVG_4)
-    print('cr1 value after transfer')
-    tc_dev.read_registers()
-    # tc_dev.single_sample()
-    # tc_dev.auto_sample()
