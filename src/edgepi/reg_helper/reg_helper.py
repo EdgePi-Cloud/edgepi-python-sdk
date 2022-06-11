@@ -28,7 +28,7 @@ class OpCode:
     op_mask : int
         the value used to clear the register bits whose value will be updated
         when the op_code is applied. Mask bits intended to clear corresponding
-        bts in the target value should be assigned a value of 0. 
+        bits in the target value should be assigned a value of 0. 
         Please see below for a practical example on how to define the op_mask. 
         
     An example of how to define OpCode fields:
