@@ -81,14 +81,20 @@ def apply_opcodes(register_values:dict, opcodes:list):
 
     Args:
         register_values (dict): a map of the device's registers to a dictionary containing the register value
-                                and the change flag
+                                and the change flag. The dictionary must contain entries of the form 
+                                register_address: {'value': register_value}.
 
         updates (list): a list of valid Enum objects representing opcodes to be applied to registers.
                         See tc_constants.py for for a valid Enums.
 
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags
+
+    Raises:
+        ValueError: if either register_values or opcodes is empty
     '''
+    if len(register_values) < 1 or len(opcodes) < 1:
+        raise ValueError('register_values and opcodes args must both be non-empty')
     _add_change_flags(register_values)
 
     # apply each opcode to its corresponding register
@@ -146,3 +152,4 @@ def _filter_out_self(dict_entry:dict):
     if dict_entry[0] == 'self':
         return False
     return True
+    

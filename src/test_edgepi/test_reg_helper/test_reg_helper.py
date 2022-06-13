@@ -1,5 +1,5 @@
 import pytest
-from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags
+from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags, apply_opcodes
 from edgepi.tc.tc_constants import *
 
 @pytest.mark.parametrize('reg_value, opcode, updated_reg_value', [
@@ -97,3 +97,67 @@ def test_add_change_flags_adds_flags(reg_values):
     _add_change_flags(reg_values)
     for key in reg_values:
         assert reg_values[key]['flag'] == False
+
+@pytest.mark.parametrize('reg_values, opcodes', [
+    ({}, []),
+    ({0x0: {}}, []),
+    ({}, [AvgMode.AVG_1]),
+])
+def test_apply_opcodes_raises(reg_values, opcodes):
+    with pytest.raises(Exception) as e:
+        apply_opcodes(reg_values, opcodes)
+    assert 'register_values and opcodes args must both be non-empty' in str(e.value)
+
+@pytest.mark.parametrize('reg_values, opcodes, out', [
+    (
+        {TCAddresses.CR1_W.value: {'value': 0x0}}, [AvgMode.AVG_1],
+        {TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}}
+    ),
+    (
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0},
+            TCAddresses.CR1_W.value: {'value': 0x0}
+        },
+        [AvgMode.AVG_1],
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0, 'flag': False},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+        },
+    ),
+    (
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0},
+            TCAddresses.CR1_W.value: {'value': 0x0}
+        },
+        [None],
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0, 'flag': False},
+            TCAddresses.CR1_W.value: {'value': 0x0, 'flag': False}
+        },
+    ),
+    (
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0},
+            TCAddresses.CR1_W.value: {'value': 0x0}
+        },
+        [AvgMode.AVG_1, ConvMode.AUTO],
+        {
+            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'flag': True},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+        },
+    ),
+    (
+        {
+            TCAddresses.CR0_W.value: {'value': 0x0},
+            TCAddresses.CR1_W.value: {'value': 0x0}
+        },
+        [AvgMode.AVG_1, ConvMode.AUTO, None],
+        {
+            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'flag': True},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+        },
+    )
+])
+def test_apply_opcodes(reg_values, opcodes, out):
+    assert apply_opcodes(reg_values, opcodes) == out
+    
