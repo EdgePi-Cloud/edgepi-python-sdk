@@ -135,8 +135,8 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     return register_value
 
 
-def filter_self_from_args(locals_dict:dict):
-    ''' use for filtering the self argument from a functions locals() dictionary
+def filter_dict(locals_dict:dict, keyword:str) -> list:
+    ''' use for filtering the self argument from a function's locals() dictionary
 
         Args:
             locals_dict (dict): the dictionary obtained by calling locals() in the function
@@ -144,12 +144,5 @@ def filter_self_from_args(locals_dict:dict):
         Returns:
             a list of values from the locals() dictionary, with the self entry filtered out
     '''
-    filtered_args = (dict(filter(_filter_out_self, locals_dict.items()))).values()
-    return filtered_args
-
-def _filter_out_self(dict_entry:dict):
-    '''helper method for filter_self_from_args'''
-    if dict_entry[0] == 'self':
-        return False
-    return True
-    
+    filtered_args = { key:value for (key,value) in locals_dict.items() if key != keyword }
+    return filtered_args.values()

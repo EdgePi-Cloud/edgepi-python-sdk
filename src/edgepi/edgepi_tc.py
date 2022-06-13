@@ -8,7 +8,7 @@ import time
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import code_to_temp
-from edgepi.reg_helper.reg_helper import apply_opcodes, filter_self_from_args
+from edgepi.reg_helper.reg_helper import apply_opcodes, filter_dict
 
 _logger = logging.getLogger(__name__)
 
@@ -167,7 +167,7 @@ class EdgePiTC(SpiDevice):
         Args:
             all (Enum): enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
         '''
-        args_list = filter_self_from_args(locals())
+        args_list = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
 
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
