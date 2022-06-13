@@ -7,6 +7,7 @@ ____
 ## Importing Thermocouple Module from SDK Package
 ```
 from edgepi.edgepi_tc import EdgePiTC
+from edgepi.tc.tc_constants import *
 
 edgepi_tc = EdgePiTC()
 ```
