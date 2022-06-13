@@ -145,4 +145,4 @@ def filter_dict(locals_dict:dict, keyword:str) -> list:
             a list of values from the locals() dictionary, with the self entry filtered out
     '''
     filtered_args = { key:value for (key,value) in locals_dict.items() if key != keyword }
-    return filtered_args.values()
+    return list(filtered_args.values())
