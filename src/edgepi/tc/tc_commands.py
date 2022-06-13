@@ -2,7 +2,6 @@ import logging
 from pickletools import uint1
 from tokenize import Number
 import bitstring
-from pyparsing import Char
 from edgepi.tc.tc_constants import *
 
 _logger = logging.getLogger(__name__)

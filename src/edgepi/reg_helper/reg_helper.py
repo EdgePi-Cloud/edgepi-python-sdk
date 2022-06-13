@@ -77,7 +77,6 @@ def _add_change_flags(register_values:dict):
     for key in register_values:
         register_values[key]['flag'] = False
 
-# TODO: make more efficient by grouping by address
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
     Generates updated register values after applying opcodes, and sets flag for updated registers
@@ -127,13 +126,11 @@ def _apply_opcode(register_value:int, opcode:OpCode):
         the opcode.
     '''
     # ensure op_code only writes to bits of register covered by mask
-    # second conditional is to permit edge-case where opcode is 0x00, i.e. 
-    # 'do not modify any bits' instruction.
     if (~opcode.op_mask & opcode.op_code) != opcode.op_code:
         raise OpCodeMaskIncompatibleError(opcode.op_code, opcode.op_mask)
 
     register_value &= opcode.op_mask    # clear the bits to be overwritten
-    register_value |= opcode.op_code    # apply the opcode opcode to the cleared bits
+    register_value |= opcode.op_code    # apply the opcode to the cleared bits
    
     return register_value
 

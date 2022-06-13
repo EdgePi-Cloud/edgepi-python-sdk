@@ -182,5 +182,4 @@ class EdgePiTC(SpiDevice):
                 updated_value = entry['value']
                 self.__write_to_registers(reg_addx, updated_value)
                 _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')
-
-        # TODO: validate registers not updated by user have not been modified
+                
