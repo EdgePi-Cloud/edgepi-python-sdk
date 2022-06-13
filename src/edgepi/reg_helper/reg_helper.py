@@ -4,11 +4,14 @@ Helper functions and class for modifying device register values
 Classes:
 
     OpCode
+    OpCodeMaskIncompatibleError(ValueError)
 
 Functions:
 
+    _add_change_flags(dict)
     apply_opcodes(dict, list)
-    apply_opcode(object, int)
+    apply_opcode(OpCode, int)
+    filter_dict(dict, any)
 '''
 
 from dataclasses import dataclass
@@ -135,14 +138,14 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     return register_value
 
 
-def filter_dict(locals_dict:dict, keyword:str) -> list:
-    ''' use for filtering the self argument from a function's locals() dictionary
+def filter_dict(dictionary:dict, keyword) -> list:
+    ''' use for filtering an entry from a dictionary by key
 
         Args:
-            locals_dict (dict): the dictionary obtained by calling locals() in the function
+            dictionary (dict): any dictionary whose entries are to be filtered
 
         Returns:
-            a list of values from the locals() dictionary, with the self entry filtered out
+            a list of values from the dictionary, with the entry whose key is the keyword, filtered out.
     '''
-    filtered_args = { key:value for (key,value) in locals_dict.items() if key != keyword }
+    filtered_args = { key:value for (key,value) in dictionary.items() if key != keyword }
     return list(filtered_args.values())
