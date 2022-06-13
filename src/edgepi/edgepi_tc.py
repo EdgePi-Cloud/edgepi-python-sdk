@@ -19,7 +19,6 @@ class EdgePiTC(SpiDevice):
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=2)
 
-    # TODO: use enum instead of int
     def set_averaging_mode(self, num_samples:AvgMode):
         '''
         Sets number of measurements made per sampling event.   
@@ -104,7 +103,6 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
-    # TODO: change to 'private' methods
     def __write_to_registers(self, start_addx, values):
         ''' write to a variable number of registers sequentially.
             
@@ -171,7 +169,6 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
 
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
-        # TODO: add flags to check later if register value has been modified
         reg_values = self.__read_registers_to_map()
         _logger.debug(f'set_config: register values before updates => {reg_values}')
 

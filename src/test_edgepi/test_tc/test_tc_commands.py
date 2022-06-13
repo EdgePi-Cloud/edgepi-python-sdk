@@ -1,6 +1,7 @@
 import pytest
+from bitstring import BitArray
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import code_to_temp
+from edgepi.tc.tc_commands import code_to_temp, _negative_temp_check
 
 @pytest.mark.parametrize('code_bytes, temps', [
     ([0x0D, 0x88, 0x00, 0xC0, 0x00, 0x00], (-8, -1024)), # negative temps
@@ -21,3 +22,11 @@ def test_code_to_temp_exceptions(code_bytes, err_type):
     with pytest.raises(Exception) as e:
         code_to_temp(code_bytes)
     assert e.type == err_type
+
+@pytest.mark.parametrize('temp_code, out, new_value', [
+    (BitArray(uint=0b10001000, length=8), True, 0b1000),
+    (BitArray(uint=0b01001000, length=8), False, 0b01001000)
+])
+def test_negative_temp_check(temp_code, out, new_value):
+   assert _negative_temp_check(temp_code) == out
+   assert temp_code.uint == new_value

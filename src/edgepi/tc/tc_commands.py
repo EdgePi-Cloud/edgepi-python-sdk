@@ -1,5 +1,8 @@
 import logging
+from pickletools import uint1
+from tokenize import Number
 import bitstring
+from pyparsing import Char
 from edgepi.tc.tc_constants import *
 
 _logger = logging.getLogger(__name__)
@@ -8,7 +11,8 @@ def temp_to_code(temp:float):
     ''' converts a float temperature value to binary code for writing to register '''
     raise NotImplementedError
 
-def _negative_temp_check(temp_code):
+def _negative_temp_check(temp_code:int):
+    ''' checks if MAX31856 temperature register reading is negative '''
     # if sign bit is set (negative temp), toggle sign bit off. Compute as positive and then invert after.
     if temp_code[0]:
         del temp_code[0]
