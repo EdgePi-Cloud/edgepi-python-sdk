@@ -1,5 +1,5 @@
 import pytest
-from edgepi.reg_helper.reg_helper import _apply_opcode
+from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags
 from edgepi.tc.tc_constants import *
 
 @pytest.mark.parametrize('reg_value, opcode, updated_reg_value', [
@@ -81,3 +81,19 @@ from edgepi.tc.tc_constants import *
 ])
 def test_apply_opcode(reg_value, opcode, updated_reg_value):
     assert _apply_opcode(reg_value, opcode) == updated_reg_value
+
+@pytest.mark.parametrize('reg_values', [
+    ({0x0: {'value':0x255}}),
+    ({
+        0x0: {'value':0x255},
+        0x1: {'value':0x255},
+        0x2: {'value':0x255}}),
+    ({
+        0x0: {},
+        0x1: {'value':0x255},
+        0x2: {}}),
+])
+def test_add_change_flags_adds_flags(reg_values):
+    _add_change_flags(reg_values)
+    for key in reg_values:
+        assert reg_values[key]['flag'] == False
