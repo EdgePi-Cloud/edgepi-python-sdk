@@ -10,3 +10,12 @@ from edgepi.tc.tc_commands import code_to_temp
 ])
 def test_code_to_temp(code_bytes, temps):
     assert code_to_temp(code_bytes) == temps
+
+@pytest.mark.parametrize('code_bytes, err_type', [
+    ([0x0D], IndexError), # should raise IndexError
+    ([0x0D, 'hello', 'world', '!', 0x0F, 0x0F], ValueError), # should raise ValueError
+])
+def test_code_to_temp_exceptions(code_bytes, err_type):
+    with pytest.raises(Exception) as e:
+        code_to_temp(code_bytes)
+    assert e.type == err_type
