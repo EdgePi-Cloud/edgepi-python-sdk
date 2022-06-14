@@ -121,7 +121,11 @@ class TCType(Enum):
 class VoltageMode(Enum):
     ''' 
     valid opcodes for setting thermocouple voltage mode. Use to set 
-    thermocouple type other than those listed under TCType 
+    thermocouple type other than those listed under TCType. 
+    Note, When voltage mode is selected, no linearization is
+    performed on the conversion data. Use the voltage data
+    and the cold-junction temperature to calculate the thermo-
+    couple’s hot-junction temperature.
     '''
     GAIN_8 = OpCode(0x08, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)    # full-scale input voltage range of +/- 78.125 mV
     GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)   # full-scale input voltage range of +/- 19.531 mV
