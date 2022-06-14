@@ -24,5 +24,5 @@ setuptools.setup(
                                     exclude=['test_edgepi']),
     package_dir={"": "src"},    
     python_requires=">=3.6",
-    install_requires=["python-periphery >= 2.3.0", "bitstring == 3.1.9"]
+    install_requires=["python-periphery >= 2.3.0", "bitstring >= 3.1.9"]
 )
