@@ -76,26 +76,26 @@ class DecBits(Enum):
 @unique
 class ConvMode(Enum):
     ''' valid opcodes for setting thermocouple conversion mode '''
-    SINGLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
-    AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)
+    SINGLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)   # set thermocouple to perform single, manually triggered conversions
+    AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)     # set thermocouple to perform continuous conversions
 
 @unique
 class CJMode(Enum):
     ''' valid opcodes for setting thermocouple cold junction mode'''
-    ENABLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
-    DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)
+    ENABLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)   # enable the cold-junction sensor
+    DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)  # disable the cold-junction sensor
 
 @unique
 class FaultMode(Enum):
     ''' valid opcodes for setting thermocouple fault mode '''
-    COMPARATOR = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
-    INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)
+    COMPARATOR = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)   # faults deassert only once fault condition is no longer true
+    INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)    # faults deassert only once TCOps.CLEAR_FAULTS command is issued
 
 @unique
 class NoiseFilterMode(Enum):
     ''' valid opcodes for setting thermocouple noise rejection filter mode '''
-    Hz_60 = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)  
-    Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)
+    Hz_60 = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)    # reject 60 Hz and its harmonics
+    Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)    # reject 50 Hz and its harmonics
 
 @unique
 class AvgMode(Enum):
@@ -119,9 +119,12 @@ class TCType(Enum):
     TYPE_T = OpCode(0x07, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)     # type T thermocouple
 
 class VoltageMode(Enum):
-    ''' valid opcodes for setting thermocouple voltage mode '''
-    GAIN_8 = OpCode(0x08, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)
-    GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)
+    ''' 
+    valid opcodes for setting thermocouple voltage mode. Use to set 
+    thermocouple type other than those listed under TCType 
+    '''
+    GAIN_8 = OpCode(0x08, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)    # full-scale input voltage range of +/- 78.125 mV
+    GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)   # full-scale input voltage range of +/- 19.531 mV
 
 class FaultMasks(Enum):
     ''' valid opcodes for setting thermocouple fault masks '''

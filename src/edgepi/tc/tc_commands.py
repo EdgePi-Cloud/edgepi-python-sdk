@@ -1,6 +1,4 @@
 import logging
-from pickletools import uint1
-from tokenize import Number
 import bitstring
 from edgepi.tc.tc_constants import *
 

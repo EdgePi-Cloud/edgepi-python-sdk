@@ -26,7 +26,8 @@ class EdgePiTC(SpiDevice):
         '''
         self.set_config(average_mode=num_samples)
 
-    def __read_temps(self):
+    def read_temps(self):
+        ''' Use to read cold junction and linearized thermocouple temperature measurements '''
         temp_bytes = self.__read_registers(TCAddresses.CJTH_R.value, 5)
         return code_to_temp(temp_bytes)
 
@@ -47,7 +48,7 @@ class EdgePiTC(SpiDevice):
         time.sleep(0.5)
 
         # read cold junction and linearized TC temperatures
-        temp_codes = self.__read_temps()
+        temp_codes = self.read_temps()
 
         _logger.debug(f'single sample codes: {temp_codes}')
 
@@ -160,10 +161,11 @@ class EdgePiTC(SpiDevice):
         cj_offset_decimals: DecBits = None,
         ):
         '''
-        A collective thermocouple settings update method.
+        A collective thermocouple settings update method. Use this method when you wish to configure multiple thermocouple settings
+        at once.
 
         Args:
-            all (Enum): enum representing a valid hex opcode. See tc_constants.py for valid opcodes.
+            all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.
         '''
         args_list = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
