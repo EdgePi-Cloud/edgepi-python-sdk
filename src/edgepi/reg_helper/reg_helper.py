@@ -66,24 +66,13 @@ class OpCodeMaskIncompatibleError(ValueError):
     def __str__(self):
         return f'opcode ({hex(self.opcode)}) affects bits not covered by mask ({hex(self.mask)})'
 
-
-def _add_change_flags(register_values:dict):
-    '''
-        adds flags to register values for checking to see if register value has been modified later
-
-        Args:
-            register_values (dict): a map of the device's registers to their current values
-    '''
-    for key in register_values:
-        register_values[key]['flag'] = False
-
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
-    Generates updated register values after applying opcodes, and sets flag for updated registers
+    Generates updated register values after applying opcodes, and sets is_changed for updated registers
 
     Args:
         register_values (dict): a map of the device's registers to a dictionary containing the register value
-                                and the change flag. The dictionary must contain entries of the form 
+                                and the change is_changed. The dictionary must contain entries of the form 
                                 register_address: {'value': register_value}.
 
         updates (list): a list of valid Enum objects representing opcodes to be applied to registers.
@@ -97,7 +86,7 @@ def apply_opcodes(register_values:dict, opcodes:list):
     '''
     if len(register_values) < 1 or len(opcodes) < 1:
         raise ValueError('register_values and opcodes args must both be non-empty')
-    _add_change_flags(register_values)
+    _format_register_map(register_values)
 
     # apply each opcode to its corresponding register
     for opcode in opcodes:
@@ -108,7 +97,7 @@ def apply_opcodes(register_values:dict, opcodes:list):
         if register_entry is not None:
             # apply the opcode to the register
             register_entry['value'] = _apply_opcode(register_entry['value'], opcode.value)
-            register_entry['flag'] = True
+            register_entry['is_changed'] = True
 
     return register_values
 
@@ -146,3 +135,43 @@ def filter_dict(dictionary:dict, keyword) -> list:
     '''
     filtered_args = { key:value for (key,value) in dictionary.items() if key != keyword }
     return list(filtered_args.values())
+
+def _add_change_flags(register_values:dict):
+    '''
+        adds flags to register values for checking to see if register value has been modified later
+
+        Args:
+            register_values (dict): a map of the device's registers to their current values
+
+        Returns:
+            the same dictionary but with an added 'is_changed' field for each entry
+    '''
+    for key in register_values:
+        register_values[key]['is_changed'] = False
+
+def _convert_values_to_dict(reg_map:dict) -> dict:
+    ''' Changes a register_address, register_value map to use register_address, dictionary format
+        where the dictionary now hold the register_value.
+
+        Args:
+            reg_map (dict): a dictionary containing (int) register_address, (int) register_value pairs
+
+        Returns:
+            a dictionary containing (int) register_address, {'value': register_value} pairs
+    '''
+    # convert each addx, value pair to addx, dictionary pair
+    for addx, value in reg_map.items():
+        reg_map[addx] = {'value': value}
+
+def _format_register_map(reg_map:dict) -> dict:
+    ''' converts map of register_address, register_value pairs to a format compatible with functions
+        defined in this module.
+
+        Args:
+            reg_map (dict): a dictionary containing (int) register_address, (int) register_value pairs
+
+        Returns:
+            a dictionary containing (int) register_address, {'value': register_value, 'is_changed': False} pairs
+    '''
+    _convert_values_to_dict(reg_map)
+    _add_change_flags(reg_map)

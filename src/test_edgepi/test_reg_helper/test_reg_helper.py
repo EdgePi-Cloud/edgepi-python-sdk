@@ -1,5 +1,6 @@
 import pytest
-from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags, apply_opcodes, filter_dict
+from copy import deepcopy
+from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags, apply_opcodes, filter_dict, _convert_values_to_dict
 from edgepi.tc.tc_constants import *
 
 @pytest.mark.parametrize('reg_value, opcode, updated_reg_value', [
@@ -96,7 +97,7 @@ def test_apply_opcode(reg_value, opcode, updated_reg_value):
 def test_add_change_flags_adds_flags(reg_values):
     _add_change_flags(reg_values)
     for key in reg_values:
-        assert reg_values[key]['flag'] == False
+        assert reg_values[key]['is_changed'] == False
 
 @pytest.mark.parametrize('reg_values, opcodes', [
     ({}, []),
@@ -110,51 +111,51 @@ def test_apply_opcodes_raises(reg_values, opcodes):
 
 @pytest.mark.parametrize('reg_values, opcodes, out', [
     (
-        {TCAddresses.CR1_W.value: {'value': 0x0}}, [AvgMode.AVG_1],
-        {TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}}
+        {TCAddresses.CR1_W.value: 0x0}, [AvgMode.AVG_1],
+        {TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}}
     ),
     (
         {
-            TCAddresses.CR0_W.value: {'value': 0x0},
-            TCAddresses.CR1_W.value: {'value': 0x0}
+            TCAddresses.CR0_W.value: 0x0,
+            TCAddresses.CR1_W.value: 0x0
         },
         [AvgMode.AVG_1],
         {
-            TCAddresses.CR0_W.value: {'value': 0x0, 'flag': False},
-            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+            TCAddresses.CR0_W.value: {'value': 0x0, 'is_changed': False},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
         },
     ),
     (
         {
-            TCAddresses.CR0_W.value: {'value': 0x0},
-            TCAddresses.CR1_W.value: {'value': 0x0}
+            TCAddresses.CR0_W.value: 0x0,
+            TCAddresses.CR1_W.value: 0x0
         },
         [None],
         {
-            TCAddresses.CR0_W.value: {'value': 0x0, 'flag': False},
-            TCAddresses.CR1_W.value: {'value': 0x0, 'flag': False}
+            TCAddresses.CR0_W.value: {'value': 0x0, 'is_changed': False},
+            TCAddresses.CR1_W.value: {'value': 0x0, 'is_changed': False}
         },
     ),
     (
         {
-            TCAddresses.CR0_W.value: {'value': 0x0},
-            TCAddresses.CR1_W.value: {'value': 0x0}
+            TCAddresses.CR0_W.value: 0x0,
+            TCAddresses.CR1_W.value: 0x0
         },
         [AvgMode.AVG_1, ConvMode.AUTO],
         {
-            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'flag': True},
-            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'is_changed': True},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
         },
     ),
     (
         {
-            TCAddresses.CR0_W.value: {'value': 0x0},
-            TCAddresses.CR1_W.value: {'value': 0x0}
+            TCAddresses.CR0_W.value: 0x0,
+            TCAddresses.CR1_W.value: 0x0
         },
         [AvgMode.AVG_1, ConvMode.AUTO, None],
         {
-            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'flag': True},
-            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'flag': True}
+            TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'is_changed': True},
+            TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
         },
     )
 ])
@@ -168,3 +169,14 @@ def test_apply_opcodes(reg_values, opcodes, out):
 ])
 def test_filter_dict(dict, keyword, out):
     assert filter_dict(dict, keyword) == out
+
+@pytest.mark.parametrize('reg_map', [
+    ({TCAddresses.CR0_R.value: 0xFF}),
+    ({TCAddresses.CR0_R.value: 0xFF, TCAddresses.CR1_R.value: 0x00, TCAddresses.CJLF_R.value: 0x5F}),
+])
+def test_convert_values_to_dict(reg_map):
+    map_copy = deepcopy(reg_map)
+    _convert_values_to_dict(reg_map)
+    for key in reg_map:
+        assert type(reg_map[key]) is dict               # assert changed format to addx, dict pairs
+        assert reg_map[key]['value'] == map_copy[key]   # assert value field in dict, and reg_value copied correctly
