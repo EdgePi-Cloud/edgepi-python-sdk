@@ -11,7 +11,6 @@ Functions:
     _add_change_flags(dict)
     apply_opcodes(dict, list)
     apply_opcode(OpCode, int)
-    filter_dict(dict, any)
 '''
 
 from dataclasses import dataclass
@@ -122,19 +121,6 @@ def _apply_opcode(register_value:int, opcode:OpCode):
     register_value |= opcode.op_code    # apply the opcode to the cleared bits
    
     return register_value
-
-
-def filter_dict(dictionary:dict, keyword) -> list:
-    ''' use for filtering an entry from a dictionary by key
-
-        Args:
-            dictionary (dict): any dictionary whose entries are to be filtered
-
-        Returns:
-            a list of values from the dictionary, with the entry whose key is the keyword, filtered out.
-    '''
-    filtered_args = { key:value for (key,value) in dictionary.items() if key != keyword }
-    return list(filtered_args.values())
 
 def _add_change_flags(register_values:dict):
     '''

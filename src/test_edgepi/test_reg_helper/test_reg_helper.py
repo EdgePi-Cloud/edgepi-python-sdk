@@ -1,6 +1,6 @@
 import pytest
 from copy import deepcopy
-from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags, apply_opcodes, filter_dict, _convert_values_to_dict
+from edgepi.reg_helper.reg_helper import _apply_opcode, _add_change_flags, apply_opcodes, _convert_values_to_dict
 from edgepi.tc.tc_constants import *
 
 @pytest.mark.parametrize('reg_value, opcode, updated_reg_value', [
@@ -161,14 +161,6 @@ def test_apply_opcodes_raises(reg_values, opcodes):
 ])
 def test_apply_opcodes(reg_values, opcodes, out):
     assert apply_opcodes(reg_values, opcodes) == out
-
-@pytest.mark.parametrize('dict, keyword, out', [
-    ({'self': 0x0}, 'self', []),
-    ({'avg_mode': AvgMode.AVG_1}, 'self', [AvgMode.AVG_1]),
-    ({'self': 0x0, 'avg_mode': AvgMode.AVG_1}, 'self', [AvgMode.AVG_1]),
-])
-def test_filter_dict(dict, keyword, out):
-    assert filter_dict(dict, keyword) == out
 
 @pytest.mark.parametrize('reg_map', [
     ({TCAddresses.CR0_R.value: 0xFF}),

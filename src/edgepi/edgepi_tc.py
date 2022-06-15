@@ -8,7 +8,8 @@ import time
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import code_to_temp
-from edgepi.reg_helper.reg_helper import apply_opcodes, filter_dict
+from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.utilities.utilities import filter_dict
 
 _logger = logging.getLogger(__name__)
 
@@ -19,12 +20,14 @@ class EdgePiTC(SpiDevice):
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=2)
 
-    def set_averaging_mode(self, num_samples:AvgMode):
+    def set_average_mode(self, avg_mode:AvgMode):
         '''
         Sets number of measurements made per sampling event.   
-        Parameters: and interger from the set {1, 2, 4, 8, 16}. Default = 1. 
+        
+        Args: 
+            num_samples (AvgMode): the number of samples to perform per temperature conversion. 
         '''
-        self.set_config(average_mode=num_samples)
+        self.set_config(average_mode=avg_mode)
 
     def read_temps(self):
         ''' Use to read cold junction and linearized thermocouple temperature measurements '''
@@ -34,11 +37,9 @@ class EdgePiTC(SpiDevice):
     def single_sample(self):
         '''
         Conduct a single sampling event. Returns measured temperature in degrees Celsius.
-        Parameters: a string representing a file path to log results to (optional). Note,
-        thermocouple Conversion Mode must be set to Normally Off to enable single sampling.
 
         Returns:
-            tuple containing temperature codes for cold junction and linearized thermocouple temperature
+            a tuple containing temperature codes for cold junction and linearized thermocouple temperature
         '''
         # TODO: disable auto mode on call, or let user decide?
         reg_value = self.__read_register(TCAddresses.CR0_R.value)
@@ -57,26 +58,24 @@ class EdgePiTC(SpiDevice):
     # TODO: document how to use auto mode for users
     def auto_sample_mode(self):
         '''
-        Conduct sampling events continuously. Returns measured temperature in degrees Celsius..
+        Conduct sampling events continuously. Returns measured temperature in degrees Celsius.
         '''
         self.set_config(conversion_mode=ConvMode.AUTO)
 
     def set_type(self, tc_type:TCType):
         '''
-        Set thermocouple type. 
+        Set thermocouple type.
+
         Args: 
-            tc_type (TCType): a string from the set {B,E,J,K,N,R,S,T}.
+            tc_type (TCType): the thermocouple type.
         '''
         self.set_config(tc_type=tc_type)
-
-    def set_average_mode(self, avg_mode:AvgMode):
-        self.set_config(average_mode=avg_mode)
 
     def __read_register(self, reg_addx):
         ''' Reads the value of a single register.
 
             Args:
-                reg_addx (int|TCAddress.Enum.value): the register's address
+                reg_addx (TCAddress.Enum.value): the register's address
             
             Returns:
                 a list new_data containing two entries: new_data[0] = register address, new_data[1] = register value
@@ -91,7 +90,7 @@ class EdgePiTC(SpiDevice):
         ''' read a variable number of registers sequentially
            
             Args:
-                start_addx (int): address of the register to begin the read at.
+                start_addx (TCAddress.Enum.value): address of the register to begin the read at.
                 regs_to_read (int): number of registers to read, including starting register.
             
             Returns:
@@ -108,7 +107,7 @@ class EdgePiTC(SpiDevice):
         ''' write to a variable number of registers sequentially.
             
             Args:
-                start_addx (int): address of the register to begin the write at.
+                start_addx (TCAddress.Enum.value): address of the register to begin the write at.
                 
                 values (list): a list of values to be written to registers. CAUTION: register writes occur
                 sequentially from start register and include as many registers as there are entries in the list.
@@ -126,7 +125,7 @@ class EdgePiTC(SpiDevice):
             for writing.
             
             Returns:
-                a dictionary containing (write_register_address: read_register_value) entries for each writeable register
+                a dictionary containing (write_register_address: register_value) entries for each writeable register
         '''
         reg_map = {}
         num_regs = 16
@@ -135,7 +134,7 @@ class EdgePiTC(SpiDevice):
         # read values from __read_registers, but log values to corresponding write registers 
         reg_values = self.__read_registers(start_addx-read_regs_offset)
         for addx_offset in range(num_regs):
-            reg_map[start_addx+addx_offset] = {'value': reg_values[addx_offset+1]} # reg_values[0] is start_addx
+            reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
         _logger.debug(f'__read_registers_to_map => {reg_map}')
         return reg_map
 
