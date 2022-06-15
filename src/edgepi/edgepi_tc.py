@@ -55,7 +55,6 @@ class EdgePiTC(SpiDevice):
 
         return temp_codes
 
-    # TODO: document how to use auto mode for users
     def auto_sample_mode(self):
         '''
         Set thermocouple to conduct sampling events continuously. Note, in order to read measurements
@@ -104,6 +103,7 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
+    # TODO: this should be renamed, no longer require writing to multiple registers
     def __write_to_registers(self, start_addx, values):
         ''' write to a variable number of registers sequentially.
             
