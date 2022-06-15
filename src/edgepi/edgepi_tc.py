@@ -29,7 +29,7 @@ class EdgePiTC(SpiDevice):
         '''
         self.set_config(average_mode=avg_mode)
 
-    def read_temps(self):
+    def read_temperatures(self):
         ''' Use to read cold junction and linearized thermocouple temperature measurements '''
         temp_bytes = self.__read_registers(TCAddresses.CJTH_R.value, 5)
         return code_to_temp(temp_bytes)
@@ -49,7 +49,7 @@ class EdgePiTC(SpiDevice):
         time.sleep(0.5)
 
         # read cold junction and linearized TC temperatures
-        temp_codes = self.read_temps()
+        temp_codes = self.read_temperatures()
 
         _logger.debug(f'single sample codes: {temp_codes}')
 
@@ -58,7 +58,8 @@ class EdgePiTC(SpiDevice):
     # TODO: document how to use auto mode for users
     def auto_sample_mode(self):
         '''
-        Conduct sampling events continuously. Returns measured temperature in degrees Celsius.
+        Set thermocouple to conduct sampling events continuously. Note, in order to read measurements
+        you must call read_temperatures().
         '''
         self.set_config(conversion_mode=ConvMode.AUTO)
 
@@ -179,7 +180,7 @@ class EdgePiTC(SpiDevice):
 
         # only update registers whose values have been changed
         for reg_addx, entry in reg_values.items():
-            if entry['flag']:
+            if entry['is_changed']:
                 updated_value = entry['value']
                 self.__write_to_registers(reg_addx, updated_value)
                 _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')
