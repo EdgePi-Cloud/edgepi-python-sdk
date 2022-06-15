@@ -41,23 +41,38 @@ while True:
 ```
 ___
 ## Using Thermocouple Module
-- Configuring multiple thermocouple settings at once:
-    * `edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE, tc_type=TCType.TYPE_K, average_mode=AvgMode.AVG_1)`
-        * Note: the Enums being passed as arguments above are available in the `tc_constants` module. Please only pass these as arguments to `edgepi_tc` module methods.
-- Configuring thermocouple settings individually:
-    * `edgepi_tc.set_average_mode(AvgMode.AVG_4)`
-- Using thermocouple to make a single temperature measurement
-    * `edgepi_tc.single_sample()`
+
+This section introduces thermocouple functionality available to users, and provides a guide on how to interact with the thermocouple.
+
+1. ### Configuring Thermocouple Settings:
+    * The thermocouple has settings which can be configured. In order to allow you to configure these settings, this module provides a `set_config` method. 
+    * Example: using `set_config` to configure multiple settings at once:
+        * `edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE, tc_type=TCType.TYPE_K, average_mode=AvgMode.AVG_1)`
+    * Example: using `set_config` to configure a single setting:
+        * `edgepi_tc.set_config(average_mode=AvgMode.AVG_8)`
+     * Note: the constants being passed as arguments above are available in the `tc_constants` module. Please see the EdgePiTC Guide section below for more details.
+2. ### Measuring Temperature:
+    - Measuring temperature manually
+        * The thermocouple is set by default to function in single shot mode. When in single shot mode, temperature measurements must be triggered manually by sending a command to the thermocouple. This command can be sent via the `single_sample` method, which will return both the cold-junction sensor temperature and the linearized thermocouple temperature:
+            - `edgepi_tc.single_sample()`
+        * Note, if the thermocouple is not in single shot mode, you must set to it single shot mode before calling `single_sample`. To do this:
+            - `edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE)`
+    - Measuring temperature continuously
+        * If instead you wish to have the thermocouple perform temperature measurements automatically, you can enable auto conversion mode, like so:
+            - `edgepi_tc.set_config(conversion_mode=ConvMode.AUTO)`
+        * After enabling auto conversion mode, the thermocouple will begin automatically triggering a temperature measurement periodically. Note, while the thermocouple will automatically make and store temperature measurements, you must retrieve these by calling `read_temperatures()`:
+            - ` temps = edgepi_tc.read_temperatures()`
+3. ### Reading Thermocouple Faults
+    * The thermocouple can store information about its current operating status. If there are any faults, such as open circuits, this information will be updated and stored in the thermocouple. This module provides you with the ability to read the current fault status of the thermocouple.
+        - [ ] this has not yet been implemented and needs updating
  ____
  ## class EdgePiTC Guide
  The `EdgePiTC` class contains all methods for configuring and issuing commands to the EdgePi thermocouple. `EdgePiTC` methods which accept arguments should only receive as arguments, the Enums in the `tc_constants` module.
  
  | Method | Description |
  | --- | --- |
- | `set_config` | Use this method when you wish to configure multiple thermocouple settings at once. Note, below are outlined methods for configuring the same settings individually as well. This method is intended to accept `tc_constants` Enums as arguments. The method docstring provides more details on which specific `tc_constants` Enum is required by each parameter. |
- | `set_average_mode` | Use this method to set the number of samples taken by the thermocouple for each temperature measurement. Note, increasing the number of samples will increase temperature conversion time, while decreasing sample noise. Do not change the averaging mode while temperature conversion are taking place. Arguments are expected to be `AvgMode` Enums. |
- | `auto_sample_mode` | Use this method to set the thermocouple to perform temperature conversions continuously. Note, applying this setting will result in the thermocouple immediately and automatically triggering conversions until it is switched back to single shot mode. The time between conversions varies depending on the thermocouple's settings configuration, but generally requires one hundred to a few hundred milliseconds. To access these measurements, the `read_temperatures` method can be called. Make sure to allow enough time between readings. |
- | `read_temperatures` | Use this method to read cold-junction sensor and linearized thermocouple temperature measurements, while conversions are set to occur continuously. |
+ | `set_config` | Use this method when you wish to configure either individual thermocouple settings, or multiple thermocouple settings at once. This method is intended to accept `tc_constants` Enums as arguments. The method docstring provides more details on which specific `tc_constants` Enum is required by each parameter. |
+| `read_temperatures` | Use this method to read cold-junction sensor and linearized thermocouple temperature measurements, while conversions are set to occur continuously. |
 | `single_sample` | Use this method to trigger a single temperature conversion while conversions are set to single shot mode. Note, this method will return the measured temperatures, so there is no need to call `read_temperatures` as with auto sampling. |
  ___
 ## Using OpCodes
