@@ -1,0 +1,10 @@
+[MESSAGES CONTROL]
+
+disable=trailing-whitespace,
+        logging-fstring-interpolation,
+        line-too-long,
+        invalid-name
+
+[REPORTS]
+
+output-format=colorized
