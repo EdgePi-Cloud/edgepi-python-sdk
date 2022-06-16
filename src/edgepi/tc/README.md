@@ -37,20 +37,17 @@ from edgepi.tc.tc_constants import *
 # initialize thermocouple
 edgepi_tc = EdgePiTC()
 
-# read temperature measurements continuously every 1 second.
+# set thermocouple to measure temperature continuously
 edgepi_tc.set_config(conversion_mode=ConvMode.AUTO)
 
-stop_condition = False
-
-while True:
-  time.sleep(1)                           # wait 1 second between measurements
+# sample temperature readings 10 times, once per second
+for num_measurements in range(10):
+  time.sleep(1)                           # wait 1 second between samples
   temps = edgepi_tc.read_temperatures()   # read cold-junction and linearized thermocouple temperatures
   print(temps)
 
-  # stop continuous measurements if some condition is met
-  if stop_condition:
-      edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE)
-      break
+# stop continuous measurements once you're done sampling
+edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE)
 ```
 ___
 ## Using Thermocouple Module
