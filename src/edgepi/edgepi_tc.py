@@ -5,11 +5,11 @@ Provides a class for interacting with the EdgePi Thermocouple via SPI.
 import logging
 import time
 
-from peripherals.spi import SpiDevice
-from tc.tc_constants import *
-from tc.tc_commands import code_to_temp
-from reg_helper.reg_helper import apply_opcodes
-from utilities.utilities import filter_dict
+from edgepi.peripherals.spi import SpiDevice
+from edgepi.tc.tc_constants import *
+from edgepi.tc.tc_commands import code_to_temp
+from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.utilities.utilities import filter_dict
 
 _logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class EdgePiTC(SpiDevice):
         '''
         data = [reg_addx] + [0xFF]
         _logger.debug(f'__read_register: addx = {reg_addx} => data before xfer = {data}')
-        new_data = super().transfer(data)
+        new_data = self.transfer(data)
         _logger.debug(f'__read_register: addx = {reg_addx} => data after xfer = {new_data}')
         return new_data
 
@@ -73,19 +73,19 @@ class EdgePiTC(SpiDevice):
         '''
         data = [start_addx] + [0xFF]*regs_to_read
         _logger.debug(f'__read_registers: shifting in data => {data}')
-        new_data = super().transfer(data)
+        new_data = self.transfer(data)
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
-    def __write_to_register(self, start_addx, value):
+    def __write_to_register(self, reg_addx, value):
         ''' write a value to a register.
             
             Args:
-                start_addx (TCAddress.Enum.value): address of the register to write the value to.
+                reg_addx (TCAddress.Enum.value): address of the register to write the value to.
                 
                 value (int): a values to be written to the register.
         '''
-        data = [start_addx] + [value]
+        data = [reg_addx] + [value]
         _logger.debug(f'__write_to_registers: shifting in data => {data}')
         new_data = self.transfer(data)
         _logger.debug(f'__write_to_registers: shifted out data => {new_data}')

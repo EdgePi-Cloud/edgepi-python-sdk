@@ -3,7 +3,7 @@ OpCodes for thermocouple configuration and command operations
 '''
 
 from enum import Enum, unique
-from reg_helper.reg_helper import OpCode
+from edgepi.reg_helper.reg_helper import OpCode
 
 @unique
 class TCAddresses(Enum):
