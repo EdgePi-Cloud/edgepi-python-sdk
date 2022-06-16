@@ -45,7 +45,7 @@ def mock_read_register(reg_addx):
     new_data = mock_MAX31856_transfer(data)
     return new_data
 
-def mock_read_num_registers(start_addx, regs_to_read=16):
+def mock_read_registers(start_addx, regs_to_read=16):
     data = [start_addx] + [0xFF]*regs_to_read
     new_data = mock_MAX31856_transfer(data)
     return new_data
@@ -54,7 +54,7 @@ def mock_read_registers_to_map():
     reg_map = {}
     num_regs = 16
     start_addx = TCAddresses.CR0_R.value
-    reg_values = mock_read_num_registers(start_addx)
+    reg_values = mock_read_registers(start_addx)
     for addx_offset in range(num_regs):
         reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
     return reg_map
