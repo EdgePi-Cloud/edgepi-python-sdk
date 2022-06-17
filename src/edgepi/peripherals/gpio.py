@@ -1,7 +1,7 @@
 from periphery import GPIO
 
 class GpioDevice():
-    _dev_path = '/dev/gpiochip0'
+    _dev_path = "/dev/gpiochip0"
 
     def __init__(self, pin_num: int = None, pin_dir: str = None, pin_bias: str = None):
         self.fd = GpioDevice._dev_path

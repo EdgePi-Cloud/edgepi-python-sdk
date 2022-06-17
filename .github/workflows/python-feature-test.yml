@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests using PyTest.
 
-name: PyTest
+name: PyTest-gpio
 
 on:
   push:
