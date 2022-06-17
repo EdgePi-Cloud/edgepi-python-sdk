@@ -8,7 +8,7 @@ class GpioDevice():
         self.pin_num = pin_num
         self.pin_dir = pin_dir
         self.pin_bias = pin_bias
-        self.gpio = GPIO(path = self.fd, line=self.pin_num, direction=self.pin_dir, bias=self.pin_bias)
+        self.gpio = GPIO(self.fd, self.pin_num, self.pin_dir, bias=self.pin_bias)
 
     def close(self):
         self.gpio.close()
