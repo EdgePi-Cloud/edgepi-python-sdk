@@ -5,7 +5,7 @@ name: PyTest
 on:
   push:
     branches:
-      - 'origin/GPIO'
+      - 'GPIO'
   pull_request:
     branches:
       - 'dev'
