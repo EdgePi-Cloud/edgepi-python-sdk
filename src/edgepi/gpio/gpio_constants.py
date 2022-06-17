@@ -2,10 +2,15 @@ from enum import Enum, unique
 from edgepi.reg_helper.reg_helper import OpCode
 
 @unique
+class GpioExpanderAdreess(Enum):
+    EXP_ONE = 32
+    EXP_TWO = 33
+
+@unique
 class GPIOAddresses(Enum):
     # Read addresses
     INPUT_PORT_0  = 0x00 
-    INPUT_PORT_1  = 0x01 
+    INPUT_PORT_1  = 0x01
     OUTPUT_PORT_0 = 0x02 
     OUTPUT_PORT_1 = 0x03 
     POLARITY_INVERSION_PORT_0 = 0x04 
