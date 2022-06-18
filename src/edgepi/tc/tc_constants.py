@@ -50,6 +50,17 @@ class Masks(Enum):
     CR1_HIGH_MASK = 0x0F
     CR1_LOW_MASK = 0xF0
 
+class TCFaults(Enum):
+    ''' Fault Register bit numbers for each fault type '''
+    OPEN = 0
+    OVUV = 1
+    TCLOW = 2
+    TCHIGH = 3
+    CJLOW = 4
+    CJHIGH = 5
+    TCRANGE = 6
+    CJRANGE = 7
+
 class TempBits(Enum):
     ''' number of bits used in MAX31856 temperature registers to store values '''
     CJ_BITS = 14
