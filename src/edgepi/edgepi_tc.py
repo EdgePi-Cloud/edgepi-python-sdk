@@ -20,15 +20,6 @@ class EdgePiTC(SpiDevice):
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=2)
 
-    def set_average_mode(self, avg_mode:AvgMode):
-        '''
-        Sets number of measurements made per sampling event.   
-        
-        Args: 
-            num_samples (AvgMode): the number of samples to perform per temperature conversion. 
-        '''
-        self.set_config(average_mode=avg_mode)
-
     def read_temperatures(self):
         ''' Use to read cold junction and linearized thermocouple temperature measurements '''
         temp_bytes = self.__read_registers(TCAddresses.CJTH_R.value, 5)
@@ -39,12 +30,11 @@ class EdgePiTC(SpiDevice):
         Conduct a single sampling event. Returns measured temperature in degrees Celsius.
 
         Returns:
-            a tuple containing temperature codes for cold junction and linearized thermocouple temperature
+            a tuple containing temperatures for cold junction and linearized thermocouple temperature
         '''
-        # TODO: disable auto mode on call, or let user decide?
         reg_value = self.__read_register(TCAddresses.CR0_R.value)
         command = reg_value[1] | TCOps.SINGLE_SHOT.value.op_code
-        self.__write_to_registers(TCAddresses.CR0_W.value, command)
+        self.__write_to_register(TCAddresses.CR0_W.value, command)
         # there is a time delay between register write and update
         time.sleep(0.5)
 
@@ -55,22 +45,6 @@ class EdgePiTC(SpiDevice):
 
         return temp_codes
 
-    def auto_sample_mode(self):
-        '''
-        Set thermocouple to conduct sampling events continuously. Note, in order to read measurements
-        you must call read_temperatures().
-        '''
-        self.set_config(conversion_mode=ConvMode.AUTO)
-
-    def set_type(self, tc_type:TCType):
-        '''
-        Set thermocouple type.
-
-        Args: 
-            tc_type (TCType): the thermocouple type.
-        '''
-        self.set_config(tc_type=tc_type)
-
     def __read_register(self, reg_addx):
         ''' Reads the value of a single register.
 
@@ -78,11 +52,11 @@ class EdgePiTC(SpiDevice):
                 reg_addx (TCAddress.Enum.value): the register's address
             
             Returns:
-                a list new_data containing two entries: new_data[0] = register address, new_data[1] = register value
+                a list containing two entries: new_data[0] = register address, new_data[1] = register value
         '''
         data = [reg_addx] + [0xFF]
         _logger.debug(f'__read_register: addx = {reg_addx} => data before xfer = {data}')
-        new_data = super().transfer(data)
+        new_data = self.transfer(data)
         _logger.debug(f'__read_register: addx = {reg_addx} => data after xfer = {new_data}')
         return new_data
 
@@ -99,23 +73,19 @@ class EdgePiTC(SpiDevice):
         '''
         data = [start_addx] + [0xFF]*regs_to_read
         _logger.debug(f'__read_registers: shifting in data => {data}')
-        new_data = super().transfer(data)
+        new_data = self.transfer(data)
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
-    # TODO: this should be renamed, no longer require writing to multiple registers
-    def __write_to_registers(self, start_addx, values):
-        ''' write to a variable number of registers sequentially.
+    def __write_to_register(self, reg_addx, value):
+        ''' write a value to a register.
             
             Args:
-                start_addx (TCAddress.Enum.value): address of the register to begin the write at.
+                reg_addx (TCAddress.Enum.value): address of the register to write the value to.
                 
-                values (list): a list of values to be written to registers. CAUTION: register writes occur
-                sequentially from start register and include as many registers as there are entries in the list.
-                All registers in this range will be overwritten: it is recommended to read the register values first,
-                in case a register write includes bad values. 
+                value (int): a values to be written to the register.
         '''
-        data = [start_addx] + [values]
+        data = [reg_addx] + [value]
         _logger.debug(f'__write_to_registers: shifting in data => {data}')
         new_data = self.transfer(data)
         _logger.debug(f'__write_to_registers: shifted out data => {new_data}')
@@ -139,7 +109,6 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'__read_registers_to_map => {reg_map}')
         return reg_map
 
-    # TODO: make issue for temp setting
     def set_config(
         self,
         conversion_mode: ConvMode = None,  
@@ -182,6 +151,5 @@ class EdgePiTC(SpiDevice):
         for reg_addx, entry in reg_values.items():
             if entry['is_changed']:
                 updated_value = entry['value']
-                self.__write_to_registers(reg_addx, updated_value)
-                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')
-                
+                self.__write_to_register(reg_addx, updated_value)
+                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')      
