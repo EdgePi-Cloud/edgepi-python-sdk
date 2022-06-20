@@ -80,17 +80,118 @@ This section introduces thermocouple functionality available to users, and provi
     * The thermocouple can store information about its current operating status. If there are any faults, such as open circuits, this information will be updated and stored in the thermocouple. This module provides you with the ability to read the current fault status of the thermocouple.
         - [ ] this has not yet been implemented and needs updating
  ____
- ## class EdgePiTC Guide
+ ## EdgePiTC Methods Guide
  The `EdgePiTC` class contains all methods for configuring and issuing commands to the EdgePi thermocouple. `EdgePiTC` methods which accept arguments should only receive as arguments, the Enums in the `tc_constants` module.
  
- | Method | Description |
- | --- | --- |
- | `set_config` | Use this method when you wish to configure either individual thermocouple settings, or multiple thermocouple settings at once. This method is intended to accept `tc_constants` Enums as arguments. The method docstring provides more details on which specific `tc_constants` Enum is required by each parameter. |
-| `read_temperatures` | Use this method to read cold-junction sensor and linearized thermocouple temperature measurements, while conversions are set to occur continuously. |
-| `single_sample` | Use this method to trigger a single temperature conversion while conversions are set to single shot mode. Note, this method will return the measured temperatures, so there is no need to call `read_temperatures` as with auto sampling. |
- ___
-## Using OpCodes
-The methods outline above are designed to accept predefined Enums, which contain the OpCodes necessary to perform each transaction, as arguments. These are defined in the `tc_constants` module. Below is a guide showing the purpose of each `tc_constants` Enum and OpCode, and which Enums to use with each `EdgePiTC` method. Please avoid passing any other values as arguments to the `EdgePiTC` methods, as this can result in undefined behaviour.
+<table>
+    <tr>
+        <th>Method</th>
+        <th>Description</th>
+        <th>Input</th>
+        <th>Output</th>
+    </tr>
+    <tr>
+        <td><code>set_config</code></td>
+        <td>A general use method for configuring thermocouple settings. This method can be used to configure 
+            thermocouple settings individually, or multiple settings at once.
+        </td>
+        <td>
+            <p>This method is intended to accept <code>tc_constants</code> Enums as arguments. Please see 
+                Using OpCodes below for a comprehensive list of these Enums. In order to use a particular Enum,
+                you must first import it from <code>tc_constants</code> like so: 
+                <p><code>from edgepi.tc.tc_constants import ConvMode</code></p>
+            </p>
+            <p>Following are the arguments received by this method and the <code>tc_constants</code> Enums they must be used with</p>
+            <ul>
+                <li>
+                    <p><code>conversion_mode</code> (<code>ConvMode</code>): enable manual or automatic sampling</p>
+                </li>
+                <li>
+                    <p><code>oc_fault_mode</code> (<code>OCFaultMode</code>): set open circuit fault detection</p>
+                </li>
+                <li>
+                    <p><code>cold_junction_mode</code> (<code>CJMode</code>): enable or disable cold junction sensor</p>
+                </li>
+                <li>
+                    <p><code>fault_mode</code> (<code>FaultMode</code>): set fault reading mode</p>
+                </li>
+                <li>
+                    <p><code>noise_filter_mode</code> (<code>NoiseFilterMode</code>): set which noise frequency to reject</p>
+                </li>
+                <li>
+                    <p><code>average_mode</code> (<code>AvgMode</code>): number of samples to average per temperature measurement</p>
+                </li>
+                <li>
+                    <p><code>tc_type</code> (<code>TCType</code>): set thermocouple type</p>
+                </li>
+                <li>
+                    <p><code>voltage_mode</code> (<code>VoltageMode</code>): set input voltage range</p>
+                </li>
+                <li>
+                    <p><code>fault_mask</code> (<code>FaultMasks</code>): set which faults to prevent from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>cj_high_threshold</code> (<code>int</code>): set cold junction temperature upper threshold. If cold junction temperature rises
+                    above this limit, the FAULT output will assert</p>
+                </li>
+                <li>
+                    <p><code>cj_low_threshold</code> (<code>int</code>): set cold junction temperature lower threshold. If cold junction temperature falls
+                    below this limit, the FAULT output will assert</p>
+                </li>
+                <li>
+                    <p><code>lt_high_threshold</code> (<code>int</code>): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction 
+                    temperature rises above this limit, the FAULT output will assert</p>
+                </li>
+                <li>
+                    <p><code>lt_high_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature upper threshold decimal value.</p>
+                </li>
+                <li>
+                    <p><code>lt_low_threshold</code> (<code>int</code>): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
+                    temperature falls below this limit, the FAULT output will assert</p>
+                </li>
+                <li>
+                    <p><code>lt_low_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature lower threshold decimal value.</p>
+                </li>
+                <li>
+                    <p><code>cj_offset</code> (<code>int</code>): set cold junction temperature offset.</p>
+                </li>
+                <li>
+                    <p><code>cj_offset_decimals</code> (<code>DecBits</code>): set cold junction temperature offset decimal value.</p>
+                </li>
+            </ul>
+        </td>
+        <td>
+            None
+        </td>
+    </tr>
+    <tr>
+        <td><code>single_sample</code></td>
+        <td>When in single sampling conversion mode, Use this method to trigger a single temperature conversion.</td>
+        <td>None</td>
+        <td>A tuple containing the measured cold junction and linearized thermocouple temperature measurements, of the format 
+            <code>(cold_junction_temperature, linearized_thermocouple_temperature)</code>
+        </td>
+    </tr>
+    <tr>
+        <td><code>read_temperatures</code></td>
+        <td>When the thermocouple is set to automatic conversion mode, use this method to read cold-junction sensor and linearized thermocouple temperature measurements.</td>
+        <td>None</td>
+        <td>A tuple containing the measured cold junction and linearized thermocouple temperature measurements, of the format 
+            <code>(cold_junction_temperature, linearized_thermocouple_temperature)</code>
+        </td>
+    </tr>
+    <tr>
+        <td><code>read_faults</code></td>
+        <td>Use for reading the fault status of the thermocouple</td>
+        <td>None</td>
+        <td>a dictionary of Fault objects, each of which stores information about the fault it represents</td>
+    </tr>
+</table>
+
+---
+## OpCodes Guide
+ 
+The methods outlined above are designed to accept predefined Enums, which contain the OpCodes necessary to perform each transaction, as arguments. These are defined in the `tc_constants` module. Below is a guide showing the purpose of each `tc_constants` Enum and OpCode, and which Enums to use with each `EdgePiTC` method. Please avoid passing any other values as arguments to the `EdgePiTC` methods, as this can result in undefined behaviour.
 
 <table>
    <tr>
@@ -111,7 +212,7 @@ The methods outline above are designed to accept predefined Enums, which contain
    <tr>
       <td><code>DecBits</code></td>
       <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details).</td>
-      <td>Example: <code>DecBits.p1</code> allows you to specify a temperature threshold with a decimal value of 0.5, i.e. 21.5.</td>
+      <td>Example: <code>DecBits.P0_5</code> allows you to specify a temperature threshold with a decimal value of 0.5</td>
    </tr>
    <tr>
       <td><code>CJMode</code></td>
