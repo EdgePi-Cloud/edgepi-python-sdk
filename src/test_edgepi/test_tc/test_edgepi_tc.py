@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from edgepi.edgepi_tc import EdgePiTC
+from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import *
 
 @pytest.fixture(name='tc')

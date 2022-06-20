@@ -3,7 +3,7 @@ ____
 ## Installing EdgePi SDK Package via Pip
 - Inside a virtual environment, run either of the following to install:
 - Via GitHub HTTPS 
-    * `$ python3 -m pip install https://github.com/osensa/edgepi-python-sdk/tree/abstract-config`
+    * `$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@staging`
         - [ ] branch name needs to be updated to main once current changes are deployed
     * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide]([https://link-url-here.org](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)) for creating a personal access token, if you do not yet have one.
 - Via TestPyPi
@@ -19,9 +19,13 @@ This section will demonstrate how to import the EdgePi Thermcouple module, and u
 ### Manual Measurements
 ```
 from edgepi.edgepi_tc import EdgePiTC
+from edgepi.tc.tc_constants import ConvMode
 
 # initialize thermocouple
 edgepi_tc = EdgePiTC()
+
+# set thermocouple to single sample mode
+edgepi_tc.set_config(conversion_mode=ConvMode.SINGLE)
 
 # make a single temperature measurement
 temps = edgepi_tc.single_sample()
@@ -32,7 +36,7 @@ print(temps)
 ```
 import time
 from edgepi.edgepi_tc import EdgePiTC
-from edgepi.tc.tc_constants import *
+from edgepi.tc.tc_constants import ConvMode
 
 # initialize thermocouple
 edgepi_tc = EdgePiTC()

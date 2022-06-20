@@ -150,6 +150,7 @@ class EdgePiTC(SpiDevice):
         Args:
             all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.
         '''
+        # TODO: update docstring with individual fields for args
         args_list = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
 
