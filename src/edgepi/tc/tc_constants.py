@@ -40,16 +40,20 @@ class TCAddresses(Enum):
     CJTL_W = 0x8B
 
 class Masks(Enum):
-    CR0_BIT0_MASK = 0xFE
-    CR0_BIT1_MASK = 0xFD
-    CR0_BIT2_MASK = 0xFB
-    CR0_BIT3_MASK = 0xF7
+    ''' values for clearing or 'masking' register bits '''
+    BIT0_MASK = 0xFE
+    BIT1_MASK = 0xFD
+    BIT2_MASK = 0xFB
+    BIT3_MASK = 0xF7
+    BIT4_MASK = 0xEF
+    BIT5_MASK = 0xDF
+    BIT6_MASK = 0xBF
+    BIT7_MASK = 0x7F
     CR0_OC_MASK = 0xCF
-    CR0_BIT6_MASK = 0xBF
-    CR0_BIT7_MASK = 0x7F
     CR1_HIGH_MASK = 0x0F
     CR1_LOW_MASK = 0xF0
 
+@unique
 class TCFaults(Enum):
     ''' Fault Register bit numbers for each fault type '''
     OPEN = 0
@@ -61,6 +65,7 @@ class TCFaults(Enum):
     TCRANGE = 6
     CJRANGE = 7
 
+@unique
 class TempBits(Enum):
     ''' number of bits used in MAX31856 temperature registers to store values '''
     CJ_BITS = 14
@@ -71,8 +76,8 @@ class TempBits(Enum):
 @unique
 class TCOps(Enum):
     ''' valid opcodes for commands that can be sent to thermocouple '''
-    SINGLE_SHOT = OpCode(0x40, TCAddresses.CR0_W.value, Masks.CR0_BIT6_MASK.value)      # trigger a single temperature conversion
-    CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.CR0_BIT1_MASK.value)     # clear fault status register, only use with Interrupt Fault Mode
+    SINGLE_SHOT = OpCode(0x40, TCAddresses.CR0_W.value, Masks.BIT6_MASK.value)  # trigger a single temperature conversion
+    CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.BIT1_MASK.value) # clear fault status register, only use with Interrupt Fault Mode
 
 @unique
 class DecBits(Enum):
@@ -87,26 +92,26 @@ class DecBits(Enum):
 @unique
 class ConvMode(Enum):
     ''' valid opcodes for setting thermocouple conversion mode '''
-    SINGLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)   # set thermocouple to perform single, manually triggered conversions
-    AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.CR0_BIT7_MASK.value)     # set thermocouple to perform continuous conversions
+    SINGLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.BIT7_MASK.value)   # set thermocouple to perform single, manually triggered conversions
+    AUTO = OpCode(0x80, TCAddresses.CR0_W.value, Masks.BIT7_MASK.value)     # set thermocouple to perform continuous conversions
 
 @unique
 class CJMode(Enum):
     ''' valid opcodes for setting thermocouple cold junction mode'''
-    ENABLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)   # enable the cold-junction sensor
-    DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.CR0_BIT3_MASK.value)  # disable the cold-junction sensor
+    ENABLE = OpCode(0x00, TCAddresses.CR0_W.value, Masks.BIT3_MASK.value)   # enable the cold-junction sensor
+    DISABLE = OpCode(0x08, TCAddresses.CR0_W.value, Masks.BIT3_MASK.value)  # disable the cold-junction sensor
 
 @unique
 class FaultMode(Enum):
     ''' valid opcodes for setting thermocouple fault mode '''
-    COMPARATOR = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)   # faults deassert only once fault condition is no longer true
-    INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.CR0_BIT2_MASK.value)    # faults deassert only once TCOps.CLEAR_FAULTS command is issued
+    COMPARATOR = OpCode(0x00, TCAddresses.CR0_W.value, Masks.BIT2_MASK.value)   # faults deassert only once fault condition is no longer true
+    INTERRUPT = OpCode(0x04, TCAddresses.CR0_W.value, Masks.BIT2_MASK.value)    # faults deassert only once TCOps.CLEAR_FAULTS command is issued
 
 @unique
 class NoiseFilterMode(Enum):
     ''' valid opcodes for setting thermocouple noise rejection filter mode '''
-    Hz_60 = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)    # reject 60 Hz and its harmonics
-    Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.CR0_BIT0_MASK.value)    # reject 50 Hz and its harmonics
+    Hz_60 = OpCode(0x00, TCAddresses.CR0_W.value, Masks.BIT0_MASK.value)    # reject 60 Hz and its harmonics
+    Hz_50 = OpCode(0x01, TCAddresses.CR0_W.value, Masks.BIT0_MASK.value)    # reject 50 Hz and its harmonics
 
 @unique
 class AvgMode(Enum):
@@ -142,4 +147,22 @@ class VoltageMode(Enum):
     GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)   # full-scale input voltage range of +/- 19.531 mV
 
 class FaultMasks(Enum):
-    ''' valid opcodes for setting thermocouple fault masks '''
+    ''' valid opcodes for setting the thermocouple fault mask register 
+        Example: OPEN_MASK_ON will 'mask' the OPEN fault from asserting through
+        the FAULT pin, but the fault register will still be updated. OPEN_MASK_OFF
+        will allow the OPEN fault to assert through the FAULT pin. Note, the FAULT
+        pin is currently not connected on the EdgePi, so these settings do not currently
+        result in any changes to the thermocouple functionality.
+    '''
+    OPEN_MASK_ON = OpCode(0x01, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)
+    OPEN_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)
+    OVUV_MASK_ON = OpCode(0x02, TCAddresses.MASK_W.value, Masks.BIT1_MASK)
+    OVUV_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT1_MASK)
+    TCLOW_MASK_ON = OpCode(0x03, TCAddresses.MASK_W.value, Masks.BIT2_MASK)
+    TCLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT2_MASK)
+    TCHIGH_MASK_ON = OpCode(0x04, TCAddresses.MASK_W.value, Masks.BIT3_MASK)
+    TCHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT3_MASK)
+    CJLOW_MASK_ON = OpCode(0x05, TCAddresses.MASK_W, Masks.BIT4_MASK)
+    CJLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W, Masks.BIT4_MASK)
+    CJHIGH_MASK_ON = OpCode(0x06, TCAddresses.MASK_W, Masks.BIT5_MASK)
+    CJHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W, Masks.BIT5_MASK)
