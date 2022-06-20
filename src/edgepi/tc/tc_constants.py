@@ -81,13 +81,35 @@ class TCOps(Enum):
 
 @unique
 class DecBits(Enum):
-    ''' valid decimal values for temperature registers with precision up to 2^-4. '''
+    ''' valid decimal values for temperature registers with precision up to 2^-4. 
+        The MAX31856 uses a custom bit value scheme for setting temperature decimal values.
+        It allocates only 4 bits for this purpose, meaning only 16 decimal values are possible.
+        These are listed below. Note, these values are not intended to be combined, as there 
+        is no guarantee the sum value can be represented. Please only select the exact value 
+        you need from this list.
+
+        Examples:
+            P0_5 represents the decimal value 0.5
+            P0 represents the decimal value 0.0
+            P0_0625 represents the decimal value 0.0625
+    '''
     # TODO: add entire range of valid values (16 total)
-    p0 = 0
-    p1 = 0.5
-    p2 = 0.75
-    p3 = 0.875
-    p4 = 0.9375
+    P0 = 0b0000
+    P0_5 = 0b1000
+    P0_75 = 0b1100
+    P0_875 = 0b1110
+    P0_9375 = 0b1111
+    P0_4375 = 0b0111
+    P0_1875 = 0b0011
+    P0_0625 = 0b0001
+    P0_5625 = 0b1001
+    P0_8125 = 0b1101
+    P0_6875 = 0b1011
+    P0_25 = 0b0100
+    P0_125 = 0b0010
+    P0_625 = 0b1010
+    P0_3125 = 0b0101
+    P0_375 = 0b0110
 
 @unique
 class ConvMode(Enum):
