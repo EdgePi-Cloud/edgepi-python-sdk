@@ -3,8 +3,8 @@ ____
 ## Installing EdgePi SDK Package via Pip
 - Inside a virtual environment, run either of the following to install:
 - Via GitHub HTTPS 
-    * `$ python3 -m pip install https://github.com/osensa/edgepi-python-sdk/tree/TC`
-        - [ ] branch name needs to be updated to main once current changes are deployed
+    * `$ python3 -m pip install https://github.com/osensa/edgepi-python-sdk/tree/staging`
+        - [ ] The latest semi-stable version is available on the `staging` branch, but the intention is to eventually have a stable version on our main branch. Once we have this, `staging` here will have to replaced with `main`.
     * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide]([https://link-url-here.org](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)) for creating a personal access token, if you do not yet have one.
 - Via TestPyPi
     * `$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK`
