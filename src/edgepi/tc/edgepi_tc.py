@@ -149,8 +149,45 @@ class EdgePiTC(SpiDevice):
 
         Args:
             all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.
+
+                conversion_mode (ConvMode): enable manual or automatic sampling
+
+                oc_fault_mode (OCFaultMode): set open circuit fault detection
+
+                cold_junction_mode (CJMode): enable or disable cold junction sensor
+
+                fault_mode (FaultMode): set fault reading mode
+
+                noise_filter_mode (NoiseFilterMode): set which noise frequency to reject
+
+                average_mode (AvgMode): number of samples to average per temperature measurement
+
+                tc_type (TCType): set thermocouple type
+
+                voltage_mode (VoltageMode): set input voltage range
+
+                fault_mask (FaultMasks): set which faults to prevent from asserting through the FAULT pin
+
+                cj_high_threshold (int): set cold junction temperature upper threshold. If cold junction temperature rises
+                above this limit, the FAULT output will assert
+
+                cj_low_threshold (int): set cold junction temperature lower threshold. If cold junction temperature falls
+                below this limit, the FAULT output will assert
+
+                lt_high_threshold (int): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction 
+                temperature rises above this limit, the FAULT output will assert
+
+                lt_high_threshold_decimals (DecBits): set thermocouple hot junction temperature upper threshold decimal value.
+
+                lt_low_threshold (int): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
+                temperature falls below this limit, the FAULT output will assert
+
+                lt_low_threshold_decimals (DecBits): set thermocouple hot junction temperature lower threshold decimal value.
+
+                cj_offset (int): set cold junction temperature offset.
+
+                cj_offset_decimals (DecBits): set cold junction temperature offset decimal value.
         '''
-        # TODO: update docstring with individual fields for args
         args_list = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
 
