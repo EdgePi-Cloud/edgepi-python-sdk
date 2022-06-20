@@ -5,7 +5,7 @@ ____
 - Via GitHub HTTPS 
     * `$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@staging`
         - [ ] The latest semi-stable version is available on the `staging` branch, but the intention is to eventually have a stable version on our main branch. Once we have this, `staging` here will have to replaced with `main`.
-    * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide]([https://link-url-here.org](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)) for creating a personal access token, if you do not yet have one.
+    * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide]([https://link-url-here.org](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for creating a personal access token, if you do not yet have one.
 - Via TestPyPi
     * `$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK`
 - Via PyPi
