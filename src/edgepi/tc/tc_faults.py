@@ -1,13 +1,30 @@
 from dataclasses import dataclass
 from bitstring import Bits
-from enum import Enum
+from enum import Enum, unique
 from copy import deepcopy
-from edgepi.tc.tc_constants import TCFaults
 
+@unique
+class TCFaults(Enum):
+    ''' Fault Register bit numbers for each fault type 
+        Note: the bit numbers are written in reverse order here in order to 
+        be compatible with the bitstring module, since it considers the MSB
+        of a bitstring to be index 0. So CJRANGE actually maps to bit 7 on
+        the MAX31856.
+    '''
+    OPEN = 7
+    OVUV = 6
+    TCLOW = 5
+    TCHIGH = 4
+    CJLOW = 3
+    CJHIGH = 2
+    TCRANGE = 1
+    CJRANGE = 0
+
+@unique
 class FaultMsg(Enum):
     CJRANGE_OK_MSG = 'Cold-junction temperature is within normal operating range'
     CJRANGE_BAD_MSG = 'Cold-junction temperature is outside normal operating range'
-    TCRANGE_OK_MSG = 'Thermocouple hot-junction temperature is outside normal operating range'
+    TCRANGE_OK_MSG = 'Thermocouple hot-junction temperature is within normal operating range'
     TCRANGE_BAD_MSG = 'Thermocouple hot-junction temperature is outside normal operating range'
     CJHIGH_OK_MSG = 'Cold-junction temperature is less than or equal to cold-junction high threshold'
     CJHIGH_BAD_MSG = 'Cold-junction temperature is greater than cold-junction high threshold'
@@ -44,6 +61,7 @@ class Fault:
     at_fault : bool = False
     is_masked : bool = True
 
+@unique
 class Faults(Enum):
     CJRANGE_OK = Fault(TCFaults.CJRANGE, FaultMsg.CJRANGE_OK_MSG)
     CJRANGE_BAD = Fault(TCFaults.CJRANGE, FaultMsg.CJRANGE_BAD_MSG, True)
@@ -84,15 +102,14 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
         Returns:
             a dict containing information on the current status of each Fault Status register bit
     '''
-    # check each bit in fault status and fault masks registers to generate Faults
-
     faults_dict = {}
 
+    # check each bit in fault status and fault mask registers to generate Faults
     for i in range(8):
-        # choose Fault from _faults_map based on whether this bit is set or not
+        # choose Fault type from _faults_map based on whether this bit is set or not
         fault = deepcopy(_faults_map[i][fault_bits[i]].value)
 
-        # is the corresponding bit in mask register set
+        # is the corresponding bit for this fault type set in fault mask register
         fault.is_masked = fault_masks[i]
 
         faults_dict[fault.fault_type] = fault

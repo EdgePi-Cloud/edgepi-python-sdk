@@ -1,7 +1,6 @@
 import pytest
 from bitstring import Bits
-from edgepi.tc.tc_faults import map_fault_status, Faults, Fault, FaultMsg
-from edgepi.tc.tc_constants import TCFaults
+from edgepi.tc.tc_faults import map_fault_status, Faults, Fault, FaultMsg, TCFaults
 
 @pytest.mark.parametrize('fault_bits, mask_bits, expected', [
     (Bits('0xFF'), Bits('0xFF'),

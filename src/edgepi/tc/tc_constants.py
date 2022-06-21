@@ -54,18 +54,6 @@ class Masks(Enum):
     CR1_LOW_MASK = 0xF0
 
 @unique
-class TCFaults(Enum):
-    ''' Fault Register bit numbers for each fault type '''
-    OPEN = 0
-    OVUV = 1
-    TCLOW = 2
-    TCHIGH = 3
-    CJLOW = 4
-    CJHIGH = 5
-    TCRANGE = 6
-    CJRANGE = 7
-
-@unique
 class TempBits(Enum):
     ''' number of bits used in MAX31856 temperature registers to store values '''
     CJ_BITS = 14
@@ -175,6 +163,8 @@ class FaultMasks(Enum):
         will allow the OPEN fault to assert through the FAULT pin. Note, the FAULT
         pin is currently not connected on the EdgePi, so these settings do not currently
         result in any changes to the thermocouple functionality.
+
+        Note, the MAX31856 does not permit unmasking the TCRANGE and CJRANGE faults.
     '''
     OPEN_MASK_ON = OpCode(0x01, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)
     OPEN_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from edgepi.tc.edgepi_tc import EdgePiTC
-from edgepi.tc.tc_constants import *
+from edgepi.tc.tc_constants import TCAddresses
 
 @pytest.fixture(name='tc')
 def fixture_test_edgepi_tc(mocker):
@@ -39,3 +39,8 @@ def test_write_to_register_passes_data(mock_transfer, reg_address, value, tc):
     tc._EdgePiTC__read_register(reg_address)
     data = [reg_address] + [value]
     mock_transfer.assert_called_once_with(data)
+
+# @pytest.mark.parametrize('opcodes, out', [
+#     (ConvMode.SINGLE, ),
+# ])
+# def test_set_config():
