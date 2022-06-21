@@ -54,3 +54,20 @@ EDGEPI-PYTHON-SDK
 ├── setup.py
 └── requirements.txt
 ```
+---
+## Installing EdgePi-Python-SDK Package via Pip
+- Inside a virtual environment, run either of the following commands to install:
+- Via GitHub HTTPS 
+    * `$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@staging`
+        - The latest semi-stable version is available on the `staging` branch, but the intention is to eventually have a stable version on our `main` branch. Once we have this, `staging` here will have to replaced with `main`.
+    * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for creating a personal access token, if you do not yet have one.
+- Via TestPyPi
+    * `$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK`
+- Via PyPi
+    * ` $ python3 -m pip install EdgePi-Python-SDK`
+        - The latest stable release will be published here. Note, the SDK is not yet available on PyPi. The package name here is a placeholder and will have to be replaced.
+---
+## EdgePi-Python-SDK Modules
+This SDK contains modules intended to represent each connected peripheral device on the EdgePi. Below is a directory of the available modules.
+* [Thermocouple](https://github.com/osensa/edgepi-python-sdk/tree/staging/src/edgepi/tc)
+* [Digital to Analogue Converter](https://github.com/osensa/edgepi-python-sdk/tree/staging/src/edgepi/dac)
