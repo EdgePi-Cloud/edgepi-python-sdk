@@ -60,6 +60,19 @@ class Fault:
     at_fault : bool = False
     is_masked : bool = True
 
+    def __repr__(self) -> str:
+        msg = f'''
+            -------------------------------------------------------
+            Fault Object
+
+            Fault Type: {self.fault_type}
+            At Fault: {self.at_fault}
+            Fault Message: {self.err_msg.value}
+            Fault Masked: {self.at_fault}
+            -------------------------------------------------------
+        '''
+        return msg
+
 _fault_msg_map = {
     TCFaults.CJRANGE: (FaultMsg.CJRANGE_OK_MSG, FaultMsg.CJRANGE_BAD_MSG),
     TCFaults.TCRANGE: (FaultMsg.TCRANGE_OK_MSG, FaultMsg.TCRANGE_BAD_MSG),
@@ -101,5 +114,6 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
 
         faults_dict[tcfault_type] = fault
 
+    print('\n\n', faults_dict, '\n\n')
     return faults_dict
     
