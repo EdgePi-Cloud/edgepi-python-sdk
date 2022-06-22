@@ -47,7 +47,19 @@ class EdgePiTC(SpiDevice):
 
         return temp_codes
 
-    def read_faults(self) -> list:
+    def read_faults(self, verbose=False) -> list:
+        ''' Read information about thermocouple fault status.
+
+            Args:
+                verbose (bool): set to True for more detailed information about faults
+
+            Returns:
+                a dictionary mapping each thermocouple fault type to information about its current 
+                status. When verbose=True, this information is contained in a Fault object. This object
+                contains more detailed information about the Fault. See :obj:`edgepi.tc.tc_faults.Fault`
+                for more details. When verbose=False, this information is a boolean value indicating 
+                if the Fault is occuring or not.
+        '''
         # read in values from fault status register and fault mask register
         faults = self.__read_register(TCAddresses.SR_R.value)
         fault_bits = Bits(uint=faults[1], length=8)
@@ -57,6 +69,10 @@ class EdgePiTC(SpiDevice):
         fault_msgs = map_fault_status(fault_bits, fault_masks)
         _logger.info(f'read_faults:\n{fault_msgs}')
 
+        if not verbose:
+            for fault_type, fault_object in fault_msgs.items():
+                fault_msgs[fault_type] = fault_object.at_fault
+                
         return fault_msgs
 
     def __read_register(self, reg_addx):
