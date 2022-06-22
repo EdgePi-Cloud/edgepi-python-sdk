@@ -47,7 +47,7 @@ class EdgePiTC(SpiDevice):
 
         return temp_codes
 
-    def read_faults(self, filter_at_fault=False) -> list:
+    def read_faults(self, filter_at_fault=True) -> list:
         ''' Read information about thermocouple fault status.
 
             Args:
@@ -67,7 +67,7 @@ class EdgePiTC(SpiDevice):
         _logger.info(f'read_faults:\n{fault_msgs}')
 
         # filter out normal status Fault objects
-        if not filter_at_fault:
+        if filter_at_fault:
             fault_msgs = { fault_type:fault for (fault_type,fault) in fault_msgs.items() if fault.at_fault == True }
                 
         return fault_msgs
