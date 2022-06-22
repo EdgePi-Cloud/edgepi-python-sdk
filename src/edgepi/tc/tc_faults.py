@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from bitstring import Bits
 from enum import Enum, unique
-from copy import deepcopy
 
 @unique
 class TCFaults(Enum):
@@ -80,17 +79,6 @@ class Faults(Enum):
     OPEN_OK = Fault(TCFaults.OPEN, FaultMsg.OPEN_OK_MSG)
     OPEN_BAD = Fault(TCFaults.OPEN, FaultMsg.OPEN_BAD_MSG, True)
 
-_faults_map = {
-    TCFaults.CJRANGE.value: (Faults.CJRANGE_OK, Faults.CJRANGE_BAD),
-    TCFaults.TCRANGE.value: (Faults.TCRANGE_OK, Faults.TCRANGE_BAD),
-    TCFaults.CJHIGH.value: (Faults.CJHIGH_OK, Faults.CJHIGH_BAD),
-    TCFaults.CJLOW.value: (Faults.CJLOW_OK, Faults.CJLOW_BAD),
-    TCFaults.TCHIGH.value: (Faults.TCHIGH_OK, Faults.TCHIGH_BAD),
-    TCFaults.TCLOW.value: (Faults.TCLOW_OK, Faults.TCLOW_BAD),
-    TCFaults.OVUV.value: (Faults.OVUV_OK, Faults.OVUV_BAD),
-    TCFaults.OPEN.value: (Faults.OPEN_OK, Faults.OPEN_BAD)
-    }
-
 def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
     ''' Generates a dictionary of Fault objects
 
@@ -102,15 +90,26 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
         Returns:
             a dict containing information on the current status of each Fault Status register bit
     '''
+    _faults_map = {
+    TCFaults.CJRANGE.value: (Faults.CJRANGE_OK, Faults.CJRANGE_BAD),
+    TCFaults.TCRANGE.value: (Faults.TCRANGE_OK, Faults.TCRANGE_BAD),
+    TCFaults.CJHIGH.value: (Faults.CJHIGH_OK, Faults.CJHIGH_BAD),
+    TCFaults.CJLOW.value: (Faults.CJLOW_OK, Faults.CJLOW_BAD),
+    TCFaults.TCHIGH.value: (Faults.TCHIGH_OK, Faults.TCHIGH_BAD),
+    TCFaults.TCLOW.value: (Faults.TCLOW_OK, Faults.TCLOW_BAD),
+    TCFaults.OVUV.value: (Faults.OVUV_OK, Faults.OVUV_BAD),
+    TCFaults.OPEN.value: (Faults.OPEN_OK, Faults.OPEN_BAD)
+    }
+
     faults_dict = {}
 
     # check each bit in fault status and fault mask registers to generate Faults
-    for i in range(8):
+    for tcfault in TCFaults:
         # choose Fault type from _faults_map based on whether this bit is set or not
-        fault = deepcopy(_faults_map[i][fault_bits[i]].value)
+        fault = _faults_map[tcfault.value][fault_bits[tcfault.value]].value
 
         # is the corresponding bit for this fault type set in fault mask register
-        fault.is_masked = fault_masks[i]
+        fault.is_masked = fault_masks[tcfault.value]
 
         faults_dict[fault.fault_type] = fault
 
