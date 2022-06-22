@@ -61,16 +61,12 @@ class Fault:
     is_masked : bool = True
 
     def __repr__(self) -> str:
-        msg = f'''
-            -------------------------------------------------------
-            Fault Object
-
-            Fault Type: {self.fault_type}
-            At Fault: {self.at_fault}
-            Fault Message: {self.err_msg.value}
-            Fault Masked: {self.at_fault}
-            -------------------------------------------------------
-        '''
+        msg = '\n\t{' + f'''
+            Fault Type: {self.fault_type},
+            At Fault: {self.at_fault},
+            Fault Message: {self.err_msg.value},
+            Fault Masked: {self.at_fault},
+        ''' + '}\n'
         return msg
 
 _fault_msg_map = {
@@ -114,6 +110,5 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
 
         faults_dict[tcfault_type] = fault
 
-    print('\n\n', faults_dict, '\n\n')
     return faults_dict
     
