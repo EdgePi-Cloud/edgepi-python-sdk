@@ -3,7 +3,7 @@ from bitstring import Bits
 from enum import Enum, unique
 
 @unique
-class TCFaults(Enum):
+class FaultType(Enum):
     ''' Fault Register bit numbers for each fault type 
         Note: the bit numbers are written in reverse order here in order to 
         be compatible with the bitstring module, since it considers the MSB
@@ -45,7 +45,7 @@ class Fault:
         Attributes:
             name (str): the fault's official MAX31856 name
 
-            fault_type (TCFaults): the fault's TCFaults type
+            fault_type (FaultType): the fault's FaultType type
 
             err_msg (FaultMsg): a message containing the current fault output
 
@@ -55,7 +55,7 @@ class Fault:
                               Note this means the FAULT pin will not assert even if this
                               fault is occurring. Faults are masked by default.
     '''
-    fault_type : TCFaults = None
+    fault_type : FaultType = None
     err_msg : FaultMsg = None
     at_fault : bool = False
     is_masked : bool = True
@@ -70,14 +70,14 @@ class Fault:
         return msg
 
 _fault_msg_map = {
-    TCFaults.CJRANGE: (FaultMsg.CJRANGE_OK_MSG, FaultMsg.CJRANGE_BAD_MSG),
-    TCFaults.TCRANGE: (FaultMsg.TCRANGE_OK_MSG, FaultMsg.TCRANGE_BAD_MSG),
-    TCFaults.CJHIGH: (FaultMsg.CJHIGH_OK_MSG, FaultMsg.CJHIGH_BAD_MSG),
-    TCFaults.CJLOW: (FaultMsg.CJLOW_OK_MSG, FaultMsg.CJLOW_BAD_MSG),
-    TCFaults.TCHIGH: (FaultMsg.TCHIGH_OK_MSG, FaultMsg.TCHIGH_BAD_MSG),
-    TCFaults.TCLOW: (FaultMsg.TCLOW_OK_MSG, FaultMsg.TCLOW_BAD_MSG),
-    TCFaults.OVUV: (FaultMsg.OVUV_OK_MSG, FaultMsg.OVUV_BAD_MSG),
-    TCFaults.OPEN: (FaultMsg.OPEN_OK_MSG, FaultMsg.OPEN_BAD_MSG)
+    FaultType.CJRANGE: (FaultMsg.CJRANGE_OK_MSG, FaultMsg.CJRANGE_BAD_MSG),
+    FaultType.TCRANGE: (FaultMsg.TCRANGE_OK_MSG, FaultMsg.TCRANGE_BAD_MSG),
+    FaultType.CJHIGH: (FaultMsg.CJHIGH_OK_MSG, FaultMsg.CJHIGH_BAD_MSG),
+    FaultType.CJLOW: (FaultMsg.CJLOW_OK_MSG, FaultMsg.CJLOW_BAD_MSG),
+    FaultType.TCHIGH: (FaultMsg.TCHIGH_OK_MSG, FaultMsg.TCHIGH_BAD_MSG),
+    FaultType.TCLOW: (FaultMsg.TCLOW_OK_MSG, FaultMsg.TCLOW_BAD_MSG),
+    FaultType.OVUV: (FaultMsg.OVUV_OK_MSG, FaultMsg.OVUV_BAD_MSG),
+    FaultType.OPEN: (FaultMsg.OPEN_OK_MSG, FaultMsg.OPEN_BAD_MSG)
     }
 
 def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
@@ -94,7 +94,7 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
     faults_dict = {}
 
     # check each bit in fault status and fault mask registers to generate Faults
-    for tcfault_type in TCFaults:
+    for tcfault_type in FaultType:
         fault = Fault(fault_type=tcfault_type)
 
         # get value of ith bit in fault_bits register, either 0 or 1
