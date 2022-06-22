@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from bitstring import Bits
 from enum import Enum, unique
-from copy import deepcopy
 
 @unique
 class TCFaults(Enum):
@@ -56,39 +55,20 @@ class Fault:
                               Note this means the FAULT pin will not assert even if this
                               fault is occurring. Faults are masked by default.
     '''
-    fault_type : TCFaults
-    err_msg : FaultMsg
+    fault_type : TCFaults = None
+    err_msg : FaultMsg = None
     at_fault : bool = False
     is_masked : bool = True
 
-@unique
-class Faults(Enum):
-    CJRANGE_OK = Fault(TCFaults.CJRANGE, FaultMsg.CJRANGE_OK_MSG)
-    CJRANGE_BAD = Fault(TCFaults.CJRANGE, FaultMsg.CJRANGE_BAD_MSG, True)
-    TCRANGE_OK = Fault(TCFaults.TCRANGE, FaultMsg.TCRANGE_OK_MSG)
-    TCRANGE_BAD = Fault(TCFaults.TCRANGE, FaultMsg.TCRANGE_BAD_MSG, True)
-    CJHIGH_OK = Fault(TCFaults.CJHIGH, FaultMsg.CJHIGH_OK_MSG)
-    CJHIGH_BAD = Fault(TCFaults.CJHIGH, FaultMsg.CJHIGH_BAD_MSG, True)
-    CJLOW_OK = Fault(TCFaults.CJLOW, FaultMsg.CJLOW_OK_MSG)
-    CJLOW_BAD = Fault(TCFaults.CJLOW, FaultMsg.CJLOW_BAD_MSG, True)
-    TCHIGH_OK = Fault(TCFaults.TCHIGH, FaultMsg.TCHIGH_OK_MSG)
-    TCHIGH_BAD = Fault(TCFaults.TCHIGH, FaultMsg.TCHIGH_BAD_MSG, True)
-    TCLOW_OK = Fault(TCFaults.TCLOW, FaultMsg.TCLOW_OK_MSG)
-    TCLOW_BAD = Fault(TCFaults.TCLOW, FaultMsg.TCLOW_BAD_MSG, True)
-    OVUV_OK = Fault(TCFaults.OVUV, FaultMsg.OVUV_OK_MSG)
-    OVUV_BAD = Fault(TCFaults.OVUV, FaultMsg.OVUV_BAD_MSG, True)
-    OPEN_OK = Fault(TCFaults.OPEN, FaultMsg.OPEN_OK_MSG)
-    OPEN_BAD = Fault(TCFaults.OPEN, FaultMsg.OPEN_BAD_MSG, True)
-
-_faults_map = {
-    TCFaults.CJRANGE.value: (Faults.CJRANGE_OK, Faults.CJRANGE_BAD),
-    TCFaults.TCRANGE.value: (Faults.TCRANGE_OK, Faults.TCRANGE_BAD),
-    TCFaults.CJHIGH.value: (Faults.CJHIGH_OK, Faults.CJHIGH_BAD),
-    TCFaults.CJLOW.value: (Faults.CJLOW_OK, Faults.CJLOW_BAD),
-    TCFaults.TCHIGH.value: (Faults.TCHIGH_OK, Faults.TCHIGH_BAD),
-    TCFaults.TCLOW.value: (Faults.TCLOW_OK, Faults.TCLOW_BAD),
-    TCFaults.OVUV.value: (Faults.OVUV_OK, Faults.OVUV_BAD),
-    TCFaults.OPEN.value: (Faults.OPEN_OK, Faults.OPEN_BAD)
+_fault_msg_map = {
+    TCFaults.CJRANGE: (FaultMsg.CJRANGE_OK_MSG, FaultMsg.CJRANGE_BAD_MSG),
+    TCFaults.TCRANGE: (FaultMsg.TCRANGE_OK_MSG, FaultMsg.TCRANGE_BAD_MSG),
+    TCFaults.CJHIGH: (FaultMsg.CJHIGH_OK_MSG, FaultMsg.CJHIGH_BAD_MSG),
+    TCFaults.CJLOW: (FaultMsg.CJLOW_OK_MSG, FaultMsg.CJLOW_BAD_MSG),
+    TCFaults.TCHIGH: (FaultMsg.TCHIGH_OK_MSG, FaultMsg.TCHIGH_BAD_MSG),
+    TCFaults.TCLOW: (FaultMsg.TCLOW_OK_MSG, FaultMsg.TCLOW_BAD_MSG),
+    TCFaults.OVUV: (FaultMsg.OVUV_OK_MSG, FaultMsg.OVUV_BAD_MSG),
+    TCFaults.OPEN: (FaultMsg.OPEN_OK_MSG, FaultMsg.OPEN_BAD_MSG)
     }
 
 def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
@@ -105,14 +85,21 @@ def map_fault_status(fault_bits:Bits, fault_masks:Bits) -> dict:
     faults_dict = {}
 
     # check each bit in fault status and fault mask registers to generate Faults
-    for i in range(8):
-        # choose Fault type from _faults_map based on whether this bit is set or not
-        fault = deepcopy(_faults_map[i][fault_bits[i]].value)
+    for tcfault_type in TCFaults:
+        fault = Fault(fault_type=tcfault_type)
 
-        # is the corresponding bit for this fault type set in fault mask register
-        fault.is_masked = fault_masks[i]
+        # get value of ith bit in fault_bits register, either 0 or 1
+        fault_bit_value = fault_bits[tcfault_type.value]
 
-        faults_dict[fault.fault_type] = fault
+        # get message depending on whether ith bit of fault_bits is set or not
+        fault.err_msg = _fault_msg_map[tcfault_type][fault_bit_value]
+
+        fault.at_fault = fault_bit_value
+
+        # check ith bit in fault_masks register to see if this fault type is being masked.
+        fault.is_masked = fault_masks[tcfault_type.value]
+
+        faults_dict[tcfault_type] = fault
 
     return faults_dict
     
