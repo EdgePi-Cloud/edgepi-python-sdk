@@ -65,7 +65,7 @@ class Fault:
             Fault Type: {self.fault_type},
             At Fault: {self.at_fault},
             Fault Message: {self.err_msg.value},
-            Fault Masked: {self.at_fault},
+            Fault Masked: {self.is_masked},
         ''' + '}\n'
         return msg
 
