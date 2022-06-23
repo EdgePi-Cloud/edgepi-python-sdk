@@ -125,3 +125,4 @@ class GpioBPinDir(Enum):
     PIN7_DIR_IN = OpCode(0x40, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT6.value)
     PIN8_DIR_IN = OpCode(0x80, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT7.value)
     ALL_DIR_IN = OpCode(0xFF, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BYTE.value)
+
