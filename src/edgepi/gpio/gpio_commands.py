@@ -37,7 +37,7 @@ class GPIOCommands(I2CDevice):
                      'DOUT8' :    ['i2c', 'out', 'pull_down', 33, 'PORTA'],
                      'RTD_EN' :   ['i2c', 'out', 'pull_down', 33, 'PORTB'],
                      'GND_SW1' :  ['i2c', 'out', 'pull_down', 33, 'PORTB'],
-                     'GND_SW2' :  ['i2c', 'out', 'pull_down', 33, 'PORTB'],
+                     'GND_SW2' :  ['i2c', 'out', 'pull_down', 33, 'PORTB']
                     }
     def __init__(self, pinList: list = None):
         self.gpioPinDict = {}
@@ -52,6 +52,8 @@ class GPIOCommands(I2CDevice):
         self.i2cDev = super().__init__(fd='/dev/i2c-10') if self.i2cPinList else None
         self.setDefaults()
             
-    def _read_regs(self):
+    def _read_regs_map(self):
+        reg_map = {}
+        if 'PORTA' in self.i2cPinList
             
     def setDefaults(self):
