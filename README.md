@@ -54,4 +54,3 @@ EDGEPI-PYTHON-SDK
 ├── setup.py
 └── requirements.txt
 ```
-username teset
