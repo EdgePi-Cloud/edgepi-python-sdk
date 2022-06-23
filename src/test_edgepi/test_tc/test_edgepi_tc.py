@@ -3,7 +3,7 @@ from unittest.mock import patch
 from bitstring import Bits
 from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import TCAddresses
-from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault, map_fault_status
+from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
 @pytest.fixture(name='tc')
 def fixture_test_edgepi_tc(mocker):
