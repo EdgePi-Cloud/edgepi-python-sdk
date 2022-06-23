@@ -95,7 +95,7 @@ This section introduces thermocouple functionality available to users, and provi
                     <p><code>conversion_mode</code> (<code>ConvMode</code>): enable manual or automatic sampling</p>
                 </li>
                 <li>
-                    <p><code>oc_fault_mode</code> (<code>OCFaultMode</code>): set open circuit fault detection</p>
+                    <p><code>oc_fault_mode</code> (<code>OpenCircuitMode</code>): set open circuit fault detection mode</p>
                 </li>
                 <li>
                     <p><code>cold_junction_mode</code> (<code>CJMode</code>): enable or disable cold junction sensor</p>
@@ -116,7 +116,22 @@ This section introduces thermocouple functionality available to users, and provi
                     <p><code>voltage_mode</code> (<code>VoltageMode</code>): set input voltage range</p>
                 </li>
                 <li>
-                    <p><code>fault_mask</code> (<code>FaultMasks</code>): set which faults to prevent from asserting through the FAULT pin</p>
+                    <p><code>cj_high_mask</code> (<code>CJHighMask</code>): choose whether to mask CJHIGH fault from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>cj_low_mask</code> (<code>CJLowMask</code>): choose whether to mask CJLOW fault from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>tc_high_mask</code> (<code>TCLHighMask</code>): choose whether to mask TCHIGH fault from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>tc_low_mask</code> (<code>TCLowMask</code>): choose whether to mask TCLOW fault from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>ovuv_mask</code> (<code>OvuvMask</code>): choose whether to mask OVUV fault from asserting through the FAULT pin</p>
+                </li>
+                <li>
+                    <p><code>open_mask</code> (<code>OpenMask</code>): choose whether to mask OPEN fault from asserting through the FAULT pin</p>
                 </li>
                 <li>
                     <p><code>cj_high_threshold</code> (<code>int</code>): set cold junction temperature upper threshold. If cold junction temperature rises
@@ -263,11 +278,83 @@ The methods outlined above are designed to accept predefined Enums, which contai
    </tr>
    <tr>
       <td><code>VoltageMode</code></td>
-      <td>Settings for thermocouple voltage mode. Use to set thermocouple type if your thermocouple type is not listed under <code>TCType</code> thermocouples.</td>
+      <td>Settings for thermocouple voltage mode (for use if your thermocouple type is not list under `TCType`)</td>
       <td>
          <ul>
-            <li><code>VoltageMode.GAIN_8</code>: full-scale input voltage range of +/- 78.125 mV</li>
-            <li><code>VoltageMode.GAIN_32</code>:  full-scale input voltage range of +/- 19.531 mV</li>
+            <li><code>VoltageMode.GAIN_8</code>: set a full-scale input voltage range of +/- 78.125 mV</li>
+           <li><code>VoltageMode.GAIN_32</code>: set a full-scale input voltage range of +/- 19.531 mV</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>OpenMask</code></td>
+      <td>Settings for masking OPEN fault</td>
+      <td>
+         <ul>
+           <li><code>OpenMask.OPEN_MASK_ON</code>: mask the OPEN fault from asserting</li>
+           <li><code>OpenMask.OPEN_MASK_OFF</code>: do not mask the OPEN fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>OvuvMask</code></td>
+      <td>Settings for masking OVUV fault</td>
+      <td>
+         <ul>
+           <li><code>OvuvMask.OVUV_MASK_ON</code>: mask the OVUV fault from asserting</li>
+           <li><code>OvuvMask.OVUV_MASK_OFF</code>: do not mask the OVUV fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>TCLowMask</code></td>
+      <td>Settings for masking TCLOW fault</td>
+      <td>
+         <ul>
+           <li><code>TCLowMask.TCLOW_MASK_ON</code>: mask the TCLOW fault from asserting</li>
+           <li><code>TCLowMask.TCLOW_MASK_OFF</code>: do not mask the TCLOW fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>TCHighMask</code></td>
+      <td>Settings for masking TCHIGH fault</td>
+      <td>
+         <ul>
+           <li><code>TCHighMask.TCHIGH_MASK_ON</code>: mask the TCHIGH fault from asserting</li>
+           <li><code>TCHighMask.TCHIGH_MASK_OFF</code>: do not mask the TCHIGH fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>CJLowMask</code></td>
+      <td>Settings for masking CJLOW fault</td>
+      <td>
+         <ul>
+           <li><code>CJLowMask.CJLOW_MASK_ON</code>: mask the CJLOW fault from asserting</li>
+           <li><code>CJLowMask.CJLOW_MASK_OFF</code>: do not mask the CJLOW fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>CJHighMask</code></td>
+      <td>Settings for masking CJHIGH fault</td>
+      <td>
+         <ul>
+           <li><code>CJHighMask.CJHIGH_MASK_ON</code>: mask the CJHIGH fault from asserting</li>
+           <li><code>CJHighMask.CJHIGH_MASK_OFF</code>: do not mask the CJHIGH fault from asserting</li>
+         </ul>
+      </td>
+   </tr>
+   <tr>
+      <td><code>OpenCircuitMode</code></td>
+      <td>Settings for thermocouple open-circuit fault detection mode</td>
+      <td>
+         <ul>
+           <li><code>OpenCircuitMode.DISABLED</code>: disable open circuit testing</li>
+           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 10 ms</li>
+           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 32 ms</li>
+           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 100 ms</li>
          </ul>
       </td>
    </tr>
