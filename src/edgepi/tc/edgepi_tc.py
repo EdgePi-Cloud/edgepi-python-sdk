@@ -139,7 +139,7 @@ class EdgePiTC(SpiDevice):
     def set_config(
         self,
         conversion_mode: ConvMode = None,  
-        oc_fault_mode: FaultMode = None,
+        oc_fault_mode: OpenCircuitMode = None,
         cold_junction_mode: CJMode = None, 
         fault_mode: FaultMode = None,
         noise_filter_mode: NoiseFilterMode = None,
@@ -170,7 +170,7 @@ class EdgePiTC(SpiDevice):
 
                 conversion_mode (ConvMode): enable manual or automatic sampling
 
-                oc_fault_mode (OCFaultMode): set open circuit fault detection mode
+                oc_fault_mode (OpenCircuitMode): set open circuit fault detection mode
 
                 cold_junction_mode (CJMode): enable or disable cold junction sensor
 
