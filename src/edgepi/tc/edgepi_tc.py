@@ -170,7 +170,7 @@ class EdgePiTC(SpiDevice):
 
                 conversion_mode (ConvMode): enable manual or automatic sampling
 
-                oc_fault_mode (OCFaultMode): set open circuit fault detection
+                oc_fault_mode (OCFaultMode): set open circuit fault detection mode
 
                 cold_junction_mode (CJMode): enable or disable cold junction sensor
 

@@ -200,3 +200,11 @@ class CJHighMask(Enum):
     ''' valid opcodes for setting the thermocouple CJHIGH fault mask '''
     CJHIGH_MASK_ON = OpCode(0x06, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
     CJHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
+
+@unique
+class OpenCircuitMode(Enum):
+    ''' valid opcodes for setting thermocouple open circuit fault detection mode '''
+    DISABLED = OpCode(0x00, TCAddresses.CR0_W.value, Masks.CR0_OC_MASK.value)
+    LOW_INPUT_IMPEDANCE = OpCode(0x10, TCAddresses.CR0_W.value, Masks.CR0_OC_MASK.value)
+    MED_INPUT_IMPEDANCE = OpCode(0x20, TCAddresses.CR0_W.value, Masks.CR0_OC_MASK.value)
+    HIGH_INPUT_IMPEDANCE = OpCode(0x30, TCAddresses.CR0_W.value, Masks.CR0_OC_MASK.value)
