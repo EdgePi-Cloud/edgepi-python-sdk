@@ -6,7 +6,6 @@ class SpiDevice():
 
     def __init__ (self, bus_num:int = None, dev_ID:int = None, mode:int = 1, max_speed:int = 1000000, bit_order:str='msb', bits_per_word:int = 8, extra_flags:int = 0):
         self.spi = SPI(f'/dev/spidev{bus_num}.{dev_ID}',  mode, max_speed, bit_order, bits_per_word, extra_flags)
-        print(self.spi.devpath)
     
     def transfer(self, data:list) -> list:
         out = self.spi.transfer(data)

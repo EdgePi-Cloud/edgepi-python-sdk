@@ -5,9 +5,11 @@ Provides a class for interacting with the EdgePi Thermocouple via SPI.
 import logging
 import time
 
+from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
 from edgepi.tc.tc_commands import code_to_temp
+from edgepi.tc.tc_faults import map_fault_status
 from edgepi.reg_helper.reg_helper import apply_opcodes
 from edgepi.utilities.utilities import filter_dict
 
@@ -44,6 +46,31 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'single sample codes: {temp_codes}')
 
         return temp_codes
+
+    def read_faults(self, filter_at_fault=True) -> list:
+        ''' Read information about thermocouple fault status.
+
+            Args:
+                filter_at_fault (bool): set to True to return only Faults that are currently asserting
+
+            Returns:
+                a dictionary mapping each thermocouple fault type to a Fault object holding 
+                information about its current status. See :obj:`tc.tc_faults.Fault` for details about the Fault class.
+        '''
+        # read in values from fault status register and fault mask register
+        faults = self.__read_register(TCAddresses.SR_R.value)
+        fault_bits = Bits(uint=faults[1], length=8)
+        masks = self.__read_register(TCAddresses.MASK_R.value)
+        fault_masks = Bits(uint=masks[1], length=8)
+
+        fault_msgs = map_fault_status(fault_bits, fault_masks)
+        _logger.info(f'read_faults:\n{fault_msgs}')
+
+        # filter out normal status Fault objects
+        if filter_at_fault:
+            fault_msgs = { fault_type:fault for (fault_type,fault) in fault_msgs.items() if fault.at_fault == True }
+
+        return fault_msgs
 
     def __read_register(self, reg_addx):
         ''' Reads the value of a single register.
@@ -135,6 +162,44 @@ class EdgePiTC(SpiDevice):
 
         Args:
             all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.
+
+                conversion_mode (ConvMode): enable manual or automatic sampling
+
+                oc_fault_mode (OCFaultMode): set open circuit fault detection
+
+                cold_junction_mode (CJMode): enable or disable cold junction sensor
+
+                fault_mode (FaultMode): set fault reading mode
+
+                noise_filter_mode (NoiseFilterMode): set which noise frequency to reject
+
+                average_mode (AvgMode): number of samples to average per temperature measurement
+
+                tc_type (TCType): set thermocouple type
+
+                voltage_mode (VoltageMode): set input voltage range
+
+                fault_mask (FaultMasks): set which faults to prevent from asserting through the FAULT pin
+
+                cj_high_threshold (int): set cold junction temperature upper threshold. If cold junction temperature rises
+                above this limit, the FAULT output will assert
+
+                cj_low_threshold (int): set cold junction temperature lower threshold. If cold junction temperature falls
+                below this limit, the FAULT output will assert
+
+                lt_high_threshold (int): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction 
+                temperature rises above this limit, the FAULT output will assert
+
+                lt_high_threshold_decimals (DecBits): set thermocouple hot junction temperature upper threshold decimal value.
+
+                lt_low_threshold (int): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
+                temperature falls below this limit, the FAULT output will assert
+
+                lt_low_threshold_decimals (DecBits): set thermocouple hot junction temperature lower threshold decimal value.
+
+                cj_offset (int): set cold junction temperature offset.
+
+                cj_offset_decimals (DecBits): set cold junction temperature offset decimal value.
         '''
         args_list = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_list}\n\n')
