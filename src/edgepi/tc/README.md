@@ -1,17 +1,5 @@
 # EdgePi Thermocouple Module User Guide
 ____
-## Installing EdgePi SDK Package via Pip
-- Inside a virtual environment, run either of the following to install:
-- Via GitHub HTTPS 
-    * `$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@staging`
-        - [ ] branch name needs to be updated to main once current changes are deployed
-    * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide]([https://link-url-here.org](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)) for creating a personal access token, if you do not yet have one.
-- Via TestPyPi
-    * `$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK`
-- Via PyPi
-    * ` $ python3 -m pip install EdgePi-Python-SDK`
-        - [ ] Note, the SDK is not yet available on PyPi. The package name here is a placeholder and will have to be replaced.
-____
 ## Quick Use Example
 
 This section will demonstrate how to import the EdgePi Thermcouple module, and use it to make cold-junction and linearized thermocouple temperature measurement. The first example shows how to do this manually, and the second shows how use the thermocouple's continuous conversion functionality to make measurements automatically.
