@@ -69,7 +69,7 @@ class EdgePiTC(SpiDevice):
         # filter out normal status Fault objects
         if filter_at_fault:
             fault_msgs = { fault_type:fault for (fault_type,fault) in fault_msgs.items() if fault.at_fault == True }
-                
+
         return fault_msgs
 
     def __read_register(self, reg_addx):
