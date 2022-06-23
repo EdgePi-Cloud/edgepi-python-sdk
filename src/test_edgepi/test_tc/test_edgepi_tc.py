@@ -1,7 +1,9 @@
 import pytest
 from unittest.mock import patch
-from edgepi.edgepi_tc import EdgePiTC
-from edgepi.tc.tc_constants import *
+from bitstring import Bits
+from edgepi.tc.edgepi_tc import EdgePiTC
+from edgepi.tc.tc_constants import TCAddresses
+from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
 @pytest.fixture(name='tc')
 def fixture_test_edgepi_tc(mocker):
@@ -39,3 +41,36 @@ def test_write_to_register_passes_data(mock_transfer, reg_address, value, tc):
     tc._EdgePiTC__read_register(reg_address)
     data = [reg_address] + [value]
     mock_transfer.assert_called_once_with(data)
+
+@pytest.mark.parametrize('filter_at_fault, pre_filter_map, expected', [
+    (True,
+        {FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)},
+        {}
+    ),  # no faults, return only asserting faults
+    (False,
+        {FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)},
+        {FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)}
+    ),  # no faults, return all faults
+    (True,
+        {
+            FaultType.OVUV:Fault(FaultType.OVUV, FaultMsg.OVUV_OK_MSG, True, True),
+            FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)
+        },
+        {FaultType.OVUV:Fault(FaultType.OVUV, FaultMsg.OVUV_OK_MSG, True, True)}
+    ),  # all faults, return only asserting faults
+    (False,
+        {
+            FaultType.OVUV:Fault(FaultType.OVUV, FaultMsg.OVUV_OK_MSG, True, True),
+            FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)
+        },
+        {
+            FaultType.OVUV:Fault(FaultType.OVUV, FaultMsg.OVUV_OK_MSG, True, True),
+            FaultType.OPEN:Fault(FaultType.OPEN, FaultMsg.OPEN_OK_MSG, False, True)
+        }
+    ),  # all faults, return all faults
+])
+def test_read_faults_filters(mocker, filter_at_fault, pre_filter_map, expected, tc):
+    mocker.patch('edgepi.tc.edgepi_tc.Bits')
+    with patch('edgepi.tc.edgepi_tc.map_fault_status', return_value=pre_filter_map):
+        result = tc.read_faults(filter_at_fault=filter_at_fault)
+        assert  result == expected

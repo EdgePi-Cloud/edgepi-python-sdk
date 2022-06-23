@@ -1,6 +1,6 @@
 import logging
 import bitstring
-from edgepi.tc.tc_constants import *
+from edgepi.tc.tc_constants import TempBits
 
 _logger = logging.getLogger(__name__)
   

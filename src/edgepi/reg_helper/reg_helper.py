@@ -50,7 +50,7 @@ class OpCode:
         register_value of (0b0110 1101), our opcode should be (0b0110 0000). Applying this opcode
         to our now 'masked' register_value, with an OR operation, gives us our final register value:
 
-            (0b0000 1101) | (0b0110 1101) = (0b0110 1101)
+            (0b0000 1101) | (0b0110 0000) = (0b0110 1101)
     '''
     op_code: int
     reg_address: int
