@@ -70,7 +70,6 @@ def test_write_to_register_passes_data(mock_transfer, reg_address, value, tc):
     ),  # all faults, return all faults
 ])
 def test_read_faults_filters(mocker, filter_at_fault, pre_filter_map, expected, tc):
-    mocker.patch('edgepi.peripherals.spi.SpiDevice.transfer')
     mocker.patch('edgepi.tc.edgepi_tc.Bits')
     with patch('edgepi.tc.edgepi_tc.map_fault_status', return_value=pre_filter_map):
         result = tc.read_faults(filter_at_fault=filter_at_fault)
