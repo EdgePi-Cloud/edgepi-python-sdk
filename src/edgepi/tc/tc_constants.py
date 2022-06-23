@@ -81,7 +81,6 @@ class DecBits(Enum):
             P0 represents the decimal value 0.0
             P0_0625 represents the decimal value 0.0625
     '''
-    # TODO: add entire range of valid values (16 total)
     P0 = 0b0000
     P0_5 = 0b1000
     P0_75 = 0b1100
@@ -156,25 +155,48 @@ class VoltageMode(Enum):
     GAIN_8 = OpCode(0x08, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)    # full-scale input voltage range of +/- 78.125 mV
     GAIN_32 = OpCode(0x0C, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)   # full-scale input voltage range of +/- 19.531 mV
 
-class FaultMasks(Enum):
-    ''' valid opcodes for setting the thermocouple fault mask register 
-        Example: OPEN_MASK_ON will 'mask' the OPEN fault from asserting through
-        the FAULT pin, but the fault register will still be updated. OPEN_MASK_OFF
-        will allow the OPEN fault to assert through the FAULT pin. Note, the FAULT
-        pin is currently not connected on the EdgePi, so these settings do not currently
-        result in any changes to the thermocouple functionality.
+''' Below are valid opcodes for setting the thermocouple fault mask register 
+    Example: OPEN_MASK_ON will 'mask' the OPEN fault from asserting through
+    the FAULT pin, but the fault register will still be updated. OPEN_MASK_OFF
+    will allow the OPEN fault to assert through the FAULT pin. Note, the FAULT
+    pin is currently not connected on the EdgePi, so these settings do not currently
+    result in any changes to the thermocouple functionality.
 
-        Note, the MAX31856 does not permit unmasking the TCRANGE and CJRANGE faults.
-    '''
+    Note, the MAX31856 does not permit unmasking the TCRANGE and CJRANGE faults.
+'''
+
+@unique
+class OpenMask(Enum):
+    ''' valid opcodes for setting the thermocouple OPEN fault mask '''
     OPEN_MASK_ON = OpCode(0x01, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)
     OPEN_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT0_MASK.value)
+
+@unique
+class OvuvMask(Enum):
+    ''' valid opcodes for setting the thermocouple OVUV fault mask '''
     OVUV_MASK_ON = OpCode(0x02, TCAddresses.MASK_W.value, Masks.BIT1_MASK.value)
     OVUV_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT1_MASK.value)
+
+@unique
+class TCLowMask(Enum):
+    ''' valid opcodes for setting the thermocouple TCLOW fault mask '''
     TCLOW_MASK_ON = OpCode(0x03, TCAddresses.MASK_W.value, Masks.BIT2_MASK.value)
     TCLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT2_MASK.value)
+
+@unique
+class TCHighMask(Enum):
+    ''' valid opcodes for setting the thermocouple TCHIGH fault mask '''
     TCHIGH_MASK_ON = OpCode(0x04, TCAddresses.MASK_W.value, Masks.BIT3_MASK.value)
     TCHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT3_MASK.value)
+
+@unique
+class CJLowMask(Enum):
+    ''' valid opcodes for setting the thermocouple CJLOW fault mask '''
     CJLOW_MASK_ON = OpCode(0x05, TCAddresses.MASK_W.value, Masks.BIT4_MASK.value)
     CJLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT4_MASK.value)
+
+@unique
+class CJHighMask(Enum):
+    ''' valid opcodes for setting the thermocouple CJHIGH fault mask '''
     CJHIGH_MASK_ON = OpCode(0x06, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
     CJHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)

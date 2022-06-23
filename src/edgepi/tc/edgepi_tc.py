@@ -146,7 +146,12 @@ class EdgePiTC(SpiDevice):
         average_mode: AvgMode = None,
         tc_type: TCType = None,
         voltage_mode: VoltageMode = None,
-        fault_mask: FaultMasks = None,
+        cj_high_mask: CJHighMask = None,
+        cj_low_mask: CJLowMask = None,
+        tc_high_mask: TCHighMask = None,
+        tc_low_mask: TCLowMask = None,
+        ovuv_mask: OvuvMask = None,
+        open_mask: OpenMask = None,
         cj_high_threshold: int = None,
         cj_low_threshold: int = None,
         lt_high_threshold: int = None,
@@ -157,8 +162,8 @@ class EdgePiTC(SpiDevice):
         cj_offset_decimals: DecBits = None,
         ):
         '''
-        A collective thermocouple settings update method. Use this method when you wish to configure multiple thermocouple settings
-        at once.
+        A collective thermocouple settings update method. Use this method to configure thermocouple settings. This method
+        allows you to configure settings either individually, or collectively.
 
         Args:
             all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.
@@ -179,7 +184,17 @@ class EdgePiTC(SpiDevice):
 
                 voltage_mode (VoltageMode): set input voltage range
 
-                fault_mask (FaultMasks): set which faults to prevent from asserting through the FAULT pin
+                cj_high_mask (CJHighMask): choose whether to mask CJHIGH fault from asserting through the FAULT pin
+                
+                cj_low_mask (CJLowMask): choose whether to mask CJLOW fault from asserting through the FAULT pin
+                
+                tc_high_mask (TCHighMask): choose whether to mask TCHIGH fault from asserting through the FAULT pin
+                
+                tc_low_mask (TCLowMask): choose whether to mask TCLOW fault from asserting through the FAULT pin
+                
+                ovuv_mask (OvuvMask): choose whether to mask OVUV fault from asserting through the FAULT pin
+                
+                open_mask (OpenMask): choose whether to mask OPEN fault from asserting through the FAULT pin
 
                 cj_high_threshold (int): set cold junction temperature upper threshold. If cold junction temperature rises
                 above this limit, the FAULT output will assert
