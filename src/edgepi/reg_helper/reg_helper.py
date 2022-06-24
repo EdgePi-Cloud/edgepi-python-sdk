@@ -67,15 +67,13 @@ class OpCodeMaskIncompatibleError(ValueError):
 
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
-    Generates updated register values after applying opcodes, and sets is_changed for updated registers
+    Generates updated register values after applying opcodes, and sets is_changed flag for updated registers.
 
     Args:
-        register_values (dict): a map of the device's registers to a dictionary containing the register value
-                                and the change is_changed. The dictionary must contain entries of the form 
-                                register_address: {'value': register_value}.
+        register_values (dict): a map of a device's registers to a dictionary containing their corresponding register values.
+                                The dictionary must contain entries of the form register_address (int): register_value (int).
 
-        updates (list): a list of valid Enum objects representing opcodes to be applied to registers.
-                        See tc_constants.py for for a valid Enums.
+        opcodes (list): a list of OpCode objects to be used for updating register values.
 
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags
@@ -91,11 +89,11 @@ def apply_opcodes(register_values:dict, opcodes:list):
     for opcode in opcodes:
         if opcode is None:
             continue
-        register_entry = register_values.get(opcode.value.reg_address)
+        register_entry = register_values.get(opcode.reg_address)
         # if this opcode maps to a valid register address
         if register_entry is not None:
             # apply the opcode to the register
-            register_entry['value'] = _apply_opcode(register_entry['value'], opcode.value)
+            register_entry['value'] = _apply_opcode(register_entry['value'], opcode)
             register_entry['is_changed'] = True
 
     return register_values

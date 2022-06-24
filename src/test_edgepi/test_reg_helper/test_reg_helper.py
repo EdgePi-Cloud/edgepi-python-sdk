@@ -111,7 +111,7 @@ def test_apply_opcodes_raises(reg_values, opcodes):
 
 @pytest.mark.parametrize('reg_values, opcodes, out', [
     (
-        {TCAddresses.CR1_W.value: 0x0}, [AvgMode.AVG_1],
+        {TCAddresses.CR1_W.value: 0x0}, [AvgMode.AVG_1.value],
         {TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}}
     ),
     (
@@ -119,7 +119,7 @@ def test_apply_opcodes_raises(reg_values, opcodes):
             TCAddresses.CR0_W.value: 0x0,
             TCAddresses.CR1_W.value: 0x0
         },
-        [AvgMode.AVG_1],
+        [AvgMode.AVG_1.value],
         {
             TCAddresses.CR0_W.value: {'value': 0x0, 'is_changed': False},
             TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
@@ -141,7 +141,7 @@ def test_apply_opcodes_raises(reg_values, opcodes):
             TCAddresses.CR0_W.value: 0x0,
             TCAddresses.CR1_W.value: 0x0
         },
-        [AvgMode.AVG_1, ConvMode.AUTO],
+        [AvgMode.AVG_1.value, ConvMode.AUTO.value],
         {
             TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'is_changed': True},
             TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
@@ -152,7 +152,7 @@ def test_apply_opcodes_raises(reg_values, opcodes):
             TCAddresses.CR0_W.value: 0x0,
             TCAddresses.CR1_W.value: 0x0
         },
-        [AvgMode.AVG_1, ConvMode.AUTO, None],
+        [AvgMode.AVG_1.value, ConvMode.AUTO.value, None],
         {
             TCAddresses.CR0_W.value: {'value': ConvMode.AUTO.value.op_code, 'is_changed': True},
             TCAddresses.CR1_W.value: {'value': AvgMode.AVG_1.value.op_code, 'is_changed': True}
