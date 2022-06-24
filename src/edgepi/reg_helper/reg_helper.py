@@ -74,8 +74,7 @@ def apply_opcodes(register_values:dict, opcodes:list):
                                 and the change is_changed. The dictionary must contain entries of the form 
                                 register_address: {'value': register_value}.
 
-        updates (list): a list of valid Enum objects representing opcodes to be applied to registers.
-                        See tc_constants.py for for a valid Enums.
+        updates (list): a list of OpCode objects to be applied to registers.
 
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags
@@ -91,11 +90,11 @@ def apply_opcodes(register_values:dict, opcodes:list):
     for opcode in opcodes:
         if opcode is None:
             continue
-        register_entry = register_values.get(opcode.value.reg_address)
+        register_entry = register_values.get(opcode.reg_address)
         # if this opcode maps to a valid register address
         if register_entry is not None:
             # apply the opcode to the register
-            register_entry['value'] = _apply_opcode(register_entry['value'], opcode.value)
+            register_entry['value'] = _apply_opcode(register_entry['value'], opcode)
             register_entry['is_changed'] = True
 
     return register_values
