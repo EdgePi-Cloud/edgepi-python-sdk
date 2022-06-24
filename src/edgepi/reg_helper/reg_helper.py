@@ -70,11 +70,10 @@ def apply_opcodes(register_values:dict, opcodes:list):
     Generates updated register values after applying opcodes, and sets is_changed for updated registers
 
     Args:
-        register_values (dict): a map of the device's registers to a dictionary containing the register value
-                                and the change is_changed. The dictionary must contain entries of the form 
-                                register_address: {'value': register_value}.
+        register_values (dict): a map of the device's registers to a dictionary containing their corresponding register values.
+                                The dictionary must contain entries of the form register_address (int): register_value (int).
 
-        updates (list): a list of OpCode objects to be applied to registers.
+        opcodes (list): a list of OpCode objects to be be for updating register values.
 
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags

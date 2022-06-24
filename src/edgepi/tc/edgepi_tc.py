@@ -220,7 +220,7 @@ class EdgePiTC(SpiDevice):
         args_dict = filter_dict(locals(), 'self')
         _logger.debug(f'set_config args list: \n\n {args_dict}\n\n')
 
-        # extract OpCodes from Enums
+        # extract opcodes from Enums
         args_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum)]
 
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
