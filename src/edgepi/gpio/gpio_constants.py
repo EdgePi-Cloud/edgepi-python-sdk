@@ -2,7 +2,7 @@ from enum import Enum, unique
 from edgepi.reg_helper.reg_helper import OpCode
 
 @unique
-class GpioExpanderAdreess(Enum):
+class GpioExpanderAddress(Enum):
     EXP_ONE = 32
     EXP_TWO = 33
 
@@ -125,3 +125,4 @@ class GpioBPinDir(Enum):
     PIN7_DIR_IN = OpCode(0x40, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT6.value)
     PIN8_DIR_IN = OpCode(0x80, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT7.value)
     ALL_DIR_IN = OpCode(0xFF, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BYTE.value)
+
