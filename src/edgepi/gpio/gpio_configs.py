@@ -20,7 +20,7 @@ class GpioDACConfig:
     name: str = 'dac'
     device: str = 'i2c'
     num_pins: int = 9
-    address: GpioExpanderAdress = GpioExpanderAdress
+    address: GpioExpanderAddress = GpioExpanderAddress
     dev_path: str = '/dev/i2c-10'
 
 @dataclass
@@ -56,8 +56,8 @@ def _generate_dac_pins():
     '''
     pin_list = []
     for pin, set, clear in zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear):
-        pin_list.append(I2cPinInfo(pin, set.value, clear.value, GpioExpanderAdress.EXP_ONE.value))
-    pin_list[8] = I2cPinInfo(_list_of_DAC_gpios[8], GpioAOutputSet.SET_OUTPUT_1.value, GpioAOutputClear.CLEAR_OUTPUT_1.value, GpioExpanderAdress.EXP_TWO.value)
+        pin_list.append(I2cPinInfo(pin, set.value, clear.value, GpioExpanderAddress.EXP_ONE.value))
+    pin_list[8] = I2cPinInfo(_list_of_DAC_gpios[8], GpioAOutputSet.SET_OUTPUT_1.value, GpioAOutputClear.CLEAR_OUTPUT_1.value, GpioExpanderAddress.EXP_TWO.value)
     return pin_list
 
 def generate_pin_info(config:str):
