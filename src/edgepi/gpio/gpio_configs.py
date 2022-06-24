@@ -3,7 +3,7 @@ from edgepi.gpio.gpio_constants import *
 
 @dataclass(frozen = True)
 class GpioDACConfig:
-    ''' Represents a GPIO settings for DAC
+    ''' Represents peripheral information for GPIOs used DAC
 
         Attributes:
             name (str): name of config
@@ -46,6 +46,14 @@ class I2cPinInfo:
 _list_of_DAC_gpios = ['AO_EN1','AO_EN4','AO_EN3','AO_EN2','AO_EN5','AO_EN6','AO_EN7','AO_EN8', 'DAC_GAIN']
 
 def _generate_dac_pins():
+    ''' Generates a list I2cPinInfo dataclasses for DAC pins
+
+        Args:
+            N/A
+        
+        Returns:
+            a list of dataclass with gpio information
+    '''
     pin_list = []
     for pin, set, clear in zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear):
         pin_list.append(I2cPinInfo(pin, set.value, clear.value, GpioDACConfig.address.EXP_ONE.value))
