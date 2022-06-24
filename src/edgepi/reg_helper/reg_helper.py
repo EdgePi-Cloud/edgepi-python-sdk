@@ -67,13 +67,13 @@ class OpCodeMaskIncompatibleError(ValueError):
 
 def apply_opcodes(register_values:dict, opcodes:list):
     '''
-    Generates updated register values after applying opcodes, and sets is_changed for updated registers
+    Generates updated register values after applying opcodes, and sets is_changed flag for updated registers.
 
     Args:
-        register_values (dict): a map of the device's registers to a dictionary containing their corresponding register values.
+        register_values (dict): a map of a device's registers to a dictionary containing their corresponding register values.
                                 The dictionary must contain entries of the form register_address (int): register_value (int).
 
-        opcodes (list): a list of OpCode objects to be be for updating register values.
+        opcodes (list): a list of OpCode objects to be used for updating register values.
 
     Returns:
         a map of the device's registers to a dictionary containg the updated values and change flags
