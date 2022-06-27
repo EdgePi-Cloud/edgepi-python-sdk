@@ -217,7 +217,7 @@ class EdgePiTC(SpiDevice):
                 cj_offset_decimals (DecBits): set cold junction temperature offset decimal value.
         '''
         # filter out self from args
-        args_dict = filter_dict(locals(), 'self')
+        args_dict = filter_dict(locals(), 'self', None)
         _logger.debug(f'set_config args list: \n\n {args_dict}\n\n')
 
         # extract opcodes from Enums

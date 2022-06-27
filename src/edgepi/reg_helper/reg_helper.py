@@ -87,8 +87,6 @@ def apply_opcodes(register_values:dict, opcodes:list):
 
     # apply each opcode to its corresponding register
     for opcode in opcodes:
-        if opcode is None:
-            continue
         register_entry = register_values.get(opcode.reg_address)
         # if this opcode maps to a valid register address
         if register_entry is not None:
