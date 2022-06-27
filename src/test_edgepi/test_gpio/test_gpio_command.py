@@ -4,11 +4,11 @@ from edgepi.gpio.gpio_configs import *
 
 @pytest.mark.parametrize('config, result', 
                        [('dac', GpioDACConfig),
-                        ('adc', 'adc'),
-                        ('rtd', 'rtd'),
-                        ('din', 'din'),
-                        ('dout', 'dout'),
-                        ('ledArry', 'ledArry'),
+                        ('adc', GpioADCConfig),
+                        ('rtd', GpioRTDConfig),
+                        ('din', None),
+                        ('dout', None),
+                        ('led', GpioLEDConfig),
                         ( None, None)])
 def test_getPeriphConfig(config, result):
     assert getPeriphConfig(config) == result

@@ -21,6 +21,8 @@ class EdgePiGPIO(I2CDevice):
         if config is None:
             _logger.error(f'Config is not chosen, please choose a configuration')
         self.config = getPeriphConfig(config)
-        if self.config == GpioDACConfig:
+        _logger.debug(f'{self.config.name} Configuration Selected: {self.config}')
+        if self.config is not None and 'i2c' in self.config.dev_path:
             super().__init__(self.config.dev_path)
-        
+            _logger.info(f'GPIO expander up and running')
+            self.pinList = generate_pin_info(self.config.name)
