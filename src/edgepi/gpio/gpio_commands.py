@@ -6,15 +6,15 @@ def getPeriphConfig(config: str = None):
     if config == 'dac':
         gpioConfig = GpioDACConfig
     elif config == 'adc':
-        gpioConfig = 'adc'
+        gpioConfig = GpioADCConfig
     elif config == 'rtd':
-        gpioConfig = 'rtd'
-    elif config == 'ledArry':
-        gpioConfig = 'ledArry'
+        gpioConfig = GpioRTDConfig
+    elif config == 'led':
+        gpioConfig = GpioLEDConfig
     elif config == 'din':
-        gpioConfig = 'din'
+        gpioConfig = None
     elif config == 'dout':
-        gpioConfig = 'dout'
+        gpioConfig = None
     else:
         gpioConfig = None
     return gpioConfig

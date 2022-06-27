@@ -64,4 +64,3 @@ else:
         MsgList = i2cDevice.setWriteMsg(addrs, Msg)
         assert MsgList[0].data == result[0]
         assert MsgList[0].read == result[1]
-    # Get Write Message
