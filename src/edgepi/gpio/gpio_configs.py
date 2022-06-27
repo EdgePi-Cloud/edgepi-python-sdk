@@ -1,3 +1,4 @@
+from enum import Enum, unique
 from dataclasses import dataclass
 from edgepi.gpio.gpio_constants import * 
 
@@ -88,6 +89,13 @@ class GpioLEDConfig:
     num_pins: int = 8
     address: GpioExpanderAddress = GpioExpanderAddress
     dev_path: str = '/dev/i2c-10'
+
+@unique
+class GpioConfigs(Enum):
+    DAC = GpioDACConfig
+    ADC = GpioADCConfig
+    RTD = GpioRTDConfig
+    LED = GpioLEDConfig
 
 @dataclass
 class I2cPinInfo:
