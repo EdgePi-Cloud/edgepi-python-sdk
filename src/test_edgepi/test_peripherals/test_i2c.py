@@ -20,6 +20,42 @@ if sys.platform != 'linux':
         i2cDevice = I2CDevice(fd)
         assert i2cDevice.fd == fd
 
+    @pytest.mark.parametrize("addrs, Msg, result",
+                            [( 30, [31, 32], [[30], [31, 32], False, True]),
+                             ( 20, [21, 22], [[20], [21, 22], False, True]),
+                             ( 10, [11, 12], [[10], [11, 12], False, True]),
+                             ( 0, [1, 2], [[0], [1, 2], False, True])
+                            ])
+    @patch('edgepi.peripherals.i2c.I2C')
+    def test_i2c_setReadMsg(i2c_mock, addrs, Msg, result):
+        i2cDev = I2CDevice('/dev/i2c-10')
+        i2c_mock.Message.return_value.data1 = result[0]
+        i2c_mock.Message.return_value.data2 = result[1]
+        i2c_mock.Message.return_value.read1 = result[2]
+        i2c_mock.Message.return_value.read2 = result[3]
+        MsgList = i2cDev.setReadMsg(addrs, Msg)
+        assert MsgList[0].data1 == result[0]
+        assert MsgList[1].data2 == result[1]
+        assert MsgList[0].read1 == result[2]
+        assert MsgList[1].read2 == result[3]
+
+    # Get Read Message
+    # Set Write Message
+    @pytest.mark.parametrize("addrs, Msg, result",
+                            [( 30, [31, 32], [[30, 31, 32], False]),
+                             ( 20, [21, 22], [[20, 21, 22], False]),
+                             ( 10, [11, 12], [[10, 11, 12], False]),
+                             ( 0, [1, 2], [[0, 1, 2], False])
+                            ])
+    @patch('edgepi.peripherals.i2c.I2C')
+    def test_i2c_setWriteMsg(i2c_mock, addrs, Msg, result):
+        i2cDevice = I2CDevice('/dev/i2c-10')
+        i2c_mock.Message.return_value.data = result[0]
+        i2c_mock.Message.return_value.read = result[1]
+        MsgList = i2cDevice.setWriteMsg(addrs, Msg)
+        assert MsgList[0].data == result[0]
+        assert MsgList[0].read == result[1]
+
 else:
     @pytest.mark.parametrize("fd, result",
                             [( '/dev/i2c-10', ['/dev/i2c-10'])
@@ -35,14 +71,14 @@ else:
                              ( 10, [11, 12], [[10], [11, 12], False, True]),
                              ( 0, [1, 2], [[0], [1, 2], False, True])
                             ])
-    @patch('edgepi.peripherals.i2c.I2C.Message')
+    @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_setReadMsg(i2c_mock, addrs, Msg, result):
-        i2c_mock().data1 = result[0]
-        i2c_mock().data2 = result[1]
-        i2c_mock().read1 = result[2]
-        i2c_mock().read2 = result[3]
-        i2cDevice = I2CDevice('/dev/i2c-10')
-        MsgList = i2cDevice.setReadMsg(addrs, Msg)
+        i2cDev = I2CDevice('/dev/i2c-10')
+        i2c_mock.Message.return_value.data1 = result[0]
+        i2c_mock.Message.return_value.data2 = result[1]
+        i2c_mock.Message.return_value.read1 = result[2]
+        i2c_mock.Message.return_value.read2 = result[3]
+        MsgList = i2cDev.setReadMsg(addrs, Msg)
         assert MsgList[0].data1 == result[0]
         assert MsgList[1].data2 == result[1]
         assert MsgList[0].read1 == result[2]
@@ -56,11 +92,11 @@ else:
                              ( 10, [11, 12], [[10, 11, 12], False]),
                              ( 0, [1, 2], [[0, 1, 2], False])
                             ])
-    @patch('edgepi.peripherals.i2c.I2C.Message')
+    @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_setWriteMsg(i2c_mock, addrs, Msg, result):
-        i2c_mock().data = result[0]
-        i2c_mock().read = result[1]
         i2cDevice = I2CDevice('/dev/i2c-10')
+        i2c_mock.Message.return_value.data = result[0]
+        i2c_mock.Message.return_value.read = result[1]
         MsgList = i2cDevice.setWriteMsg(addrs, Msg)
         assert MsgList[0].data == result[0]
         assert MsgList[0].read == result[1]
