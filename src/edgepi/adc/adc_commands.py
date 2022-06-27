@@ -40,6 +40,6 @@ class ADCCommands():
 
     @staticmethod
     def check_range(target, lower, upper):
-        if target <= lower and target >= upper:
+        if target >= lower and target <= upper:
             return True
         raise ValueError('Target out of range %s', target)
