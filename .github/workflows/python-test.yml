@@ -11,8 +11,8 @@ on:
       - 'dev'
 
 jobs:
-  build:
-
+  test:
+    name: Test on Self-Hosted
     runs-on: self-hosted
     strategy:
       fail-fast: false
