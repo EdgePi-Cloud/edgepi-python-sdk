@@ -52,6 +52,7 @@ class Masks(Enum):
     CR0_OC_MASK = 0xCF
     CR1_HIGH_MASK = 0x0F
     CR1_LOW_MASK = 0xF0
+    BYTE_MASK = 0x00
 
 @unique
 class TempBits(Enum):
@@ -68,10 +69,10 @@ class TCOps(Enum):
     CLEAR_FAULTS = OpCode(0x02, TCAddresses.CR0_W.value, Masks.BIT1_MASK.value) # clear fault status register, only use with Interrupt Fault Mode
 
 @unique
-class DecBits(Enum):
+class DecBits4(Enum):
     ''' valid decimal values for temperature registers with precision up to 2^-4. 
         The MAX31856 uses a custom bit value scheme for setting temperature decimal values.
-        It allocates only 4 bits for this purpose, meaning only 16 decimal values are possible.
+        One such scheme allocates 4 bits for this purpose, meaning only 16 decimal values are possible.
         These are listed below. Note, these values are not intended to be combined, as there 
         is no guarantee the sum value can be represented. Please only select the exact value 
         you need from this list.
@@ -97,6 +98,85 @@ class DecBits(Enum):
     P0_625 = 0b1010
     P0_3125 = 0b0101
     P0_375 = 0b0110
+
+@unique
+class DecBits6(Enum):
+    ''' valid decimal values for temperature registers with precision up to 2^-6. 
+            The MAX31856 uses a custom bit value scheme for setting temperature decimal values.
+            One such scheme allocates 6 bits for this purpose, meaning only 64 decimal values are possible.
+            These are listed below. Note, these values are not intended to be combined, as there 
+            is no guarantee the sum value can be represented. Please only select the exact value 
+            you need from this list.
+
+        Examples:
+            P0_5 represents the decimal value 0.5
+            P0 represents the decimal value 0.0
+            P0_0625 represents the decimal value 0.0625
+    '''
+    P0_0 = 0b000000
+    P0_015625 = 0b000001
+    P0_03125 = 0b000010
+    P0_046875 = 0b000011
+    P0_0625 = 0b000100
+    P0_078125 = 0b000101
+    P0_09375 = 0b000110
+    P0_109375 = 0b000111
+    P0_125 = 0b001000
+    P0_140625 = 0b001001
+    P0_15625 = 0b001010
+    P0_171875 = 0b001011
+    P0_1875 = 0b001100
+    P0_203125 = 0b001101
+    P0_21875 = 0b001110
+    P0_234375 = 0b001111
+    P0_25 = 0b010000
+    P0_265625 = 0b010001
+    P0_28125 = 0b010010
+    P0_296875 = 0b010011
+    P0_3125 = 0b010100
+    P0_328125 = 0b010101
+    P0_34375 = 0b010110
+    P0_359375 = 0b010111
+    P0_375 = 0b011000
+    P0_390625 = 0b011001
+    P0_40625 = 0b011010
+    P0_421875 = 0b011011
+    P0_4375 = 0b011100
+    P0_453125 = 0b011101
+    P0_46875 = 0b011110
+    P0_484375 = 0b011111
+    P0_5 = 0b100000
+    P0_515625 = 0b100001
+    P0_53125 = 0b100010
+    P0_546875 = 0b100011
+    P0_5625 = 0b100100
+    P0_578125 = 0b100101
+    P0_59375 = 0b100110
+    P0_609375 = 0b100111
+    P0_625 = 0b101000
+    P0_640625 = 0b101001
+    P0_65625 = 0b101010
+    P0_671875 = 0b101011
+    P0_6875 = 0b101100
+    P0_703125 = 0b101101
+    P0_71875 = 0b101110
+    P0_734375 = 0b101111
+    P0_75 = 0b110000
+    P0_765625 = 0b110001
+    P0_78125 = 0b110010
+    P0_796875 = 0b110011
+    P0_8125 = 0b110100
+    P0_828125 = 0b110101
+    P0_84375 = 0b110110
+    P0_859375 = 0b110111
+    P0_875 = 0b111000
+    P0_890625 = 0b111001
+    P0_90625 = 0b111010
+    P0_921875 = 0b111011
+    P0_9375 = 0b111100
+    P0_953125 = 0b111101
+    P0_96875 = 0b111110
+    P0_984375 = 0b111111
 
 @unique
 class ConvMode(Enum):
