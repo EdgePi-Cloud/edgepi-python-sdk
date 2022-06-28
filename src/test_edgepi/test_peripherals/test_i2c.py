@@ -66,23 +66,20 @@ else:
     
 
     @pytest.mark.parametrize("addrs, Msg, result",
-                            [( 30, [31, 32], [[30], [31, 32], False, True]),
-                             ( 20, [21, 22], [[20], [21, 22], False, True]),
-                             ( 10, [11, 12], [[10], [11, 12], False, True]),
-                             ( 0, [1, 2], [[0], [1, 2], False, True])
+                            [( 30, [31, 32], [[30], False, [31, 32], True]),
+                             ( 20, [21, 22], [[20], False, [21, 22], True]),
+                             ( 10, [11, 12], [[10], False, [11, 12], True]),
+                             ( 0, [1, 2], [[0], False, [1, 2], True])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_setReadMsg(i2c_mock, addrs, Msg, result):
         i2cDev = I2CDevice('/dev/i2c-10')
-        i2c_mock.Message.return_value.data1 = result[0]
-        i2c_mock.Message.return_value.data2 = result[1]
-        i2c_mock.Message.return_value.read1 = result[2]
-        i2c_mock.Message.return_value.read2 = result[3]
+        i2cDev.i2cdev.Message.return_value.data = i2cDev.i2cdev.Message
         MsgList = i2cDev.setReadMsg(addrs, Msg)
-        assert MsgList[0].data1 == result[0]
-        assert MsgList[1].data2 == result[1]
-        assert MsgList[0].read1 == result[2]
-        assert MsgList[1].read2 == result[3]
+        i2cDev.i2cdev.Message.assert_any_call(result[0], read=result[1])
+        i2cDev.i2cdev.Message.assert_any_call(result[2], read=result[3])
+        assert len(MsgList) == i2cDev.i2cdev.Message.call_count
+
 
     # Get Read Message
     # Set Write Message
@@ -95,18 +92,28 @@ else:
     @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_setWriteMsg(i2c_mock, addrs, Msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
-        i2c_mock.Message.return_value.data = result[0]
-        i2c_mock.Message.return_value.read = result[1]
+        i2cDevice.i2cdev.Message.return_value.data = i2cDevice.i2cdev.Message
         MsgList = i2cDevice.setWriteMsg(addrs, Msg)
-        assert MsgList[0].data == result[0]
-        assert MsgList[0].read == result[1]
+        i2cDevice.i2cdev.Message.assert_called_with(result[0], read=result[1])
+        assert len(MsgList) == i2cDevice.i2cdev.Message.call_count
 
-    #Transfer
+    #Transfer Read
     @pytest.mark.parametrize("devAddress, msg, result",
-                            [( 33, [[2],False,[0, 0],True], [2,3,4]),
-                             ( 32, [[2],False,[0, 0],True], [1,2,3,4])
+                            [( 33, [2,False,[0, 0],True], [255, 255]),
+                             ( 32, [2,False,[0, 0],True], [255, 255])
                             ])
     def test_i2c_transfer_read(devAddress, msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
-        MsgList = i2cDevice.setReadMsg(msg[1], msg[2])
-        MsgList = I2CDevice.transfer(devAddress, MsgList)
+        MsgList = i2cDevice.setReadMsg(msg[0], msg[2])
+        MsgList = i2cDevice.transfer(devAddress, MsgList)
+        assert MsgList == result
+
+    @pytest.mark.parametrize("devAddress, msg, result",
+                            [( 33, [2,False,[0, 0],True], [255, 255]),
+                             ( 32, [2,False,[0, 0],True], [255, 255])
+                            ])
+    def test_i2c_transfer_read(devAddress, msg, result):
+        i2cDevice = I2CDevice('/dev/i2c-10')
+        MsgList = i2cDevice.setReadMsg(msg[0], msg[2])
+        MsgList = i2cDevice.transfer(devAddress, MsgList)
+        assert MsgList == result
