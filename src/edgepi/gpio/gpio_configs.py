@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from edgepi.gpio.gpio_constants import * 
 
 @dataclass(frozen = True)
-class GpioDACConfig:
+class GpioExpanderConfig:
     ''' Represents peripheral information for GPIOs used DAC
 
         Attributes:
@@ -18,84 +18,18 @@ class GpioDACConfig:
             dev_path (str): device path to the peripheral device file
     '''
 
-    name: str = 'dac'
-    device: str = 'i2c'
-    num_pins: int = 9
-    address: GpioExpanderAddress = GpioExpanderAddress
-    dev_path: str = '/dev/i2c-10'
-
-@dataclass(frozen = True)
-class GpioADCConfig:
-    ''' Represents peripheral information for GPIOs used ADC
-
-        Attributes:
-            name (str): name of config
-
-            device (str): peripheral device
-
-            num_pins (int): number of pins used for this configuration
-
-            address (GpioExpanderAdreess): addresses of i2c device
-
-            dev_path (str): device path to the peripheral device file
-    '''
-
-    name: str = 'adc'
-    device: str = 'i2c'
-    num_pins: int = 2
-    address: GpioExpanderAddress = GpioExpanderAddress
-    dev_path: str = '/dev/i2c-10'
-
-@dataclass(frozen = True)
-class GpioRTDConfig:
-    ''' Represents peripheral information for GPIOs used RTD
-
-        Attributes:
-            name (str): name of config
-
-            device (str): peripheral device
-
-            num_pins (int): number of pins used for this configuration
-
-            address (GpioExpanderAdreess): addresses of i2c device
-
-            dev_path (str): device path to the peripheral device file
-    '''
-
-    name: str = 'rtd'
-    device: str = 'i2c'
-    num_pins: int = 1
-    address: GpioExpanderAddress = GpioExpanderAddress
-    dev_path: str = '/dev/i2c-10'
-
-@dataclass(frozen = True)
-class GpioLEDConfig:
-    ''' Represents peripheral information for GPIOs used LED array
-
-        Attributes:
-            name (str): name of config
-
-            device (str): peripheral device
-
-            num_pins (int): number of pins used for this configuration
-
-            address (GpioExpanderAdreess): addresses of i2c device
-
-            dev_path (str): device path to the peripheral device file
-    '''
-
-    name: str = 'led'
-    device: str = 'i2c'
-    num_pins: int = 8
-    address: GpioExpanderAddress = GpioExpanderAddress
-    dev_path: str = '/dev/i2c-10'
+    name: str = None
+    device: str = None
+    num_pins: int = None
+    address: GpioExpanderAddress = None
+    dev_path: str = None
 
 @unique
 class GpioConfigs(Enum):
-    DAC = GpioDACConfig
-    ADC = GpioADCConfig
-    RTD = GpioRTDConfig
-    LED = GpioLEDConfig
+    DAC = GpioExpanderConfig(name = 'dac', device='i2c', num_pins=9, address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
+    ADC = GpioExpanderConfig(name = 'adc', device='i2c', num_pins=2, address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
+    RTD = GpioExpanderConfig(name = 'rtd', device='i2c', num_pins=1, address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
+    LED = GpioExpanderConfig(name = 'led', device='i2c', num_pins=8, address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
 
 @dataclass
 class I2cPinInfo:

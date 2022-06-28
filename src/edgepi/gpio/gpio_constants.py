@@ -1,8 +1,6 @@
 from enum import Enum, unique
 from edgepi.reg_helper.reg_helper import OpCode
-from edgepi.gpio.gpio_configs import *
 
-@unique
 class GpioExpanderAddress(Enum):
     EXP_ONE = 32
     EXP_TWO = 33

@@ -5,18 +5,17 @@ from edgepi.gpio.gpio_configs import *
 
 
 @pytest.mark.parametrize('config, result', 
-                        [(GpioDACConfig, ['dac', 'i2c', 9, 32, 33, '/dev/i2c-10']),
-                         (GpioADCConfig, ['adc', 'i2c', 2, 32, 33, '/dev/i2c-10']),
-                         (GpioRTDConfig, ['rtd', 'i2c', 1, 32, 33, '/dev/i2c-10']),
-                         (GpioLEDConfig, ['led', 'i2c', 8, 32, 33, '/dev/i2c-10'])
+                        [(GpioConfigs.DAC.value, ['dac', 'i2c', 9, 32, '/dev/i2c-10']),
+                         (GpioConfigs.ADC.value, ['adc', 'i2c', 2, 33, '/dev/i2c-10']),
+                         (GpioConfigs.RTD.value, ['rtd', 'i2c', 1, 33, '/dev/i2c-10']),
+                         (GpioConfigs.LED.value, ['led', 'i2c', 8, 32, '/dev/i2c-10'])
                         ])
 def test_GpioModuleConfig(config, result):
     assert config.name == result[0]
     assert config.device == result[1]
     assert config.num_pins == result[2]
-    assert config.address.EXP_ONE.value == result[3]
-    assert config.address.EXP_TWO.value == result[4]
-    assert config.dev_path == result[5]
+    assert config.address.value == result[3]
+    assert config.dev_path == result[4]
 
 @pytest.mark.parametrize('name, setoutput, clearoutput, address, result', 
                         [('AO_EN1', GpioAOutputSet.SET_OUTPUT_1.value, GpioAOutputClear.CLEAR_OUTPUT_1.value, GpioExpanderAddress.EXP_ONE.value, ['AO_EN1', OpCode(1, 2, 0xFE), OpCode(0, 2, 0xFE), 32]),

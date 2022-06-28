@@ -13,10 +13,10 @@ def fixture_test_edgepi_tc(mocker):
     mocker.patch('edgepi.peripherals.gpio.GPIO')
 
 @pytest.mark.parametrize("mock_expect,config, result",
-                        [(['/dev/i2c-10'],'dac',[GpioDACConfig]),
-                         (['/dev/i2c-10'],'adc',[GpioADCConfig]),
-                         (['/dev/i2c-10'],'rtd',[GpioRTDConfig]),
-                         (['/dev/i2c-10'],'led',[GpioLEDConfig]),
+                        [(['/dev/i2c-10'],'dac',[GpioConfigs.DAC.value]),
+                         (['/dev/i2c-10'],'adc',[GpioConfigs.ADC.value]),
+                         (['/dev/i2c-10'],'rtd',[GpioConfigs.RTD.value]),
+                         (['/dev/i2c-10'],'led',[GpioConfigs.LED.value]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
 def test_edgepi_gpio_init(i2c_mock, mock_expect, config, result):
