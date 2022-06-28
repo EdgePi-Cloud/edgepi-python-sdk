@@ -129,6 +129,9 @@ def _slice_bitstring_to_opcodes(temp_code:TempCode, bitstr:BitArray, num_slices:
     return op_codes
     
 def _validate_temperatures(tempcode:TempCode):
+    ''' Validates integer value of TempCode is within writeable range for 
+        affected register.
+    '''
     reg_temps = {
         TempType.CJ.value: {'min': -127, 'max': 127},
         TempType.LT.value: {'min': -2047, 'max': 2047},
