@@ -15,8 +15,7 @@ class I2CDevice():
             MsgList: list of I2C.Message() objects containing Msg to be sent
     '''
     def setReadMsg(self, addr:int = None, Msg:list = None):
-        return [I2C.Message([addr]), I2C.Message(Msg, read=True)]
-    
+        return [self.i2cdev.Message([addr], read = False), self.i2cdev.Message(Msg, read = True)]
     ''' 
         set Write message to be sent through I2C.
         Attributes:
@@ -26,7 +25,21 @@ class I2CDevice():
             MsgList: list of I2C.Message() objects containing Msg to be sent
     '''
     def setWriteMsg(self, addr:int = None, Msg:list = None):
-        return [I2C.Message([addr]+Msg)]
-        
+        msgList = [self.i2cdev.Message([addr]+Msg, read = False)]
+        return msgList
+    
+    ''' 
+        Message Transfer
+        Attributes:
+            dev_addr: hardware device address
+            Msg: list of Message class objects
+        Return:
+            MsgList: list of message bytes if reading flag was set
+    '''
+    def transfer(self, dev_addr: int = None, Msg:list = None):
+        self.i2cdev.transfer(dev_addr, Msg)
+        if Msg[1].read == True:
+            return Msg[1].data
+
     def close(self):
         self.i2cdev.close()
