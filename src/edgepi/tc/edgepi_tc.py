@@ -8,7 +8,7 @@ import time
 from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import code_to_temp, TempCode, tempcode_to_opcode
+from edgepi.tc.tc_commands import code_to_temp, TempCode, tempcode_to_opcode, TempType
 from edgepi.tc.tc_faults import map_fault_status
 from edgepi.reg_helper.reg_helper import apply_opcodes
 from edgepi.utilities.utilities import filter_dict
@@ -242,14 +242,15 @@ class EdgePiTC(SpiDevice):
         ops_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum) and type(entry.value) is OpCode]
 
         tempcodes = []
-        tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value))
-        tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value))
-        tempcodes.append(TempCode(lt_high_threshold, lt_high_threshold_decimals, 11, 4, 0, TCAddresses.LTHFTH_W.value))
-        tempcodes.append(TempCode(lt_low_threshold, lt_low_threshold_decimals, 11, 4, 0, TCAddresses.LTLFTH_W.value))
-        tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value))
-        tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value))
+        tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.CJ))
+        tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value, TempType.CJ))
+        tempcodes.append(TempCode(lt_high_threshold, lt_high_threshold_decimals, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.LT))
+        tempcodes.append(TempCode(lt_low_threshold, lt_low_threshold_decimals, 11, 4, 0, TCAddresses.LTLFTH_W.value, TempType.LT))
+        tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value, TempType.CJ_OFF))
+        tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.CJ))
 
         for tempcode in tempcodes:
+            tempcode.check_values() # check if user only passed either int or dec val for this tempcode
             ops_list += tempcode_to_opcode(tempcode)
         _logger.debug(f'set_config: ops_list:\n\n{ops_list}\n\n')
         
@@ -266,4 +267,4 @@ class EdgePiTC(SpiDevice):
             if entry['is_changed']:
                 updated_value = entry['value']
                 self.__write_to_register(reg_addx, updated_value)
-                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')      
+                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')    

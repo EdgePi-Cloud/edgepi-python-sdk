@@ -113,7 +113,7 @@ class DecBits6(Enum):
             P0 represents the decimal value 0.0
             P0_0625 represents the decimal value 0.0625
     '''
-    P0_0 = 0b000000
+    P0 = 0b000000
     P0_015625 = 0b000001
     P0_03125 = 0b000010
     P0_046875 = 0b000011
