@@ -60,7 +60,8 @@ else:
     @pytest.mark.parametrize("fd, result",
                             [( '/dev/i2c-10', ['/dev/i2c-10'])
                             ])
-    def test_i2c_init_param(fd, result):
+    @patch('edgepi.peripherals.i2c.I2C')
+    def test_i2c_init_param(i2c_mock,fd, result):
         i2cDevice = I2CDevice(fd)
         assert i2cDevice.fd == result[0]
     
