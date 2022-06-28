@@ -72,6 +72,18 @@ class EdgePiTC(SpiDevice):
 
         return fault_msgs
 
+    def overwrite_cold_junction_temp(self, cj_temp:int, cj_temp_decimals:DecBits6):
+        ''' Write temperature values to the cold-junction sensor. Cold-junction sensing
+            must be disabled (using set_config method) in order for values to be written
+            to the cold-junction sensor.
+
+            Args:
+                cj_temp (int): the integer value of the temperature to be written to the cold-junction sensor
+
+                cj_temp_decimals (DecBits6): the decimal value of the temperature to be written to the cold-junction sensor
+        '''
+        self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
+
     def __read_register(self, reg_addx):
         ''' Reads the value of a single register.
 
