@@ -8,7 +8,7 @@ import time
 from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import code_to_temp
+from edgepi.tc.tc_commands import code_to_temp, TempCode, tempcode_to_opcode
 from edgepi.tc.tc_faults import map_fault_status
 from edgepi.reg_helper.reg_helper import apply_opcodes
 from edgepi.utilities.utilities import filter_dict
@@ -155,11 +155,13 @@ class EdgePiTC(SpiDevice):
         cj_high_threshold: int = None,
         cj_low_threshold: int = None,
         lt_high_threshold: int = None,
-        lt_high_threshold_decimals: DecBits = None,
+        lt_high_threshold_decimals: DecBits4 = None,
         lt_low_threshold: int = None,
-        lt_low_threshold_decimals: DecBits = None,
+        lt_low_threshold_decimals: DecBits4 = None,
         cj_offset: int = None,
-        cj_offset_decimals: DecBits = None,
+        cj_offset_decimals: DecBits4 = None,
+        cj_temp: int = None,
+        cj_temp_decimals: DecBits6 = None
         ):
         '''
         A collective thermocouple settings update method. Use this method to configure thermocouple settings. This method
@@ -205,31 +207,47 @@ class EdgePiTC(SpiDevice):
                 lt_high_threshold (int): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction 
                 temperature rises above this limit, the FAULT output will assert
 
-                lt_high_threshold_decimals (DecBits): set thermocouple hot junction temperature upper threshold decimal value.
+                lt_high_threshold_decimals (DecBits4): set thermocouple hot junction temperature upper threshold decimal value.
 
                 lt_low_threshold (int): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
                 temperature falls below this limit, the FAULT output will assert
 
-                lt_low_threshold_decimals (DecBits): set thermocouple hot junction temperature lower threshold decimal value.
+                lt_low_threshold_decimals (DecBits4): set thermocouple hot junction temperature lower threshold decimal value.
 
                 cj_offset (int): set cold junction temperature offset.
 
-                cj_offset_decimals (DecBits): set cold junction temperature offset decimal value.
+                cj_offset_decimals (DecBits4): set cold junction temperature offset decimal value.
+
+                cj_temp (int): write values to cold-junction sensor. Only use when cold-junction is disabled.
+
+                cj_temp_decimals (DecBits6): set decimal value for cj_temp
         '''
         # filter out self from args
         args_dict = filter_dict(locals(), 'self', None)
-        _logger.debug(f'set_config args list: \n\n {args_dict}\n\n')
+        _logger.debug(f'set_config: args dict:\n\n {args_dict}\n\n')
 
-        # extract opcodes from Enums
-        args_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum)]
+        # extract non-temperature setting opcodes from Enums
+        ops_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum) and type(entry.value) is OpCode]
 
+        tempcodes = []
+        tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value))
+        tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value))
+        tempcodes.append(TempCode(lt_high_threshold, lt_high_threshold_decimals, 11, 4, 0, TCAddresses.LTHFTH_W.value))
+        tempcodes.append(TempCode(lt_low_threshold, lt_low_threshold_decimals, 11, 4, 0, TCAddresses.LTLFTH_W.value))
+        tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value))
+        tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value))
+
+        for tempcode in tempcodes:
+            ops_list += tempcode_to_opcode(tempcode)
+        _logger.debug(f'set_config: ops_list:\n\n{ops_list}\n\n')
+        
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
         reg_values = self.__read_registers_to_map()
-        _logger.debug(f'set_config: register values before updates => {reg_values}')
+        _logger.debug(f'set_config: register values before updates:\n\n{reg_values}\n\n')
 
         # updated register values
-        apply_opcodes(reg_values, args_list)
-        _logger.debug(f'set_config: register values after updates => {reg_values}')
+        apply_opcodes(reg_values, ops_list)
+        _logger.debug(f'set_config: register values after updates:\n\n{reg_values}\n\n')
 
         # only update registers whose values have been changed
         for reg_addx, entry in reg_values.items():

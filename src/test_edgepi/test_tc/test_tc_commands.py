@@ -33,48 +33,48 @@ def test_negative_temp_check(temp_code, out, new_value):
    assert temp_code.uint == new_value
 
 @pytest.mark.parametrize('tempcode, opcode_list', [
-    (TempCode(0x7F, 0, 7, 0, 0, TCAddresses.CJHF_W.value),
+    (TempCode(0x7F, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value),
         [OpCode(0x7F, TCAddresses.CJHF_W.value, Masks.BYTE_MASK.value)]),   # single register, + value, no dec, no fillers
-    (TempCode(-0x7F, 0, 7, 0, 0, TCAddresses.CJHF_W.value),
+    (TempCode(-0x7F, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value),
         [OpCode(0xFF, TCAddresses.CJHF_W.value, Masks.BYTE_MASK.value)]),   # single register, - value, no dec, no fillers
-    (TempCode(0x4, DecBits4.P0_5.value, 3, 4, 0, TCAddresses.CJTO_W.value),
+    (TempCode(0x4, DecBits4.P0_5, 3, 4, 0, TCAddresses.CJTO_W.value),
         [OpCode(0x48, TCAddresses.CJTO_W.value, Masks.BYTE_MASK.value)]),   # single register, + value, dec, no fillers
-    (TempCode(-0x4, DecBits4.P0_5.value, 3, 4, 0, TCAddresses.CJTO_W.value),
+    (TempCode(-0x4, DecBits4.P0_5, 3, 4, 0, TCAddresses.CJTO_W.value),
         [OpCode(0xC8, TCAddresses.CJTO_W.value, Masks.BYTE_MASK.value)]),   # single register, - value, dec, no fillers
-    (TempCode(1024, 0, 11, 4, 0, TCAddresses.LTHFTH_W.value),
+    (TempCode(1024, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value),
         [OpCode(0x40, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x00, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, no dec, no fillers
-    (TempCode(-1024, 0, 11, 4, 0, TCAddresses.LTHFTH_W.value),
+    (TempCode(-1024, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value),
         [OpCode(0xC0, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x00, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, no dec, no fillers
-    (TempCode(1024, DecBits4.P0_75.value, 11, 4, 0, TCAddresses.LTHFTH_W.value),
+    (TempCode(1024, DecBits4.P0_75, 11, 4, 0, TCAddresses.LTHFTH_W.value),
         [OpCode(0x40, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x0C, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, + value, dec, no fillers
-    (TempCode(-1024, DecBits4.P0_75.value, 11, 4, 0, TCAddresses.LTHFTH_W.value),
+    (TempCode(-1024, DecBits4.P0_75, 11, 4, 0, TCAddresses.LTHFTH_W.value),
         [OpCode(0xC0, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x0C, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, dec, no fillers
-    (TempCode(2047, DecBits4.P0_9375.value, 11, 4, 0, TCAddresses.LTHFTH_W.value),
+    (TempCode(2047, DecBits4.P0_9375, 11, 4, 0, TCAddresses.LTHFTH_W.value),
         [OpCode(0x7F, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0xFF, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max + value, dec, no fillers
-    (TempCode(64, DecBits6.P0_296875.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(64, DecBits6.P0_296875, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0x40, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x4C, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, + value, dec, fillers
-    (TempCode(-64, DecBits6.P0_296875.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(-64, DecBits6.P0_296875, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0xC0, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x4C, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, dec, fillers
-    (TempCode(127, DecBits6.P0_984375.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(127, DecBits6.P0_984375, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0x7F, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0xFC, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max + value, dec, fillers
-    (TempCode(1, DecBits6.P0_015625.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(1, DecBits6.P0_015625, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0x01, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x04, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, min + value, dec, fillers
-    (TempCode(0, DecBits6.P0_0.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(0, DecBits6.P0_0, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0x00, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x00, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, zero value, dec, fillers
-    (TempCode(-1, DecBits6.P0_015625.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(-1, DecBits6.P0_015625, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0x81, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x04, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max - value, dec, fillers
-    (TempCode(-127, DecBits6.P0_984375.value, 7, 6, 2, TCAddresses.CJTH_W.value),
+    (TempCode(-127, DecBits6.P0_984375, 7, 6, 2, TCAddresses.CJTH_W.value),
         [OpCode(0xFF, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0xFC, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, min - value, dec, fillers
 ])

@@ -81,7 +81,11 @@ class TempCode():
     start_addx: int
 
 def _format_temp_bitstring(sign_bit:int, int_val:int, dec_val:int, num_int_bits:int, num_dec_bits:int, fill_bits:int):
-    ''' Combine and places in order the sign, int, dec, and filler bits of a TempCode into a BitArray'''
+    ''' Combine and place in order the sign, int, dec, and filler bits of a TempCode into a BitArray
+
+        Returns:
+            a bitstring BitArray ordered from MSB to LSB as a MAX31856 temperature register: sign_bit, int_val, dec_val, fill_bits
+    '''
     bits = BitArray(uint=sign_bit, length=1)
     int_bits = BitArray(uint=int_val, length=num_int_bits)
     bits.append(int_bits)
@@ -94,6 +98,9 @@ def _format_temp_bitstring(sign_bit:int, int_val:int, dec_val:int, num_int_bits:
 def _slice_bitstring_to_opcodes(temp_code:TempCode, bitstr:BitArray, num_slices:int) -> list:
     ''' Uses a bitstring representing a temperature setting update to produce OpCodes
         for carrying out this operation
+
+        Returns:
+            a list of OpCodes
     '''
     op_codes = []
     for i in range(num_slices):
@@ -105,7 +112,10 @@ def _slice_bitstring_to_opcodes(temp_code:TempCode, bitstr:BitArray, num_slices:
         op_codes.append(OpCode(value, temp_code.start_addx+i, Masks.BYTE_MASK.value))
     return op_codes
     
-def tempcode_to_opcode(temp_code:TempCode) -> list:
+def tempcode_to_opcode(temp_code:TempCode):
+    if temp_code.int_val is None or temp_code.dec_val is None:
+        return []
+
     # compute total bits required by this setting
     num_bits = 1 + temp_code.num_int_bits + temp_code.num_dec_bits + temp_code.num_filler_bits
 
@@ -119,7 +129,7 @@ def tempcode_to_opcode(temp_code:TempCode) -> list:
         temp_code.int_val = abs(temp_code.int_val)
 
     # combine and place in order the sign, int, dec, and filler bits into a BitArray
-    bits = _format_temp_bitstring(sign_bit, temp_code.int_val, temp_code.dec_val, temp_code.num_int_bits,
+    bits = _format_temp_bitstring(sign_bit, temp_code.int_val, temp_code.dec_val.value, temp_code.num_int_bits,
                                 temp_code.num_dec_bits, temp_code.num_filler_bits)
 
     # slice bitstring into 8-bit register sized chunks and convert each chunk to OpCode
