@@ -77,6 +77,7 @@ def test_negative_temp_check(temp_code, out, new_value):
     (TempCode(-127, DecBits6.P0_984375, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.CJ),
         [OpCode(0xFF, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0xFC, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, min - value, dec, fillers
+    (TempCode(None, None, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.CJ), [])
 ])
 def test_tempcode_to_opcode(tempcode, opcode_list):
     result = tempcode_to_opcode(tempcode)
@@ -85,6 +86,9 @@ def test_tempcode_to_opcode(tempcode, opcode_list):
 @pytest.mark.parametrize('tempcode, err_type', [
     (TempCode(0x7F, DecBits4.P0, 8, 0, 0, TCAddresses.CJHF_W.value, TempType.CJ), ValueError),
     (TempCode(0x7F, DecBits4.P0, 7, 1, 0, TCAddresses.CJHF_W.value, TempType.CJ), ValueError),
+    (None, ValueError),
+    (TempCode(None, DecBits6.P0, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.CJ), ValueError),
+    (TempCode(1000, None, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.CJ), ValueError),
 ])
 def test_tempcode_to_opcode_raises(tempcode, err_type):
     with pytest.raises(Exception) as e:

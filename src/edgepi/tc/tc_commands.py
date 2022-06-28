@@ -2,7 +2,7 @@ from enum import Enum, unique
 import logging
 from dataclasses import dataclass
 from bitstring import BitArray, pack
-from edgepi.tc.tc_constants import DecBits4, DecBits6, TCAddresses, TempBits, Masks
+from edgepi.tc.tc_constants import DecBits4, TempBits, Masks
 from edgepi.reg_helper.reg_helper import OpCode
 
 _logger = logging.getLogger(__name__)
