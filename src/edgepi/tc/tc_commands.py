@@ -90,12 +90,6 @@ class TempCode():
     start_addx: int
     setting_name: TempType
 
-    def check_values(self):
-        if self.int_val is None:
-            self.int_val = 0
-        elif self.dec_val is None:
-            self.dec_val = DecBits4.P0
-
 def _format_temp_bitstring(sign_bit:int, int_val:int, dec_val:int, num_int_bits:int, num_dec_bits:int, fill_bits:int):
     ''' Combine and place in order the sign, int, dec, and filler bits of a TempCode into a BitArray
 
@@ -148,13 +142,14 @@ def tempcode_to_opcode(temp_code:TempCode):
     if temp_code is None:
         raise ValueError('temp_code must be of type TempCode: received None')
     
-    # no args passed for this temp setting
-    if temp_code.int_val is None and temp_code.dec_val is None:
+    # no args passed for this temp setting -- skip it
+    # second clause is to check for registers with no decimal bits, since dec_val will never be None
+    if (temp_code.int_val is None and temp_code.dec_val is None) or (temp_code.int_val is None and temp_code.num_dec_bits == 0):
         return []
 
     # only either int or dec args passed for this temp setting
     if temp_code.int_val is None or temp_code.dec_val is None:
-        raise ValueError('temp_code requires both int and dec values: received only one of these.')
+        raise ValueError(f'temp_code requires both int and dec values: received only one of these: {temp_code}')
 
     # validate temp range
     _validate_temperatures(temp_code)
