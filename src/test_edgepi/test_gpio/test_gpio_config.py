@@ -31,6 +31,9 @@ def test_I2cPinInfo(name, setoutput, clearoutput, address, result):
     assert pin.setCode == result[1]
     assert pin.clearCode == result[2]
     assert pin.address == result[3]
+    assert pin.is_high == None
+    assert pin.is_out == None
+
 
 
 def test_generate_pin_info_dac(config = 'dac', pin_name_list = ['AO_EN1','AO_EN4','AO_EN3','AO_EN2','AO_EN5','AO_EN6','AO_EN7','AO_EN8', 'DAC_GAIN']):

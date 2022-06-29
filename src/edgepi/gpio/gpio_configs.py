@@ -51,6 +51,8 @@ class I2cPinInfo:
     setCode: Union[GpioAOutputSet, GpioBOutputSet] = None
     clearCode: Union[GpioAOutputClear, GpioBOutputClear] = None
     address: int = None
+    is_high: bool = None
+    is_out: bool = None
 
 # TODO: add more configs and list of pins for different modules
 
