@@ -13,16 +13,24 @@ def getPinConfigAddress(config:GpioExpanderConfig = None ):
     In: GPIO Expander Config data class
     Return: pin configuration(Direction) register address, pin output port (output level) register address 
     '''
-     # TODO: check config and return specific Values 
     return GPIOAddresses.CONFIGURATION_PORT_0.value if config.port is 'A'else GPIOAddresses.CONFIGURATION_PORT_1.value, GPIOAddresses.OUTPUT_PORT_0.value if config.port is 'A'else GPIOAddresses.OUTPUT_PORT_1.value
 
-def getDefaultValues(config:GpioExpanderConfig = None):
+def getDefaultValues(config:GpioExpanderConfig = None, pinList: list = None):
     ''' 
     In: GPIO Expander Config data class
     Return: pin configuration(Direction) register value, pin output port (output level) register value
     '''
+    pinDirVal = []
+    pinOutVal = []
     # TODO: check config and return specific Values 
-    return GpioAPinDir.ALL_DIR_OUT.value.op_code if config.port is 'A'else GpioBPinDir.ALL_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_ALL.value.op_code if config.port is 'A'else GpioBOutputClear.CLEAR_OUTPUT_ALL.value.op_code
+    if config.port is 'A' and config.dir is 'out':
+        if len(pinList) >= 8:
+            pinDirVal.append(GpioAPinDir.ALL_DIR_OUT.value.op_code)
+        if len(pinList) > 8:
+            pinDirVal.append(GpioAPinDir.PIN1_DIR_OUT.value.op_code)
+
+
+    return  if config.port is 'A'else GpioBPinDir.ALL_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_ALL.value.op_code if config.port is 'A'else GpioBOutputClear.CLEAR_OUTPUT_ALL.value.op_code
 
 def setPinStates(pinList:list = None):
     ''' 

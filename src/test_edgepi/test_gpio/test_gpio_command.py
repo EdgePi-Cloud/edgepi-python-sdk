@@ -24,16 +24,24 @@ def test_getPinConfigAddress(config, result):
     assert pinConfig == result[0]
     assert pinOut == result[1]
 
-@pytest.mark.parametrize('config, result', 
-                       [(GpioConfigs.DAC.value,[GpioAPinDir.ALL_DIR_OUT.value.op_code,GpioAPinDir.ALL_DIR_OUT.value.op_code]),
-                        (GpioConfigs.ADC.value,[GpioBPinDir.ALL_DIR_OUT.value.op_code,GpioBPinDir.ALL_DIR_OUT.value.op_code]),
-                        (GpioConfigs.RTD.value,[GpioBPinDir.ALL_DIR_OUT.value.op_code,GpioBPinDir.ALL_DIR_OUT.value.op_code]),
-                        (GpioConfigs.LED.value,[GpioBPinDir.ALL_DIR_OUT.value.op_code,GpioBPinDir.ALL_DIR_OUT.value.op_code])
+@pytest.mark.parametrize('config, pinDirList, pinOutList', 
+                       [(GpioConfigs.DAC.value,
+                        [GpioAPinDir.ALL_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_ALL.value.op_code],
+                        [GpioAPinDir.PIN1_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_1.value.op_code]),
+                        (GpioConfigs.ADC.value,
+                        [GpioBPinDir.PIN2_DIR_OUT.value.op_code,GpioBPinDir.PIN3_DIR_OUT.value.op_code],
+                        [GpioBOutputClear.CLEAR_OUTPUT_2.value.op_code, GpioBOutputClear.CLEAR_OUTPUT_3.value.op_code]),
+                        (GpioConfigs.RTD.value,
+                        [GpioBPinDir.PIN1_DIR_OUT.value.op_code],
+                        [GpioBOutputClear.CLEAR_OUTPUT_1.value.op_code]),
+                        (GpioConfigs.LED.value,
+                        [GpioBPinDir.ALL_DIR_OUT.value.op_code],
+                        [GpioBOutputClear.CLEAR_OUTPUT_ALL.value.op_code])
                         ])
-def test_getDefaultValues(config, result):
-    pinConfig, pinOut = getDefaultValues(config)
-    assert pinConfig == result[0]
-    assert pinOut == result[1]
+def test_getDefaultValues(config, expPinconfigList, exppinOutList):
+    pinConfigList, pinOutList = getDefaultValues(config)
+    assert pinConfigList == expPinconfigList
+    assert pinOutList == exppinOutList
 
 @pytest.mark.parametrize('pinConfig', 
                        [(GpioConfigs.DAC.value),
