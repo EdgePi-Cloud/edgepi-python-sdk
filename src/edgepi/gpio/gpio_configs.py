@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from typing import Union
 from dataclasses import dataclass
 from edgepi.gpio.gpio_constants import * 
 
@@ -21,15 +22,17 @@ class GpioExpanderConfig:
     name: str = None
     device: str = None
     num_pins: int = None
+    dir: str = None
+    port: str = None
     address: GpioExpanderAddress = None
     dev_path: str = None
 
 @unique
 class GpioConfigs(Enum):
-    DAC = GpioExpanderConfig(name = 'dac', device='i2c', num_pins=9, address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
-    ADC = GpioExpanderConfig(name = 'adc', device='i2c', num_pins=2, address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
-    RTD = GpioExpanderConfig(name = 'rtd', device='i2c', num_pins=1, address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
-    LED = GpioExpanderConfig(name = 'led', device='i2c', num_pins=8, address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
+    DAC = GpioExpanderConfig(name = 'dac', device='i2c', num_pins=9,dir='out', port='A', address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
+    ADC = GpioExpanderConfig(name = 'adc', device='i2c', num_pins=2,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
+    RTD = GpioExpanderConfig(name = 'rtd', device='i2c', num_pins=1,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
+    LED = GpioExpanderConfig(name = 'led', device='i2c', num_pins=8,dir='in', port='B', address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
 
 @dataclass
 class I2cPinInfo:
@@ -38,15 +41,15 @@ class I2cPinInfo:
         Attributes:
             name (str): name of the pin
 
-            dir (str): direction of the pin in or out
+            setCode (GpioAOutputSet, GpioBOutputSet): Output set code
 
-            port (str): port group A or B
+            clearCode (GpioAOutputClear, GpioBOutputClear): Output clear code
 
             address (int): address of i2c device
     '''
     name: str = None
-    setCode: GpioAOutputSet = None
-    clearCode: GpioAOutputClear = None
+    setCode: Union[GpioAOutputSet, GpioBOutputSet] = None
+    clearCode: Union[GpioAOutputClear, GpioBOutputClear] = None
     address: int = None
 
 # TODO: add more configs and list of pins for different modules
