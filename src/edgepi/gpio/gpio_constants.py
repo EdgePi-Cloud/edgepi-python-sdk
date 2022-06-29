@@ -66,7 +66,7 @@ class GpioBOutputSet(Enum):
     SET_OUTPUT_6 = OpCode(0x20, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT5.value)
     SET_OUTPUT_7 = OpCode(0x40, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT6.value)
     SET_OUTPUT_8 = OpCode(0x80, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT7.value)
-    SET_OUTPUT_ALL = OpCode(0xFF, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BYTE.value)
+    SET_OUTPUT_ALL = OpCode(0xFF, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BYTE.value)
 
 @unique
 class GpioBOutputClear(Enum):
@@ -78,7 +78,7 @@ class GpioBOutputClear(Enum):
     CLEAR_OUTPUT_6 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT5.value)
     CLEAR_OUTPUT_7 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT6.value)
     CLEAR_OUTPUT_8 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT7.value)
-    CLEAR_OUTPUT_ALL = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BYTE.value)
+    CLEAR_OUTPUT_ALL = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BYTE.value)
 
 @unique
 class GpioAPinDir(Enum):
@@ -112,7 +112,7 @@ class GpioBPinDir(Enum):
     PIN6_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT5.value)
     PIN7_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT6.value)
     PIN8_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT7.value)
-    ALL_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BYTE.value)
+    ALL_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BYTE.value)
 
 
     PIN1_DIR_IN = OpCode(0x01, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT0.value)
@@ -123,5 +123,5 @@ class GpioBPinDir(Enum):
     PIN6_DIR_IN = OpCode(0x20, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT5.value)
     PIN7_DIR_IN = OpCode(0x40, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT6.value)
     PIN8_DIR_IN = OpCode(0x80, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT7.value)
-    ALL_DIR_IN = OpCode(0xFF, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BYTE.value)
+    ALL_DIR_IN = OpCode(0xFF, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BYTE.value)
 

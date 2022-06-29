@@ -13,8 +13,13 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
                          (['/dev/i2c-10'],'rtd',[GpioConfigs.RTD.value]),
                          (['/dev/i2c-10'],'led',[GpioConfigs.LED.value]),
                         ])
-@patch('edgepi.peripherals.i2c.I2C')
+@patch('edgepi.peripherals.i2c.I2CDevice')
 def test_edgepi_gpio_init(i2c_mock, mock_expect, config, result):
     i2c_mock.fd = mock_expect[0]
     gpioCtrl = EdgePiGPIO(config)
     assert gpioCtrl.config == result[0]
+
+# generate_write_message with default values and state
+# trnsfer_message
+# return pin state
+# def test_edgepi_gpio_set_default():

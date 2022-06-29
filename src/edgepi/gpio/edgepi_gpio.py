@@ -8,6 +8,7 @@ import time
 from edgepi.peripherals.gpio import GpioDevice
 from edgepi.peripherals.i2c import I2CDevice
 from edgepi.gpio.gpio_commands import *
+from edgepi.gpio.gpio_constants import gpio_constants
 
 _logger = logging.getLogger(__name__)
 
@@ -26,3 +27,16 @@ class EdgePiGPIO(I2CDevice):
             super().__init__(self.config.dev_path)
             _logger.info(f'GPIO expander up and running')
             self.pinList = generate_pin_info(self.config.name)
+            self.pinConfigAddress, self.pinOutAddress = getPinConfigAddress(self.config)
+
+    
+    def set_default(self):
+        ''' 
+        function to set the pins to default configuration
+        Note: always toggle output state first before changing the pin direction
+        '''
+        pinDirVal, pinOutVal = getDefaultValues(self.config)
+        self.transfer(self.config.address.value, self.setWriteMsg(self.pinOutAddress, pinOutVal))
+        self.transfer(self.config.address.value, self.setWriteMsg(self.pinConfigAddress, pinDirVal))
+        self.transfer(self.config.address.value, self.setReadMsg(self.pinOutAddress, [0xFF]))
+        
