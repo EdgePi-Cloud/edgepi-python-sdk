@@ -116,7 +116,7 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
         return new_data
 
-    def __write_to_register(self, reg_addx, value):
+    def __write_to_register(self, reg_addx:int, value:int):
         ''' write a value to a register.
             
             Args:
@@ -149,7 +149,12 @@ class EdgePiTC(SpiDevice):
         return reg_map
 
     def __update_registers_from_dict(self, reg_values:dict):
-        ''' Applies updated register values contained in a dictionary with register_addx: register_value pairs '''
+        ''' Applies updated register values contained in a dictionary of register values
+
+            Args:
+                reg_values (dict): a dictionary containing { register_address: entry } pairs, where
+                                    entry is a dictionary holding 'value' and 'is_changed' keys.
+        '''
         for reg_addx, entry in reg_values.items():
             if entry['is_changed']:
                 updated_value = entry['value']
@@ -185,7 +190,7 @@ class EdgePiTC(SpiDevice):
         ):
         '''
         A collective thermocouple settings update method. Use this method to configure thermocouple settings. This method
-        allows you to configure settings either individually, or collectively.
+        allows you to configure settings either individually, or collectively (more than one at a time).
 
         Args:
             all (Enum): enum representing a valid hex opcode. Valid opcodes are available in this SDK's tc_constants module.

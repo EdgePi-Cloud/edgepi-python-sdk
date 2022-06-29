@@ -1,13 +1,13 @@
 import pytest
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import call, patch
 from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import AvgMode, DecBits4, DecBits6, TCAddresses
 from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
 @pytest.fixture(name='tc')
 def fixture_test_edgepi_tc(mocker):
-    mocker.patch('edgepi.peripherals.spi.SPI')
+    mocker.patch('edgepi.tc.edgepi_tc.SpiDevice')
     return EdgePiTC()
 
 @pytest.mark.parametrize('reg_address, data', [
@@ -132,3 +132,30 @@ def test_set_config(mocker, args, reg_values, updated_regs, tc):
         else:
             assert reg_values[addx]['value'] == updated_regs[addx]
             assert reg_values[addx]['is_changed'] == True
+
+@pytest.mark.parametrize('reg_values', [
+    ({TCAddresses.CR0_W.value: {'is_changed': True, 'value': 0xFF}}),
+    ({
+        TCAddresses.CR0_W.value: {'is_changed': True, 'value': 0xFF},
+        TCAddresses.CR1_W.value: {'is_changed': True, 'value': 0xFF}}),
+    ({TCAddresses.CR0_W.value: {'is_changed': False, 'value': 0xFF}}),
+    ({
+        TCAddresses.CR0_W.value: {'is_changed': True, 'value': 0xFF},
+        TCAddresses.CR1_W.value: {'is_changed': True, 'value': 0xFF}}),
+    ({
+        TCAddresses.CR0_W.value: {'is_changed': True, 'value': 0xFF},
+        TCAddresses.CR1_W.value: {'is_changed': True, 'value': 0xFF},
+        TCAddresses.CJHF_W.value: {'is_changed': False, 'value': 0x0}}),
+])
+@patch('edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__write_to_register')
+def test_update_registers_from_dict(mock_write, reg_values, tc):
+    # construct list of expected calls to __write_to_register
+    write_calls = []
+    for addx, entry in reg_values.items():
+        if entry['is_changed']:
+            write_calls.append(call(addx, entry['value']))
+
+    tc._EdgePiTC__update_registers_from_dict(reg_values)
+
+    # assert __write_to_register called with expected calls
+    mock_write.assert_has_calls(write_calls, any_order=True)
