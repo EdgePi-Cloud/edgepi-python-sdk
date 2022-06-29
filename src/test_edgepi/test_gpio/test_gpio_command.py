@@ -34,3 +34,16 @@ def test_getDefaultValues(config, result):
     pinConfig, pinOut = getDefaultValues(config)
     assert pinConfig == result[0]
     assert pinOut == result[1]
+
+@pytest.mark.parametrize('pinConfig', 
+                       [(GpioConfigs.DAC.value),
+                        (GpioConfigs.ADC.value),
+                        (GpioConfigs.RTD.value),
+                        (GpioConfigs.LED.value)
+                        ])
+def test_setPinStates(pinConfig):
+    pinList = generate_pin_info(pinConfig.name)
+    pinList = setPinStates(pinList)
+    for pin in pinList:
+        assert pin.is_high == False
+        assert pin.is_out == True
