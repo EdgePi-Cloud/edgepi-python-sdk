@@ -39,4 +39,5 @@ class EdgePiGPIO(I2CDevice):
         self.transfer(self.config.address.value, self.setWriteMsg(self.pinConfigAddress, pinDirVal))
         pinOutVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinOutAddress, [0xFF]))
         pinDirVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinConfigAddress, [0xFF]))
-        # check if writing was successfull
+        # TODO: check if writing was successfull
+        
