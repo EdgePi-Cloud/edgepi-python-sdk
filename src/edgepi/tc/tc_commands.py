@@ -50,15 +50,15 @@ def code_to_temp(code_bytes:list):
         lt_temp = -(lt_temp)
 
     _logger.info(f'Cold Junction Temp: {cj_temp}')  
-    _logger.info(f'LT TC Temp: {lt_temp}')         
+    _logger.info(f'THERMOCOUPLE TC Temp: {lt_temp}')         
 
     return cj_temp, lt_temp
 
 @unique
 class TempType(Enum):
-    CJ = 0
-    LT = 1
-    CJ_OFF = 2
+    COLD_JUNCTION = 0
+    THERMOCOUPLE = 1
+    COLD_JUNCTION_OFFSET = 2
 
 @dataclass 
 class TempCode():
@@ -127,9 +127,9 @@ def _validate_temperatures(tempcode:TempCode):
         affected register.
     '''
     reg_temps = {
-        TempType.CJ.value: {'min': -127, 'max': 127},
-        TempType.LT.value: {'min': -2047, 'max': 2047},
-        TempType.CJ_OFF.value: {'min': -7, 'max': 7},
+        TempType.COLD_JUNCTION.value: {'min': -127, 'max': 127},
+        TempType.THERMOCOUPLE.value: {'min': -2047, 'max': 2047},
+        TempType.COLD_JUNCTION_OFFSET.value: {'min': -7, 'max': 7},
     }
     temp_type = tempcode.setting_name.value
     temp_val = tempcode.int_val

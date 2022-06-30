@@ -257,12 +257,12 @@ class EdgePiTC(SpiDevice):
 
         # process temperature setting
         tempcodes = []
-        tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.CJ))
-        tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value, TempType.CJ))
-        tempcodes.append(TempCode(lt_high_threshold, lt_high_threshold_decimals, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.LT))
-        tempcodes.append(TempCode(lt_low_threshold, lt_low_threshold_decimals, 11, 4, 0, TCAddresses.LTLFTH_W.value, TempType.LT))
-        tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value, TempType.CJ_OFF))
-        tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.CJ))
+        tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION))
+        tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value, TempType.COLD_JUNCTION))
+        tempcodes.append(TempCode(lt_high_threshold, lt_high_threshold_decimals, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE))
+        tempcodes.append(TempCode(lt_low_threshold, lt_low_threshold_decimals, 11, 4, 0, TCAddresses.LTLFTH_W.value, TempType.THERMOCOUPLE))
+        tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value, TempType.COLD_JUNCTION_OFFSET))
+        tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION))
 
         for tempcode in tempcodes:
             ops_list += tempcode_to_opcode(tempcode)
