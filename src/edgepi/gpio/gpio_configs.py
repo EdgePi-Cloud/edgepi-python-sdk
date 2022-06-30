@@ -24,15 +24,15 @@ class GpioExpanderConfig:
     num_pins: int = None
     dir: str = None
     port: str = None
-    address: GpioExpanderAddress = None
+    address: Union[GpioExpanderAddress, int] = None
     dev_path: str = None
 
 @unique
 class GpioConfigs(Enum):
-    DAC = GpioExpanderConfig(name = 'dac', device='i2c', num_pins=9,dir='out', port='A', address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
-    ADC = GpioExpanderConfig(name = 'adc', device='i2c', num_pins=2,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
-    RTD = GpioExpanderConfig(name = 'rtd', device='i2c', num_pins=1,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO, dev_path='/dev/i2c-10')
-    LED = GpioExpanderConfig(name = 'led', device='i2c', num_pins=8,dir='in', port='B', address=GpioExpanderAddress.EXP_ONE, dev_path='/dev/i2c-10')
+    DAC = GpioExpanderConfig(name = 'dac', device='i2c', num_pins=9,dir='out', port='A', address=GpioExpanderAddress, dev_path='/dev/i2c-10')
+    ADC = GpioExpanderConfig(name = 'adc', device='i2c', num_pins=2,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO.value, dev_path='/dev/i2c-10')
+    RTD = GpioExpanderConfig(name = 'rtd', device='i2c', num_pins=1,dir='out', port='B', address=GpioExpanderAddress.EXP_TWO.value, dev_path='/dev/i2c-10')
+    LED = GpioExpanderConfig(name = 'led', device='i2c', num_pins=8,dir='in', port='B', address=GpioExpanderAddress.EXP_ONE.value, dev_path='/dev/i2c-10')
 
 @dataclass
 class I2cPinInfo:
@@ -60,7 +60,7 @@ class I2cPinInfo:
 _list_of_DAC_gpios = ['AO_EN1','AO_EN4','AO_EN3','AO_EN2','AO_EN5','AO_EN6','AO_EN7','AO_EN8', 'DAC_GAIN']
 _list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
 _list_of_RTD_gpios = ['RTD_EN']
-_list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2' 'LED_OVR3' 'LED_OVR4''LED_OVR5''LED_OVR6', 'LED_OVR7', 'LED_OVR8']
+_list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4','LED_OVR5','LED_OVR6', 'LED_OVR7', 'LED_OVR8']
 
 
 

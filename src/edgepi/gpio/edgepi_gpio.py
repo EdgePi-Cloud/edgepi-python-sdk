@@ -30,41 +30,64 @@ class EdgePiGPIO(I2CDevice):
             self.pinList = generate_pin_info(self.config.name)
             self.pinConfigAddress, self.pinOutAddress = getPinConfigAddress(self.config)
 
-    
+    def generate_default_reg_dict(self):
+        ''' 
+        Function to generate a list of default register dictionary
+        Return:
+            list of register dictionary [{register address : register value}]
+        '''
+        pinLists = checkMultipleDev(self.pinList)
+        listRegDict=[]
+        for pinList in pinLists:
+            if pinList:
+                listRegDict.append(self.__reg_addressToValue_dict(pinList[0].address))
+        return listRegDict, pinLists
+
     def set_expander_default(self):
         ''' 
         function to set the pins to default configuration
         Note: always toggle output state first before changing the pin direction
         '''
-        reg_dict = getDefaultValues(self.__reg_addressToValue_dict(), self.pinList)
         
-        self.transfer(self.config.address.value, self.setWriteMsg(self.pinOutAddress, pinOutVal))
-        self.transfer(self.config.address.value, self.setWriteMsg(self.pinConfigAddress, pinDirVal))
-        pinOutVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinOutAddress, [0xFF]))
-        pinDirVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinConfigAddress, [0xFF]))
-        # TODO: check if writing was successfull
+        listDefaultRegDict, pinLists = self.generate_default_reg_dict()
+        listRegDict = listDefaultRegDict
+        for regDict, pinList, dev_address, defaultRegDict in zip(listRegDict, pinLists, self.config.address, listDefaultRegDict):
+            regDict = getDefaultValues(regDict, pinList)
+            
+            for reg_addx, entry in regDict.items():
+                if entry['is_changed']:
+                    self.transfer(dev_address.value, self.setWriteMsg(reg_addx, entry['value']))
+
+            for reg_address, value in defaultRegDict.item():
+                value = self.transfer(dev_address.value, self.setReadMsg(reg_address, [value]))
+        return listDefaultRegDict
     
-    def __read_register(self, address):
+    def __read_register(self, reg_address, dev_address):
         ''' 
         function to read one register value
+        In:
+            reg_address: register address to read data from
+            dev_address: expander address to read 
         Returns:
             A byte data
         '''
         _logger.debug(f'Reading a register value')
-        msgRead = self.setReadMsg(address, [0xFF])
+        msgRead = self.setReadMsg(reg_address, [0xFF])
         _logger.debug(f'Read Message: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
-        self.transfer(self.config.address.value, msgRead)
+        self.transfer(dev_address, msgRead)
         _logger.debug(f'Message Read: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
         return msgRead[1].data[0]
 
-    def __reg_addressToValue_dict(self):
+    def __reg_addressToValue_dict(self, dev_address):
         ''' 
         Function to map address : value dictionary
+        In:
+            dev_address: expander address to read 
         Returns:
             Dictionary containing address : value
         '''
         _logger.info(f'Mapping a register addree : register value')
         reg_map = {}
-        reg_map[self.pinOutAddress] = self.__read_register(self.pinOutAddress)
-        reg_map[self.pinConfigAddress] = self.__read_register(self.pinConfigAddress)
+        reg_map[self.pinOutAddress] = self.__read_register(self.pinOutAddress, dev_address)
+        reg_map[self.pinConfigAddress] = self.__read_register(self.pinConfigAddress, dev_address)
         return reg_map
