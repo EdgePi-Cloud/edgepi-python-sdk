@@ -32,7 +32,8 @@ def test_edgepi_gpio_init(mock_I2CDevice, mock_expect, config, result):
                          ('adc',33, 255),
                          ('rtd',33, 255),
                          ('led',32, 255),
-                        ])                   
+                        ])
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                                  
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                        
 def test_edgepi_gpio_read_register(mock,config, dev_address, out):
     mock.return_value = out
@@ -46,18 +47,18 @@ def test_edgepi_gpio_read_register(mock,config, dev_address, out):
                          ('rtd', 33, {3 : 255, 7 : 255}),
                          ('led', 33, {3 : 255, 7 : 255}),
                         ])               
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._read_register')                          
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_register')                          
 def test_edgepi_gpio_reg_addressToValue_dict(mock, config, dev_address, out):
     mock.return_value = 255
     gpioCtrl = EdgePiGPIO(config)
-    out_data = gpioCtrl._reg_addressToValue_dict(dev_address)
+    out_data = gpioCtrl.reg_addressToValue_dict(dev_address)
     assert out_data == out
 
 @pytest.mark.parametrize("config, result",
                         [('dac', [{2 : 255, 6 : 255}, {2 : 255, 6 : 255}]),
                          ('adc', [None, {2 : 255, 6 : 255}]),
                         ])    
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._reg_addressToValue_dict')  
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.reg_addressToValue_dict')  
 def test_generate_default_reg_dict(Mock,config, result):
     Mock.return_value = {2 : 255, 6 : 255}
     gpioCtrl = EdgePiGPIO(config)

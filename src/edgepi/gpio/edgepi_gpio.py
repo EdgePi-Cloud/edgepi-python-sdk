@@ -75,7 +75,7 @@ class EdgePiGPIO(I2CDevice):
                 defaultRegDict[reg_address] = self.transfer(dev_address, self.setReadMsg(reg_address, [value]))
         return listDefaultRegDict
     
-    def _read_register(self, reg_address, dev_address):
+    def read_register(self, reg_address, dev_address):
         ''' 
         function to read one register value
         In:
@@ -91,7 +91,7 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(f'Message Read: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
         return msgRead[1].data[0]
 
-    def _reg_addressToValue_dict(self, dev_address):
+    def reg_addressToValue_dict(self, dev_address):
         ''' 
         Function to map address : value dictionary
         In:
