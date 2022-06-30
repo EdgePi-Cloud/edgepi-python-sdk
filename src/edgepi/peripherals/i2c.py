@@ -38,8 +38,8 @@ class I2CDevice():
     '''
     def transfer(self, dev_addr: int = None, Msg:list = None):
         self.i2cdev.transfer(dev_addr, Msg)
-        if Msg[1].read == True:
-            return Msg[1].data
+        if len(Msg)>1:
+            return Msg[1].data[0]
 
     def close(self):
         self.i2cdev.close()
