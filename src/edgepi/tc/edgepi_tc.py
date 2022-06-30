@@ -38,6 +38,7 @@ class EdgePiTC(SpiDevice):
         command = reg_value[1] | TCOps.SINGLE_SHOT.value.op_code
         self.__write_to_register(TCAddresses.CR0_W.value, command)
         # there is a time delay between register write and update
+        # TODO: replace with time delay calculation
         time.sleep(0.5)
 
         # read cold junction and linearized TC temperatures

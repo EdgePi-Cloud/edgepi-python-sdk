@@ -1,5 +1,5 @@
-from enum import Enum, unique
 import logging
+from enum import Enum, unique
 from dataclasses import dataclass
 from bitstring import BitArray, pack
 from edgepi.tc.tc_constants import DecBits4, TempBits, Masks
