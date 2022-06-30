@@ -37,13 +37,12 @@ def test_getDefaultValues(config, reg_dict, result):
     getDefaultValues(reg_dict, pinList)
     assert reg_dict == result
     
-@pytest.mark.parametrize('config',[('dac')])
-def test_checkMultipleDev(config):
+@pytest.mark.parametrize('config, result',[('adc',[0, 2]), ('dac',[8, 1]), ('rtd',[0, 1]), ('led',[8, 0])])
+def test_checkMultipleDev(config, result):
     pinList_org = generate_pin_info(config)
     pinList = checkMultipleDev(pinList_org)
-    for pin, pinOrg in zip(pinList[0], pinList_org):
-        assert pin == pinOrg
-    assert pinList[1][0] == pinList_org[8]
+    assert len(pinList[0]) == result[0]
+    assert len(pinList[1]) == result[1]
     
 
 @pytest.mark.parametrize('pinConfig', 

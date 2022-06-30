@@ -5,7 +5,7 @@ from edgepi.gpio.gpio_configs import *
 
 
 @pytest.mark.parametrize('config, result', 
-                        [(GpioConfigs.DAC.value, ['dac', 'i2c', 9, 'out', 'A', 32, '/dev/i2c-10']),
+                        [(GpioConfigs.DAC.value, ['dac', 'i2c', 9, 'out', 'A', GpioExpanderAddress, '/dev/i2c-10']),
                          (GpioConfigs.ADC.value, ['adc', 'i2c', 2, 'out', 'B', 33, '/dev/i2c-10']),
                          (GpioConfigs.RTD.value, ['rtd', 'i2c', 1, 'out', 'B', 33, '/dev/i2c-10']),
                          (GpioConfigs.LED.value, ['led', 'i2c', 8, 'in', 'B', 32, '/dev/i2c-10'])
@@ -16,7 +16,7 @@ def test_GpioModuleConfig(config, result):
     assert config.num_pins == result[2]
     assert config.dir == result[3]
     assert config.port == result[4]
-    assert config.address.value == result[5]
+    assert config.address == result[5]
     assert config.dev_path == result[6]
 
 @pytest.mark.parametrize('name, setoutput, clearoutput, pinDir, address, result', 
@@ -51,7 +51,7 @@ def test_generate_pin_info_dac(config = 'dac', pin_name_list = ['AO_EN1','AO_EN4
     assert pin_list[8].dirCode == GpioAPinDir.PIN1_DIR_OUT.value
     assert pin_list[8].address == GpioExpanderAddress.EXP_TWO.value
     
-def test_generate_pin_info_led(config = 'led', pin_name_list = ['LED_OVR1', 'LED_OVR2' 'LED_OVR3' 'LED_OVR4''LED_OVR5''LED_OVR6', 'LED_OVR7', 'LED_OVR8']):
+def test_generate_pin_info_led(config = 'led', pin_name_list = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4','LED_OVR5','LED_OVR6', 'LED_OVR7', 'LED_OVR8']):
     pin_list = generate_pin_info(config)
     for pin, outputset, outputclear, outputDir, pin_name in zip(pin_list, GpioBOutputSet, GpioBOutputClear, GpioBPinDir, pin_name_list):
         assert pin.name == pin_name
