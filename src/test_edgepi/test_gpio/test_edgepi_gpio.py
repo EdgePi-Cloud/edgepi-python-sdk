@@ -33,12 +33,11 @@ def test_edgepi_gpio_init(mock_I2CDevice, mock_expect, config, result):
                          ('rtd',33, 255),
                          ('led',32, 255),
                         ])
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                                  
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                        
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                                                        
 def test_edgepi_gpio_read_register(mock,config, dev_address, out):
     mock.return_value = out
     gpioCtrl = EdgePiGPIO(config)
-    out_data = gpioCtrl._read_register(gpioCtrl.pinConfigAddress, dev_address)
+    out_data = gpioCtrl.read_register(gpioCtrl.pinConfigAddress, dev_address)
     assert out_data == out
 
 @pytest.mark.parametrize("config, dev_address, out",
@@ -74,7 +73,7 @@ def test_generate_default_reg_dict(Mock,config, result):
                          ('led', [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0], [{2 : 0, 6 : 0}, None,]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._reg_addressToValue_dict')  
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.reg_addressToValue_dict')  
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.setWriteMsg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.setReadMsg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')

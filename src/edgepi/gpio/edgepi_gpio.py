@@ -43,7 +43,7 @@ class EdgePiGPIO(I2CDevice):
         listRegDict=[]
         for pinList in pinLists:
             if pinList:
-                listRegDict.append(deepcopy(self._reg_addressToValue_dict(pinList[0].address)))
+                listRegDict.append(deepcopy(self.reg_addressToValue_dict(pinList[0].address)))
             else:
                 listRegDict.append(None)
         return listRegDict, pinLists
@@ -101,6 +101,6 @@ class EdgePiGPIO(I2CDevice):
         '''
         _logger.info(f'Mapping a register addree : register value')
         reg_map = {}
-        reg_map[self.pinOutAddress] = self._read_register(self.pinOutAddress, dev_address)
-        reg_map[self.pinConfigAddress] = self._read_register(self.pinConfigAddress, dev_address)
+        reg_map[self.pinOutAddress] = self.read_register(self.pinOutAddress, dev_address)
+        reg_map[self.pinConfigAddress] = self.read_register(self.pinConfigAddress, dev_address)
         return reg_map
