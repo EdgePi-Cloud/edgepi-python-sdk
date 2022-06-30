@@ -9,6 +9,8 @@ from edgepi.peripherals.gpio import GpioDevice
 from edgepi.peripherals.i2c import I2CDevice
 from edgepi.gpio.gpio_commands import *
 
+from edgepi.reg_helper.reg_helper import apply_opcodes
+
 _logger = logging.getLogger(__name__)
 
 class EdgePiGPIO(I2CDevice):
@@ -34,8 +36,8 @@ class EdgePiGPIO(I2CDevice):
         function to set the pins to default configuration
         Note: always toggle output state first before changing the pin direction
         '''
-        reg_map = __reg_addressToValue_dict()
-
+        reg_dict = getDefaultValues(self.__reg_addressToValue_dict(), self.pinList)
+        
         self.transfer(self.config.address.value, self.setWriteMsg(self.pinOutAddress, pinOutVal))
         self.transfer(self.config.address.value, self.setWriteMsg(self.pinConfigAddress, pinDirVal))
         pinOutVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinOutAddress, [0xFF]))
@@ -53,7 +55,7 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(f'Read Message: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
         self.transfer(self.config.address.value, msgRead)
         _logger.debug(f'Message Read: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
-        return msgRead[1].data
+        return msgRead[1].data[0]
 
     def __reg_addressToValue_dict(self):
         ''' 
@@ -63,6 +65,6 @@ class EdgePiGPIO(I2CDevice):
         '''
         _logger.info(f'Mapping a register addree : register value')
         reg_map = {}
-        reg_map[self.pinOutAddress] = self.__read_register(self.pinConfigAddress)
         reg_map[self.pinOutAddress] = self.__read_register(self.pinOutAddress)
+        reg_map[self.pinConfigAddress] = self.__read_register(self.pinConfigAddress)
         return reg_map
