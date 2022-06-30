@@ -34,10 +34,35 @@ class EdgePiGPIO(I2CDevice):
         function to set the pins to default configuration
         Note: always toggle output state first before changing the pin direction
         '''
-        pinDirVal, pinOutVal = getDefaultValues(self.config)
+        reg_map = __reg_addressToValue_dict()
+
         self.transfer(self.config.address.value, self.setWriteMsg(self.pinOutAddress, pinOutVal))
         self.transfer(self.config.address.value, self.setWriteMsg(self.pinConfigAddress, pinDirVal))
         pinOutVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinOutAddress, [0xFF]))
         pinDirVal = self.transfer(self.config.address.value, self.setReadMsg(self.pinConfigAddress, [0xFF]))
         # TODO: check if writing was successfull
-        
+    
+    def __read_register(self, address):
+        ''' 
+        function to read one register value
+        Returns:
+            A byte data
+        '''
+        _logger.debug(f'Reading a register value')
+        msgRead = self.setReadMsg(address, [0xFF])
+        _logger.debug(f'Read Message: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
+        self.transfer(self.config.address.value, msgRead)
+        _logger.debug(f'Message Read: Register Address {msgRead[0].data}, Msg Place Holder {msgRead[1].data}')
+        return msgRead[1].data
+
+    def __reg_addressToValue_dict(self):
+        ''' 
+        Function to map address : value dictionary
+        Returns:
+            Dictionary containing address : value
+        '''
+        _logger.info(f'Mapping a register addree : register value')
+        reg_map = {}
+        reg_map[self.pinOutAddress] = self.__read_register(self.pinConfigAddress)
+        reg_map[self.pinOutAddress] = self.__read_register(self.pinOutAddress)
+        return reg_map

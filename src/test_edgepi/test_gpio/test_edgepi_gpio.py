@@ -23,3 +23,15 @@ def test_edgepi_gpio_init(i2c_mock, mock_expect, config, result):
 # trnsfer_message
 # return pin state
 # def test_edgepi_gpio_set_default():
+
+@pytest.mark.parametrize("config, out",
+                        [('dac', 255),
+                         ('adc', 255),
+                         ('rtd', 255),
+                         ('led', 255),
+                        ])                                         
+def test_edgepi_gpio_read_register(config, out):
+    transfer_mock.return_value = out
+    gpioCtrl = EdgePiGPIO(config)
+    out_data = gpioCtrl.__read_register(gpioCtrl.pinConfigAddress)
+    assert out_data == out

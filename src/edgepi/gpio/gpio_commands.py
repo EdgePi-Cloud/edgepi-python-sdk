@@ -23,14 +23,9 @@ def getDefaultValues(config:GpioExpanderConfig = None, pinList: list = None):
     pinDirVal = []
     pinOutVal = []
     # TODO: check config and return specific Values 
-    if config.port is 'A' and config.dir is 'out':
-        if len(pinList) >= 8:
-            pinDirVal.append(GpioAPinDir.ALL_DIR_OUT.value.op_code)
-        if len(pinList) > 8:
-            pinDirVal.append(GpioAPinDir.PIN1_DIR_OUT.value.op_code)
+    # if config.port is 'A' and config.dir is 'out':
+    #     for pin in pinList:
 
-
-    return  if config.port is 'A'else GpioBPinDir.ALL_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_ALL.value.op_code if config.port is 'A'else GpioBOutputClear.CLEAR_OUTPUT_ALL.value.op_code
 
 def setPinStates(pinList:list = None):
     ''' 

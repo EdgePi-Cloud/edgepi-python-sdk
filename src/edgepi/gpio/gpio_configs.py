@@ -50,6 +50,7 @@ class I2cPinInfo:
     name: str = None
     setCode: Union[GpioAOutputSet, GpioBOutputSet] = None
     clearCode: Union[GpioAOutputClear, GpioBOutputClear] = None
+    dirCode: Union[GpioAPinDir, GpioBPinDir] = None
     address: int = None
     is_high: bool = None
     is_out: bool = None
@@ -73,9 +74,9 @@ def _generate_dac_pins():
             a list of dataclass with gpio information
     '''
     pin_list = []
-    for pin, set, clear in zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear):
-        pin_list.append(I2cPinInfo(pin, set.value, clear.value, GpioExpanderAddress.EXP_ONE.value))
-    pin_list[8] = I2cPinInfo(_list_of_DAC_gpios[8], GpioAOutputSet.SET_OUTPUT_1.value, GpioAOutputClear.CLEAR_OUTPUT_1.value, GpioExpanderAddress.EXP_TWO.value)
+    for pin, set, clear, dir in zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear, GpioAPinDir):
+        pin_list.append(I2cPinInfo(pin, set.value, clear.value, dir.value, GpioExpanderAddress.EXP_ONE.value))
+    pin_list[8] = I2cPinInfo(_list_of_DAC_gpios[8], GpioAOutputSet.SET_OUTPUT_1.value, GpioAOutputClear.CLEAR_OUTPUT_1.value, GpioAPinDir.PIN1_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value)
     return pin_list
 
 def _generate_LED_pins():
@@ -88,8 +89,8 @@ def _generate_LED_pins():
             a list of dataclass with gpio information
     '''
     pin_list = []
-    for pin, set, clear in zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear):
-        pin_list.append(I2cPinInfo(pin, set.value, clear.value, GpioExpanderAddress.EXP_ONE.value))
+    for pin, set, clear, dir in zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear, GpioBPinDir):
+        pin_list.append(I2cPinInfo(pin, set.value, clear.value, dir.value, GpioExpanderAddress.EXP_ONE.value))
     return pin_list
 
 def _generate_ADC_pins():
@@ -102,8 +103,8 @@ def _generate_ADC_pins():
             a list of dataclass with gpio information
     '''
     pin_list = []
-    pin_list.append(I2cPinInfo(_list_of_ADC_gpios[0], GpioBOutputSet.SET_OUTPUT_2.value, GpioBOutputClear.CLEAR_OUTPUT_2.value, GpioExpanderAddress.EXP_TWO.value))
-    pin_list.append(I2cPinInfo(_list_of_ADC_gpios[1], GpioBOutputSet.SET_OUTPUT_3.value, GpioBOutputClear.CLEAR_OUTPUT_3.value, GpioExpanderAddress.EXP_TWO.value))
+    pin_list.append(I2cPinInfo(_list_of_ADC_gpios[0], GpioBOutputSet.SET_OUTPUT_2.value, GpioBOutputClear.CLEAR_OUTPUT_2.value, GpioBPinDir.PIN2_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value))
+    pin_list.append(I2cPinInfo(_list_of_ADC_gpios[1], GpioBOutputSet.SET_OUTPUT_3.value, GpioBOutputClear.CLEAR_OUTPUT_3.value, GpioBPinDir.PIN3_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value))
     return pin_list
 
 def _generate_RTD_pins():
@@ -116,7 +117,7 @@ def _generate_RTD_pins():
             a list of dataclass with gpio information
     '''
     pin_list = []
-    pin_list.append(I2cPinInfo(_list_of_RTD_gpios[0], GpioBOutputSet.SET_OUTPUT_1.value, GpioBOutputClear.CLEAR_OUTPUT_1.value, GpioExpanderAddress.EXP_TWO.value))
+    pin_list.append(I2cPinInfo(_list_of_RTD_gpios[0], GpioBOutputSet.SET_OUTPUT_1.value, GpioBOutputClear.CLEAR_OUTPUT_1.value, GpioBPinDir.PIN1_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value))
     return pin_list
 
 

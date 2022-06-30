@@ -72,7 +72,7 @@ class EdgePiTC(SpiDevice):
 
         return fault_msgs
 
-    def __read_register(self, reg_addx):
+    def read_register(self, reg_addx):
         ''' Reads the value of a single register.
 
             Args:
