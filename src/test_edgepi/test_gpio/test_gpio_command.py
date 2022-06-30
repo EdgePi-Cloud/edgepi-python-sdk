@@ -24,24 +24,27 @@ def test_getPinConfigAddress(config, result):
     assert pinConfig == result[0]
     assert pinOut == result[1]
 
-# @pytest.mark.parametrize('config, pinDirList, pinOutList', 
-#                        [(GpioConfigs.DAC.value,
-#                         [GpioAPinDir.ALL_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_ALL.value.op_code],
-#                         [GpioAPinDir.PIN1_DIR_OUT.value.op_code, GpioAOutputClear.CLEAR_OUTPUT_1.value.op_code]),
-#                         (GpioConfigs.ADC.value,
-#                         [GpioBPinDir.PIN2_DIR_OUT.value.op_code,GpioBPinDir.PIN3_DIR_OUT.value.op_code],
-#                         [GpioBOutputClear.CLEAR_OUTPUT_2.value.op_code, GpioBOutputClear.CLEAR_OUTPUT_3.value.op_code]),
-#                         (GpioConfigs.RTD.value,
-#                         [GpioBPinDir.PIN1_DIR_OUT.value.op_code],
-#                         [GpioBOutputClear.CLEAR_OUTPUT_1.value.op_code]),
-#                         (GpioConfigs.LED.value,
-#                         [GpioBPinDir.ALL_DIR_OUT.value.op_code],
-#                         [GpioBOutputClear.CLEAR_OUTPUT_ALL.value.op_code])
-#                         ])
-# def test_getDefaultValues(config, expPinconfigList, exppinOutList):
-#     pinConfigList, pinOutList = getDefaultValues(config)
-#     assert pinConfigList == expPinconfigList
-#     assert pinOutList == exppinOutList
+@pytest.mark.parametrize('config, reg_dict, result', 
+                       [('adc', {3 : 255, 7 : 255}, {3: {'value': 249, 'is_changed': True},
+                                                     7: {'value': 249, 'is_changed': True}}),
+                        ('led', {3 : 255, 7 : 255}, {3: {'value': 0, 'is_changed': True},
+                                                     7: {'value': 0, 'is_changed': True}}),
+                        ('rtd', {3 : 255, 7 : 255}, {3: {'value': 254, 'is_changed': True},
+                                                     7: {'value': 254, 'is_changed': True}})
+                        ])
+def test_getDefaultValues(config, reg_dict, result):
+    pinList = generate_pin_info(config)
+    getDefaultValues(reg_dict, pinList)
+    assert reg_dict == result
+    
+@pytest.mark.parametrize('config',[('dac')])
+def test_checkMultipleDev(config):
+    pinList_org = generate_pin_info(config)
+    pinList = checkMultipleDev(pinList_org)
+    for pin, pinOrg in zip(pinList[0], pinList_org):
+        assert pin == pinOrg
+    assert pinList[1][0] == pinList_org[8]
+    
 
 @pytest.mark.parametrize('pinConfig', 
                        [(GpioConfigs.DAC.value),

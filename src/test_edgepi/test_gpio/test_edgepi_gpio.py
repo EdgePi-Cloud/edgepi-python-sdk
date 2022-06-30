@@ -25,13 +25,23 @@ def test_edgepi_gpio_init(i2c_mock, mock_expect, config, result):
 # def test_edgepi_gpio_set_default():
 
 @pytest.mark.parametrize("config, out",
-                        [('dac', 255),
-                         ('adc', 255),
-                         ('rtd', 255),
-                         ('led', 255),
+                        [('dac', [255]),
+                         ('adc', [255]),
+                         ('rtd', [255]),
+                         ('led', [255]),
                         ])                                         
 def test_edgepi_gpio_read_register(config, out):
-    transfer_mock.return_value = out
     gpioCtrl = EdgePiGPIO(config)
-    out_data = gpioCtrl.__read_register(gpioCtrl.pinConfigAddress)
+    out_data = gpioCtrl._EdgePiGPIO__read_register(gpioCtrl.pinConfigAddress)
+    assert out_data == out
+
+@pytest.mark.parametrize("config, out",
+                        [('dac', {2 : [255], 6 : [255]}),
+                         ('adc', {3 : [255], 7 : [255]}),
+                         ('rtd', {3 : [255], 7 : [255]}),
+                         ('led', {3 : [255], 7 : [255]}),
+                        ])                                         
+def test_edgepi_gpio_reg_addressToValue_dict(config, out):
+    gpioCtrl = EdgePiGPIO(config)
+    out_data = gpioCtrl._EdgePiGPIO__reg_addressToValue_dict()
     assert out_data == out
