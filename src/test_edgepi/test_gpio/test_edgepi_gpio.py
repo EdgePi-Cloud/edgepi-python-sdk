@@ -33,8 +33,11 @@ def test_edgepi_gpio_init(mock_I2CDevice, mock_expect, config, result):
                          ('rtd',33, 255),
                          ('led',32, 255),
                         ])
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.setReadMsg') 
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')                                                        
-def test_edgepi_gpio_read_register(mock,config, dev_address, out):
+def test_edgepi_gpio_read_register(mock, mock_msg, config, dev_address, out):
+    mock_msg.data = [255]
+    mock_msg.return_value = (mock_msg ,mock_msg)
     mock.return_value = out
     gpioCtrl = EdgePiGPIO(config)
     out_data = gpioCtrl.read_register(gpioCtrl.pinConfigAddress, dev_address)
