@@ -2,6 +2,7 @@ from enum import Enum
 from bitstring import Bits
 
 class ConvTimes(Enum):
+    ''' Converson time delays for various MAX31856 settings configurations'''
     CJ_ON_OC_LOW_NOM = 13.3
     CJ_ON_OC_LOW_MAX = 15
     CJ_ON_OC_MED_NOM = 33.4
@@ -28,7 +29,7 @@ class ConvTimes(Enum):
     HZ60_AVG_8 = 233.31
     HZ60_AVG_16 = 499.95
 
-open_circ_delays = {
+_open_circ_delays = {
     0b100: (0, 0),
     0b101: (ConvTimes.CJ_OFF_OC_LOW_NOM.value, ConvTimes.CJ_OFF_OC_LOW_MAX.value),
     0b110: (ConvTimes.CJ_OFF_OC_MED_NOM.value, ConvTimes.CJ_OFF_OC_MED_MAX.value),
@@ -39,12 +40,12 @@ open_circ_delays = {
     0b011: (ConvTimes.CJ_ON_OC_HIGH_NOM.value, ConvTimes.CJ_ON_OC_HIGH_MAX.value),    
 }
 
-default_times = {
+_default_times = {
     0b0: (ConvTimes.DEFAULT_HZ60_NOM.value, ConvTimes.DEFAULT_HZ60_MAX.value),
     0b1: (ConvTimes.DEFAULT_HZ50_NOM.value, ConvTimes.DEFAULT_HZ50_MAX.value),
 }
 
-avg_mode_delays = {
+_avg_mode_delays = {
     0b00000: 0,
     0b10000: 0,
     0b00001: ConvTimes.HZ60_AVG_2.value,
@@ -58,6 +59,18 @@ avg_mode_delays = {
 }
 
 def calc_conv_time(cr0_val:int, cr1_val:int, safe_delay:bool = True):
+    ''' Computes the time delay required for thermocouple single sampling
+
+        Args:
+            cr0_val (int): the value stored in register CR0
+
+            cr1_val (int): the value stored in register CR1
+
+            safe_delay (bool): indicator for whether to compute min or max time delay
+
+        Returns:
+            a float representing the computed time delay in milliseconds (ms)
+    '''
     cr0 = Bits(uint=cr0_val, length=8)
     cr1 = Bits(uint=cr1_val, length=8)
     noise_filt_bit = cr0[7]
@@ -73,16 +86,16 @@ def calc_conv_time(cr0_val:int, cr1_val:int, safe_delay:bool = True):
 
     # compute conv time for settings that depend on safety margin
     if safe_delay:
-        conv_time += default_times[noise_filt_bit][1] # base conv time
-        conv_time += open_circ_delays[open_circ_bit_str.uint][1] # open circuit test delay
+        conv_time += _default_times[noise_filt_bit][1] # base conv time
+        conv_time += _open_circ_delays[open_circ_bit_str.uint][1] # open circuit test delay
     else:
-        conv_time += default_times[noise_filt_bit][0] # base conv time
-        conv_time += open_circ_delays[open_circ_bit_str.uint][0] # open circuit test delay
+        conv_time += _default_times[noise_filt_bit][0] # base conv time
+        conv_time += _open_circ_delays[open_circ_bit_str.uint][0] # open circuit test delay
 
     if cold_junct_bit:
         conv_time += ConvTimes.CJ_OFF.value
 
     # additional conv time delays
-    conv_time += avg_mode_delays[avg_mode_bit_str.uint]
+    conv_time += _avg_mode_delays[avg_mode_bit_str.uint]
 
     return round(conv_time, 2)

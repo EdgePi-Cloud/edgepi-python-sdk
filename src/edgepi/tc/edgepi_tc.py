@@ -29,11 +29,17 @@ class EdgePiTC(SpiDevice):
         return code_to_temp(temp_bytes)
 
     def single_sample(self, safe_delay:bool = True):
-        '''
-        Conduct a single sampling event. Returns measured temperature in degrees Celsius.
+        '''Conduct a single sampling event. Returns measured temperature in degrees Celsius.
 
-        Returns:
-            a tuple containing temperatures for cold junction and linearized thermocouple temperature
+            Args:
+                safe_delay (bool): manual sampling requires a time delay between triggering
+                                the sampling and the measured values being available for reading.
+                                Set to True to enable the maximum time delay, or False to enable
+                                a shorter time delay. Note, using the shorter time delay offers
+                                a higher chance of reading temperature values before the new
+                                measurement is available.
+            Returns:
+                a tuple containing temperatures for cold junction and linearized thermocouple temperature
         '''
         cr0_value = self.__read_register(TCAddresses.CR0_R.value)
         cr1_value = self.__read_register(TCAddresses.CR1_R.value)
