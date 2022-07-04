@@ -41,6 +41,7 @@ class EdgePiGPIO(I2CDevice):
         listRegDict=[]
         for pin_list in pin_lists:
             if pin_list:
+                # TODO: better naming convention for the function
                 listRegDict.append(self.__reg_addressToValue_dict(pin_list[0].address))
             else:
                 listRegDict.append(None)

@@ -56,7 +56,7 @@ class I2cPinInfo:
     is_out: bool = None
 
 # TODO: add more configs and list of pins for different modules
-
+# TODO: instead of mappping pins to list, use dictionary to make it self-explaintory
 _list_of_DAC_gpios = ['AO_EN1','AO_EN4','AO_EN3','AO_EN2','AO_EN5','AO_EN6','AO_EN7','AO_EN8', 'DAC_GAIN']
 _list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
 _list_of_RTD_gpios = ['RTD_EN']
@@ -120,7 +120,7 @@ def _generate_RTD_pins():
     pin_list.append(I2cPinInfo(_list_of_RTD_gpios[0], GpioBOutputSet.SET_OUTPUT_1.value, GpioBOutputClear.CLEAR_OUTPUT_1.value, GpioBPinDir.PIN1_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value))
     return pin_list
 
-
+# TODO: try use enums
 def generate_pin_info(config:str):
     ''' Generates a list pin info dataclasses
 
@@ -133,6 +133,7 @@ def generate_pin_info(config:str):
     pin_list=[]
 
     if config == 'dac':
+        # TODO: use Consistant naming
        pin_list =  _generate_dac_pins()
     if config == 'led':
        pin_list =  _generate_LED_pins()
