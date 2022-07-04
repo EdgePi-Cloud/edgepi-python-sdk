@@ -14,7 +14,7 @@ class I2CDevice():
         Return:
             MsgList: list of I2C.Message() objects containing Msg to be sent
     '''
-    def setReadMsg(self, addr:int = None, Msg:list = None):
+    def set_read_msg(self, addr:int = None, Msg:list = None):
         return [self.i2cdev.Message([addr], read = False), self.i2cdev.Message(Msg, read = True)]
     ''' 
         set Write message to be sent through I2C.
@@ -24,7 +24,7 @@ class I2CDevice():
         Return:
             MsgList: list of I2C.Message() objects containing Msg to be sent
     '''
-    def setWriteMsg(self, addr:int = None, Msg:list = None):
+    def set_write_msg(self, addr:int = None, Msg:list = None):
         msgList = [self.i2cdev.Message([addr]+Msg, read = False)]
         return msgList
     
@@ -38,8 +38,6 @@ class I2CDevice():
     '''
     def transfer(self, dev_addr: int = None, Msg:list = None):
         self.i2cdev.transfer(dev_addr, Msg)
-        if len(Msg)>1:
-            return Msg[1].data[0]
 
     def close(self):
         self.i2cdev.close()

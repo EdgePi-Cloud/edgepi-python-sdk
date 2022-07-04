@@ -30,10 +30,10 @@ if sys.platform != 'linux':
                              ( 0, [1, 2], [[0], False, [1, 2], True])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
-    def test_i2c_setReadMsg(i2c_mock, addrs, Msg, result):
+    def test_i2c_set_read_msg(i2c_mock, addrs, Msg, result):
         i2cDev = I2CDevice('/dev/i2c-10')
         i2cDev.i2cdev.Message.return_value.data = i2cDev.i2cdev.Message
-        MsgList = i2cDev.setReadMsg(addrs, Msg)
+        MsgList = i2cDev.set_read_msg(addrs, Msg)
         i2cDev.i2cdev.Message.assert_any_call(result[0], read=result[1])
         i2cDev.i2cdev.Message.assert_any_call(result[2], read=result[3])
         assert len(MsgList) == i2cDev.i2cdev.Message.call_count
@@ -48,10 +48,10 @@ if sys.platform != 'linux':
                              ( 0, [1, 2], [[0, 1, 2], False])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
-    def test_i2c_setWriteMsg(i2c_mock, addrs, Msg, result):
+    def test_i2c_set_write_msg(i2c_mock, addrs, Msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
         i2cDevice.i2cdev.Message.return_value.data = i2cDevice.i2cdev.Message
-        MsgList = i2cDevice.setWriteMsg(addrs, Msg)
+        MsgList = i2cDevice.set_write_msg(addrs, Msg)
         i2cDevice.i2cdev.Message.assert_called_with(result[0], read=result[1])
         assert len(MsgList) == i2cDevice.i2cdev.Message.call_count
     
@@ -72,10 +72,10 @@ else:
                              ( 0, [1, 2], [[0], False, [1, 2], True])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
-    def test_i2c_setReadMsg(i2c_mock, addrs, Msg, result):
+    def test_i2c_set_read_msg(i2c_mock, addrs, Msg, result):
         i2cDev = I2CDevice('/dev/i2c-10')
         i2cDev.i2cdev.Message.return_value.data = i2cDev.i2cdev.Message
-        MsgList = i2cDev.setReadMsg(addrs, Msg)
+        MsgList = i2cDev.set_read_msg(addrs, Msg)
         i2cDev.i2cdev.Message.assert_any_call(result[0], read=result[1])
         i2cDev.i2cdev.Message.assert_any_call(result[2], read=result[3])
         assert len(MsgList) == i2cDev.i2cdev.Message.call_count
@@ -90,10 +90,10 @@ else:
                              ( 0, [1, 2], [[0, 1, 2], False])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
-    def test_i2c_setWriteMsg(i2c_mock, addrs, Msg, result):
+    def test_i2c_set_write_msg(i2c_mock, addrs, Msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
         i2cDevice.i2cdev.Message.return_value.data = i2cDevice.i2cdev.Message
-        MsgList = i2cDevice.setWriteMsg(addrs, Msg)
+        MsgList = i2cDevice.set_write_msg(addrs, Msg)
         i2cDevice.i2cdev.Message.assert_called_with(result[0], read=result[1])
         assert len(MsgList) == i2cDevice.i2cdev.Message.call_count
 
@@ -104,7 +104,7 @@ else:
                             ])
     def test_i2c_transfer_read(devAddress, msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
-        MsgList = i2cDevice.setReadMsg(msg[0], msg[2])
+        MsgList = i2cDevice.set_read_msg(msg[0], msg[2])
         MsgList = i2cDevice.transfer(devAddress, MsgList)
         assert MsgList == result
 
@@ -114,6 +114,6 @@ else:
                             ])
     def test_i2c_transfer_read(devAddress, msg, result):
         i2cDevice = I2CDevice('/dev/i2c-10')
-        MsgList = i2cDevice.setReadMsg(msg[0], msg[2])
+        MsgList = i2cDevice.set_read_msg(msg[0], msg[2])
         MsgList = i2cDevice.transfer(devAddress, MsgList)
         assert MsgList == result
