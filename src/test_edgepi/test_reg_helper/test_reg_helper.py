@@ -79,6 +79,17 @@ from edgepi.tc.tc_constants import *
     (0b00000000, VoltageMode.GAIN_32.value, 0b00001100),    # only sets low byte bits
     (0b00001100, VoltageMode.GAIN_32.value, 0b00001100),    # doesn't toggle low byte
     (0b11110011, VoltageMode.GAIN_32.value, 0b11111100),    # only clears low byte bits
+    (0b11111111, OpenCircuitMode.DISABLED.value, 0b11001111), # only clears oc bits
+    (0b00000000, OpenCircuitMode.DISABLED.value, 0b00000000), # doesn't toggle oc bits or set other bits
+    (0b00000000, OpenCircuitMode.LOW_INPUT_IMPEDANCE.value, 0b00010000), # only sets oc bits
+    (0b00010000, OpenCircuitMode.LOW_INPUT_IMPEDANCE.value, 0b00010000), # doesn't toggle oc bits
+    (0b11111111, OpenCircuitMode.LOW_INPUT_IMPEDANCE.value, 0b11011111), # doesn't clear other bits
+    (0b00000000, OpenCircuitMode.MED_INPUT_IMPEDANCE.value, 0b00100000), # only sets oc bits
+    (0b00100000, OpenCircuitMode.MED_INPUT_IMPEDANCE.value, 0b00100000), # doesn't toggle oc bits
+    (0b11111111, OpenCircuitMode.MED_INPUT_IMPEDANCE.value, 0b11101111), # doesn't clear other bits
+    (0b00000000, OpenCircuitMode.HIGH_INPUT_IMPEDANCE.value, 0b00110000), # only sets oc bits
+    (0b00110000, OpenCircuitMode.HIGH_INPUT_IMPEDANCE.value, 0b00110000), # doesn't toggle oc bits
+    (0b11111111, OpenCircuitMode.HIGH_INPUT_IMPEDANCE.value, 0b11111111), # doesn't clear other bits
 ])
 def test_apply_opcode(reg_value, opcode, updated_reg_value):
     assert _apply_opcode(reg_value, opcode) == updated_reg_value
