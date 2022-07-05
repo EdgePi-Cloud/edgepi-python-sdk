@@ -1,6 +1,8 @@
 from enum import Enum
 from bitstring import Bits
 
+SAFETY_MARGIN = 1.1
+
 class ConvTimes(Enum):
     ''' Converson time delays for various MAX31856 settings configurations'''
     CJ_ON_OC_LOW_NOM = 13.3
@@ -98,4 +100,4 @@ def calc_conv_time(cr0_val:int, cr1_val:int, safe_delay:bool = True):
     # additional conv time delays
     conv_time += _avg_mode_delays[avg_mode_bit_str.uint]
 
-    return conv_time*1.1
+    return conv_time*SAFETY_MARGIN

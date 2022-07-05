@@ -47,7 +47,7 @@ class EdgePiTC(SpiDevice):
         self.__write_to_register(TCAddresses.CR0_W.value, command)
         # compute time delay between register write and update
         conv_time = calc_conv_time(cr0_value[1], cr1_value[1], safe_delay)
-        time.sleep(round(conv_time/1000, 3))
+        time.sleep(conv_time/1000)
 
         # read cold junction and linearized TC temperatures
         temp_codes = self.read_temperatures()

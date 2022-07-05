@@ -1,5 +1,5 @@
 import pytest
-from edgepi.tc.tc_conv_time import calc_conv_time, ConvTimes
+from edgepi.tc.tc_conv_time import SAFETY_MARGIN, calc_conv_time, ConvTimes
 
 @pytest.mark.parametrize('cr0_val, cr1_val, safe_delay, expected', [
     ########################## 60 hz, max base time
@@ -292,4 +292,4 @@ from edgepi.tc.tc_conv_time import calc_conv_time, ConvTimes
         ConvTimes.CJ_OFF_OC_HIGH_NOM.value + ConvTimes.CJ_OFF.value),  # AV_16, OC_H_NOM, CJ_OFF, DEF_NOM, 50HZ
 ])
 def test_calc_conv_time(cr0_val, cr1_val, safe_delay, expected):
-    assert calc_conv_time(cr0_val, cr1_val, safe_delay) == pytest.approx(expected*1.1)
+    assert calc_conv_time(cr0_val, cr1_val, safe_delay) == pytest.approx(expected*SAFETY_MARGIN)
