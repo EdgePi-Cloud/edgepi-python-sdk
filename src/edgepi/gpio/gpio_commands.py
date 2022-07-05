@@ -23,7 +23,6 @@ def get_pin_config_address(config:GpioExpanderConfig = None ):
     Return:
         pin configuration(Direction) register address, pin output port (output level) register address 
     '''
-    # return GPIOAddresses.CONFIGURATION_PORT_0.value if config.port is 'A'else GPIOAddresses.CONFIGURATION_PORT_1.value, GPIOAddresses.OUTPUT_PORT_0.value if config.port is 'A'else GPIOAddresses.OUTPUT_PORT_1.value
     return (GPIOAddresses.CONFIGURATION_PORT_0.value, GPIOAddresses.OUTPUT_PORT_0.value) if config.port is 'A' else (GPIOAddresses.CONFIGURATION_PORT_1.value, GPIOAddresses.OUTPUT_PORT_1.value)
 
 def get_default_values(reg_dict: dict = None, pin_list: list = None):
@@ -51,13 +50,13 @@ def check_multiple_dev(pin_list: list = None):
     dev_2 = [pin for pin in pin_list if pin.address == GpioExpanderAddress.EXP_TWO.value]
     return [dev_1, dev_2]
 
-def set_pin_states(pin_list:list = None):
+def set_pin_states(pin_dict:dict = None):
     ''' 
     In:
         pinInfo: list of pin info dataclass
     Return: pin configuration(Direction) register value, pin output port (output level) register value
     '''
-    for pin in pin_list:
-        pin.is_high = False
-        pin.is_out = True
-    return pin_list
+    for key, value in pin_dict.items():
+        pin_dict[key].is_high = False
+        pin_dict[key].is_out = True
+    return pin_dict

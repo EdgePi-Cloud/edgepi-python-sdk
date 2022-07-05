@@ -7,6 +7,7 @@ import time
 
 from edgepi.peripherals.gpio import GpioDevice
 from edgepi.peripherals.i2c import I2CDevice
+from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.gpio.gpio_commands import *
 
 from edgepi.reg_helper.reg_helper import apply_opcodes
@@ -19,15 +20,15 @@ class EdgePiGPIO(I2CDevice):
     that requires GPIO manipulation. It is not intended for user.
     '''
     
-    def __init__(self, config_name: str = None):
-        if config_name is None:
+    def __init__(self, config: GpioExpanderConfig = None):
+        if config is None:
             raise ValueError(f'Missing Config Name')
-        self.config = get_periph_config(config_name)
+        self.config = config
         _logger.debug(f'{self.config.name} Configuration Selected: {self.config}')
         if self.config is not None and 'i2c' in self.config.dev_path:
             super().__init__(self.config.dev_path)
             _logger.info(f'GPIO expander up and running')
-            self.pin_list = generate_pin_info(self.config.name)
+            self.pin_list = generate_pin_info(self.config)
             self.pin_config_address, self.pin_out_address = get_pin_config_address(self.config)
         # TODO: add GPIO init, GPIO and I2C init
 

@@ -52,8 +52,8 @@ def test_check_multiple_dev(config, result):
                         (GpioConfigs.LED.value)
                         ])
 def test_set_pin_states(pinConfig):
-    pin_list = generate_pin_info(pinConfig.name)
-    pin_list = set_pin_states(pin_list)
-    for pin in pin_list:
-        assert pin.is_high == False
-        assert pin.is_out == True
+    pin_dict = generate_pin_info(pinConfig)
+    pin_dict = set_pin_states(pin_dict)
+    for key, value in pin_dict.items():
+        assert pin_dict[key].is_high == False
+        assert pin_dict[key].is_out == True
