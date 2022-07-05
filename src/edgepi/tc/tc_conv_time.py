@@ -98,4 +98,4 @@ def calc_conv_time(cr0_val:int, cr1_val:int, safe_delay:bool = True):
     # additional conv time delays
     conv_time += _avg_mode_delays[avg_mode_bit_str.uint]
 
-    return round(conv_time, 2)*1.1
+    return conv_time*1.1
