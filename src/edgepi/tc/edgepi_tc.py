@@ -162,6 +162,15 @@ class EdgePiTC(SpiDevice):
                 self.__write_to_register(reg_addx, updated_value)
                 _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')
 
+    def __get_tc_type(self):
+        ''' Returns the currently configured thermocouple type'''
+        cr1 = Bits(uint=self.__read_register(TCAddresses.CR1_R.value)[1], length=8)
+        tc_bits = cr1[-4:].uint
+        for enum in TCType:
+            if enum.value.op_code == tc_bits:
+                return enum
+        return None
+
     def set_config(
         self,
         conversion_mode: ConvMode = None,  
@@ -255,7 +264,7 @@ class EdgePiTC(SpiDevice):
         # extract non-temperature setting opcodes from Enums
         ops_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum) and type(entry.value) is OpCode]
 
-        # process temperature setting
+        # process temperature settings
         tempcodes = []
         tempcodes.append(TempCode(cj_high_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION))
         tempcodes.append(TempCode(cj_low_threshold, DecBits4.P0, 7, 0, 0, TCAddresses.CJLF_W.value, TempType.COLD_JUNCTION))
@@ -264,8 +273,11 @@ class EdgePiTC(SpiDevice):
         tempcodes.append(TempCode(cj_offset, cj_offset_decimals, 3, 4, 0, TCAddresses.CJTO_W.value, TempType.COLD_JUNCTION_OFFSET))
         tempcodes.append(TempCode(cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION))
 
+        # in case the user updates thermocouple type as well
+        tc_type = tc_type if tc_type is not None else self.__get_tc_type()
+
         for tempcode in tempcodes:
-            ops_list += tempcode_to_opcode(tempcode)
+            ops_list += tempcode_to_opcode(tempcode, tc_type)
         _logger.debug(f'set_config: ops_list:\n\n{ops_list}\n\n')
         
         # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.

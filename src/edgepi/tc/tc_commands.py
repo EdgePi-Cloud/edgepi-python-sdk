@@ -2,7 +2,7 @@ import logging
 from enum import Enum, unique
 from dataclasses import dataclass
 from bitstring import BitArray, pack
-from edgepi.tc.tc_constants import DecBits4, TempBits, Masks
+from edgepi.tc.tc_constants import TCType, TempBits, Masks
 from edgepi.reg_helper.reg_helper import OpCode
 
 _logger = logging.getLogger(__name__)
@@ -90,6 +90,24 @@ class TempCode():
     start_addx: int
     setting_name: TempType
 
+@dataclass
+class TempRange():
+    tc_low : int
+    tc_high : int
+    cold_junct_low : int
+    cold_junct_high : int
+
+_tc_type_temps = {
+    TCType.TYPE_B.value.op_code: TempRange(250, 1820, 0, 125),
+    TCType.TYPE_E.value.op_code: TempRange(-200, 1000, -55, 125),
+    TCType.TYPE_J.value.op_code: TempRange(-210, 1200, -55, 125),
+    TCType.TYPE_K.value.op_code: TempRange(-200, 1372, -55, 125),
+    TCType.TYPE_N.value.op_code: TempRange(-200, 1300, -55, 125),
+    TCType.TYPE_R.value.op_code: TempRange(-50, 1768, -50, 125),
+    TCType.TYPE_S.value.op_code: TempRange(-50, 1768, -50, 125),
+    TCType.TYPE_T.value.op_code: TempRange(-200, 400, -55, 125)
+}
+
 def _format_temp_bitstring(sign_bit:int, int_val:int, dec_val:int, num_int_bits:int, num_dec_bits:int, fill_bits:int):
     ''' Combine and place in order the sign, int, dec, and filler bits of a TempCode into a BitArray
 
@@ -122,23 +140,27 @@ def _slice_bitstring_to_opcodes(temp_code:TempCode, bitstr:BitArray, num_slices:
         op_codes.append(OpCode(value, temp_code.start_addx+i, Masks.BYTE_MASK.value))
     return op_codes
     
-def _validate_temperatures(tempcode:TempCode):
-    ''' Validates integer value of TempCode is within writeable range for 
-        affected register.
+def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
+    ''' Validates integer value of TempCode is within permitted range for 
+        register or thermocouple type.
     '''
-    reg_temps = {
-        TempType.COLD_JUNCTION.value: {'min': -127, 'max': 127},
-        TempType.THERMOCOUPLE.value: {'min': -2047, 'max': 2047},
+    # use thermocouple type to get TempRange object from dict
+    temps = _tc_type_temps[tc_type.value.op_code]
+
+    temp_ranges = {
+        TempType.COLD_JUNCTION.value: {'min': temps.cold_junct_low, 'max': temps.cold_junct_high},
+        TempType.THERMOCOUPLE.value: {'min': temps.tc_low, 'max': temps.tc_high},
         TempType.COLD_JUNCTION_OFFSET.value: {'min': -7, 'max': 7},
     }
+
     temp_type = tempcode.setting_name.value
     temp_val = tempcode.int_val
-    if temp_type in reg_temps:
-        if temp_val < reg_temps[temp_type]['min'] or temp_val > reg_temps[temp_type]['max']:
+    if temp_type in temp_ranges:
+        if temp_val < temp_ranges[temp_type]['min'] or temp_val > temp_ranges[temp_type]['max']:
             raise ValueError(f'Temperature integer value {temp_val} exceeds writeable limits for setting {tempcode.setting_name}')
 
 
-def tempcode_to_opcode(temp_code:TempCode):
+def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     if temp_code is None:
         raise ValueError('temp_code must be of type TempCode: received None')
     
@@ -151,8 +173,11 @@ def tempcode_to_opcode(temp_code:TempCode):
     if temp_code.int_val is None or temp_code.dec_val is None:
         raise ValueError(f'temp_code requires both int and dec values: received only one of these: {temp_code}')
 
+    if tc_type is None:
+        raise ValueError('thermocouple type is required to compute thermocouple temperature range')
+
     # validate temp range
-    _validate_temperatures(temp_code)
+    _validate_temperatures(temp_code, tc_type)
 
     # compute total bits required by this setting
     num_bits = 1 + temp_code.num_int_bits + temp_code.num_dec_bits + temp_code.num_filler_bits
