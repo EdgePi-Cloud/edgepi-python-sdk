@@ -183,6 +183,18 @@ def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
     else:
         raise IllegalTempTypeError(f'TempType {temp_type} does not exist')
 
+def _dec_bits_to_float(dec_bits:int, num_dec_bits:int):
+    ''' converts a decimal value formatted as DecBits4 or DecBits6 into float
+        
+        Args:
+            dec_bits (int): the uint value representing the binary code for decimal value,
+                            obtained from a DecBits4 or DecBits6 enum.
+
+            num_dec_bits (int): the number of bits assigned for decimal values
+    '''
+    # shift the bits num_dec_bits places behind the decimal point
+    return dec_bits * 2**-num_dec_bits
+
 def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     if temp_code is None:
         raise ValueError('temp_code must be of type TempCode: received None')

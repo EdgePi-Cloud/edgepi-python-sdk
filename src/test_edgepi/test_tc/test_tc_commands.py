@@ -3,7 +3,7 @@ from bitstring import BitArray
 from collections import Counter
 from contextlib import nullcontext as does_not_raise
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import IncompatibleRegisterSizeError, IncompleteTempError, MissingTCTypeError, TempOutOfRangeError, TempType, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode, _validate_temperatures
+from edgepi.tc.tc_commands import IncompatibleRegisterSizeError, IncompleteTempError, MissingTCTypeError, TempOutOfRangeError, TempType, _dec_bits_to_float, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode, _validate_temperatures
 
 @pytest.mark.parametrize('code_bytes, temps', [
     ([0x0D, 0x88, 0x00, 0xC0, 0x00, 0x00], (-8, -1024)), # negative temps
@@ -137,8 +137,92 @@ def test_tempcode_to_opcode_raises(tempcode, tc_type, err_type):
     (TempCode(-201, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E,
     pytest.raises(TempOutOfRangeError)),
     (TempCode(-200, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise())
-    
 ])
 def test_validate_temperatures(tempcode, tc_type,expected):
     with expected:
         _validate_temperatures(tempcode, tc_type)
+
+@pytest.mark.parametrize('dec_bits, num_dec_bits, float_val', [
+    (DecBits4.P0.value, 4, 0),
+    (DecBits4.P0_5.value, 4, 0.5),
+    (DecBits4.P0_75.value, 4, 0.75),
+    (DecBits4.P0_875.value, 4, 0.875),
+    (DecBits4.P0_9375.value, 4, 0.9375),
+    (DecBits4.P0_4375.value, 4, 0.4375),
+    (DecBits4.P0_1875.value, 4, 0.1875),
+    (DecBits4.P0_0625.value, 4, 0.0625),
+    (DecBits4.P0_5625.value, 4, 0.5625),
+    (DecBits4.P0_8125.value, 4, 0.8125),
+    (DecBits4.P0_6875.value, 4, 0.6875),
+    (DecBits4.P0_25.value, 4, 0.25),
+    (DecBits4.P0_125.value, 4, 0.125),
+    (DecBits4.P0_625.value, 4, 0.625),
+    (DecBits4.P0_3125.value, 4, 0.3125),
+    (DecBits4.P0_375.value, 4, 0.375),
+    (DecBits6.P0.value, 6, 0),
+    (DecBits6.P0_015625.value, 6, 0.015625),
+    (DecBits6.P0_03125.value, 6, 0.03125),
+    (DecBits6.P0_046875.value, 6, 0.046875),
+    (DecBits6.P0_0625.value, 6, 0.0625),
+    (DecBits6.P0_078125.value, 6, 0.078125),
+    (DecBits6.P0_09375.value, 6, 0.09375),
+    (DecBits6.P0_109375.value, 6, 0.109375),
+    (DecBits6.P0_125.value, 6, 0.125),
+    (DecBits6.P0_140625.value, 6, 0.140625),
+    (DecBits6.P0_15625.value, 6, 0.15625),
+    (DecBits6.P0_171875.value, 6, 0.171875),
+    (DecBits6.P0_1875.value, 6, 0.1875),
+    (DecBits6.P0_203125.value, 6, 0.203125),
+    (DecBits6.P0_21875.value, 6, 0.21875),
+    (DecBits6.P0_234375.value, 6, 0.234375),
+    (DecBits6.P0_25.value, 6, 0.25),
+    (DecBits6.P0_265625.value, 6, 0.265625),
+    (DecBits6.P0_28125.value, 6, 0.28125),
+    (DecBits6.P0_296875.value, 6, 0.296875),
+    (DecBits6.P0_3125.value, 6, 0.3125),
+    (DecBits6.P0_328125.value, 6, 0.328125),
+    (DecBits6.P0_34375.value, 6, 0.34375),
+    (DecBits6.P0_359375.value, 6, 0.359375),
+    (DecBits6.P0_375.value, 6, 0.375),
+    (DecBits6.P0_390625.value, 6, 0.390625),
+    (DecBits6.P0_40625.value, 6, 0.40625),
+    (DecBits6.P0_421875.value, 6, 0.421875),
+    (DecBits6.P0_4375.value, 6, 0.4375),
+    (DecBits6.P0_453125.value, 6, 0.453125),
+    (DecBits6.P0_46875.value, 6, 0.46875),
+    (DecBits6.P0_484375.value, 6, 0.484375),
+    (DecBits6.P0_5.value, 6, 0.5),
+    (DecBits6.P0_515625.value, 6, 0.515625),
+    (DecBits6.P0_53125.value, 6, 0.53125),
+    (DecBits6.P0_546875.value, 6, 0.546875),
+    (DecBits6.P0_5625.value, 6, 0.5625),
+    (DecBits6.P0_578125.value, 6, 0.578125),
+    (DecBits6.P0_59375.value, 6, 0.59375),
+    (DecBits6.P0_609375.value, 6, 0.609375),
+    (DecBits6.P0_625.value, 6, 0.625),
+    (DecBits6.P0_640625.value, 6, 0.640625),
+    (DecBits6.P0_65625.value, 6, 0.65625),
+    (DecBits6.P0_671875.value, 6, 0.671875),
+    (DecBits6.P0_6875.value, 6, 0.6875),
+    (DecBits6.P0_703125.value, 6, 0.703125),
+    (DecBits6.P0_71875.value, 6, 0.71875),
+    (DecBits6.P0_734375.value, 6, 0.734375),
+    (DecBits6.P0_75.value, 6, 0.75),
+    (DecBits6.P0_765625.value, 6, 0.765625),
+    (DecBits6.P0_78125.value, 6, 0.78125),
+    (DecBits6.P0_796875.value, 6, 0.796875),
+    (DecBits6.P0_8125.value, 6, 0.8125),
+    (DecBits6.P0_828125.value, 6, 0.828125),
+    (DecBits6.P0_84375.value, 6, 0.84375),
+    (DecBits6.P0_859375.value, 6, 0.859375),
+    (DecBits6.P0_875.value, 6, 0.875),
+    (DecBits6.P0_890625.value, 6, 0.890625),
+    (DecBits6.P0_90625.value, 6, 0.90625),
+    (DecBits6.P0_921875.value, 6, 0.921875),
+    (DecBits6.P0_9375.value, 6, 0.9375),
+    (DecBits6.P0_953125.value, 6, 0.953125),
+    (DecBits6.P0_96875.value, 6, 0.96875),
+    (DecBits6.P0_984375.value, 6, 0.984375),
+])
+def test_dec_bits_to_float(dec_bits, num_dec_bits, float_val):
+    assert _dec_bits_to_float(dec_bits, num_dec_bits) == float_val
