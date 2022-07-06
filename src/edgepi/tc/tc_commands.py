@@ -157,7 +157,8 @@ def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
     temp_val = tempcode.int_val
     if temp_type in temp_ranges:
         if temp_val < temp_ranges[temp_type]['min'] or temp_val > temp_ranges[temp_type]['max']:
-            raise ValueError(f'Temperature integer value {temp_val} exceeds writeable limits for setting {tempcode.setting_name}')
+            raise ValueError(f'''Temperature integer value {temp_val} exceeds writeable limits 
+            for setting {tempcode.setting_name} for {tc_type} thermocouple''')
 
 
 def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):

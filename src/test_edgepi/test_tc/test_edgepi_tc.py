@@ -77,7 +77,7 @@ def test_read_faults_filters(mocker, filter_at_fault, pre_filter_map, expected, 
 
 default_reg_values = {
     TCAddresses.CR0_W.value: 0x0,
-    TCAddresses.CR1_W.value: 0x0,
+    TCAddresses.CR1_W.value: 0x03, # Type K thermocouple
     TCAddresses.MASK_W.value: 0x0,
     TCAddresses.CJHF_W.value: 0x0,
     TCAddresses.CJLF_W.value: 0x0,
@@ -91,22 +91,22 @@ default_reg_values = {
 }
 
 @pytest.mark.parametrize('args, reg_values, updated_regs', [
-    ({'average_mode': AvgMode.AVG_16}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x40}),
-    ({'average_mode': AvgMode.AVG_8}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x30}),
-    ({'average_mode': AvgMode.AVG_4}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x20}),
-    ({'average_mode': AvgMode.AVG_2}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x10}),
-    ({'average_mode': AvgMode.AVG_1}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x0}),
+    ({'average_mode': AvgMode.AVG_16}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x43}),
+    ({'average_mode': AvgMode.AVG_8}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x33}),
+    ({'average_mode': AvgMode.AVG_4}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x23}),
+    ({'average_mode': AvgMode.AVG_2}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x13}),
+    ({'average_mode': AvgMode.AVG_1}, deepcopy(default_reg_values), {TCAddresses.CR1_W.value: 0x03}),
     ({'cj_high_threshold': 100}, deepcopy(default_reg_values), {TCAddresses.CJHF_W.value: 0x64}),
-    ({'cj_low_threshold': -100}, deepcopy(default_reg_values), {TCAddresses.CJLF_W.value: 0xE4}),
+    ({'cj_low_threshold': -16}, deepcopy(default_reg_values), {TCAddresses.CJLF_W.value: 0x90}),
     ({'lt_high_threshold': 1000, 'lt_high_threshold_decimals': DecBits4.P0_9375}, deepcopy(default_reg_values),
         {
             TCAddresses.LTHFTH_W.value: 0x3E,
             TCAddresses.LTHFTL_W.value: 0x8F
         }),
-    ({'lt_low_threshold': -1000, 'lt_low_threshold_decimals': DecBits4.P0_9375}, deepcopy(default_reg_values),
+    ({'lt_low_threshold': -55, 'lt_low_threshold_decimals': DecBits4.P0_9375}, deepcopy(default_reg_values),
         {
-            TCAddresses.LTLFTH_W.value: 0xBE,
-            TCAddresses.LTLFTL_W.value: 0x8F
+            TCAddresses.LTLFTH_W.value: 0x83,
+            TCAddresses.LTLFTL_W.value: 0x7F
         }),
     ({'cj_offset': 4, 'cj_offset_decimals': DecBits4.P0_9375}, deepcopy(default_reg_values),
         {
