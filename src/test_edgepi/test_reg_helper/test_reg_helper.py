@@ -28,12 +28,12 @@ from edgepi.tc.tc_constants import *
     (0b00000000, TCOps.CLEAR_FAULTS.value, 0b00000010),     # sets bit 1, doesn't set others
     (0b00000010, TCOps.CLEAR_FAULTS.value, 0b00000010),     # doesn't toggle bit 1
     (0b11111101, TCOps.CLEAR_FAULTS.value, 0b11111111),     # sets bit 1, doesn't clear others
-    (0b00000001, NoiseFilterMode.Hz_60.value, 0b00000000),  # clears bit 0, doesn't set others
-    (0b00000000, NoiseFilterMode.Hz_60.value, 0b00000000),  # doesn't toggle bit 0
-    (0b11111111, NoiseFilterMode.Hz_60.value, 0b11111110),  # clears bit 0, doesn't clear others
-    (0b00000000, NoiseFilterMode.Hz_50.value, 0b00000001),  # sets bit 0, doesn't set others
-    (0b00000001, NoiseFilterMode.Hz_50.value, 0b00000001),  # doesn't toggle bit 0
-    (0b11111110, NoiseFilterMode.Hz_50.value, 0b11111111),  # sets bit 0, doesn't clear others
+    (0b00000001, NoiseFilterMode.HZ_60.value, 0b00000000),  # clears bit 0, doesn't set others
+    (0b00000000, NoiseFilterMode.HZ_60.value, 0b00000000),  # doesn't toggle bit 0
+    (0b11111111, NoiseFilterMode.HZ_60.value, 0b11111110),  # clears bit 0, doesn't clear others
+    (0b00000000, NoiseFilterMode.HZ_50.value, 0b00000001),  # sets bit 0, doesn't set others
+    (0b00000001, NoiseFilterMode.HZ_50.value, 0b00000001),  # doesn't toggle bit 0
+    (0b11111110, NoiseFilterMode.HZ_50.value, 0b11111111),  # sets bit 0, doesn't clear others
     (0b11110000, AvgMode.AVG_1.value, 0b00000000),          # clears high byte, doesn't set low byte
     (0b00000000, AvgMode.AVG_1.value, 0b00000000),          # doesn't toggle high byte
     (0b11111111, AvgMode.AVG_1.value, 0b00001111),          # clears high byte, doesn't clear low byte

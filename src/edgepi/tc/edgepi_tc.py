@@ -1,13 +1,14 @@
 '''
-Provides a class for interacting with the EdgePi Thermocouple via SPI. 
+Provides a class for interacting with the EdgePi Thermocouple via SPI.
 '''
+
 
 import logging
 import time
-
+from enum import Enum
 from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
-from edgepi.tc.tc_constants import *
+from edgepi.tc.tc_constants import AvgMode, CJHighMask, CJLowMask, CJMode, ConvMode, DecBits, FaultMode, NoiseFilterMode, OpenCircuitMode, OpenMask, OvuvMask, TCAddresses, TCHighMask, TCLowMask, TCOps, TCType, VoltageMode
 from edgepi.tc.tc_commands import code_to_temp
 from edgepi.tc.tc_faults import map_fault_status
 from edgepi.reg_helper.reg_helper import apply_opcodes
@@ -15,10 +16,12 @@ from edgepi.utilities.utilities import filter_dict
 
 _logger = logging.getLogger(__name__)
 
+
 class EdgePiTC(SpiDevice):
-    ''' 
+    '''
     A class used to represent the EdgePi Thermocouple as an SPI device.
-    ''' 
+    '''
+
     def __init__(self):
         super().__init__(bus_num=6, dev_ID=2)
 
@@ -54,7 +57,7 @@ class EdgePiTC(SpiDevice):
                 filter_at_fault (bool): set to True to return only Faults that are currently asserting
 
             Returns:
-                a dictionary mapping each thermocouple fault type to a Fault object holding 
+                a dictionary mapping each thermocouple fault type to a Fault object holding
                 information about its current status. See :obj:`tc.tc_faults.Fault` for details about the Fault class.
         '''
         # read in values from fault status register and fault mask register
@@ -68,7 +71,8 @@ class EdgePiTC(SpiDevice):
 
         # filter out normal status Fault objects
         if filter_at_fault:
-            fault_msgs = { fault_type:fault for (fault_type,fault) in fault_msgs.items() if fault.at_fault == True }
+            fault_msgs = {fault_type: fault for (fault_type, fault)
+                          in fault_msgs.items() if fault.at_fault is True}
 
         return fault_msgs
 
@@ -77,28 +81,30 @@ class EdgePiTC(SpiDevice):
 
             Args:
                 reg_addx (TCAddress.Enum.value): the register's address
-            
+
             Returns:
                 a list containing two entries: new_data[0] = register address, new_data[1] = register value
         '''
         data = [reg_addx] + [0xFF]
-        _logger.debug(f'__read_register: addx = {reg_addx} => data before xfer = {data}')
+        _logger.debug(
+            f'__read_register: addx = {reg_addx} => data before xfer = {data}')
         new_data = self.transfer(data)
-        _logger.debug(f'__read_register: addx = {reg_addx} => data after xfer = {new_data}')
+        _logger.debug(
+            f'__read_register: addx = {reg_addx} => data after xfer = {new_data}')
         return new_data
 
-    def __read_registers(self, start_addx:int=0, regs_to_read:int=16):
+    def __read_registers(self, start_addx: int = 0, regs_to_read: int = 16):
         ''' read a variable number of registers sequentially
-           
+
             Args:
                 start_addx (TCAddress.Enum.value): address of the register to begin the read at.
                 regs_to_read (int): number of registers to read, including starting register.
-            
+
             Returns:
-                a list containing register values starting from start_addx. Note, first entry 
+                a list containing register values starting from start_addx. Note, first entry
                 is the start address: register values begin from the second entry.
         '''
-        data = [start_addx] + [0xFF]*regs_to_read
+        data = [start_addx] + [0xFF] * regs_to_read
         _logger.debug(f'__read_registers: shifting in data => {data}')
         new_data = self.transfer(data)
         _logger.debug(f'__read_registers: shifted out data => {new_data}')
@@ -106,10 +112,10 @@ class EdgePiTC(SpiDevice):
 
     def __write_to_register(self, reg_addx, value):
         ''' write a value to a register.
-            
+
             Args:
                 reg_addx (TCAddress.Enum.value): address of the register to write the value to.
-                
+
                 value (int): a values to be written to the register.
         '''
         data = [reg_addx] + [value]
@@ -118,10 +124,10 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'__write_to_registers: shifted out data => {new_data}')
 
     def __read_registers_to_map(self):
-        ''' Builds a map of write register address to corresponding read register value. Note, each register has 
-            a read and write address, but only the read address contains the register's value. Write addresses are only 
+        ''' Builds a map of write register address to corresponding read register value. Note, each register has
+            a read and write address, but only the read address contains the register's value. Write addresses are only
             for writing.
-            
+
             Returns:
                 a dictionary containing (write_register_address: register_value) entries for each writeable register
         '''
@@ -129,18 +135,21 @@ class EdgePiTC(SpiDevice):
         num_regs = 16
         read_regs_offset = 0x80
         start_addx = TCAddresses.CR0_W.value
-        # read values from __read_registers, but log values to corresponding write registers 
-        reg_values = self.__read_registers(start_addx-read_regs_offset)
+        # read values from __read_registers, but log values to corresponding write registers
+        reg_values = self.__read_registers(start_addx - read_regs_offset)
         for addx_offset in range(num_regs):
-            reg_map[start_addx+addx_offset] = reg_values[addx_offset+1] # reg_values[0] is start_addx
+            reg_map[start_addx +
+                    addx_offset] = reg_values[addx_offset +
+                                              1]  # reg_values[0] is start_addx
         _logger.debug(f'__read_registers_to_map => {reg_map}')
         return reg_map
 
+    # pylint: disable=unused-argument
     def set_config(
         self,
-        conversion_mode: ConvMode = None,  
+        conversion_mode: ConvMode = None,
         oc_fault_mode: OpenCircuitMode = None,
-        cold_junction_mode: CJMode = None, 
+        cold_junction_mode: CJMode = None,
         fault_mode: FaultMode = None,
         noise_filter_mode: NoiseFilterMode = None,
         average_mode: AvgMode = None,
@@ -160,7 +169,7 @@ class EdgePiTC(SpiDevice):
         lt_low_threshold_decimals: DecBits = None,
         cj_offset: int = None,
         cj_offset_decimals: DecBits = None,
-        ):
+    ):
         '''
         A collective thermocouple settings update method. Use this method to configure thermocouple settings. This method
         allows you to configure settings either individually, or collectively.
@@ -185,15 +194,15 @@ class EdgePiTC(SpiDevice):
                 voltage_mode (VoltageMode): set input voltage range
 
                 cj_high_mask (CJHighMask): choose whether to mask CJHIGH fault from asserting through the FAULT pin
-                
+
                 cj_low_mask (CJLowMask): choose whether to mask CJLOW fault from asserting through the FAULT pin
-                
+
                 tc_high_mask (TCHighMask): choose whether to mask TCHIGH fault from asserting through the FAULT pin
-                
+
                 tc_low_mask (TCLowMask): choose whether to mask TCLOW fault from asserting through the FAULT pin
-                
+
                 ovuv_mask (OvuvMask): choose whether to mask OVUV fault from asserting through the FAULT pin
-                
+
                 open_mask (OpenMask): choose whether to mask OPEN fault from asserting through the FAULT pin
 
                 cj_high_threshold (int): set cold junction temperature upper threshold. If cold junction temperature rises
@@ -202,12 +211,12 @@ class EdgePiTC(SpiDevice):
                 cj_low_threshold (int): set cold junction temperature lower threshold. If cold junction temperature falls
                 below this limit, the FAULT output will assert
 
-                lt_high_threshold (int): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction 
+                lt_high_threshold (int): set thermocouple hot junction temperature upper threshold. If thermocouple hot junction
                 temperature rises above this limit, the FAULT output will assert
 
                 lt_high_threshold_decimals (DecBits): set thermocouple hot junction temperature upper threshold decimal value.
 
-                lt_low_threshold (int): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
+                lt_low_threshold (int): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction
                 temperature falls below this limit, the FAULT output will assert
 
                 lt_low_threshold_decimals (DecBits): set thermocouple hot junction temperature lower threshold decimal value.
@@ -221,19 +230,26 @@ class EdgePiTC(SpiDevice):
         _logger.debug(f'set_config args list: \n\n {args_dict}\n\n')
 
         # extract opcodes from Enums
-        args_list = [entry.value for entry in args_dict.values() if issubclass(entry.__class__, Enum)]
+        args_list = [
+            entry.value for entry in args_dict.values() if issubclass(
+                entry.__class__, Enum)]
 
-        # read value of every write register into dict, starting from CR0_W. Tuples are (write register addx : register_value) pairs.
+        # read value of every write register into dict, starting from CR0_W.
+        # Tuples are (write register addx : register_value) pairs.
         reg_values = self.__read_registers_to_map()
-        _logger.debug(f'set_config: register values before updates => {reg_values}')
+        _logger.debug(
+            f'set_config: register values before updates => {reg_values}')
 
         # updated register values
         apply_opcodes(reg_values, args_list)
-        _logger.debug(f'set_config: register values after updates => {reg_values}')
+        _logger.debug(
+            f'set_config: register values after updates => {reg_values}')
 
         # only update registers whose values have been changed
         for reg_addx, entry in reg_values.items():
             if entry['is_changed']:
                 updated_value = entry['value']
                 self.__write_to_register(reg_addx, updated_value)
-                _logger.info(f'register value at address ({hex(reg_addx)}) has been updated to ({hex(updated_value)})')      
+                _logger.info(
+                    f'''register value at address ({hex(reg_addx)}) has been updated
+                    to ({hex(updated_value)})''')

@@ -1,9 +1,15 @@
 [MESSAGES CONTROL]
 
-disable=trailing-whitespace,
-        logging-fstring-interpolation,
+disable=logging-fstring-interpolation,
         line-too-long,
-        invalid-name
+        too-many-locals,
+        too-many-arguments
+
+[LOGGING]
+
+# Format style used to check logging format string. `old` means using %
+# formatting, while `new` is for `{}` formatting.
+logging-format-style=new
 
 [REPORTS]
 
