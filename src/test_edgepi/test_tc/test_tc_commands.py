@@ -54,17 +54,17 @@ def test_negative_temp_check(temp_code, out, new_value):
     (TempCode(-50, DecBits4.P0_75, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
         [OpCode(0x83, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x2C, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, dec, no fillers
-    (TempCode(1372, DecBits4.P0_9375, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
+    (TempCode(1371, DecBits4.P0_9375, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
         [OpCode(0x55, TCAddresses.LTHFTH_W.value, Masks.BYTE_MASK.value),
-        OpCode(0xCF, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max + value, dec, no fillers
+        OpCode(0xBF, TCAddresses.LTHFTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max + value, dec, no fillers
     (TempCode(64, DecBits6.P0_296875, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
         [OpCode(0x40, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x4C, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, + value, dec, fillers
     (TempCode(-8, DecBits6.P0_296875, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
         [OpCode(0x88, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0x4C, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, - value, dec, fillers
-    (TempCode(125, DecBits6.P0_984375, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
-        [OpCode(0x7D, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
+    (TempCode(124, DecBits6.P0_984375, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
+        [OpCode(0x7C, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
         OpCode(0xFC, TCAddresses.CJTL_W.value, Masks.BYTE_MASK.value)]),   # 2 registers, max + value, dec, fillers
     (TempCode(1, DecBits6.P0_015625, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
         [OpCode(0x01, TCAddresses.CJTH_W.value, Masks.BYTE_MASK.value),
@@ -136,7 +136,16 @@ def test_tempcode_to_opcode_raises(tempcode, tc_type, err_type):
     (TempCode(1000, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise()),
     (TempCode(-201, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E,
     pytest.raises(TempOutOfRangeError)),
-    (TempCode(-200, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise())
+    (TempCode(-200, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise()),
+    (TempCode(1372, DecBits4.P0_25, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(1371, DecBits4.P0_4375, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K, does_not_raise()),
+    (TempCode(-200, DecBits4.P0_25, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
+    pytest.raises(TempOutOfRangeError)),
+    (TempCode(-199, DecBits4.P0_125, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K, does_not_raise()),
+    (TempCode(1820, DecBits4.P0_375, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(1819, DecBits4.P0_125, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B, does_not_raise()),
 ])
 def test_validate_temperatures(tempcode, tc_type,expected):
     with expected:

@@ -161,6 +161,24 @@ class IncompatibleRegisterSizeError(ValueError):
 class IllegalTempTypeError(ValueError):
     ''' Raised when a non-existent TempType is entered '''
 
+
+def _dec_bits_to_float(dec_bits:int, num_dec_bits:int, is_negative:bool=False):
+    ''' converts a decimal value formatted as DecBits4 or DecBits6 into float
+        
+        Args:
+            dec_bits (int): the uint value representing the binary code for decimal value,
+                            obtained from a DecBits4 or DecBits6 enum.
+
+            num_dec_bits (int): the number of bits assigned for decimal values
+
+            is_negative (bool): is this a negative decimal value or not
+    '''
+    # shift the bits num_dec_bits places behind the decimal point
+    if num_dec_bits == 0:
+        return 0
+        
+    return -(dec_bits * 2**-num_dec_bits) if is_negative else (dec_bits * 2**-num_dec_bits)
+
 def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
     ''' Validates that the integer value of a TempCode is within the permitted range for 
         the targeted register or thermocouple type.
@@ -173,27 +191,16 @@ def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
         TempType.THERMOCOUPLE.value: {'min': temps.tc_low, 'max': temps.tc_high},
         TempType.COLD_JUNCTION_OFFSET.value: {'min': -7, 'max': 7},
     }
-
+    is_negative = True if tempcode.int_val < 0 else False
     temp_type = tempcode.setting_name.value
-    temp_val = tempcode.int_val
+    temp_val = tempcode.int_val + _dec_bits_to_float(tempcode.dec_val.value, tempcode.num_dec_bits, is_negative)
+    print(temp_val)
     if temp_type in temp_ranges:
         if temp_val < temp_ranges[temp_type]['min'] or temp_val > temp_ranges[temp_type]['max']:
             raise TempOutOfRangeError(f'''Temperature integer value {temp_val} exceeds writeable limits 
             for setting {tempcode.setting_name} for {tc_type} thermocouple''')
     else:
         raise IllegalTempTypeError(f'TempType {temp_type} does not exist')
-
-def _dec_bits_to_float(dec_bits:int, num_dec_bits:int):
-    ''' converts a decimal value formatted as DecBits4 or DecBits6 into float
-        
-        Args:
-            dec_bits (int): the uint value representing the binary code for decimal value,
-                            obtained from a DecBits4 or DecBits6 enum.
-
-            num_dec_bits (int): the number of bits assigned for decimal values
-    '''
-    # shift the bits num_dec_bits places behind the decimal point
-    return dec_bits * 2**-num_dec_bits
 
 def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     if temp_code is None:
