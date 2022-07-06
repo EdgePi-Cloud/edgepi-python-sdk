@@ -1,8 +1,9 @@
 import pytest
 from bitstring import BitArray
 from collections import Counter
+from contextlib import nullcontext as does_not_raise
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import IncompatibleRegisterSizeError, IncompleteTempError, MissingTCTypeError, TempOutOfRangeError, TempType, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode
+from edgepi.tc.tc_commands import IncompatibleRegisterSizeError, IncompleteTempError, MissingTCTypeError, TempOutOfRangeError, TempType, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode, _validate_temperatures
 
 @pytest.mark.parametrize('code_bytes, temps', [
     ([0x0D, 0x88, 0x00, 0xC0, 0x00, 0x00], (-8, -1024)), # negative temps
@@ -97,5 +98,47 @@ def test_tempcode_to_opcode(tempcode, tc_type, opcode_list):
 def test_tempcode_to_opcode_raises(tempcode, tc_type, err_type):
     with pytest.raises(Exception) as e:
         tempcode_to_opcode(tempcode, tc_type)
-    print(e)
     assert e.type == err_type
+
+@pytest.mark.parametrize('tempcode, tc_type, expected', [
+    (TempCode(126, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(125, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, does_not_raise()),
+    (TempCode(-56, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(-55, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, does_not_raise()),
+    (TempCode(1373, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(1372, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K, does_not_raise()),
+    (TempCode(-201, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K,
+    pytest.raises(TempOutOfRangeError)),
+    (TempCode(-200, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_K, does_not_raise()),
+    (TempCode(126, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_B,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(125, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_B, does_not_raise()),
+    (TempCode(-1, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_B,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(0, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_B, does_not_raise()),
+    (TempCode(1821, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(1820, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B, does_not_raise()),
+    (TempCode(249, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B,
+    pytest.raises(TempOutOfRangeError)),
+    (TempCode(250, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_B, does_not_raise()),
+    (TempCode(126, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_E,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(125, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_E, does_not_raise()),
+    (TempCode(-56, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_E,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(-55, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_E, does_not_raise()),
+    (TempCode(1001, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E,
+        pytest.raises(TempOutOfRangeError)),
+    (TempCode(1000, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise()),
+    (TempCode(-201, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E,
+    pytest.raises(TempOutOfRangeError)),
+    (TempCode(-200, DecBits4.P0, 11, 4, 0, TCAddresses.LTHFTH_W.value, TempType.THERMOCOUPLE), TCType.TYPE_E, does_not_raise())
+    
+])
+def test_validate_temperatures(tempcode, tc_type,expected):
+    with expected:
+        _validate_temperatures(tempcode, tc_type)

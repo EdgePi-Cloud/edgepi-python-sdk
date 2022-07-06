@@ -158,9 +158,12 @@ class IncompatibleRegisterSizeError(ValueError):
         of MAX31856 register sizes (8 bits).
     '''
 
+class IllegalTempTypeError(ValueError):
+    ''' Raised when a non-existent TempType is entered '''
+
 def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
-    ''' Validates integer value of TempCode is within permitted range for 
-        register or thermocouple type.
+    ''' Validates that the integer value of a TempCode is within the permitted range for 
+        the targeted register or thermocouple type.
     '''
     # use thermocouple type to get TempRange object from dict
     temps = _tc_type_temps[tc_type.value.op_code]
@@ -177,6 +180,8 @@ def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
         if temp_val < temp_ranges[temp_type]['min'] or temp_val > temp_ranges[temp_type]['max']:
             raise TempOutOfRangeError(f'''Temperature integer value {temp_val} exceeds writeable limits 
             for setting {tempcode.setting_name} for {tc_type} thermocouple''')
+    else:
+        raise IllegalTempTypeError(f'TempType {temp_type} does not exist')
 
 def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     if temp_code is None:
