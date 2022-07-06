@@ -359,3 +359,84 @@ The methods outlined above are designed to accept predefined Enums, which contai
       </td>
    </tr>
 </table>
+
+---
+## Temperature Threshold Setting
+In order to set temperature fault thresholds using this module, please refer to the table below for accepted temperature values by thermocouple type. Attempting to set a temperature threshold outside of your thermocouple type's range will raise an exception.
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Thermocouple Type</th>
+            <th colspan="4">Temperature Range (°C)</th>
+        </tr>
+        <tr>
+            <th colspan="2">Cold Junction</th>
+            <th colspan="2">Thermocouple</th>
+        </tr>
+        <tr>
+            <td>Low</td>
+            <td>High</td>
+            <td>Low</td>
+            <td>High</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Type B</td>
+            <td>0</td>
+            <td>125</td>
+            <td>250</td>
+            <td>1820</td>
+        </tr>
+        <tr>
+            <td>Type E</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1000</td>
+        </tr>
+        <tr>
+            <td>Type J</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-210</td>
+            <td>1200</td>
+        </tr>
+        <tr>
+            <td>Type K</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1372</td>
+        </tr>
+        <tr>
+            <td>Type N</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1300</td>
+        </tr>
+        <tr>
+            <td>Type R</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type S</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type T</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>400</td>
+        </tr>
+    </tbody>
+</table>
