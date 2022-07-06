@@ -2,7 +2,7 @@ import pytest
 from bitstring import BitArray
 from collections import Counter
 from edgepi.tc.tc_constants import *
-from edgepi.tc.tc_commands import TempType, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode
+from edgepi.tc.tc_commands import IncompatibleRegisterSizeError, IncompleteTempError, MissingTCTypeError, TempOutOfRangeError, TempType, code_to_temp, _negative_temp_check, tempcode_to_opcode, TempCode
 
 @pytest.mark.parametrize('code_bytes, temps', [
     ([0x0D, 0x88, 0x00, 0xC0, 0x00, 0x00], (-8, -1024)), # negative temps
@@ -84,13 +84,18 @@ def test_tempcode_to_opcode(tempcode, tc_type, opcode_list):
     assert Counter(result) == Counter(opcode_list)
 
 @pytest.mark.parametrize('tempcode, tc_type, err_type', [
-    (TempCode(0x7F, DecBits4.P0, 8, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, ValueError),
-    (TempCode(0x7F, DecBits4.P0, 7, 1, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, ValueError),
+    (TempCode(127, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, TempOutOfRangeError),
+    (TempCode(127, DecBits4.P0, 7, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, TempOutOfRangeError),
     (None, TCType.TYPE_K, ValueError),
-    (TempCode(None, DecBits6.P0, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, ValueError),
-    (TempCode(1000, None, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, ValueError),
+    (TempCode(None, DecBits6.P0, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, IncompleteTempError),
+    (TempCode(1000, None, 7, 6, 2, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, IncompleteTempError),
+    (TempCode(120, DecBits4.P0, 8, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, IncompatibleRegisterSizeError),
+    (TempCode(120, DecBits4.P0, 7, 1, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, IncompatibleRegisterSizeError),
+    (TempCode(120, DecBits4.P0, 6, 1, 1, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), TCType.TYPE_K, IncompatibleRegisterSizeError),
+    (TempCode(127, DecBits4.P0, 8, 0, 0, TCAddresses.CJHF_W.value, TempType.COLD_JUNCTION), None, MissingTCTypeError),
 ])
 def test_tempcode_to_opcode_raises(tempcode, tc_type, err_type):
     with pytest.raises(Exception) as e:
         tempcode_to_opcode(tempcode, tc_type)
+    print(e)
     assert e.type == err_type

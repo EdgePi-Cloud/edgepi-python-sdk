@@ -5,6 +5,8 @@ OpCodes for thermocouple configuration and command operations
 from enum import Enum, unique
 from edgepi.reg_helper.reg_helper import OpCode
 
+REG_SIZE = 8 # MAX31856 register size in bits
+
 @unique
 class TCAddresses(Enum):
     # Read addresses

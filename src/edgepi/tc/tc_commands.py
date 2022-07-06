@@ -2,7 +2,7 @@ import logging
 from enum import Enum, unique
 from dataclasses import dataclass
 from bitstring import BitArray, pack
-from edgepi.tc.tc_constants import TCType, TempBits, Masks
+from edgepi.tc.tc_constants import REG_SIZE, TCType, TempBits, Masks
 from edgepi.reg_helper.reg_helper import OpCode
 
 _logger = logging.getLogger(__name__)
@@ -139,7 +139,25 @@ def _slice_bitstring_to_opcodes(temp_code:TempCode, bitstr:BitArray, num_slices:
         # this temp_code requires > 1 register.
         op_codes.append(OpCode(value, temp_code.start_addx+i, Masks.BYTE_MASK.value))
     return op_codes
-    
+
+class TempOutOfRangeError(ValueError):
+    ''' Raised when a temperature threshold entered by the user is out of range for the currently
+        configured thermocouple type.
+    '''
+
+class IncompleteTempError(ValueError):
+    ''' Raised when the user sets only either the integer or decimal value
+        for a temperature threshold which requires both.
+    '''
+
+class MissingTCTypeError(ValueError):
+    ''' Raised if no thermocouple type is passed to tempcode_to_opcode ''' 
+
+class IncompatibleRegisterSizeError(ValueError):
+    ''' Raised when the number of bits contained in a TempCode is not a multiple
+        of MAX31856 register sizes (8 bits).
+    '''
+
 def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
     ''' Validates integer value of TempCode is within permitted range for 
         register or thermocouple type.
@@ -157,9 +175,8 @@ def _validate_temperatures(tempcode:TempCode, tc_type:TCType):
     temp_val = tempcode.int_val
     if temp_type in temp_ranges:
         if temp_val < temp_ranges[temp_type]['min'] or temp_val > temp_ranges[temp_type]['max']:
-            raise ValueError(f'''Temperature integer value {temp_val} exceeds writeable limits 
+            raise TempOutOfRangeError(f'''Temperature integer value {temp_val} exceeds writeable limits 
             for setting {tempcode.setting_name} for {tc_type} thermocouple''')
-
 
 def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     if temp_code is None:
@@ -172,10 +189,10 @@ def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
 
     # only either int or dec args passed for this temp setting
     if temp_code.int_val is None or temp_code.dec_val is None:
-        raise ValueError(f'temp_code requires both int and dec values: received only one of these: {temp_code}')
+        raise IncompleteTempError(f'temp_code {temp_code} requires both int and dec values: received only one of these.')
 
     if tc_type is None:
-        raise ValueError('thermocouple type is required to compute thermocouple temperature range')
+        raise MissingTCTypeError('thermocouple type is required to compute thermocouple temperature range')
 
     # validate temp range
     _validate_temperatures(temp_code, tc_type)
@@ -183,8 +200,8 @@ def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
     # compute total bits required by this setting
     num_bits = 1 + temp_code.num_int_bits + temp_code.num_dec_bits + temp_code.num_filler_bits
 
-    if num_bits % 8:
-        raise ValueError('Number of temp_code bits not divisible by 8 bit register size')
+    if num_bits % REG_SIZE:
+        raise IncompatibleRegisterSizeError('Number of temp_code bits not divisible by 8 bit register size')
 
     # check if negative temperature
     sign_bit = 0
@@ -197,5 +214,5 @@ def tempcode_to_opcode(temp_code:TempCode, tc_type:TCType):
                                 temp_code.num_dec_bits, temp_code.num_filler_bits)
 
     # slice bitstring into 8-bit register sized chunks and convert each chunk to OpCode
-    num_regs = int(num_bits / 8) # number of registers this setting uses
+    num_regs = int(num_bits / REG_SIZE) # number of registers this setting uses
     return _slice_bitstring_to_opcodes(temp_code, bits, num_regs)
