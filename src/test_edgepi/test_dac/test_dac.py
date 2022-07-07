@@ -1,3 +1,6 @@
+'''unit test for dac module'''
+
+
 import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
@@ -6,15 +9,13 @@ from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
 
 
 @pytest.fixture(name="dac_ops")
-def fixture_test_DAC_ops():
+def fixture_test_dac_ops():
     dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8)
     return dac_ops
 
 
-"""
-Combine command needs check for interger numbers for op-code, channel and value
-It also needs to check the range of each value.
-"""
+# Combine command needs check for interger numbers for op-code, channel and value
+# It also needs to check the range of each value.
 
 
 @pytest.mark.parametrize(
@@ -47,15 +48,15 @@ def test_check_for_int_exception(sample, error, dac_ops):
 
 
 @pytest.mark.parametrize(
-    "min, target, max, result",
+    "range_min, target, range_max, result",
     [(0, 0, 10, True), (0, 10, 10, True), (0, 5, 10, True), (0.5, 1, 1.1, True)],
 )
-def test_check_range(min, target, max, result, dac_ops):
-    assert dac_ops.check_range(target, min, max) == result
+def test_check_range(range_min, target, range_max, result, dac_ops):
+    assert dac_ops.check_range(target, range_min, range_max) == result
 
 
 @pytest.mark.parametrize(
-    "min, target, max, error",
+    "range_min, target, range_max, error",
     [
         (0, -1, len(CH), ValueError),
         (0, 11, len(CH), ValueError),
@@ -63,9 +64,9 @@ def test_check_range(min, target, max, result, dac_ops):
         (0, 65536, CALIB_CONSTS.RANGE.value, ValueError),
     ],
 )
-def test_check_range(min, target, max, error, dac_ops):
+def test_check_range_raises(range_min, target, range_max, error, dac_ops):
     with pytest.raises(Exception) as e:
-        dac_ops.check_range(target, min, max)
+        dac_ops.check_range(target, range_min, range_max)
     assert e.type is error
 
 
@@ -78,6 +79,7 @@ def test_check_range(min, target, max, error, dac_ops):
     ],
 )
 def test_combine_command(a, b, c, d, dac_ops):
+    # pylint: disable=invalid-name
     assert dac_ops.combine_command(a, b, c) == d
 
 
@@ -86,15 +88,14 @@ def test_combine_command(a, b, c, d, dac_ops):
     [(1, 1000, [49, 3, 232]), (0, 1000, [48, 3, 232]), (3, 1000, [51, 3, 232])],
 )
 def test_generate_write_and_update_command(a, b, c, dac_ops):
+    # pylint: disable=invalid-name
     assert dac_ops.generate_write_and_update_command(a, b) == c
 
 
-"""
-voltage to code conversion
-voltage = positive floating number 0~5V ideally
-code = positive integer number 0~65535
-rounding up/down during conversion ?
-"""
+# voltage to code conversion
+# voltage = positive floating number 0~5V ideally
+# code = positive integer number 0~65535
+# rounding up/down during conversion ?
 
 
 @pytest.mark.parametrize(
