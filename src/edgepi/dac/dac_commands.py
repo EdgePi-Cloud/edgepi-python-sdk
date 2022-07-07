@@ -55,8 +55,8 @@ class DACCommands:
             _logger.debug(f"Combined Command is: {combined_cmnd}")
             return combined_cmnd
         # pylint: disable=broad-except
-        except Exception as e:
-            _logger.error(f"Exception raised {e}")
+        except Exception as err:
+            _logger.error(f"Exception raised {err}")
 
     @staticmethod
     def check_for_int(target_list):

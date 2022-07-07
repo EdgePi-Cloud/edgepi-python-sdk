@@ -297,9 +297,9 @@ def test_add_change_flags_adds_flags(reg_values):
     ],
 )
 def test_apply_opcodes_raises(reg_values, opcodes):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as err:
         apply_opcodes(reg_values, opcodes)
-    assert "register_values and opcodes args must both be non-empty" in str(e.value)
+    assert "register_values and opcodes args must both be non-empty" in str(err.value)
 
 
 @pytest.mark.parametrize(

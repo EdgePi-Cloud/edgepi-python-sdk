@@ -37,9 +37,9 @@ def test_code_to_temp(code_bytes, temps):
     ],
 )
 def test_code_to_temp_exceptions(code_bytes, err_type):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as err:
         code_to_temp(code_bytes)
-    assert e.type == err_type
+    assert err.type == err_type
 
 
 @pytest.mark.parametrize(

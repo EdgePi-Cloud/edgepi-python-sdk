@@ -44,9 +44,9 @@ def test_check_for_int(sample, result, dac_ops):
     ],
 )
 def test_check_for_int_exception(sample, error, dac_ops):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as err:
         dac_ops.check_for_int(sample)
-    assert e.type is error
+    assert err.type is error
 
 
 @pytest.mark.parametrize(
@@ -67,9 +67,9 @@ def test_check_range(range_min, target, range_max, result, dac_ops):
     ],
 )
 def test_check_range_raises(range_min, target, range_max, error, dac_ops):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as err:
         dac_ops.check_range(target, range_min, range_max)
-    assert e.type is error
+    assert err.type is error
 
 
 @pytest.mark.parametrize(
