@@ -14,15 +14,11 @@ disable=logging-fstring-interpolation,
 # formatting, while `new` is for `{}` formatting.
 logging-format-style=new
 
-[MASTER]
-# ignore files from setup.py
-ignore-paths=.*/third_party/.*.py
-
 [BASIC]
 # exclude docstring requirement for test and private functions
 no-docstring-rgx=^test_|^_|^fixture
 
- # Good variable names which should always be accepted, separated by a comma
+# Good variable names which should always be accepted, separated by a comma
 good-names=fd,ch,dr,tc
 
 [REPORTS]
