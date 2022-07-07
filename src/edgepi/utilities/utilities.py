@@ -19,4 +19,4 @@ def filter_dict(dictionary:dict, entry_key='', entry_val='') -> dict:
             key or value matches either the entry_key or entry_val, respectively.
     '''
     filtered_args = { key:value for (key,value) in dictionary.items() if key != entry_key and value != entry_val }
-    return(filtered_args)
+    return filtered_args
