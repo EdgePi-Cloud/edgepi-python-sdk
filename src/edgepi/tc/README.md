@@ -231,9 +231,9 @@ The methods outlined above are designed to accept predefined Enums, which contai
       </td>
    </tr>
    <tr>
-      <td><code>DecBits</code></td>
-      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details).</td>
-      <td>Example: <code>DecBits.P0_5</code> allows you to specify a temperature threshold with a decimal value of 0.5</td>
+      <td><code>DecBits4, DecBits6</code></td>
+      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details). Please refer to documentation above or <code>set_config</code> docstring for whether to use DecBits4 or DecBits6 for setting decimal values</td>
+      <td>Example: <code>DecBits4.P0_5</code> or <code>DecBits6.P0_5</code>allows you to specify a temperature threshold with a decimal value of 0.5</td>
    </tr>
    <tr>
       <td><code>CJMode</code></td>
