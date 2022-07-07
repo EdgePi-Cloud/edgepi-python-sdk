@@ -42,8 +42,8 @@ class OpCode:
         So our intended goal is to change the register_value to (0b0110 1101).
 
         To do so, we first need to clear, or in other words, mask these high bits.
-        The mask to use here should be defined as (0b0000 1111). This allows us to clear the high bits
-        in a single AND operation, as follows:
+        The mask to use here should be defined as (0b0000 1111).
+        This allows us to clear the high bits in a single AND operation, as follows:
 
             (0b1010 1101) & (0b0000 1111) = (0b0000 1101).
 
@@ -65,11 +65,13 @@ class OpCodeMaskIncompatibleError(ValueError):
 
 def apply_opcodes(register_values: dict, opcodes: list):
     """
-    Generates updated register values after applying opcodes, and sets is_changed flag for updated registers.
+    Generates updated register values after applying opcodes,
+    and sets is_changed flag for updated registers.
 
     Args:
-        register_values (dict): a map of a device's registers to a dictionary containing their corresponding register values.
-                                The dictionary must contain entries of the form register_address (int): register_value (int).
+        register_values (dict): a map of a device's registers to a dictionary containing their
+                                corresponding register values. The dictionary must contain
+                                entries of the form register_address (int): register_value (int).
 
         opcodes (list): a list of OpCode objects to be used for updating register values.
 
@@ -110,7 +112,10 @@ def _apply_opcode(register_value: int, opcode: OpCode):
     """
     # ensure op_code only writes to bits of register covered by mask
     if (~opcode.op_mask & opcode.op_code) != opcode.op_code:
-        raise OpCodeMaskIncompatibleError(f'''opcode ({hex(opcode.op_code)}) affects bits not covered by mask ({hex(opcode.op_mask)}''')
+        raise OpCodeMaskIncompatibleError(
+            f"""opcode ({hex(opcode.op_code)}) affects bits
+            not covered by mask ({hex(opcode.op_mask)}"""
+        )
 
     register_value &= opcode.op_mask  # clear the bits to be overwritten
     register_value |= opcode.op_code  # apply the opcode to the cleared bits
@@ -155,7 +160,7 @@ def _format_register_map(reg_map: dict) -> dict:
         reg_map (dict): a dictionary containing (int) register_address, (int) register_value pairs
 
     Returns:
-        a dictionary containing (int) register_address, {'value': register_value, 'is_changed': False} pairs
+        a dictionary holding (int) reg_address, {'value': reg_value, 'is_changed': False} pairs
     """
     _convert_values_to_dict(reg_map)
     _add_change_flags(reg_map)

@@ -1,7 +1,6 @@
 [MESSAGES CONTROL]
 
 disable=logging-fstring-interpolation,
-        line-too-long,
         too-many-locals,
         too-many-arguments,
         fixme,

@@ -1,4 +1,4 @@
-''''
+"""'
     Accessory module for EdgePiTC methods
 
     Classes:
@@ -7,7 +7,7 @@
     Functions:
         _negative_temp_check(int)
         code_to_temp(list)
-'''
+"""
 
 
 import logging
@@ -28,7 +28,10 @@ def _negative_temp_check(temp_code: int):
 
 
 def code_to_temp(code_bytes: list):
-    """converts cold junction and linearized thermocouple temperature binary codes to float values"""
+    """
+    converts cold junction and linearized thermocouple temperature
+    binary codes to float values
+    """
     # generate cold junction temperature and linearized TC temperatures
     cj_high_byte = code_bytes[1]
     cj_low_byte = code_bytes[2]
@@ -46,9 +49,7 @@ def code_to_temp(code_bytes: list):
 
     # combine and arrange the temperature bits in order from msb to lsb and
     # eliminate empty placeholder bits
-    lt_code = bitstring.pack(
-        "uint:8, uint:8, uint:8", lt_high_byte, lt_mid_byte, lt_low_byte
-    )
+    lt_code = bitstring.pack("uint:8, uint:8, uint:8", lt_high_byte, lt_mid_byte, lt_low_byte)
     del lt_code[-5:]
     lt_negative_flag = _negative_temp_check(lt_code)
 
