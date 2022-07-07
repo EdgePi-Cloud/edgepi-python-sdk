@@ -11,6 +11,13 @@ disable=logging-fstring-interpolation,
 # formatting, while `new` is for `{}` formatting.
 logging-format-style=new
 
+[BASIC]
+# exclude docstring requirement for test and private functions
+no-docstring-rgx=^test_|^_
+
+ # Good variable names which should always be accepted, separated by a comma
+good-names=fd
+
 [REPORTS]
 
 output-format=colorized
