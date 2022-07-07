@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import FrozenInstanceError
 from edgepi.adc.adc_configs import *
-from edgepi.adc.adc_constants import EDGEPI_ADC_REG as regs
+from edgepi.adc.adc_constants import EdgePiADCReg as regs
 
 @pytest.fixture(name='adc_configs')
 def fixture_test_ADC_ops():

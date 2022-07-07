@@ -1,5 +1,5 @@
 import pytest
-from edgepi.adc.adc_constants import EDGEPI_ADC_CHANNEL as CH
+from edgepi.adc.adc_constants import EdgePiADCChannel as CH
 from edgepi.adc.adc_commands import ADCCommands
 
 @pytest.fixture(name='adc_ops')
