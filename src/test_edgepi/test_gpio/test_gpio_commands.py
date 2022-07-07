@@ -1,3 +1,6 @@
+'''unit tests for gpio_commands module'''
+
+
 import pytest
 from edgepi.gpio.gpio_commands import get_periph_config
 from edgepi.gpio.gpio_configs import GpioConfigs
