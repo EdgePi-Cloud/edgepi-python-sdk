@@ -23,7 +23,7 @@ class EdgePiTC(SpiDevice):
     '''
 
     def __init__(self):
-        super().__init__(bus_num=6, dev_ID=2)
+        super().__init__(bus_num=6, dev_id=2)
 
     def read_temperatures(self):
         ''' Use to read cold junction and linearized thermocouple temperature measurements '''
