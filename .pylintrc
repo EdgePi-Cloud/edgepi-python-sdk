@@ -5,13 +5,18 @@ disable=logging-fstring-interpolation,
         too-many-locals,
         too-many-arguments,
         fixme,
-        too-few-public-methods
+        too-few-public-methods,
+        duplicate-code
 
 [LOGGING]
 
 # Format style used to check logging format string. `old` means using %
 # formatting, while `new` is for `{}` formatting.
 logging-format-style=new
+
+[MASTER]
+# ignore files from setup.py
+ignore-paths=.*/third_party/.*.py
 
 [BASIC]
 # exclude docstring requirement for test and private functions
