@@ -13,10 +13,10 @@ logging-format-style=new
 
 [BASIC]
 # exclude docstring requirement for test and private functions
-no-docstring-rgx=^test_|^_
+no-docstring-rgx=^test_|^_|^fixture
 
  # Good variable names which should always be accepted, separated by a comma
-good-names=fd,e,ch,dr
+good-names=fd,e,ch,dr,tc
 
 [REPORTS]
 
