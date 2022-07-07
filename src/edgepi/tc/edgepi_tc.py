@@ -1,5 +1,5 @@
 '''
-Provides a class for interacting with the EdgePi Thermocouple via SPI.
+Module for interacting with the EdgePi Thermocouple via SPI.
 '''
 
 

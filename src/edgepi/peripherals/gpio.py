@@ -6,7 +6,6 @@ Module for GPIO devices
 from periphery import GPIO
 
 
-# pylint: disable=too-few-public-methods
 class GpioDevice:
     """Class for representing a GPIO device"""
 

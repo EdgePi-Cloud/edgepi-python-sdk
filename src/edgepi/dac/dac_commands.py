@@ -28,7 +28,6 @@ class DACCommands:
             )
         return None
 
-    # pylint: disable=fixme
     # TODO: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
         """Convert a voltage to binary code value"""

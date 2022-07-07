@@ -3,7 +3,9 @@
 disable=logging-fstring-interpolation,
         line-too-long,
         too-many-locals,
-        too-many-arguments
+        too-many-arguments,
+        fixme,
+        too-few-public-methods
 
 [LOGGING]
 

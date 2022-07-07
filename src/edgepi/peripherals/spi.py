@@ -9,7 +9,6 @@ Classes:
 from periphery import SPI
 
 
-# pylint: disable=fixme
 # TODO: This class needs to be changed as the SPI library changes
 class SpiDevice:
     """Class representing an I2C device"""
