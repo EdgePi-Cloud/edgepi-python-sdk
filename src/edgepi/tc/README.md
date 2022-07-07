@@ -146,20 +146,38 @@ This section introduces thermocouple functionality available to users, and provi
                     temperature rises above this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_high_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature upper threshold decimal value.</p>
+                    <p>
+                    <code>lt_high_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature upper threshold decimal value.
+                    Note you <strong>must<strong> set both `lt_high_threshold` and `lt_high_threshold_decimals` at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>lt_low_threshold</code> (<code>int</code>): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
                     temperature falls below this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_low_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature lower threshold decimal value.</p>
+                    <p>
+                    <code>lt_low_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature lower threshold decimal value.
+                    Note you <strong>must<strong> set both `lt_low_threshold` and `lt_low_threshold_decimals` at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>cj_offset</code> (<code>int</code>): set cold junction temperature offset.</p>
                 </li>
                 <li>
-                    <p><code>cj_offset_decimals</code> (<code>DecBits</code>): set cold junction temperature offset decimal value.</p>
+                    <p>
+                    <code>cj_offset_decimals</code> (<code>DecBits4</code>): set cold junction temperature offset decimal value.
+                    Note you <strong>must<strong> set both `cj_offset` and `cj_offset_decimals` at the same time.
+                    </p>
+                </li>
+                <li>
+                    <p><code>cj_temp</code> (<code>int</code>): write temperature values to the cold-junction sensor, when it is disabled.</p>
+                </li>
+                <li>
+                    <p>
+                    <code>cj_temp_decimals</code> (<code>DecBits6</code>): set cold junction temperature overwrite decimal value.
+                    Note you <strong>must<strong> set both `cj_temp` and `cj_temp_decimals` at the same time.
+                    </p>
                 </li>
             </ul>
         </td>
