@@ -16,7 +16,7 @@ logging-format-style=new
 no-docstring-rgx=^test_|^_
 
  # Good variable names which should always be accepted, separated by a comma
-good-names=fd,e,ch
+good-names=fd,e,ch,dr
 
 [REPORTS]
 
