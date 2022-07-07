@@ -366,13 +366,16 @@ The methods outlined above are designed to accept predefined Enums, which contai
    </tr>
    <tr>
       <td><code>OpenCircuitMode</code></td>
-      <td>Settings for thermocouple open-circuit fault detection mode</td>
+      <td>
+        Settings for thermocouple open-circuit fault detection mode. Using a higher impedance mode will increase nominal test time, increasing
+        temperature conversion time in turn.
+     </td>
       <td>
          <ul>
            <li><code>OpenCircuitMode.DISABLED</code>: disable open circuit testing</li>
-           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 10 ms</li>
-           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 32 ms</li>
-           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 100 ms</li>
+           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: series resistance < 5kΩ </li>
+           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant < 2 ms  </li>
+           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant > 2 ms</li>
          </ul>
       </td>
    </tr>
