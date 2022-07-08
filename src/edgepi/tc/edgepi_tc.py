@@ -6,7 +6,6 @@ Module for interacting with the EdgePi Thermocouple via SPI.
 import logging
 import time
 from enum import Enum
-
 from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_constants import (
