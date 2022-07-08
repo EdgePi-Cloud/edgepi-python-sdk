@@ -1,3 +1,5 @@
+"""' SDK publishing """
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as file:
@@ -20,9 +22,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=setuptools.find_packages(where="src",
-                                    exclude=['test_edgepi']),
-    package_dir={"": "src"},    
+    packages=setuptools.find_packages(where="src", exclude=["test_edgepi"]),
+    package_dir={"": "src"},
     python_requires=">=3.6",
-    install_requires=["python-periphery >= 2.3.0", "bitstring >= 3.1.9"]
+    install_requires=["python-periphery >= 2.3.0", "bitstring >= 3.1.9"],
 )
