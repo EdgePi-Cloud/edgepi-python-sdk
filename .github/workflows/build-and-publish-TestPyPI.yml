@@ -5,7 +5,7 @@ name: Build and Publish to TestPyPI
 on:
   push:
     branches:
-      - 'dev'
+      - 'staging'
 
 jobs:
   build-and-publish:
