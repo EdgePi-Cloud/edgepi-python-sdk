@@ -1,15 +1,26 @@
-from dataclasses import dataclass
-from typing import List
+""" Calibration utility module for DAC devices """
 
-#TODO: need to combine this calibration dataclass into one to avoid confusion. This requires some more research and revision in calculation
+
+from dataclasses import dataclass
+
+
+# TODO: need to combine this calibration dataclass into one to avoid confusion.
+# This requires some more research and revision in calculation
 @dataclass
-class DACHwCalib_const:
+class DAChWCalibConst:
+    """Calibration constants for DAC"""
+
     gain: float = 0
     offset: float = 0
 
+
 @dataclass
-class DACSwCalib_const:
+class DACsWCalibConst:
+    """Calibration constants for DAC"""
+
     gain: float = 2.5
     offset: float = 0
 
+
+# pylint: disable=fixme
 # TODO: add functions/classes for calibration

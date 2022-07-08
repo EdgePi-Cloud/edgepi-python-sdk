@@ -1,7 +1,13 @@
+""" Constants for ADC device modules """
+
+
 from enum import Enum, unique
 
+
 @unique
-class EDGEPI_ADC_OP(Enum):
+class EdgePiADCOp(Enum):
+    """EdgePi ADC operation codes"""
+
     OP_NOP = 0x00
     OP_RESET = 0x06
     OP_START1 = 0x09
@@ -19,38 +25,44 @@ class EDGEPI_ADC_OP(Enum):
     OP_RREG = 0x20
     OP_WREG = 0x40
 
-@unique
-class EDGEPI_ADC_REG(Enum):
-    REG_ID = 0X00
-    REG_POWER = 0X01
-    REG_INTERFACE = 0X02
-    REG_MODE0 = 0X03
-    REG_MODE1 = 0X04
-    REG_MODE2 = 0X05
-    REG_INPMUX = 0X06
-    REG_OFCAL0 = 0X07
-    REG_OFCAL1 = 0X08
-    REG_OFCAL2 = 0X09
-    REG_FSCAL0 = 0X0A
-    REG_FSCAL1 = 0X0B
-    REG_FSCAL2 = 0X0C
-    REG_IDACMUX = 0X0D
-    REG_IDACMAG = 0X0E
-    REG_REFMUX = 0X0F
-    REG_TDACP = 0X10
-    REG_TDACN = 0X11
-    REG_GPIOCON = 0X12
-    REG_GPIODIR = 0X13
-    REG_GPIODAT = 0X14
-    REG_ADC2CFG = 0X15
-    REG_ADC2MUX = 0X16
-    REG_ADC2OFC0 = 0X17
-    REG_ADC2OFC1 = 0X18
-    REG_ADC2FSC0 = 0X19
-    REG_ADC2FSC1 = 0X1A
 
 @unique
-class EDGEPI_ADC_CHANNEL(Enum):
+class EdgePiADCReg(Enum):
+    """EdgePi ADC register addresses"""
+
+    REG_ID = 0x00
+    REG_POWER = 0x01
+    REG_INTERFACE = 0x02
+    REG_MODE0 = 0x03
+    REG_MODE1 = 0x04
+    REG_MODE2 = 0x05
+    REG_INPMUX = 0x06
+    REG_OFCAL0 = 0x07
+    REG_OFCAL1 = 0x08
+    REG_OFCAL2 = 0x09
+    REG_FSCAL0 = 0x0A
+    REG_FSCAL1 = 0x0B
+    REG_FSCAL2 = 0x0C
+    REG_IDACMUX = 0x0D
+    REG_IDACMAG = 0x0E
+    REG_REFMUX = 0x0F
+    REG_TDACP = 0x10
+    REG_TDACN = 0x11
+    REG_GPIOCON = 0x12
+    REG_GPIODIR = 0x13
+    REG_GPIODAT = 0x14
+    REG_ADC2CFG = 0x15
+    REG_ADC2MUX = 0x16
+    REG_ADC2OFC0 = 0x17
+    REG_ADC2OFC1 = 0x18
+    REG_ADC2FSC0 = 0x19
+    REG_ADC2FSC1 = 0x1A
+
+
+@unique
+class EdgePiADCChannel(Enum):
+    """EdgePi ADC channels"""
+
     AIN0 = 0
     AIN1 = 1
     AIN2 = 2
