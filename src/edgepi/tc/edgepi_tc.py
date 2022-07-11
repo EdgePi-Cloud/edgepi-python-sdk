@@ -207,7 +207,7 @@ class EdgePiTC(SpiDevice):
             if entry["is_changed"]:
                 updated_value = entry["value"]
                 self.__write_to_register(reg_addx, updated_value)
-                _logger.info(
+                _logger.debug(
                     f"""register value at address ({hex(reg_addx)})
                      has been updated to ({hex(updated_value)})"""
                 )
@@ -220,6 +220,85 @@ class EdgePiTC(SpiDevice):
             if enum.value.op_code == tc_bits:
                 return enum
         return None
+
+    def __process_temperature_settings(
+        self,
+        cj_high_threshold: int,
+        cj_low_threshold: int,
+        lt_high_threshold: int,
+        lt_high_threshold_decimals: DecBits4,
+        lt_low_threshold: int,
+        lt_low_threshold_decimals: DecBits4,
+        cj_offset: int,
+        cj_offset_decimals: DecBits4,
+        cj_temp: int,
+        cj_temp_decimals: DecBits6,
+        tc_type: TCType,
+        ops_list: list,
+    ):
+        """ generates OpCodes for temperature settings and appends to external OpCodes list """
+        tempcodes = [
+            TempCode(
+                cj_high_threshold,
+                DecBits4.P0,
+                7,
+                0,
+                0,
+                TCAddresses.CJHF_W.value,
+                TempType.COLD_JUNCTION
+            ),
+            TempCode(
+                cj_low_threshold,
+                DecBits4.P0,
+                7,
+                0,
+                0,
+                TCAddresses.CJLF_W.value,
+                TempType.COLD_JUNCTION
+            ),
+            TempCode(
+                lt_high_threshold,
+                lt_high_threshold_decimals,
+                11,
+                4,
+                0,
+                TCAddresses.LTHFTH_W.value,
+                TempType.THERMOCOUPLE
+            ),
+            TempCode(
+                lt_low_threshold,
+                lt_low_threshold_decimals,
+                11,
+                4,
+                0,
+                TCAddresses.LTLFTH_W.value,
+                TempType.THERMOCOUPLE
+            ),
+            TempCode(
+                cj_offset,
+                cj_offset_decimals,
+                3,
+                4,
+                0,
+                TCAddresses.CJTO_W.value,
+                TempType.COLD_JUNCTION_OFFSET
+            ),
+            TempCode(
+                cj_temp, cj_temp_decimals,
+                7,
+                6,
+                2,
+                TCAddresses.CJTH_W.value,
+                TempType.COLD_JUNCTION
+            ),
+        ]
+
+        # in case the user updates thermocouple type as well
+        tc_type = tc_type if tc_type is not None else self.__get_tc_type()
+
+        for tempcode in tempcodes:
+            ops_list += tempcode_to_opcode(tempcode, tc_type)
+        _logger.debug(f"set_config: ops_list:\n\n{ops_list}\n\n")
 
     def set_config(
         self,
@@ -325,75 +404,20 @@ class EdgePiTC(SpiDevice):
             if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
         ]
 
-        # process temperature settings
-        tempcodes = []
-        tempcodes.append(
-            TempCode(
-                cj_high_threshold,
-                DecBits4.P0,
-                7,
-                0,
-                0,
-                TCAddresses.CJHF_W.value,
-                TempType.COLD_JUNCTION,
-            )
+        self.__process_temperature_settings(
+            cj_high_threshold,
+            cj_low_threshold,
+            lt_high_threshold,
+            lt_high_threshold_decimals,
+            lt_low_threshold,
+            lt_low_threshold_decimals,
+            cj_offset,
+            cj_offset_decimals,
+            cj_temp,
+            cj_temp_decimals,
+            tc_type,
+            ops_list,
         )
-        tempcodes.append(
-            TempCode(
-                cj_low_threshold,
-                DecBits4.P0,
-                7,
-                0,
-                0,
-                TCAddresses.CJLF_W.value,
-                TempType.COLD_JUNCTION,
-            )
-        )
-        tempcodes.append(
-            TempCode(
-                lt_high_threshold,
-                lt_high_threshold_decimals,
-                11,
-                4,
-                0,
-                TCAddresses.LTHFTH_W.value,
-                TempType.THERMOCOUPLE,
-            )
-        )
-        tempcodes.append(
-            TempCode(
-                lt_low_threshold,
-                lt_low_threshold_decimals,
-                11,
-                4,
-                0,
-                TCAddresses.LTLFTH_W.value,
-                TempType.THERMOCOUPLE,
-            )
-        )
-        tempcodes.append(
-            TempCode(
-                cj_offset,
-                cj_offset_decimals,
-                3,
-                4,
-                0,
-                TCAddresses.CJTO_W.value,
-                TempType.COLD_JUNCTION_OFFSET,
-            )
-        )
-        tempcodes.append(
-            TempCode(
-                cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION
-            )
-        )
-
-        # in case the user updates thermocouple type as well
-        tc_type = tc_type if tc_type is not None else self.__get_tc_type()
-
-        for tempcode in tempcodes:
-            ops_list += tempcode_to_opcode(tempcode, tc_type)
-        _logger.debug(f"set_config: ops_list:\n\n{ops_list}\n\n")
 
         # read value of every write register into dict, starting from CR0_W.
         # Tuples are (write register addx : register_value) pairs.

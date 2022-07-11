@@ -230,7 +230,7 @@ def _dec_bits_to_float(dec_bits: int, num_dec_bits: int, is_negative: bool = Fal
     if num_dec_bits == 0:
         return 0
 
-    return -(dec_bits * 2**-num_dec_bits) if is_negative else (dec_bits * 2**-num_dec_bits)
+    return (dec_bits * 2**-num_dec_bits) * (-1 if is_negative else 1)
 
 
 def _validate_temperatures(tempcode: TempCode, tc_type: TCType):
@@ -250,15 +250,15 @@ def _validate_temperatures(tempcode: TempCode, tc_type: TCType):
     temp_val = tempcode.int_val + _dec_bits_to_float(
         tempcode.dec_val.value, tempcode.num_dec_bits, is_negative
     )
-    print(temp_val)
-    if temp_type in temp_ranges:
-        if temp_val < temp_ranges[temp_type]["min"] or temp_val > temp_ranges[temp_type]["max"]:
-            raise TempOutOfRangeError(
-                f"""Temperature integer value {temp_val} exceeds writeable limits
-            for setting {tempcode.setting_name} for {tc_type} thermocouple"""
-            )
-    else:
+
+    if temp_type not in temp_ranges:
         raise IllegalTempTypeError(f"TempType {temp_type} does not exist")
+
+    if not temp_ranges[temp_type]["min"] <= temp_val <= temp_ranges[temp_type]["max"]:
+        raise TempOutOfRangeError(
+            f"""Temperature integer value {temp_val} exceeds writeable limits
+        for setting {tempcode.setting_name} for {tc_type} thermocouple"""
+        )
 
 
 def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType) -> list:
@@ -285,10 +285,9 @@ def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType) -> list:
         raise ValueError("temp_code must be of type TempCode: received None")
 
     # no args passed for this temp setting -- skip it
-    # second clause is to check for registers with no decimal bits, since dec_val will never be None
-    if (temp_code.int_val is None and temp_code.dec_val is None) or (
-        temp_code.int_val is None and temp_code.num_dec_bits == 0
-    ):
+    # second clause is to check for registers with no decimal bits,
+    # since dec_val will never be None
+    if temp_code.int_val is None and (temp_code.dec_val is None or temp_code.num_dec_bits == 0):
         return []
 
     # only either int or dec args passed for this temp setting
