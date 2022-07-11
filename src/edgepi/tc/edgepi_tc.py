@@ -75,7 +75,7 @@ class EdgePiTC(SpiDevice):
         cr1_value = self.__read_register(TCAddresses.CR1_R.value)
         command = cr0_value[1] | TCOps.SINGLE_SHOT.value.op_code
         self.__write_to_register(TCAddresses.CR0_W.value, command)
-        
+
         # compute time delay between register write and update
         conv_time = calc_conv_time(cr0_value[1], cr1_value[1], safe_delay)
         time.sleep(conv_time / 1000)
