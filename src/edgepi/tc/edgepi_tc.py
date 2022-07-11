@@ -37,6 +37,12 @@ from edgepi.utilities.utilities import filter_dict
 _logger = logging.getLogger(__name__)
 
 
+class ColdJunctionOverWriteError(Exception):
+    """
+    Raised when the user attempts to write temperature values to the cold-junction
+    sensor without first having disabled it."""
+
+
 class EdgePiTC(SpiDevice):
     """
     A class used to represent the EdgePi Thermocouple as an SPI device.
@@ -114,6 +120,11 @@ class EdgePiTC(SpiDevice):
             cj_temp_decimals (DecBits6): the decimal value of the temperature
                                         to be written to the cold-junction sensor
         """
+        cr0 = Bits(uint=self.__read_register(TCAddresses.CR0_R.value)[1], length=8)
+        if not cr0[4]:
+            raise ColdJunctionOverWriteError(
+                """Cold-junction sensor must be disabled in order to write values to it."""
+            )
         self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
 
     def __read_register(self, reg_addx):
