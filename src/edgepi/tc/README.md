@@ -146,20 +146,38 @@ This section introduces thermocouple functionality available to users, and provi
                     temperature rises above this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_high_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature upper threshold decimal value.</p>
+                    <p>
+                    <code>lt_high_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature upper threshold decimal value.
+                      Note you <strong>must</strong> set both <code>lt_high_threshold</code> and <code>lt_high_threshold_decimals</code> at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>lt_low_threshold</code> (<code>int</code>): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
                     temperature falls below this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_low_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature lower threshold decimal value.</p>
+                    <p>
+                    <code>lt_low_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature lower threshold decimal value.
+                    Note you <strong>must</strong> set both <code>lt_low_threshold</code> and <code>lt_low_threshold_decimals</code> at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>cj_offset</code> (<code>int</code>): set cold junction temperature offset.</p>
                 </li>
                 <li>
-                    <p><code>cj_offset_decimals</code> (<code>DecBits</code>): set cold junction temperature offset decimal value.</p>
+                    <p>
+                    <code>cj_offset_decimals</code> (<code>DecBits4</code>): set cold junction temperature offset decimal value.
+                    Note you <strong>must</strong> set both <code>cj_offset</code> and <code>cj_offset_decimals</code> at the same time.
+                    </p>
+                </li>
+                <li>
+                    <p><code>cj_temp</code> (<code>int</code>): write temperature values to the cold-junction sensor, when it is disabled.</p>
+                </li>
+                <li>
+                    <p>
+                    <code>cj_temp_decimals</code> (<code>DecBits6</code>): set cold junction temperature overwrite decimal value.
+                    Note you <strong>must</strong> set both <code>cj_temp</code> and <code>cj_temp_decimals</code> at the same time.
+                    </p>
                 </li>
             </ul>
         </td>
@@ -213,9 +231,9 @@ The methods outlined above are designed to accept predefined Enums, which contai
       </td>
    </tr>
    <tr>
-      <td><code>DecBits</code></td>
-      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details).</td>
-      <td>Example: <code>DecBits.P0_5</code> allows you to specify a temperature threshold with a decimal value of 0.5</td>
+      <td><code>DecBits4, DecBits6</code></td>
+      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details). Please refer to documentation above or <code>set_config</code> docstring for whether to use DecBits4 or DecBits6 for setting decimal values</td>
+      <td>Example: <code>DecBits4.P0_5</code> or <code>DecBits6.P0_5</code>allows you to specify a temperature threshold with a decimal value of 0.5</td>
    </tr>
    <tr>
       <td><code>CJMode</code></td>
@@ -348,14 +366,98 @@ The methods outlined above are designed to accept predefined Enums, which contai
    </tr>
    <tr>
       <td><code>OpenCircuitMode</code></td>
-      <td>Settings for thermocouple open-circuit fault detection mode</td>
+      <td>
+        Settings for thermocouple open-circuit fault detection mode. Using a higher impedance mode will increase nominal test time, increasing
+        temperature conversion time in turn.
+     </td>
       <td>
          <ul>
            <li><code>OpenCircuitMode.DISABLED</code>: disable open circuit testing</li>
-           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 10 ms</li>
-           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 32 ms</li>
-           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 100 ms</li>
+           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: series resistance < 5kΩ </li>
+           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant < 2 ms  </li>
+           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant > 2 ms</li>
          </ul>
       </td>
    </tr>
+</table>
+
+---
+## Temperature Threshold Setting
+In order to set temperature fault thresholds using this module, please refer to the table below for accepted temperature values by thermocouple type. Attempting to set a temperature threshold outside of your thermocouple type's range will raise an exception.
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Thermocouple Type</th>
+            <th colspan="4">Temperature Range (°C)</th>
+        </tr>
+        <tr>
+            <th colspan="2">Cold Junction</th>
+            <th colspan="2">Thermocouple</th>
+        </tr>
+        <tr>
+            <td>Low</td>
+            <td>High</td>
+            <td>Low</td>
+            <td>High</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Type B</td>
+            <td>0</td>
+            <td>125</td>
+            <td>250</td>
+            <td>1820</td>
+        </tr>
+        <tr>
+            <td>Type E</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1000</td>
+        </tr>
+        <tr>
+            <td>Type J</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-210</td>
+            <td>1200</td>
+        </tr>
+        <tr>
+            <td>Type K</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1372</td>
+        </tr>
+        <tr>
+            <td>Type N</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1300</td>
+        </tr>
+        <tr>
+            <td>Type R</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type S</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type T</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>400</td>
+        </tr>
+    </tbody>
 </table>
