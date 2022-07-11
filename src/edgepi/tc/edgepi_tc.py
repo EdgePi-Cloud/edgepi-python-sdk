@@ -33,6 +33,7 @@ from edgepi.tc.tc_constants import (
 from edgepi.tc.tc_faults import map_fault_status
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.utilities.utilities import filter_dict
+from edgepi.tc.tc_conv_time import calc_conv_time
 
 _logger = logging.getLogger(__name__)
 
@@ -56,20 +57,28 @@ class EdgePiTC(SpiDevice):
         temp_bytes = self.__read_registers(TCAddresses.CJTH_R.value, 5)
         return code_to_temp(temp_bytes)
 
-    def single_sample(self):
-        """
-        Conduct a single sampling event. Returns measured temperature in degrees Celsius.
+    def single_sample(self, safe_delay: bool = True):
+        """Conduct a single sampling event. Returns measured temperature in degrees Celsius.
 
+        Args:
+            safe_delay (bool): manual sampling requires a time delay between triggering
+                            the sampling and the measured values being available for reading.
+                            Set to True to enable the maximum time delay, or False to enable
+                            a shorter time delay. Note, using the shorter time delay offers
+                            a higher chance of reading temperature values before the new
+                            measurement is available.
         Returns:
             a tuple containing temperatures for cold junction
-            and linearized thermocouple temperature.
+            and linearized thermocouple temperature
         """
-        reg_value = self.__read_register(TCAddresses.CR0_R.value)
-        command = reg_value[1] | TCOps.SINGLE_SHOT.value.op_code
+        cr0_value = self.__read_register(TCAddresses.CR0_R.value)
+        cr1_value = self.__read_register(TCAddresses.CR1_R.value)
+        command = cr0_value[1] | TCOps.SINGLE_SHOT.value.op_code
         self.__write_to_register(TCAddresses.CR0_W.value, command)
-        # there is a time delay between register write and update
-        # TODO: replace with time delay calculation
-        time.sleep(0.5)
+        
+        # compute time delay between register write and update
+        conv_time = calc_conv_time(cr0_value[1], cr1_value[1], safe_delay)
+        time.sleep(conv_time / 1000)
 
         # read cold junction and linearized TC temperatures
         temp_codes = self.read_temperatures()
@@ -303,7 +312,7 @@ class EdgePiTC(SpiDevice):
     def set_config(
         self,
         conversion_mode: ConvMode = None,
-        oc_fault_mode: OpenCircuitMode = None,
+        open_circuit_mode: OpenCircuitMode = None,
         cold_junction_mode: CJMode = None,
         fault_mode: FaultMode = None,
         noise_filter_mode: NoiseFilterMode = None,

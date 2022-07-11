@@ -1,4 +1,4 @@
-atomicwrites==1.4.0
+atomicwrites==1.4.1
 attrs==21.4.0
 colorama==0.4.4
 iniconfig==1.1.1
