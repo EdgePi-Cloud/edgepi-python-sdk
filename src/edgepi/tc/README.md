@@ -207,6 +207,16 @@ This section introduces thermocouple functionality available to users, and provi
         <td>None</td>
         <td>a dictionary of Fault objects, each of which stores information about the fault it represents</td>
     </tr>
+    <tr>
+        <td><code>clear_faults</code></td>
+        <td>
+        When in Interrupt Fault Mode, use to clear the Fault Status Register bits and deassert the FAULT pin output.
+        Note that the FAULT output and the fault bit may reassert immediately if the fault persists.
+        If thermocouple is in Comparator Fault Mode, this will have no effect on the thermocouple.
+        </td>
+        <td>None</td>
+        <td>None</td>
+    </tr>
 </table>
 
 ---
