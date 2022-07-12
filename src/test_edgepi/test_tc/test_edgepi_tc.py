@@ -473,6 +473,7 @@ def test_single_sample(mocker, cr0_val, cmd, tc):
         tc.single_sample()
         mock_write.assert_called_once_with(TCAddresses.CR0_W.value, cmd)
 
+
 @pytest.mark.parametrize(
     "cr0_val, cmd",
     [
@@ -487,20 +488,23 @@ def test_clear_faults(mocker, cr0_val, cmd, tc):
         mock_write.assert_called_once_with(TCAddresses.CR0_W.value, cmd)
 
 
-@pytest.mark.parametrize('cr1_val, tc_type', [
-    (0x00, TCType.TYPE_B),
-    (0x01, TCType.TYPE_E),
-    (0x02, TCType.TYPE_J),
-    (0x03, TCType.TYPE_K),
-    (0x04, TCType.TYPE_N),
-    (0x05, TCType.TYPE_R),
-    (0x06, TCType.TYPE_S),
-    (0x07, TCType.TYPE_T),
-    (0xFF, None)
-])
+@pytest.mark.parametrize(
+    "cr1_val, tc_type",
+    [
+        (0x00, TCType.TYPE_B),
+        (0x01, TCType.TYPE_E),
+        (0x02, TCType.TYPE_J),
+        (0x03, TCType.TYPE_K),
+        (0x04, TCType.TYPE_N),
+        (0x05, TCType.TYPE_R),
+        (0x06, TCType.TYPE_S),
+        (0x07, TCType.TYPE_T),
+        (0xFF, None),
+    ],
+)
 def test_get_tc_type(mocker, cr1_val, tc_type):
     # not using fixture because need Bits not mocked here
     mocker.patch("edgepi.peripherals.spi.SPI")
     tc = EdgePiTC()
-    mocker.patch('edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register', return_value=[0, cr1_val])
+    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register", return_value=[0, cr1_val])
     assert tc._EdgePiTC__get_tc_type() == tc_type
