@@ -8,6 +8,8 @@ import pytest
 from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import (
     AvgMode,
+    CJHighMask,
+    CJLowMask,
     CJMode,
     ConvMode,
     DecBits4,
@@ -15,8 +17,13 @@ from edgepi.tc.tc_constants import (
     FaultMode,
     NoiseFilterMode,
     OpenCircuitMode,
+    OpenMask,
+    OvuvMask,
     TCAddresses,
+    TCHighMask,
+    TCLowMask,
     TCType,
+    VoltageMode,
 )
 from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
@@ -259,6 +266,76 @@ default_reg_values = {
             {"tc_type": TCType.TYPE_T},
             None,
             {TCAddresses.CR1_W.value: 0x07},
+        ),
+        (
+            {"voltage_mode": VoltageMode.GAIN_8},
+            None,
+            {TCAddresses.CR1_W.value: 0x08},
+        ),
+        (
+            {"voltage_mode": VoltageMode.GAIN_32},
+            None,
+            {TCAddresses.CR1_W.value: 0x0C},
+        ),
+        (
+            {"cj_high_mask": CJHighMask.CJHIGH_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x20},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"cj_high_mask": CJHighMask.CJHIGH_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x20},
+        ),
+        (
+            {"cj_low_mask": CJLowMask.CJLOW_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x10},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"cj_low_mask": CJLowMask.CJLOW_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x10},
+        ),
+        (
+            {"tc_high_mask": TCHighMask.TCHIGH_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x08},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"tc_high_mask": TCHighMask.TCHIGH_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x08},
+        ),
+        (
+            {"tc_low_mask": TCLowMask.TCLOW_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x04},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"tc_low_mask": TCLowMask.TCLOW_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x04},
+        ),
+        (
+            {"ovuv_mask": OvuvMask.OVUV_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x02},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"ovuv_mask": OvuvMask.OVUV_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x02},
+        ),
+        (
+            {"open_mask": OpenMask.OPEN_MASK_OFF},
+            {TCAddresses.MASK_W.value: 0x01},
+            {TCAddresses.MASK_W.value: 0x00},
+        ),
+        (
+            {"open_mask": OpenMask.OPEN_MASK_ON},
+            None,
+            {TCAddresses.MASK_W.value: 0x01},
         ),
         (
             {"cj_high_threshold": 100},

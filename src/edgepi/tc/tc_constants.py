@@ -324,7 +324,7 @@ class OvuvMask(Enum):
 class TCLowMask(Enum):
     """valid opcodes for setting the thermocouple TCLOW fault mask"""
 
-    TCLOW_MASK_ON = OpCode(0x03, TCAddresses.MASK_W.value, Masks.BIT2_MASK.value)
+    TCLOW_MASK_ON = OpCode(0x04, TCAddresses.MASK_W.value, Masks.BIT2_MASK.value)
     TCLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT2_MASK.value)
 
 
@@ -332,7 +332,7 @@ class TCLowMask(Enum):
 class TCHighMask(Enum):
     """valid opcodes for setting the thermocouple TCHIGH fault mask"""
 
-    TCHIGH_MASK_ON = OpCode(0x04, TCAddresses.MASK_W.value, Masks.BIT3_MASK.value)
+    TCHIGH_MASK_ON = OpCode(0x08, TCAddresses.MASK_W.value, Masks.BIT3_MASK.value)
     TCHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT3_MASK.value)
 
 
@@ -340,7 +340,7 @@ class TCHighMask(Enum):
 class CJLowMask(Enum):
     """valid opcodes for setting the thermocouple CJLOW fault mask"""
 
-    CJLOW_MASK_ON = OpCode(0x05, TCAddresses.MASK_W.value, Masks.BIT4_MASK.value)
+    CJLOW_MASK_ON = OpCode(0x10, TCAddresses.MASK_W.value, Masks.BIT4_MASK.value)
     CJLOW_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT4_MASK.value)
 
 
@@ -348,7 +348,7 @@ class CJLowMask(Enum):
 class CJHighMask(Enum):
     """valid opcodes for setting the thermocouple CJHIGH fault mask"""
 
-    CJHIGH_MASK_ON = OpCode(0x06, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
+    CJHIGH_MASK_ON = OpCode(0x20, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
     CJHIGH_MASK_OFF = OpCode(0x00, TCAddresses.MASK_W.value, Masks.BIT5_MASK.value)
 
 
