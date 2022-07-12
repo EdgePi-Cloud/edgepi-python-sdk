@@ -117,8 +117,20 @@ class EdgePiTC(SpiDevice):
 
         return fault_msgs
 
+    def clear_faults(self):
+        """
+        When thermocouple is in Interrupt Fault Mode, clears all bits in Fault Status Register,
+        and deasserts FAULT pin output. Note that the FAULT output and the fault bit may
+        reassert immediately if the fault persists. If thermocouple is in Comparator Fault Mode,
+        this will have no effect on the thermocouple.
+        """
+        cr0 = self.__read_register(TCAddresses.CR0_R.value)
+        command = cr0[1] | TCOps.CLEAR_FAULTS.value.op_code
+        self.__write_to_register(TCAddresses.CR0_W.value, command)
+
     def overwrite_cold_junction_temp(self, cj_temp: int, cj_temp_decimals: DecBits6):
-        """Write temperature values to the cold-junction sensor.
+        """
+        Write temperature values to the cold-junction sensor.
         Cold-junction sensing must be disabled (using set_config method)
         in order for values to be written to the cold-junction sensor.
 
@@ -245,7 +257,7 @@ class EdgePiTC(SpiDevice):
         tc_type: TCType,
         ops_list: list,
     ):
-        """ generates OpCodes for temperature settings and appends to external OpCodes list """
+        """generates OpCodes for temperature settings and appends to external OpCodes list"""
         tempcodes = [
             TempCode(
                 cj_high_threshold,
@@ -254,7 +266,7 @@ class EdgePiTC(SpiDevice):
                 0,
                 0,
                 TCAddresses.CJHF_W.value,
-                TempType.COLD_JUNCTION
+                TempType.COLD_JUNCTION,
             ),
             TempCode(
                 cj_low_threshold,
@@ -263,7 +275,7 @@ class EdgePiTC(SpiDevice):
                 0,
                 0,
                 TCAddresses.CJLF_W.value,
-                TempType.COLD_JUNCTION
+                TempType.COLD_JUNCTION,
             ),
             TempCode(
                 lt_high_threshold,
@@ -272,7 +284,7 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.LTHFTH_W.value,
-                TempType.THERMOCOUPLE
+                TempType.THERMOCOUPLE,
             ),
             TempCode(
                 lt_low_threshold,
@@ -281,7 +293,7 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.LTLFTH_W.value,
-                TempType.THERMOCOUPLE
+                TempType.THERMOCOUPLE,
             ),
             TempCode(
                 cj_offset,
@@ -290,15 +302,10 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.CJTO_W.value,
-                TempType.COLD_JUNCTION_OFFSET
+                TempType.COLD_JUNCTION_OFFSET,
             ),
             TempCode(
-                cj_temp, cj_temp_decimals,
-                7,
-                6,
-                2,
-                TCAddresses.CJTH_W.value,
-                TempType.COLD_JUNCTION
+                cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION
             ),
         ]
 

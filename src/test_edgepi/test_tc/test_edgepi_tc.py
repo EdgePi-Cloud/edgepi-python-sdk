@@ -457,3 +457,31 @@ def test_overwrite_cold_junction_temp(mocker, cj_temp, cj_temp_decimals, cj_on, 
         tc.overwrite_cold_junction_temp(cj_temp, cj_temp_decimals)
         args = {"cj_temp": cj_temp, "cj_temp_decimals": cj_temp_decimals}
         mock_set_config.assert_called_once_with(**args)
+
+
+@pytest.mark.parametrize(
+    "cr0_val, cmd",
+    [
+        (0x00, 0x40),
+        (0b10111101, 0b11111101),
+    ],
+)
+def test_single_sample(mocker, cr0_val, cmd, tc):
+    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register", return_value=[0, cr0_val])
+    mocker.patch("edgepi.tc.edgepi_tc.calc_conv_time", return_value=200)
+    with patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__write_to_register") as mock_write:
+        tc.single_sample()
+        mock_write.assert_called_once_with(TCAddresses.CR0_W.value, cmd)
+
+@pytest.mark.parametrize(
+    "cr0_val, cmd",
+    [
+        (0x00, 0x02),
+        (0b10111101, 0b10111111),
+    ],
+)
+def test_clear_faults(mocker, cr0_val, cmd, tc):
+    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register", return_value=[0, cr0_val])
+    with patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__write_to_register") as mock_write:
+        tc.clear_faults()
+        mock_write.assert_called_once_with(TCAddresses.CR0_W.value, cmd)
