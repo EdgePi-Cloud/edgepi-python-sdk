@@ -151,6 +151,10 @@ class EdgePiTC(SpiDevice):
 
             cj_temp_decimals (DecBits6): the decimal value of the temperature
                                         to be written to the cold-junction sensor
+
+        Raises:
+            ColdJunctionOverwriteError: if value is written to cold-junction temperature
+                                    registers while cold-junction sensing is not disabled.
         """
         self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
 

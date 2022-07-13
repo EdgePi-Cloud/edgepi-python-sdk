@@ -24,6 +24,7 @@ from edgepi.tc.tc_constants import (
     TCType,
     VoltageMode,
 )
+from edgepi.tc.tc_faults import FaultType
 
 
 def test_tc_init():
@@ -301,3 +302,17 @@ def test_set_config(tc, args, set_reg_value, updated_regs):
         # check updates were applied
         else:
             assert value == updated_regs[addx]
+
+
+def test_single_sample(tc):
+    temps = tc.single_sample()
+    assert len(temps) == 2
+    for temp in temps:
+        assert isinstance(temp, float)
+
+
+def test_read_faults(tc):
+    faults = tc.read_faults(filter_at_fault=False)
+    assert len(faults) == 8
+    for fault in faults:
+        assert isinstance(fault, FaultType)
