@@ -11,6 +11,7 @@ from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_commands import code_to_temp, TempCode, tempcode_to_opcode, TempType
 from edgepi.tc.tc_constants import (
+    NUM_WRITE_REGS,
     AvgMode,
     CJHighMask,
     CJLowMask,
@@ -48,6 +49,22 @@ class EdgePiTC(SpiDevice):
     """
     A class used to represent the EdgePi Thermocouple as an SPI device.
     """
+
+    # default MAX31856 register values for writeable registers
+    default_reg_values = {
+        TCAddresses.CR0_W.value: 0x00,
+        TCAddresses.CR1_W.value: 0x03,
+        TCAddresses.MASK_W.value: 0xFF,
+        TCAddresses.CJHF_W.value: 0x7F,
+        TCAddresses.CJLF_W.value: 0xC0,
+        TCAddresses.LTHFTH_W.value: 0x7F,
+        TCAddresses.LTHFTL_W.value: 0xFF,
+        TCAddresses.LTLFTH_W.value: 0x80,
+        TCAddresses.LTLFTL_W.value: 0x00,
+        TCAddresses.CJTO_W.value: 0x00,
+        TCAddresses.CJTH_W.value: 0x00,
+        TCAddresses.CJTL_W.value: 0x00,
+    }
 
     def __init__(self):
         super().__init__(bus_num=6, dev_id=2)
@@ -148,6 +165,14 @@ class EdgePiTC(SpiDevice):
             )
         self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
 
+    def reset_registers(self):
+        """
+        Resets register values to factory default values. Please refer to MAX31856
+        datasheet or this module's documentation for these values.
+        """
+        for addx, value in self.default_reg_values.items():
+            self.__write_to_register(addx, value)
+
     def __read_register(self, reg_addx):
         """Reads the value of a single register.
 
@@ -205,7 +230,7 @@ class EdgePiTC(SpiDevice):
             for each writeable register.
         """
         reg_map = {}
-        num_regs = 16
+        num_regs = NUM_WRITE_REGS
         read_regs_offset = 0x80
         start_addx = TCAddresses.CR0_W.value
         # read values from __read_registers, but log values to corresponding write registers
