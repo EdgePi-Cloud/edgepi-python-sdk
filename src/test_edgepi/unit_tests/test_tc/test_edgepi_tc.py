@@ -7,7 +7,8 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 from bitstring import Bits
-from edgepi.tc.edgepi_tc import ColdJunctionOverWriteError, EdgePiTC
+from edgepi.tc.edgepi_tc import EdgePiTC
+from edgepi.tc.tc_commands import ColdJunctionOverWriteError
 from edgepi.tc.tc_constants import (
     AvgMode,
     CJHighMask,
@@ -444,16 +445,14 @@ def test_update_registers_from_dict(mock_write, reg_values, tc):
 
 
 @pytest.mark.parametrize(
-    "cj_temp, cj_temp_decimals, cj_on, expected",
+    "cj_temp, cj_temp_decimals",
     [
-        (-50, DecBits4.P0_125, True, does_not_raise()),
-        (-50, DecBits4.P0_125, False, pytest.raises(ColdJunctionOverWriteError)),
+        (-50, DecBits4.P0_125),
+        (-50, DecBits4.P0_125),
     ],
 )
-def test_overwrite_cold_junction_temp(mocker, cj_temp, cj_temp_decimals, cj_on, expected, tc):
-    cr0 = Bits(hex="0x08") if cj_on else Bits(hex="0x00")
-    mocker.patch("edgepi.tc.edgepi_tc.Bits", return_value=cr0)
-    with expected, patch("edgepi.tc.edgepi_tc.EdgePiTC.set_config") as mock_set_config:
+def test_overwrite_cold_junction_temp(cj_temp, cj_temp_decimals, tc):
+    with patch("edgepi.tc.edgepi_tc.EdgePiTC.set_config") as mock_set_config:
         tc.overwrite_cold_junction_temp(cj_temp, cj_temp_decimals)
         args = {"cj_temp": cj_temp, "cj_temp_decimals": cj_temp_decimals}
         mock_set_config.assert_called_once_with(**args)
@@ -508,3 +507,10 @@ def test_get_tc_type(mocker, cr1_val, tc_type):
     tc = EdgePiTC()
     mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register", return_value=[0, cr1_val])
     assert tc._EdgePiTC__get_tc_type() == tc_type
+
+
+@patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__write_to_register")
+def test_tc_reset_registers(mock_write, tc):
+    write_calls = [call(addx, value) for addx, value in tc.default_reg_values.items()]
+    tc.reset_registers()
+    mock_write.assert_has_calls(write_calls, any_order=True)

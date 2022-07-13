@@ -39,12 +39,6 @@ from edgepi.tc.tc_conv_time import calc_conv_time
 _logger = logging.getLogger(__name__)
 
 
-class ColdJunctionOverWriteError(Exception):
-    """
-    Raised when the user attempts to write temperature values to the cold-junction
-    sensor without first having disabled it."""
-
-
 class EdgePiTC(SpiDevice):
     """
     A class used to represent the EdgePi Thermocouple as an SPI device.
@@ -158,17 +152,14 @@ class EdgePiTC(SpiDevice):
             cj_temp_decimals (DecBits6): the decimal value of the temperature
                                         to be written to the cold-junction sensor
         """
-        cr0 = Bits(uint=self.__read_register(TCAddresses.CR0_R.value)[1], length=8)
-        if not cr0[4]:
-            raise ColdJunctionOverWriteError(
-                """Cold-junction sensor must be disabled in order to write values to it."""
-            )
         self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
 
     def reset_registers(self):
         """
         Resets register values to factory default values. Please refer to MAX31856
-        datasheet or this module's documentation for these values.
+        datasheet or this module's documentation for these values. Note this will
+        not reset the CJTH and CJTL registers, as these require cold-junction
+        sensing to be disabled in order to update the values.
         """
         for addx, value in self.default_reg_values.items():
             self.__write_to_register(addx, value)
@@ -267,6 +258,11 @@ class EdgePiTC(SpiDevice):
                 return enum
         return None
 
+    def __get_cj_status(self):
+        "Returns the current cold-junction sensing status (on/off)"
+        cr0 = Bits(uint=self.__read_register(TCAddresses.CR0_R.value)[1], length=8)
+        return cr0[4]
+
     def __process_temperature_settings(
         self,
         cj_high_threshold: int,
@@ -336,9 +332,10 @@ class EdgePiTC(SpiDevice):
 
         # in case the user updates thermocouple type as well
         tc_type = tc_type if tc_type is not None else self.__get_tc_type()
+        cj_status = self.__get_cj_status()
 
         for tempcode in tempcodes:
-            ops_list += tempcode_to_opcode(tempcode, tc_type)
+            ops_list += tempcode_to_opcode(tempcode, tc_type, cj_status)
         _logger.debug(f"set_config: ops_list:\n\n{ops_list}\n\n")
 
     def set_config(
