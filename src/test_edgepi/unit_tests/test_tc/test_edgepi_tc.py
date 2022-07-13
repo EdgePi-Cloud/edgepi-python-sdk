@@ -3,12 +3,9 @@
 
 from copy import deepcopy
 from unittest.mock import call, patch
-from contextlib import nullcontext as does_not_raise
 
 import pytest
-from bitstring import Bits
 from edgepi.tc.edgepi_tc import EdgePiTC
-from edgepi.tc.tc_commands import ColdJunctionOverWriteError
 from edgepi.tc.tc_constants import (
     AvgMode,
     CJHighMask,

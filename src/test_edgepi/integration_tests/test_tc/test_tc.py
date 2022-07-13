@@ -234,6 +234,36 @@ def fixture_test_edgepi_tc():
             {TCAddresses.MASK_W.value: 0xFE},
             {TCAddresses.MASK_W.value: 0xFF},
         ),
+        (
+            {"cj_high_threshold": 100},
+            None,
+            {TCAddresses.CJHF_W.value: 0x64},
+        ),
+        (
+            {"cj_low_threshold": -16},
+            None,
+            {TCAddresses.CJLF_W.value: 0x90}
+        ),
+        (
+            {"lt_high_threshold": 1000, "lt_high_threshold_decimals": DecBits4.P0_9375},
+            None,
+            {TCAddresses.LTHFTH_W.value: 0x3E, TCAddresses.LTHFTL_W.value: 0x8F},
+        ),
+        (
+            {"lt_low_threshold": -55, "lt_low_threshold_decimals": DecBits4.P0_9375},
+            None,
+            {TCAddresses.LTLFTH_W.value: 0x83, TCAddresses.LTLFTL_W.value: 0x7F},
+        ),
+        (
+            {"cj_offset": 4, "cj_offset_decimals": DecBits4.P0_9375},
+            None,
+            {TCAddresses.CJTO_W.value: 0x4F},
+        ),
+        (
+            {"cj_temp": 100, "cj_temp_decimals": DecBits6.P0_984375},
+            {TCAddresses.CR0_W.value: 0x08}, # disable cold junction sensor
+            {TCAddresses.CJTH_W.value: 0x64, TCAddresses.CJTL_W.value: 0xFC},
+        ),
     ],
 )
 def test_set_config(tc, args, set_reg_value, updated_regs):
@@ -241,8 +271,6 @@ def test_set_config(tc, args, set_reg_value, updated_regs):
 
     # reset registers to default values
     tc.reset_registers()
-    reg_values = tc._EdgePiTC__read_registers_to_map()
-    print(reg_values)
 
     # modify default values for this test only if needed
     if set_reg_value is not None:
@@ -251,6 +279,11 @@ def test_set_config(tc, args, set_reg_value, updated_regs):
 
     # update registers with user args
     tc.set_config(**args)
+
+    # if overwriting cold junction temp, re-enable sensing to return
+    # CR0 to default value for value comparison below
+    if "cj_temp" in args.keys() or "cj_temp_decimals" in args.keys():
+        tc.set_config(cold_junction_mode=CJMode.ENABLE)
 
     # read updated register values
     reg_values = tc._EdgePiTC__read_registers_to_map()
