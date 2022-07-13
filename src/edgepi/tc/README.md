@@ -70,7 +70,8 @@ This section introduces thermocouple functionality available to users, and provi
     * Note, the above will return only faults that are currently occuring. To obtain information the status of all monitored faults, regardless of whether they are currently occuring or not, you may call `edgepi_tc.single_sample(filter_at_fault=False)`.
 4. ### Write Temperature Values to the Cold-Junction Sensor
     - If you have an external sensor you wish to use to write temperature values to the cold-junction sensor, the `edgepi_tc.overwrite_cold_junction_temp` method provides this functionality. For example, it may be called like this: `edgepi_tc.overwrite_cold_junction_temp(cj_temp=20, cj_temp_decimals=DecBits6.P0_25)` to write the value 20.25 to the cold-junction sensor. Note, you must provide both arguments to the method.
-    - Note, you must first disable the cold-junction sensor using `set_config` in order to write temperature values to it.
+    - Note, you must first disable the cold-junction sensor using `set_config` in order to write temperature values to the cold-junction sensor.
+    - The MAX31856 provides functionality for alerting the user a fault has occurred, through the FAULT pin output. This pin is currently not connected on the EdgePi, and therefore faults will not trigger this output. However, any faults that occur will still show up in the Fault Status Register, and thus calling `read_faults` will alert you to their presence.
     
  ____
  ## EdgePiTC Methods Guide
