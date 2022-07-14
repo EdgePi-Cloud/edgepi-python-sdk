@@ -35,6 +35,8 @@ def fixture_test_edgepi_tc(mocker):
     # mocker acts as context manager
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.tc.edgepi_tc.Bits")
+    # yield instead of return so local state (i.e mocks) not lost
+    # upon returning EdgePiTC object in test functions below
     yield EdgePiTC()
 
 
