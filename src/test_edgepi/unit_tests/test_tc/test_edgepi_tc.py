@@ -2,7 +2,7 @@
 
 
 from copy import deepcopy
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import call, patch
 
 import pytest
 from edgepi.tc.edgepi_tc import EdgePiTC
@@ -35,8 +35,6 @@ def fixture_test_edgepi_tc(mocker):
     # mocker acts as context manager
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.tc.edgepi_tc.Bits")
-    # yield so local state (i.e mocks) not lost upon returning EdgePiTC object
-    # in test functions below
     yield EdgePiTC()
 
 
@@ -513,18 +511,3 @@ def test_tc_reset_registers(mock_write, tc):
     write_calls = [call(addx, value) for addx, value in tc.default_reg_values.items()]
     tc.reset_registers()
     mock_write.assert_has_calls(write_calls, any_order=True)
-
-
-@pytest.mark.parametrize(
-    "cr0_val, cmd",
-    [
-        ([0x0, 0x0], 0x02),
-        ([0x0, 0x2], 0x02),
-        ([0x0, 0xFD], 0xFF),
-    ],
-)
-def test_clear_faults(mocker, cr0_val, cmd, tc):
-    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_register", return_value=cr0_val)
-    with patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__write_to_register") as mock_write:
-        tc.clear_faults()
-        mock_write.assert_called_once_with(TCAddresses.CR0_W.value, cmd)
