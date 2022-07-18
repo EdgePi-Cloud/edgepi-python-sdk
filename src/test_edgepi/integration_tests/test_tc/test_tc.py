@@ -240,11 +240,7 @@ def fixture_test_edgepi_tc():
             None,
             {TCAddresses.CJHF_W.value: 0x64},
         ),
-        (
-            {"cj_low_threshold": -16},
-            None,
-            {TCAddresses.CJLF_W.value: 0x90}
-        ),
+        ({"cj_low_threshold": -16}, None, {TCAddresses.CJLF_W.value: 0x90}),
         (
             {"lt_high_threshold": 1000, "lt_high_threshold_decimals": DecBits4.P0_9375},
             None,
@@ -262,7 +258,7 @@ def fixture_test_edgepi_tc():
         ),
         (
             {"cj_temp": 100, "cj_temp_decimals": DecBits6.P0_984375},
-            {TCAddresses.CR0_W.value: 0x08}, # disable cold junction sensor
+            {TCAddresses.CR0_W.value: 0x08},  # disable cold junction sensor
             {TCAddresses.CJTH_W.value: 0x64, TCAddresses.CJTL_W.value: 0xFC},
         ),
     ],
@@ -311,8 +307,71 @@ def test_single_sample(tc):
         assert isinstance(temp, float)
 
 
-def test_read_faults(tc):
-    faults = tc.read_faults(filter_at_fault=False)
-    assert len(faults) == 8
-    for fault in faults:
-        assert isinstance(fault, FaultType)
+@pytest.mark.parametrize(
+    "threshold_args, fault_names, filter_at_fault, num_faults",
+    [
+        ({"cj_high_threshold": 1}, [FaultType.CJHIGH], False, 8),
+        ({"cj_high_threshold": 1}, [FaultType.CJHIGH], True, 1),
+        ({"cj_low_threshold": 100}, [FaultType.CJLOW], True, 1),
+        (
+            {"cj_high_threshold": 1, "cj_low_threshold": 100},
+            [FaultType.CJHIGH, FaultType.CJLOW],
+            True,
+            2,
+        ),
+        ({"cj_low_threshold": 100}, [FaultType.CJLOW], True, 1),
+        (
+            {"cj_high_threshold": 1, "cj_low_threshold": 100},
+            [FaultType.CJHIGH, FaultType.CJLOW],
+            False,
+            8,
+        ),
+        (
+            {"lt_high_threshold": 1, "lt_high_threshold_decimals": DecBits4.P0_25},
+            [FaultType.TCHIGH],
+            True,
+            1,
+        ),
+        (
+            {
+                "lt_high_threshold": 1,
+                "lt_high_threshold_decimals": DecBits4.P0_25,
+                "lt_low_threshold": 100,
+                "lt_low_threshold_decimals": DecBits4.P0_25,
+            },
+            [FaultType.TCHIGH, FaultType.TCLOW, FaultType.TCRANGE],
+            True,
+            2,
+        ),
+        (
+            {
+                "lt_high_threshold": 1,
+                "lt_high_threshold_decimals": DecBits4.P0_25,
+                "lt_low_threshold": 100,
+                "lt_low_threshold_decimals": DecBits4.P0_25,
+                "cj_high_threshold": 1,
+                "cj_low_threshold": 100,
+            },
+            [
+                FaultType.CJHIGH,
+                FaultType.CJLOW,
+                FaultType.TCHIGH,
+                FaultType.TCLOW,
+                FaultType.TCRANGE,
+            ],
+            True,
+            4,
+        ),
+    ],
+)
+def test_read_faults(threshold_args, fault_names, filter_at_fault, num_faults, tc):
+    tc.set_config(**threshold_args)
+    tc.single_sample()
+    faults = tc.read_faults(filter_at_fault)
+    assert len(faults) == num_faults
+    for key, fault in faults.items():
+        if key in fault_names:
+            assert fault.at_fault
+        else:
+            assert not fault.at_fault
+    tc.reset_registers()
