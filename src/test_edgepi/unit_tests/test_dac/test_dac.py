@@ -205,5 +205,4 @@ def test_voltage_to_code(ch, expected, result, dac_ops):
     ],
 )
 def test_generate_power_code(dac_state, expected, dac_ops):
-    print(dac_state)
     assert dac_ops.generate_power_code(dac_state) == expected

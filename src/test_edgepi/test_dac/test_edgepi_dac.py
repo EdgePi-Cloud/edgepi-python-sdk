@@ -49,8 +49,8 @@ def test_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
 @pytest.mark.parametrize(
     "gain_mode, expected",
     [
-        (GainMode.NO_AMP, [112, 0, 0]),
-        (GainMode.DOUBLE_AMP, [112, 0, 4]),
+        (GainMode.SINGLE, [112, 0, 0]),
+        (GainMode.DOUBLE, [112, 0, 4]),
     ],
 )
 def test_set_gain_mode(mocker, gain_mode, expected, dac):
