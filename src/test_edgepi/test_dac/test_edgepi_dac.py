@@ -3,7 +3,7 @@
 from copy import deepcopy
 
 import pytest
-from edgepi.dac.dac_constants import PowerMode, EdgePiDacChannel as CH
+from edgepi.dac.dac_constants import GainMode, PowerMode, EdgePiDacChannel as CH
 from edgepi.dac.edgepi_dac import EdgePiDAC
 
 
@@ -38,4 +38,17 @@ def test_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
     mocker.patch.object(dac, "_dac_state", power_modes)
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.set_power_mode(analog_out, mode)
+    mock_transfer.assert_called_once_with(expected)
+
+
+@pytest.mark.parametrize(
+    "gain_mode, expected",
+    [
+        (GainMode.NO_AMP, [112, 0, 0]),
+        (GainMode.DOUBLE_AMP, [112, 0, 4]),
+    ],
+)
+def test_set_gain_mode(mocker, gain_mode, expected, dac):
+    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+    dac.set_gain_mode(gain_mode)
     mock_transfer.assert_called_once_with(expected)

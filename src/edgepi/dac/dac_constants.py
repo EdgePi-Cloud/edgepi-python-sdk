@@ -61,3 +61,17 @@ class PowerMode(Enum):
     NORMAL = 0x0
     POWER_DOWN_GROUND = 0x1
     POWER_DOWN_3_STATE = 0x3
+
+
+class GainMode(Enum):
+    """
+    EdgePi DAC output amplifier gain modes
+
+    Attributes:
+        NO_AMP: amplifier gain = 1
+
+        DOUBLE_AMP: amplifier gain = 2
+    """
+
+    NO_AMP = 0x0
+    DOUBLE_AMP = 0x4
