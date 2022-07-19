@@ -7,6 +7,7 @@ import logging
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
 from edgepi.dac.dac_constants import (
+    SW_RESET,
     GainMode,
     PowerMode,
     EdgePiDacChannel as CH,
@@ -72,4 +73,11 @@ class EdgePiDAC(spi):
             gain_mode (GainMode): DAC output amplifier gain setting
         """
         cmd = self.dac_ops.combine_command(COM.COM_GAIN.value, COM.COM_NOP.value, gain_mode.value)
+        self.transfer(cmd)
+
+    def reset(self):
+        """
+        Performs a software reset of the EdgePi DAC to power-on default values.
+        """
+        cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, COM.COM_NOP.value, SW_RESET)
         self.transfer(cmd)

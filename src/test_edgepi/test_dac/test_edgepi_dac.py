@@ -52,3 +52,9 @@ def test_set_gain_mode(mocker, gain_mode, expected, dac):
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.set_gain_mode(gain_mode)
     mock_transfer.assert_called_once_with(expected)
+
+
+def test_reset(mocker, dac):
+    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+    dac.reset()
+    mock_transfer.assert_called_once_with([96, 18, 52])
