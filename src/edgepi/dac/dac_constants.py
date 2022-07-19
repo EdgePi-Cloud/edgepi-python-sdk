@@ -4,6 +4,9 @@
 from enum import Enum
 
 
+SW_RESET = 0x1234
+
+
 class EdgePiDacCom(Enum):
     """Commands for EdgePi DAC"""
 
