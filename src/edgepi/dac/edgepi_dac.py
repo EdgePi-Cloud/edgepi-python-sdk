@@ -20,6 +20,7 @@ _logger = logging.getLogger(__name__)
 
 # TODO: map analog_out number to AO EN pins
 
+
 class EdgePiDAC(spi):
     """A EdgePi DAC device"""
 
@@ -40,12 +41,14 @@ class EdgePiDAC(spi):
             CH.DAC0.value: PowerMode.NORMAL.value,
         }
 
-    def write_voltage(self, analog_out, voltage):
+    def write_voltage(self, analog_out: int, voltage: float):
         """
         Write a voltage value to an analog out pin
 
         Args:
-            analog_out: the analog out pin number to write a voltage value to
+            analog_out (int): the analog out pin number to write a voltage value to
+
+            voltage (float): the voltage value to write
         """
         dac_ch = analog_out - 1
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
