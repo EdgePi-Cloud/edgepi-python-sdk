@@ -40,8 +40,13 @@ class EdgePiDAC(spi):
             CH.DAC0.value: PowerMode.NORMAL.value,
         }
 
-    def write_voltage_channel(self, analog_out, voltage):
-        """Write a voltage value to a DAC channel"""
+    def write_voltage(self, analog_out, voltage):
+        """
+        Write a voltage value to an analog out pin
+
+        Args:
+            analog_out: the analog out pin number to write a voltage value to
+        """
         dac_ch = analog_out - 1
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
         self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
@@ -52,7 +57,7 @@ class EdgePiDAC(spi):
         or low power consumption modes.
 
         Args:
-            analog_out (int): the analog out pin number to write a voltage value to
+            analog_out (int): the analog out pin whose power will be changed
 
             power_mode (PowerMode): a valid hex code for setting DAC channel power mode
         """
