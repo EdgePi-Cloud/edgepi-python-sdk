@@ -6,7 +6,12 @@ Module for interacting with the EdgePi DAC via SPI.
 import logging
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
-from edgepi.dac.dac_constants import PowerMode, EdgePiDacChannel as CH, EdgePiDacCom as COM
+from edgepi.dac.dac_constants import (
+    GainMode,
+    PowerMode,
+    EdgePiDacChannel as CH,
+    EdgePiDacCom as COM,
+)
 from edgepi.peripherals.spi import SpiDevice as spi
 
 
@@ -57,4 +62,14 @@ class EdgePiDAC(spi):
         cmd = self.dac_ops.combine_command(
             COM.COM_POWER_DOWN_OP.value, COM.COM_NOP.value, power_code
         )
+        self.transfer(cmd)
+
+    def set_gain_mode(self, gain_mode: GainMode):
+        """
+        Set EdgePi DAC output amplifier gain
+
+        Args:
+            gain_mode (GainMode): DAC output amplifier gain setting
+        """
+        cmd = self.dac_ops.combine_command(COM.COM_GAIN.value, COM.COM_NOP.value, gain_mode.value)
         self.transfer(cmd)
