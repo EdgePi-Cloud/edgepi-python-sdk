@@ -1,6 +1,7 @@
 """ Unit tests for edgepi_dac module """
 
 from copy import deepcopy
+from unittest.mock import call
 
 import pytest
 from edgepi.dac.dac_constants import (
@@ -73,4 +74,5 @@ def test_read_voltage(mocker, analog_out, dac):
     dac_ch = analog_out - 1
     byte_1 = (COM.COM_READBACK.value << 4) + dac_ch
     dac.read_voltage(analog_out)
-    mock_transfer.assert_called_once_with([byte_1, 0, 0])
+    write_calls = [call([byte_1, 0, 0]), call([0, 0, 0])]
+    mock_transfer.assert_has_calls(write_calls)
