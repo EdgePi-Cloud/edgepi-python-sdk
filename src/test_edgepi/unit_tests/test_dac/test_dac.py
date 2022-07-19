@@ -1,10 +1,10 @@
-'''unit test for dac module'''
+"""unit test for dac module"""
 
 
 import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
-from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS
+from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
 from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
 
 
@@ -103,3 +103,107 @@ def test_generate_write_and_update_command(a, b, c, dac_ops):
 )
 def test_voltage_to_code(ch, expected, result, dac_ops):
     assert dac_ops.voltage_to_code(ch, expected) == result
+
+
+@pytest.mark.parametrize(
+    "dac_state, expected",
+    [
+        ([PowerMode.NORMAL.value] * 8, 0x0000),
+        ([PowerMode.POWER_DOWN_GROUND.value] + [PowerMode.NORMAL.value] * 7, 0x4000),
+        ([PowerMode.POWER_DOWN_3_STATE.value] + [PowerMode.NORMAL.value] * 7, 0xC000),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x1000,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x0400,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x0100,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x0040,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x0010,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+                PowerMode.NORMAL.value,
+            ],
+            0x0004,
+        ),
+        (
+            [
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.NORMAL.value,
+                PowerMode.POWER_DOWN_GROUND.value,
+            ],
+            0x0001,
+        ),
+    ],
+)
+def test_generate_power_code(dac_state, expected, dac_ops):
+    print(dac_state)
+    assert dac_ops.generate_power_code(dac_state) == expected
