@@ -3,7 +3,12 @@
 from copy import deepcopy
 
 import pytest
-from edgepi.dac.dac_constants import GainMode, PowerMode, EdgePiDacChannel as CH
+from edgepi.dac.dac_constants import (
+    GainMode,
+    PowerMode,
+    EdgePiDacChannel as CH,
+    EdgePiDacCom as COM,
+)
 from edgepi.dac.edgepi_dac import EdgePiDAC
 
 
@@ -58,3 +63,14 @@ def test_reset(mocker, dac):
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.reset()
     mock_transfer.assert_called_once_with([96, 18, 52])
+
+
+@pytest.mark.parametrize("analog_out",
+    [(8), (7), (6), (5), (4), (3), (2), (1)]
+)
+def test_read_voltage(mocker, analog_out, dac):
+    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+    dac_ch = analog_out - 1
+    byte_1 = (COM.COM_READBACK.value << 4) + dac_ch
+    dac.read_voltage(analog_out)
+    mock_transfer.assert_called_once_with([byte_1, 0, 0])

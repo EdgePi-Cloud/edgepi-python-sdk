@@ -46,7 +46,7 @@ class EdgePiDAC(spi):
         code = self.dac_ops.voltage_to_code(voltage)
         self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
 
-    def set_power_mode(self, analog_out, power_mode: PowerMode):
+    def set_power_mode(self, analog_out: int, power_mode: PowerMode):
         """
         Set power mode for individual DAC channels to either normal power consumption,
         or low power consumption modes.
@@ -81,3 +81,18 @@ class EdgePiDAC(spi):
         """
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, COM.COM_NOP.value, SW_RESET)
         self.transfer(cmd)
+
+    def read_voltage(self, analog_out: int):
+        """
+        Read voltage from an analog out pin
+
+        Args:
+            analog_out (int): the analog out pin number to read voltage from
+        """
+        self.dac_ops.check_range(analog_out, 1, len(CH))
+        dac_ch = analog_out - 1
+        cmd = self.dac_ops.combine_command(
+            COM.COM_READBACK.value, CH(dac_ch).value, COM.COM_NOP.value
+        )
+        ch_value = self.transfer(cmd)
+        return ch_value
