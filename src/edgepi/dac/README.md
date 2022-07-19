@@ -21,10 +21,10 @@ This section introduces DAC functionality available to users, and provides a gui
 
 1. Writing Voltage to Analog Out Pins
     - Write a voltage value to be sent through an analog output pin
-3. Reading Voltage
-    - **TODO**: unclear what exactly the read operation is reading
+3. Reading Voltage from Analog Out Pins
+    - Read voltage from DAC channel corresponding to an analog out pin
 4. Setting Power Mode Analog Out Pins
     - Each analog out pin can be configured to operate in lower power consumption modes.
 5. Setting DAC Output Amplifier Gain
-7. Resetting Values
-    - **TODO**: unclear what values this is resetting
+7. Resetting DAC
+    - Performs a software reset of the DAC, returning all settings and values to the default power-on state.
