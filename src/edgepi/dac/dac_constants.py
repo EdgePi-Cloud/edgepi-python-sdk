@@ -42,3 +42,22 @@ class EdgePiDacCalibrationConstants(Enum):
 
     VOLTAGE_REF = 2.047
     RANGE = 65535
+
+
+class PowerMode(Enum):
+    """
+    EdgePi DAC power modes
+
+    Attributes:
+        NORMAL: normal power consumption of 1.1 mA typically
+
+        POWER_DOWN_GROUND: low power consumption, 1 μA typically. DAC output stage
+            connected internally to GND through 1 kΩ resistor.
+
+        POWER_DOWN_3_STATE: low power consumption, 1 μA typically. DAC output stage
+            left open circuited (three-state).
+    """
+
+    NORMAL = 0x0
+    POWER_DOWN_GROUND = 0x1
+    POWER_DOWN_3_STATE = 0x3

@@ -2,6 +2,7 @@
 
 import logging
 from typing import Union
+from bitstring import Bits
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_constants import EdgePiDacCom as COMMAND
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS
@@ -20,12 +21,8 @@ class DACCommands:
 
     def generate_write_and_update_command(self, ch, data):
         """Construct a write and update command"""
-        if self.check_range(ch, 0, len(CH)) and self.check_range(
-            data, 0, CALIB_CONSTS.RANGE.value
-        ):
-            return self.combine_command(
-                COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data
-            )
+        if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
+            return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
         return None
 
     # TODO: change the formula according to calibration if needed
@@ -47,7 +44,20 @@ class DACCommands:
     @staticmethod
     # pylint: disable=inconsistent-return-statements
     def combine_command(op_code, ch, value) -> Union[float, Exception]:
-        """combine op_code, channel and value into a message frame to send out to DAC device"""
+        """
+        Combine op_code, channel and value into a message frame to send out to DAC device
+
+        Args:
+            op_code (COMMAND.value): AD5675 DAC command
+
+            ch (CH.value): AD5657 DAC channel address
+
+            value: 16 bit data
+
+        Returns:
+            a list of bytes that form a DAC input shift register message frame, i.e.
+            of the form [op_code_byte, ch_byte, value_byte]
+        """
         try:
             DACCommands.check_for_int([op_code, ch, value])
             temp = (op_code << 20) + (ch << 16) + value
@@ -73,3 +83,14 @@ class DACCommands:
             return True
 
         raise ValueError(f"Target out of range {target}")
+
+    @staticmethod
+    def generate_power_code(dac_state: list):
+        """
+        Converts a list containing the EdgePi DAC's power state for each channel
+        to a binary code value.
+        """
+        data = Bits()
+        for value in dac_state:
+            data += Bits(uint=value, length=2)
+        return data.uint
