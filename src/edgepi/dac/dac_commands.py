@@ -25,8 +25,18 @@ class DACCommands:
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
     # TODO: change the formula according to calibration if needed
-    def voltage_to_code(self, ch, expected):
-        """Convert a voltage to binary code value"""
+    def voltage_to_code(self, ch: int, expected: float):
+        """
+        Convert a voltage to binary code value
+
+        Args:
+            ch (int): the DAC channel to write voltage to (0-indexed)
+
+            expected (float): the voltage input by the user
+
+        Returns:
+            16 bit binary code value for writing voltage value to DAC
+        """
         code = (
             (
                 (expected + self.dacs_w_calib_consts_list[ch].offset)
@@ -88,6 +98,13 @@ class DACCommands:
         """
         Converts a list containing the EdgePi DAC's power state for each channel
         to a binary code value.
+
+        Args:
+            dac_state (list): a list whose entries represent the power mode of each DAC
+                channel, ordered sequentially from DAC 7 (index 0) to DAC 0 (index 7).
+
+        Returns:
+            a 16 bit binary code value for updating DAC channel power mode
         """
         data = Bits()
         for value in dac_state:
