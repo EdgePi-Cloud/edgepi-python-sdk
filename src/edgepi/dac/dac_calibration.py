@@ -8,7 +8,7 @@ from dataclasses import dataclass
 # This requires some more research and revision in calculation
 @dataclass
 class DAChWCalibConst:
-    """Calibration constants for DAC"""
+    """Calibration constants for DAC error values"""
 
     gain: float = 0
     offset: float = 0
@@ -16,11 +16,10 @@ class DAChWCalibConst:
 
 @dataclass
 class DACsWCalibConst:
-    """Calibration constants for DAC"""
+    """Calibration constants for DAC amplifier values"""
 
     gain: float = 2.5
     offset: float = 0
 
 
-# pylint: disable=fixme
 # TODO: add functions/classes for calibration

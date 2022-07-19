@@ -76,5 +76,5 @@ class GainMode(Enum):
         DOUBLE_AMP: amplifier gain = 2
     """
 
-    NO_AMP = 0x0
-    DOUBLE_AMP = 0x4
+    SINGLE = 0x0
+    DOUBLE = 0x4

@@ -18,6 +18,7 @@ from edgepi.peripherals.spi import SpiDevice as spi
 
 _logger = logging.getLogger(__name__)
 
+# TODO: map analog_out number to AO EN pins
 
 class EdgePiDAC(spi):
     """A EdgePi DAC device"""
@@ -39,12 +40,11 @@ class EdgePiDAC(spi):
             CH.DAC0.value: PowerMode.NORMAL.value,
         }
 
-    def write_voltage_channel(self, ch, voltage):
+    def write_voltage_channel(self, analog_out, voltage):
         """Write a voltage value to a DAC channel"""
-        # TODO: fix missing expected arg
-        # pylint: disable=no-value-for-parameter
-        code = self.dac_ops.voltage_to_code(voltage)
-        self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
+        dac_ch = analog_out - 1
+        code = self.dac_ops.voltage_to_code(dac_ch, voltage)
+        self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
 
     def set_power_mode(self, analog_out: int, power_mode: PowerMode):
         """
@@ -84,10 +84,14 @@ class EdgePiDAC(spi):
 
     def read_voltage(self, analog_out: int):
         """
-        Read voltage from an analog out pin
+        Read voltage from the DAC channel corresponding to analog out pin
 
         Args:
             analog_out (int): the analog out pin number to read voltage from
+
+        Returns:
+            the voltage value read from the DAC channel corresponding to the
+            selected analog out pin.
         """
         self.dac_ops.check_range(analog_out, 1, len(CH))
         dac_ch = analog_out - 1

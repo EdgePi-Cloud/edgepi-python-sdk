@@ -23,8 +23,6 @@ class DACCommands:
         """Construct a write and update command"""
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
-        # TODO: raise error here?
-        return None
 
     # TODO: change the formula according to calibration if needed
     def voltage_to_code(self, ch, expected):
