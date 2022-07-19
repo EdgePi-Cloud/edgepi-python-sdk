@@ -1,0 +1,41 @@
+""" Unit tests for edgepi_dac module """
+
+from copy import deepcopy
+
+import pytest
+from edgepi.dac.dac_constants import PowerMode, EdgePiDacChannel as CH
+from edgepi.dac.edgepi_dac import EdgePiDAC
+
+
+@pytest.fixture(name="dac")
+def fixture_test_dac(mocker):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    yield EdgePiDAC()
+
+
+_default_power_modes = {
+    CH.DAC7.value: PowerMode.NORMAL.value,
+    CH.DAC6.value: PowerMode.NORMAL.value,
+    CH.DAC5.value: PowerMode.NORMAL.value,
+    CH.DAC4.value: PowerMode.NORMAL.value,
+    CH.DAC3.value: PowerMode.NORMAL.value,
+    CH.DAC2.value: PowerMode.NORMAL.value,
+    CH.DAC1.value: PowerMode.NORMAL.value,
+    CH.DAC0.value: PowerMode.NORMAL.value,
+}
+
+
+@pytest.mark.parametrize(
+    "power_modes, analog_out, mode, expected",
+    [
+        (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
+        (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
+        (deepcopy(_default_power_modes), 8, PowerMode.NORMAL, [64, 0, 0]),
+    ],
+)
+# TODO: add more test cases
+def test_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
+    mocker.patch.object(dac, "_dac_state", power_modes)
+    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+    dac.set_power_mode(analog_out, mode)
+    mock_transfer.assert_called_once_with(expected)
