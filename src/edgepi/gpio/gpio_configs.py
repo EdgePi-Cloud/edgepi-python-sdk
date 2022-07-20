@@ -53,7 +53,6 @@ class I2cPinInfo:
     is_high: bool = None
     is_out: bool = None
 
-# TODO: instead of mappping pins to list, use dictionary to make it self-explaintory
 _list_of_DAC_gpios = ['AO_EN1', 'AO_EN4', 'AO_EN3', 'AO_EN2',
                       'AO_EN5', 'AO_EN6', 'AO_EN7', 'AO_EN8', 'DAC_GAIN']
 _list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
@@ -72,7 +71,7 @@ def _generate_DAC_pins():
             N/A
         
         Returns:
-            a list of dataclass with gpio information
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
     for pin, set, clear, dir in zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear, GpioAPinDir):
@@ -87,7 +86,7 @@ def _generate_LED_pins():
             N/A
         
         Returns:
-            a list of dataclass with gpio information
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
     for pin, set, clear, dir in zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear, GpioBPinDir):
@@ -101,7 +100,7 @@ def _generate_ADC_pins():
             N/A
         
         Returns:
-            a list of dataclass with gpio information
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
     pin_dict.update({_list_of_ADC_gpios[0]:I2cPinInfo( GpioBOutputSet.SET_OUTPUT_2.value, GpioBOutputClear.CLEAR_OUTPUT_2.value, GpioBPinDir.PIN2_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value)})
@@ -115,30 +114,29 @@ def _generate_RTD_pins():
             N/A
         
         Returns:
-            a list of dataclass with gpio information
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
     pin_dict.update({_list_of_RTD_gpios[0]: I2cPinInfo(GpioBOutputSet.SET_OUTPUT_1.value, GpioBOutputClear.CLEAR_OUTPUT_1.value, GpioBPinDir.PIN1_DIR_OUT.value, GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
 def generate_pin_info(config:GpioExpanderConfig = None):
-    ''' Generates a list pin info dataclasses
+    ''' Generates a dictionary of pin info dataclasses
 
         Args:
             config (GpioExpanderConfig): name of the module to configure the gpio pins fors
         
         Returns:
-            a list of dataclass with gpio information
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
-    pin_list=[]
 
     if config.name == 'dac':
-       pin_list =  _generate_DAC_pins()
+       pin_dict =  _generate_DAC_pins()
     elif config.name == 'led':
-       pin_list =  _generate_LED_pins()
+       pin_dict =  _generate_LED_pins()
     elif config.name == 'adc':
-       pin_list =  _generate_ADC_pins()
+       pin_dict =  _generate_ADC_pins()
     elif config.name == 'rtd':
-       pin_list =  _generate_RTD_pins()
+       pin_dict =  _generate_RTD_pins()
 
-    return pin_list
+    return pin_dict

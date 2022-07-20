@@ -1,3 +1,4 @@
+import numbers
 import pytest
 from edgepi.gpio.gpio_commands import *
 from edgepi.gpio.gpio_configs import *
@@ -25,25 +26,33 @@ def test_get_pin_config_address(config, result):
     assert pinOut == result[1]
 
 @pytest.mark.parametrize('config, reg_dict, result', 
-                       [('adc', {3 : 255, 7 : 255}, {3: {'value': 249, 'is_changed': True},
+                       [(GpioConfigs.ADC.value, {3 : 255, 7 : 255}, {3: {'value': 249, 'is_changed': True},
                                                      7: {'value': 249, 'is_changed': True}}),
-                        ('led', {3 : 255, 7 : 255}, {3: {'value': 0, 'is_changed': True},
+                        (GpioConfigs.LED.value, {3 : 255, 7 : 255}, {3: {'value': 0, 'is_changed': True},
                                                      7: {'value': 0, 'is_changed': True}}),
-                        ('rtd', {3 : 255, 7 : 255}, {3: {'value': 254, 'is_changed': True},
+                        (GpioConfigs.RTD.value, {3 : 255, 7 : 255}, {3: {'value': 254, 'is_changed': True},
                                                      7: {'value': 254, 'is_changed': True}})
                         ])
 def test_get_default_values(config, reg_dict, result):
-    pin_list = generate_pin_info(config)
-    get_default_values(reg_dict, pin_list)
-    assert reg_dict == result
+    pin_dict_list = break_pin_info_dict(generate_pin_info(config))
+    for pin_dict in pin_dict_list:
+        get_default_values(reg_dict, list(pin_dict.values()))
+        assert reg_dict == result
     
-@pytest.mark.parametrize('config, result',[('adc',[0, 2]), ('dac',[8, 1]), ('rtd',[0, 1]), ('led',[8, 0])])
+@pytest.mark.parametrize('config, result',[(GpioConfigs.ADC.value, [33]), (GpioConfigs.DAC.value, [32, 33]), (GpioConfigs.RTD.value, [33]), (GpioConfigs.LED.value, [32])])
 def test_check_multiple_dev(config, result):
-    pin_list_org = generate_pin_info(config)
-    pin_list = check_multiple_dev(pin_list_org)
-    assert len(pin_list[0]) == result[0]
-    assert len(pin_list[1]) == result[1]
+    pin_dict_org = generate_pin_info(config)
+    list_of_address = check_multiple_dev(pin_dict_org)
+    assert list_of_address == result
     
+@pytest.mark.parametrize('config, result',[(GpioConfigs.ADC.value, generate_pin_info(GpioConfigs.ADC.value)), (GpioConfigs.DAC.value, generate_pin_info(GpioConfigs.DAC.value)), (GpioConfigs.RTD.value, generate_pin_info(GpioConfigs.RTD.value)), (GpioConfigs.LED.value, generate_pin_info(GpioConfigs.LED.value))])
+def test_break_pin_info_dict(config, result):
+    pin_dict = generate_pin_info(config)
+    list_pin_dict = break_pin_info_dict(pin_dict)
+    for element in list_pin_dict:
+        for key in element.keys():
+            assert element[key] == result[key]
+
 
 @pytest.mark.parametrize('pinConfig', 
                        [(GpioConfigs.DAC.value),

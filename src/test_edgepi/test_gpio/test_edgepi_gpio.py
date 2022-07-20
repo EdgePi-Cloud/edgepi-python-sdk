@@ -53,30 +53,29 @@ def test_edgepi_gpio_read_register(mock, mock_msg, config, dev_address, out):
 def test_edgepi_gpio_reg_addressToValue_dict(mock, config, dev_address, out):
     mock.return_value = 255
     gpioCtrl = EdgePiGPIO(config)
-    out_data = gpioCtrl._EdgePiGPIO__reg_addressToValue_dict(dev_address)
+    out_data = gpioCtrl._EdgePiGPIO__map_reg_address_value_dict(dev_address)
     assert out_data == out
 
 @pytest.mark.parametrize("config, result",
                         [(GpioConfigs.DAC.value, [{2 : 255, 6 : 255}, {2 : 255, 6 : 255}]),
-                         (GpioConfigs.ADC.value, [None, {2 : 255, 6 : 255}]),
+                         (GpioConfigs.ADC.value, [{2 : 255, 6 : 255}]),
                         ])    
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__reg_addressToValue_dict')  
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__map_reg_address_value_dict')  
 def test_generate_default_reg_dict(Mock,config, result):
     Mock.side_effect = [{2 : 255, 6 : 255}, {2 : 255, 6 : 255}]
     gpioCtrl = EdgePiGPIO(config)
-    dict= gpioCtrl._EdgePiGPIO__generate_default_reg_dict(check_multiple_dev(gpioCtrl.pin_list))
-    assert dict[0] == result[0]
-    assert dict[1] ==  result[1]
+    dict= gpioCtrl._EdgePiGPIO__generate_default_reg_dict(check_multiple_dev(generate_pin_info(config)))
+    assert dict == result
 
 
 @pytest.mark.parametrize("config, mock_vals, result",
                         [(GpioConfigs.DAC.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0], [{2 : 0, 6 : 0}, {2 : 0, 6 : 0}]),
-                         (GpioConfigs.ADC.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 252], [None, {2 : 252, 6 : 252}]),
-                         (GpioConfigs.RTD.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 254], [None, {2 : 254, 6 : 254}]),
-                         (GpioConfigs.LED.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0], [{2 : 0, 6 : 0}, None,]),
+                         (GpioConfigs.ADC.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 252], [{2 : 252, 6 : 252}]),
+                         (GpioConfigs.RTD.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 254], [{2 : 254, 6 : 254}]),
+                         (GpioConfigs.LED.value, [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0], [{2 : 0, 6 : 0}]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__reg_addressToValue_dict')  
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__map_reg_address_value_dict')  
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
@@ -88,5 +87,4 @@ def test_set_expander_default(mock_transfer, mock_set_read_msg, mock_set_write_m
     mock_I2CDevice.return_value = mock_vals[0]
     gpioCtrl = EdgePiGPIO(config)
     listDict = gpioCtrl.set_expander_default()
-    assert listDict[0] == result[0]
-    assert listDict[1] == result[1]
+    assert listDict == result

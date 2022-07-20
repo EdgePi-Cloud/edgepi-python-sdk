@@ -38,17 +38,37 @@ def get_default_values(reg_dict: dict = None, pin_list: list = None):
     apply_opcodes(reg_dict, OpCodeList)
     return reg_dict
 
-def check_multiple_dev(pin_list: list = None):
+def check_multiple_dev(pin_dict: dict = None):
     ''' 
-    Check if pins in the list belong to the same I2C dev or not
+    Check if pins in the dictionary belong to the same I2C dev or not
     In:
-        pin_list (list) - list of I2cPinInfo dataclasses
+        pin_dict (dict) - dictionary of I2cPinInfo dataclasses
     Return: 
-        List of pin_list if there are more than one I2C device address exists
+        list_of_address (list) - list of device addresses
+        
     '''
-    dev_1 = [pin for pin in pin_list if pin.address == GpioExpanderAddress.EXP_ONE.value]
-    dev_2 = [pin for pin in pin_list if pin.address == GpioExpanderAddress.EXP_TWO.value]
-    return [dev_1, dev_2]
+    addresses = [value.address for value in pin_dict.values()]
+    list_of_address = list(set(addresses))
+    return list_of_address
+
+def break_pin_info_dict(pin_dict: dict = None):
+    ''' 
+    break pin_info_dict into two separate dictionaries if there are more than 2 devices used
+    In:
+        pin_dict (dict) - dictionary of I2cPinInfo dataclasses
+    Return: 
+        list of dictionary: if there are two device used, there are two dictionaries in the list
+    '''
+    address_list = check_multiple_dev(pin_dict)
+    if len(address_list) == 2:
+        secondary_dict = {}
+        for key, value in pin_dict.items():
+            if value.address == address_list[1]:
+                secondary_dict[key] = value
+        for key in secondary_dict.keys():
+            pin_dict.pop(key)
+        return [pin_dict, secondary_dict]
+    return [pin_dict]
 
 def set_pin_states(pin_dict:dict = None):
     ''' 

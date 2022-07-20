@@ -28,11 +28,10 @@ class EdgePiGPIO(I2CDevice):
         if self.config is not None and 'i2c' in self.config.dev_path:
             super().__init__(self.config.dev_path)
             _logger.info(f'GPIO expander up and running')
-            self.pin_list = generate_pin_info(self.config)
             self.pin_config_address, self.pin_out_address = get_pin_config_address(self.config)
         # TODO: add GPIO init, GPIO and I2C init
 
-    def __generate_default_reg_dict(self, pin_lists):
+    def __generate_default_reg_dict(self, list_of_address):
         ''' 
         Function to generate a list of default register dictionary
         Return:
@@ -40,12 +39,8 @@ class EdgePiGPIO(I2CDevice):
             list of pin list
         '''
         listRegDict=[]
-        for pin_list in pin_lists:
-            if pin_list:
-                # TODO: better naming convention for the function
-                listRegDict.append(self.__reg_addressToValue_dict(pin_list[0].address))
-            else:
-                listRegDict.append(None)
+        for address in list_of_address:
+            listRegDict.append(self.__map_reg_address_value_dict(address))
         return listRegDict
 
     def set_expander_default(self):
@@ -55,13 +50,13 @@ class EdgePiGPIO(I2CDevice):
         Return:
             list_default_reg_dict: list of dictionary that includes default regsister address : value pair
         '''
-        pin_lists = check_multiple_dev(self.pin_list)
-        list_default_reg_dict = self.__generate_default_reg_dict(pin_lists)
-        for pin_list, default_reg_dict in zip(pin_lists, list_default_reg_dict):
-            if not pin_list:
-                continue
-            dev_address = pin_list[0].address
-            default_reg_dict = get_default_values(default_reg_dict, pin_list)
+
+        list_default_reg_dict = self.__generate_default_reg_dict(check_multiple_dev(generate_pin_info(self.config)))
+        pin_info_dict_list = break_pin_info_dict(generate_pin_info(self.config))
+        for pin_dict, default_reg_dict in zip(pin_info_dict_list, list_default_reg_dict):
+            pin_info_list = list(pin_dict.values())
+            dev_address = pin_info_list[0].address
+            default_reg_dict = get_default_values(default_reg_dict, pin_info_list)
             
             for reg_addx, entry in default_reg_dict.items():
                 if entry['is_changed']:
@@ -88,7 +83,7 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(f'Message Read: Register Address {msg_read[0].data}, Msg Place Holder {msg_read[1].data}')
         return msg_read[1].data[0]
 
-    def __reg_addressToValue_dict(self, dev_address):
+    def __map_reg_address_value_dict(self, dev_address):
         ''' 
         Function to map address : value dictionary
         In:
