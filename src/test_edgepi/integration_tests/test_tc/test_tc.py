@@ -1,5 +1,12 @@
 """
 Hardware-dependent integration tests for thermocouple module
+
+Hardware Requirements:
+- SPI capable device
+- MAX31856 thermocouple chip connected
+
+- if using SPI device tree overlay - SPI interface disabled
+- else, SPI interface enabled
 """
 
 import pytest
