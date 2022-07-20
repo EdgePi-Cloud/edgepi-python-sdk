@@ -66,7 +66,13 @@ This section introduces thermocouple functionality available to users, and provi
             - ` temps = edgepi_tc.read_temperatures()`
 3. ### Reading Thermocouple Faults
     * The thermocouple can store information about its current operating status. If there are any faults, such as open circuits, this information will be updated and stored in the thermocouple. This module provides you with the ability to read the current fault status of the thermocouple.
-        - [ ] this has not yet been implemented and needs updating
+    * To trigger a fault reading, you may use the following; `edgepi_tc.read_faults()`
+    * Note, the above will return only faults that are currently occuring. To obtain information the status of all monitored faults, regardless of whether they are currently occuring or not, you may call `edgepi_tc.single_sample(filter_at_fault=False)`.
+4. ### Write Temperature Values to the Cold-Junction Sensor
+    - If you have an external sensor you wish to use to write temperature values to the cold-junction sensor, the `edgepi_tc.overwrite_cold_junction_temp` method provides this functionality. For example, it may be called like this: `edgepi_tc.overwrite_cold_junction_temp(cj_temp=20, cj_temp_decimals=DecBits6.P0_25)` to write the value 20.25 to the cold-junction sensor. Note, you must provide both arguments to the method.
+    - Note, you must first disable the cold-junction sensor using `set_config` in order to write temperature values to the cold-junction sensor.
+    - The MAX31856 provides functionality for alerting the user a fault has occurred, through the FAULT pin output. This pin is currently not connected on the EdgePi, and therefore faults will not trigger this output. However, any faults that occur will still show up in the Fault Status Register, and thus calling `read_faults` will alert you to their presence.
+    
  ____
  ## EdgePiTC Methods Guide
  The `EdgePiTC` class contains all methods for configuring and issuing commands to the EdgePi thermocouple. `EdgePiTC` methods which accept arguments should only receive as arguments, the Enums in the `tc_constants` module.
@@ -207,6 +213,45 @@ This section introduces thermocouple functionality available to users, and provi
         <td>None</td>
         <td>a dictionary of Fault objects, each of which stores information about the fault it represents</td>
     </tr>
+    <tr>
+        <td><code>clear_faults</code></td>
+        <td>
+        When in Interrupt Fault Mode, use to clear the Fault Status Register bits and deassert the FAULT pin output.
+        Note that the FAULT output and the fault bit may reassert immediately if the fault persists.
+        If thermocouple is in Comparator Fault Mode, this will have no effect on the thermocouple.
+        </td>
+        <td>None</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><code>reset_registers</code></td>
+        <td>
+        Resets register values to factory default values. Please refer to MAX31856
+        datasheet or this module's documentation for these values. Note this will
+        not reset the CJTH and CJTL registers, as these require cold-junction
+        sensing to be disabled in order to update the values (by default cold-junction sensing is enabled).
+        </td>
+        <td>None</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><code>overwrite_cold_junction_temp</code></td>
+        <td>
+          Write temperature values to the cold-junction sensor, for example via an external sensor.
+          Cold-junction sensing must be disabled (using set_config method) in order for values to be written to the cold-junction sensor.
+        </td>
+        <td>
+          <ul>
+            <li>
+              cj_temp (int): the integer value of the temperature to be written to the cold-junction sensor
+            </li>
+            <li>
+              cj_temp_decimals (DecBits6): the decimal value of the temperature to be written to the cold-junction sensor
+            </li>
+          </ul>
+        </td>
+        <td>None</td>
+      </tr>
 </table>
 
 ---
@@ -460,4 +505,65 @@ In order to set temperature fault thresholds using this module, please refer to 
             <td>400</td>
         </tr>
     </tbody>
+</table>
+
+---
+## MAX31856 Factory Default Register Values
+<table>
+  <thead>
+    <tr>
+      <th>Register Name</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CR0</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CR1</td>
+      <td><code>03h</code></td>
+    </tr>
+    <tr>
+      <td>MASK</td>
+      <td><code>FFh</code></td>
+    </tr>
+    <tr>
+      <td>CJHF</td>
+      <td><code>7Fh</code></td>
+    </tr>
+    <tr>
+      <td>CJLF</td>
+      <td><code>C0h</code></td>
+    </tr>
+    <tr>
+      <td>LTHFTH</td>
+      <td><code>7Fh</code></td>
+    </tr>
+    <tr>
+      <td>THFTL</td>
+      <td><code>FFh</code></td>
+    </tr>
+    <tr>
+      <td>LTLFTH</td>
+      <td><code>80h</code></td>
+    </tr>
+    <tr>
+      <td>LTLFTL</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTO</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTH</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTL</td>
+      <td><code>00h</code></td>
+    </tr>
+  </tbody>
 </table>

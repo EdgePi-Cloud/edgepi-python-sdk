@@ -11,6 +11,7 @@ from bitstring import Bits
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.tc.tc_commands import code_to_temp, TempCode, tempcode_to_opcode, TempType
 from edgepi.tc.tc_constants import (
+    NUM_WRITE_REGS,
     AvgMode,
     CJHighMask,
     CJLowMask,
@@ -38,16 +39,26 @@ from edgepi.tc.tc_conv_time import calc_conv_time
 _logger = logging.getLogger(__name__)
 
 
-class ColdJunctionOverWriteError(Exception):
-    """
-    Raised when the user attempts to write temperature values to the cold-junction
-    sensor without first having disabled it."""
-
-
 class EdgePiTC(SpiDevice):
     """
     A class used to represent the EdgePi Thermocouple as an SPI device.
     """
+
+    # default MAX31856 register values for writeable registers
+    default_reg_values = {
+        TCAddresses.CR0_W.value: 0x00,
+        TCAddresses.CR1_W.value: 0x03,
+        TCAddresses.MASK_W.value: 0xFF,
+        TCAddresses.CJHF_W.value: 0x7F,
+        TCAddresses.CJLF_W.value: 0xC0,
+        TCAddresses.LTHFTH_W.value: 0x7F,
+        TCAddresses.LTHFTL_W.value: 0xFF,
+        TCAddresses.LTLFTH_W.value: 0x80,
+        TCAddresses.LTLFTL_W.value: 0x00,
+        TCAddresses.CJTO_W.value: 0x00,
+        TCAddresses.CJTH_W.value: 0x00,
+        TCAddresses.CJTL_W.value: 0x00,
+    }
 
     def __init__(self):
         super().__init__(bus_num=6, dev_id=2)
@@ -117,8 +128,20 @@ class EdgePiTC(SpiDevice):
 
         return fault_msgs
 
+    def clear_faults(self):
+        """
+        When thermocouple is in Interrupt Fault Mode, clears all bits in Fault Status Register,
+        and deasserts FAULT pin output. Note that the FAULT output and the fault bit may
+        reassert immediately if the fault persists. If thermocouple is in Comparator Fault Mode,
+        this will have no effect on the thermocouple.
+        """
+        cr0 = self.__read_register(TCAddresses.CR0_R.value)
+        command = cr0[1] | TCOps.CLEAR_FAULTS.value.op_code
+        self.__write_to_register(TCAddresses.CR0_W.value, command)
+
     def overwrite_cold_junction_temp(self, cj_temp: int, cj_temp_decimals: DecBits6):
-        """Write temperature values to the cold-junction sensor.
+        """
+        Write temperature values to the cold-junction sensor.
         Cold-junction sensing must be disabled (using set_config method)
         in order for values to be written to the cold-junction sensor.
 
@@ -128,13 +151,22 @@ class EdgePiTC(SpiDevice):
 
             cj_temp_decimals (DecBits6): the decimal value of the temperature
                                         to be written to the cold-junction sensor
+
+        Raises:
+            ColdJunctionOverwriteError: if value is written to cold-junction temperature
+                                    registers while cold-junction sensing is not disabled.
         """
-        cr0 = Bits(uint=self.__read_register(TCAddresses.CR0_R.value)[1], length=8)
-        if not cr0[4]:
-            raise ColdJunctionOverWriteError(
-                """Cold-junction sensor must be disabled in order to write values to it."""
-            )
         self.set_config(cj_temp=cj_temp, cj_temp_decimals=cj_temp_decimals)
+
+    def reset_registers(self):
+        """
+        Resets register values to factory default values. Please refer to MAX31856
+        datasheet or this module's documentation for these values. Note this will
+        not reset the CJTH and CJTL registers, as these require cold-junction
+        sensing to be disabled in order to update the values.
+        """
+        for addx, value in self.default_reg_values.items():
+            self.__write_to_register(addx, value)
 
     def __read_register(self, reg_addx):
         """Reads the value of a single register.
@@ -193,7 +225,7 @@ class EdgePiTC(SpiDevice):
             for each writeable register.
         """
         reg_map = {}
-        num_regs = 16
+        num_regs = NUM_WRITE_REGS
         read_regs_offset = 0x80
         start_addx = TCAddresses.CR0_W.value
         # read values from __read_registers, but log values to corresponding write registers
@@ -230,6 +262,11 @@ class EdgePiTC(SpiDevice):
                 return enum
         return None
 
+    def __get_cj_status(self):
+        "Returns the current cold-junction sensing status (on/off)"
+        cr0 = Bits(uint=self.__read_register(TCAddresses.CR0_R.value)[1], length=8)
+        return cr0[4]
+
     def __process_temperature_settings(
         self,
         cj_high_threshold: int,
@@ -245,7 +282,7 @@ class EdgePiTC(SpiDevice):
         tc_type: TCType,
         ops_list: list,
     ):
-        """ generates OpCodes for temperature settings and appends to external OpCodes list """
+        """generates OpCodes for temperature settings and appends to external OpCodes list"""
         tempcodes = [
             TempCode(
                 cj_high_threshold,
@@ -254,7 +291,7 @@ class EdgePiTC(SpiDevice):
                 0,
                 0,
                 TCAddresses.CJHF_W.value,
-                TempType.COLD_JUNCTION
+                TempType.COLD_JUNCTION,
             ),
             TempCode(
                 cj_low_threshold,
@@ -263,7 +300,7 @@ class EdgePiTC(SpiDevice):
                 0,
                 0,
                 TCAddresses.CJLF_W.value,
-                TempType.COLD_JUNCTION
+                TempType.COLD_JUNCTION,
             ),
             TempCode(
                 lt_high_threshold,
@@ -272,7 +309,7 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.LTHFTH_W.value,
-                TempType.THERMOCOUPLE
+                TempType.THERMOCOUPLE,
             ),
             TempCode(
                 lt_low_threshold,
@@ -281,7 +318,7 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.LTLFTH_W.value,
-                TempType.THERMOCOUPLE
+                TempType.THERMOCOUPLE,
             ),
             TempCode(
                 cj_offset,
@@ -290,23 +327,19 @@ class EdgePiTC(SpiDevice):
                 4,
                 0,
                 TCAddresses.CJTO_W.value,
-                TempType.COLD_JUNCTION_OFFSET
+                TempType.COLD_JUNCTION_OFFSET,
             ),
             TempCode(
-                cj_temp, cj_temp_decimals,
-                7,
-                6,
-                2,
-                TCAddresses.CJTH_W.value,
-                TempType.COLD_JUNCTION
+                cj_temp, cj_temp_decimals, 7, 6, 2, TCAddresses.CJTH_W.value, TempType.COLD_JUNCTION
             ),
         ]
 
         # in case the user updates thermocouple type as well
         tc_type = tc_type if tc_type is not None else self.__get_tc_type()
+        cj_status = self.__get_cj_status()
 
         for tempcode in tempcodes:
-            ops_list += tempcode_to_opcode(tempcode, tc_type)
+            ops_list += tempcode_to_opcode(tempcode, tc_type, cj_status)
         _logger.debug(f"set_config: ops_list:\n\n{ops_list}\n\n")
 
     def set_config(

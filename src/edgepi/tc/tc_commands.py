@@ -14,7 +14,7 @@ import logging
 from enum import Enum, unique
 from dataclasses import dataclass
 from bitstring import BitArray, pack
-from edgepi.tc.tc_constants import REG_SIZE, TCType, TempBits, Masks
+from edgepi.tc.tc_constants import REG_SIZE, TCAddresses, TCType, TempBits, Masks
 from edgepi.reg_helper.reg_helper import OpCode
 
 _logger = logging.getLogger(__name__)
@@ -215,6 +215,12 @@ class IllegalTempTypeError(ValueError):
     """Raised when a non-existent TempType is entered"""
 
 
+class ColdJunctionOverWriteError(Exception):
+    """
+    Raised when the user attempts to write temperature values to the cold-junction
+    sensor without first having disabled it."""
+
+
 def _dec_bits_to_float(dec_bits: int, num_dec_bits: int, is_negative: bool = False):
     """converts a decimal value formatted as DecBits4 or DecBits6 into float
 
@@ -261,7 +267,7 @@ def _validate_temperatures(tempcode: TempCode, tc_type: TCType):
         )
 
 
-def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType) -> list:
+def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType, cj_status: bool) -> list:
     """
     Generates a list of OpCodes necessary to execture the temperature setting
     updates contained in a TempCode.
@@ -278,6 +284,9 @@ def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType) -> list:
 
         IncompatibleRegisterSizeError: if number of bits in TempCode object is not divisible by
                                         MAX31856 register size of 8 bits.
+
+        ColdJunctionOverWriteError: if value is written to cold-junction temperature registers
+                                    while cold-junction sensing is not disabled.
     """
     # pylint: disable=too-many-branches
 
@@ -299,6 +308,11 @@ def tempcode_to_opcode(temp_code: TempCode, tc_type: TCType) -> list:
     if tc_type is None:
         raise MissingTCTypeError(
             "thermocouple type is required to compute thermocouple temperature range"
+        )
+
+    if not cj_status and temp_code.start_addx == TCAddresses.CJTH_W.value:
+        raise ColdJunctionOverWriteError(
+            "Cold-junction sensor must be disabled in order to write temperature values to it"
         )
 
     # validate temp range
