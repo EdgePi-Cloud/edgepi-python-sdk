@@ -107,8 +107,7 @@ class EdgePiDAC(spi):
             COM.COM_READBACK.value, CH(dac_ch).value, COM.COM_NOP.value
         )
         self.transfer(cmd)
-        ch_value = self.transfer([0, 0, 0])
-        # TODO: B23 to DB20 contain undefined data, and the last 16 bits
-        # contain the DB19 to DB4 DAC register contents. Need to convert
-        # these to voltage value.
-        return ch_value
+        # TODO: docs not clear if this is all zero command or addx is needed as well
+        read_data = self.transfer([0, 0, 0])
+        code = self.dac_ops.extract_read_data(read_data)
+        return self.dac_ops.code_to_voltage(dac_ch, code)

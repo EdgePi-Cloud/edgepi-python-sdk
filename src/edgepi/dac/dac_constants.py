@@ -4,7 +4,8 @@
 from enum import Enum
 
 
-SW_RESET = 0x1234
+SW_RESET = 0x1234   # software reset command data bits
+READ_WRITE_SIZE = 3 # size of DAC read/write in bytes
 
 
 class EdgePiDacCom(Enum):

@@ -2,8 +2,9 @@
 
 import logging
 from typing import Union
-from bitstring import Bits
-from edgepi.dac.dac_constants import EdgePiDacChannel as CH
+from bitstring import Bits, pack
+from edgepi.dac.dac_calibration import DAC_PRECISION
+from edgepi.dac.dac_constants import READ_WRITE_SIZE, EdgePiDacChannel as CH
 from edgepi.dac.dac_constants import EdgePiDacCom as COMMAND
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS
 
@@ -49,6 +50,53 @@ class DACCommands:
         )
         _logger.debug(f"Code generated {int(code)}")
         return int(code)
+
+    def extract_read_data(self, read_code: list):
+        """
+        Extracts bits corresponding to voltage code from a list containing
+        the byte values of a DAC register read.
+
+        Args:
+            read_code (list): a list of unsigned int byte values from DAC read
+
+        Returns:
+            the unsigned int value of the 16 bits corresponding to voltage code
+
+        Raises:
+            ValueError: if read_code does not contain exactly 3 byte values
+        """
+        if len(read_code) != READ_WRITE_SIZE:
+            raise ValueError("code must contain exactly 3 byte values")
+
+        bits = pack("uint:8, uint:8, uint:8", read_code[0], read_code[1], read_code[2])
+
+        # B23 to DB20 contain undefined data, and the last 16 bits contain the
+        # DB19 to DB4 DAC register contents. B23 (MSB) is index 0 here.
+        return bits[-16:].uint
+
+    def code_to_voltage(self, ch: int, code: int) -> float:
+        """
+        Convert a 16 bit binary code value to voltage
+
+        Args:
+            ch (int): the DAC channel the code was obtained from (0-indexed)
+
+            code (int): 16 bit unsigned int value of a DAC register read
+
+        Returns:
+            voltage corresponding to 16 bit binary code
+        """
+        # DAC gain/offset errors
+        dac_gain_err = (
+            CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value
+        ) + self.dach_w_calib_const.gain
+        dac_offset_err = self.dach_w_calib_const.offset
+        # amplifier gain/offset for this channel
+        amp_gain = self.dacs_w_calib_consts_list[ch].gain
+        amp_offset = self.dacs_w_calib_consts_list[ch].offset
+        voltage = (((code * dac_gain_err) - dac_offset_err) * amp_gain) - amp_offset
+        _logger.debug(f"code_to_voltage: code {hex(code)} = {voltage} V")
+        return round(voltage, DAC_PRECISION)
 
     @staticmethod
     # pylint: disable=inconsistent-return-statements
