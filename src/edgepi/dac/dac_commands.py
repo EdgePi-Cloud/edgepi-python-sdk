@@ -38,6 +38,8 @@ class DACCommands:
         Returns:
             16 bit binary code value for writing voltage value to DAC
         """
+        # DAC channels are 0 indexed
+        self.check_range(ch, 0, len(CH)-1)
         code = (
             (
                 (expected + self.dacs_w_calib_consts_list[ch].offset)
