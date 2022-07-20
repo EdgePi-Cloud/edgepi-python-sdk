@@ -51,7 +51,8 @@ class DACCommands:
         _logger.debug(f"Code generated {int(code)}")
         return int(code)
 
-    def extract_read_data(self, read_code: list):
+    @staticmethod
+    def extract_read_data(read_code: list):
         """
         Extracts bits corresponding to voltage code from a list containing
         the byte values of a DAC register read.
@@ -139,7 +140,7 @@ class DACCommands:
         if range_min <= target <= range_max:
             return True
 
-        raise ValueError(f"Target out of range {target}")
+        raise ValueError(f"Target {target} is out of range ")
 
     @staticmethod
     def generate_power_code(dac_state: list):

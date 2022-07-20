@@ -60,7 +60,7 @@ class EdgePiDAC(spi):
         or low power consumption modes.
 
         Args:
-            analog_out (int): the analog out pin whose power will be changed
+            analog_out (int): the analog out pin whose power mode will be changed
 
             power_mode (PowerMode): a valid hex code for setting DAC channel power mode
         """
@@ -107,7 +107,9 @@ class EdgePiDAC(spi):
             COM.COM_READBACK.value, CH(dac_ch).value, COM.COM_NOP.value
         )
         self.transfer(cmd)
-        # TODO: docs not clear if this is all zero command or addx is needed as well
+        # all zero dummy command to trigger second transfer which
+        # contains the DAC register contents.
         read_data = self.transfer([0, 0, 0])
+        _logger.debug(f"reading code {read_data}")
         code = self.dac_ops.extract_read_data(read_data)
         return self.dac_ops.code_to_voltage(dac_ch, code)
