@@ -37,9 +37,38 @@ _default_power_modes = {
         (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
         (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
         (deepcopy(_default_power_modes), 8, PowerMode.NORMAL, [64, 0, 0]),
+        (
+            {
+                CH.DAC7.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.DAC6.value: PowerMode.NORMAL.value,
+                CH.DAC5.value: PowerMode.NORMAL.value,
+                CH.DAC4.value: PowerMode.NORMAL.value,
+                CH.DAC3.value: PowerMode.NORMAL.value,
+                CH.DAC2.value: PowerMode.NORMAL.value,
+                CH.DAC1.value: PowerMode.NORMAL.value,
+                CH.DAC0.value: PowerMode.NORMAL.value,
+            },
+            8,
+            PowerMode.NORMAL,
+            [64, 0, 0],
+        ),
+        (
+            {
+                CH.DAC7.value: PowerMode.NORMAL.value,
+                CH.DAC6.value: PowerMode.NORMAL.value,
+                CH.DAC5.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.DAC4.value: PowerMode.NORMAL.value,
+                CH.DAC3.value: PowerMode.NORMAL.value,
+                CH.DAC2.value: PowerMode.NORMAL.value,
+                CH.DAC1.value: PowerMode.NORMAL.value,
+                CH.DAC0.value: PowerMode.NORMAL.value,
+            },
+            6,
+            PowerMode.NORMAL,
+            [0x40, 0, 0],
+        ),
     ],
 )
-# TODO: add more test cases
 def test_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
     mocker.patch.object(dac, "_dac_state", power_modes)
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
