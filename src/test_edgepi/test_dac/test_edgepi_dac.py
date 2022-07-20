@@ -66,11 +66,24 @@ def test_reset(mocker, dac):
     mock_transfer.assert_called_once_with([96, 18, 52])
 
 
-@pytest.mark.parametrize("analog_out",
-    [(8), (7), (6), (5), (4), (3), (2), (1)]
+@pytest.mark.parametrize(
+    "analog_out, read_data",
+    [
+        (8, [0, 0, 0]),
+        (7, [0, 0, 0]),
+        (6, [0, 0, 0]),
+        (5, [0, 0, 0]),
+        (4, [0, 0, 0]),
+        (3, [0, 0, 0]),
+        (2, [0, 0, 0]),
+        (1, [0, 0, 0]),
+    ],
 )
-def test_read_voltage(mocker, analog_out, dac):
-    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+def test_read_voltage(mocker, analog_out, read_data, dac):
+
+    mock_transfer = mocker.patch(
+        "edgepi.peripherals.spi.SpiDevice.transfer", return_value=read_data
+    )
     dac_ch = analog_out - 1
     byte_1 = (COM.COM_READBACK.value << 4) + dac_ch
     dac.read_voltage(analog_out)

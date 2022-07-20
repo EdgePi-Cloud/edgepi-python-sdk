@@ -106,6 +106,30 @@ def test_voltage_to_code(ch, expected, result, dac_ops):
 
 
 @pytest.mark.parametrize(
+    "ch, code, result",
+    [
+        (1, 30030, 2.345),
+        (0, 30030, 2.345),
+        (3, 30030, 2.345),
+    ],
+)
+def test_code_to_voltage(ch, code, result, dac_ops):
+    assert dac_ops.code_to_voltage(ch, code) == result
+
+
+@pytest.mark.parametrize(
+    "read_code, code_val",
+    [
+        ([0, 0xFF, 0xFF], 65535),
+        ([0, 0, 0], 0),
+        ([0, 0x75, 0x30], 30000),
+    ],
+)
+def test_extract_read_data(read_code, code_val, dac_ops):
+    assert dac_ops.extract_read_data(read_code) == code_val
+
+
+@pytest.mark.parametrize(
     "dac_state, expected",
     [
         ([PowerMode.NORMAL.value] * 8, 0x0000),
