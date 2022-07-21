@@ -25,8 +25,9 @@ class DACCommands:
 
     def generate_write_and_update_command(self, ch, data):
         """Construct a write and update command"""
-        if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
-            return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
+        self.check_range(ch, 0, len(CH))
+        self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
+        return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
     @staticmethod
     def validate_voltage_precision(voltage: float) -> bool:
