@@ -1,7 +1,18 @@
+"""unit tests for gpio_config module"""
+
+
 import pytest
 from edgepi.reg_helper.reg_helper import OpCode
-from edgepi.gpio.gpio_constants import *
-from edgepi.gpio.gpio_configs import *
+from edgepi.gpio.gpio_constants import (
+    GpioAOutputClear,
+    GpioAOutputSet,
+    GpioBOutputClear,
+    GpioBOutputSet,
+    GpioExpanderAddress,
+    GpioAPinDir,
+    GpioBPinDir
+)
+from edgepi.gpio.gpio_configs import GpioConfigs, I2cPinInfo, generate_pin_info
 
 
 @pytest.mark.parametrize('config, result', 

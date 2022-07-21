@@ -66,7 +66,13 @@ This section introduces thermocouple functionality available to users, and provi
             - ` temps = edgepi_tc.read_temperatures()`
 3. ### Reading Thermocouple Faults
     * The thermocouple can store information about its current operating status. If there are any faults, such as open circuits, this information will be updated and stored in the thermocouple. This module provides you with the ability to read the current fault status of the thermocouple.
-        - [ ] this has not yet been implemented and needs updating
+    * To trigger a fault reading, you may use the following; `edgepi_tc.read_faults()`
+    * Note, the above will return only faults that are currently occuring. To obtain information the status of all monitored faults, regardless of whether they are currently occuring or not, you may call `edgepi_tc.single_sample(filter_at_fault=False)`.
+4. ### Write Temperature Values to the Cold-Junction Sensor
+    - If you have an external sensor you wish to use to write temperature values to the cold-junction sensor, the `edgepi_tc.overwrite_cold_junction_temp` method provides this functionality. For example, it may be called like this: `edgepi_tc.overwrite_cold_junction_temp(cj_temp=20, cj_temp_decimals=DecBits6.P0_25)` to write the value 20.25 to the cold-junction sensor. Note, you must provide both arguments to the method.
+    - Note, you must first disable the cold-junction sensor using `set_config` in order to write temperature values to the cold-junction sensor.
+    - The MAX31856 provides functionality for alerting the user a fault has occurred, through the FAULT pin output. This pin is currently not connected on the EdgePi, and therefore faults will not trigger this output. However, any faults that occur will still show up in the Fault Status Register, and thus calling `read_faults` will alert you to their presence.
+    
  ____
  ## EdgePiTC Methods Guide
  The `EdgePiTC` class contains all methods for configuring and issuing commands to the EdgePi thermocouple. `EdgePiTC` methods which accept arguments should only receive as arguments, the Enums in the `tc_constants` module.
@@ -146,20 +152,38 @@ This section introduces thermocouple functionality available to users, and provi
                     temperature rises above this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_high_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature upper threshold decimal value.</p>
+                    <p>
+                    <code>lt_high_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature upper threshold decimal value.
+                      Note you <strong>must</strong> set both <code>lt_high_threshold</code> and <code>lt_high_threshold_decimals</code> at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>lt_low_threshold</code> (<code>int</code>): set thermocouple hot junction temperature lower threshold. If thermocouple hot junction 
                     temperature falls below this limit, the FAULT output will assert</p>
                 </li>
                 <li>
-                    <p><code>lt_low_threshold_decimals</code> (<code>DecBits</code>): set thermocouple hot junction temperature lower threshold decimal value.</p>
+                    <p>
+                    <code>lt_low_threshold_decimals</code> (<code>DecBits4</code>): set thermocouple hot junction temperature lower threshold decimal value.
+                    Note you <strong>must</strong> set both <code>lt_low_threshold</code> and <code>lt_low_threshold_decimals</code> at the same time.
+                    </p>
                 </li>
                 <li>
                     <p><code>cj_offset</code> (<code>int</code>): set cold junction temperature offset.</p>
                 </li>
                 <li>
-                    <p><code>cj_offset_decimals</code> (<code>DecBits</code>): set cold junction temperature offset decimal value.</p>
+                    <p>
+                    <code>cj_offset_decimals</code> (<code>DecBits4</code>): set cold junction temperature offset decimal value.
+                    Note you <strong>must</strong> set both <code>cj_offset</code> and <code>cj_offset_decimals</code> at the same time.
+                    </p>
+                </li>
+                <li>
+                    <p><code>cj_temp</code> (<code>int</code>): write temperature values to the cold-junction sensor, when it is disabled.</p>
+                </li>
+                <li>
+                    <p>
+                    <code>cj_temp_decimals</code> (<code>DecBits6</code>): set cold junction temperature overwrite decimal value.
+                    Note you <strong>must</strong> set both <code>cj_temp</code> and <code>cj_temp_decimals</code> at the same time.
+                    </p>
                 </li>
             </ul>
         </td>
@@ -189,6 +213,45 @@ This section introduces thermocouple functionality available to users, and provi
         <td>None</td>
         <td>a dictionary of Fault objects, each of which stores information about the fault it represents</td>
     </tr>
+    <tr>
+        <td><code>clear_faults</code></td>
+        <td>
+        When in Interrupt Fault Mode, use to clear the Fault Status Register bits and deassert the FAULT pin output.
+        Note that the FAULT output and the fault bit may reassert immediately if the fault persists.
+        If thermocouple is in Comparator Fault Mode, this will have no effect on the thermocouple.
+        </td>
+        <td>None</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><code>reset_registers</code></td>
+        <td>
+        Resets register values to factory default values. Please refer to MAX31856
+        datasheet or this module's documentation for these values. Note this will
+        not reset the CJTH and CJTL registers, as these require cold-junction
+        sensing to be disabled in order to update the values (by default cold-junction sensing is enabled).
+        </td>
+        <td>None</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><code>overwrite_cold_junction_temp</code></td>
+        <td>
+          Write temperature values to the cold-junction sensor, for example via an external sensor.
+          Cold-junction sensing must be disabled (using set_config method) in order for values to be written to the cold-junction sensor.
+        </td>
+        <td>
+          <ul>
+            <li>
+              cj_temp (int): the integer value of the temperature to be written to the cold-junction sensor
+            </li>
+            <li>
+              cj_temp_decimals (DecBits6): the decimal value of the temperature to be written to the cold-junction sensor
+            </li>
+          </ul>
+        </td>
+        <td>None</td>
+      </tr>
 </table>
 
 ---
@@ -213,9 +276,9 @@ The methods outlined above are designed to accept predefined Enums, which contai
       </td>
    </tr>
    <tr>
-      <td><code>DecBits</code></td>
-      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details).</td>
-      <td>Example: <code>DecBits.P0_5</code> allows you to specify a temperature threshold with a decimal value of 0.5</td>
+      <td><code>DecBits4, DecBits6</code></td>
+      <td>Use for setting temperature threshold registers. These enums specify the decimal values permitted by MAX31856 for temperature threshold registers. Only these values are permitted for specifying decimal values, due to the limited precision offered by the number of bits assigned to decimal places (refer to MAX31856 documentation for more details). Please refer to documentation above or <code>set_config</code> docstring for whether to use DecBits4 or DecBits6 for setting decimal values</td>
+      <td>Example: <code>DecBits4.P0_5</code> or <code>DecBits6.P0_5</code>allows you to specify a temperature threshold with a decimal value of 0.5</td>
    </tr>
    <tr>
       <td><code>CJMode</code></td>
@@ -348,14 +411,159 @@ The methods outlined above are designed to accept predefined Enums, which contai
    </tr>
    <tr>
       <td><code>OpenCircuitMode</code></td>
-      <td>Settings for thermocouple open-circuit fault detection mode</td>
+      <td>
+        Settings for thermocouple open-circuit fault detection mode. Using a higher impedance mode will increase nominal test time, increasing
+        temperature conversion time in turn.
+     </td>
       <td>
          <ul>
            <li><code>OpenCircuitMode.DISABLED</code>: disable open circuit testing</li>
-           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 10 ms</li>
-           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 32 ms</li>
-           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: nominal open circuit detection time of 100 ms</li>
+           <li><code>OpenCircuitMode.LOW_INPUT_IMPEDANCE</code>: series resistance < 5kΩ </li>
+           <li><code>OpenCircuitMode.MED_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant < 2 ms  </li>
+           <li><code>OpenCircuitMode.HIGH_INPUT_IMPEDANCE</code>: 5kΩ < series resistance < 40kΩ, time constant > 2 ms</li>
          </ul>
       </td>
    </tr>
+</table>
+
+---
+## Temperature Threshold Setting
+In order to set temperature fault thresholds using this module, please refer to the table below for accepted temperature values by thermocouple type. Attempting to set a temperature threshold outside of your thermocouple type's range will raise an exception.
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Thermocouple Type</th>
+            <th colspan="4">Temperature Range (°C)</th>
+        </tr>
+        <tr>
+            <th colspan="2">Cold Junction</th>
+            <th colspan="2">Thermocouple</th>
+        </tr>
+        <tr>
+            <td>Low</td>
+            <td>High</td>
+            <td>Low</td>
+            <td>High</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Type B</td>
+            <td>0</td>
+            <td>125</td>
+            <td>250</td>
+            <td>1820</td>
+        </tr>
+        <tr>
+            <td>Type E</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1000</td>
+        </tr>
+        <tr>
+            <td>Type J</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-210</td>
+            <td>1200</td>
+        </tr>
+        <tr>
+            <td>Type K</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1372</td>
+        </tr>
+        <tr>
+            <td>Type N</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>1300</td>
+        </tr>
+        <tr>
+            <td>Type R</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type S</td>
+            <td>-50</td>
+            <td>125</td>
+            <td>-50</td>
+            <td>1768</td>
+        </tr>
+        <tr>
+            <td>Type T</td>
+            <td>-55</td>
+            <td>125</td>
+            <td>-200</td>
+            <td>400</td>
+        </tr>
+    </tbody>
+</table>
+
+---
+## MAX31856 Factory Default Register Values
+<table>
+  <thead>
+    <tr>
+      <th>Register Name</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CR0</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CR1</td>
+      <td><code>03h</code></td>
+    </tr>
+    <tr>
+      <td>MASK</td>
+      <td><code>FFh</code></td>
+    </tr>
+    <tr>
+      <td>CJHF</td>
+      <td><code>7Fh</code></td>
+    </tr>
+    <tr>
+      <td>CJLF</td>
+      <td><code>C0h</code></td>
+    </tr>
+    <tr>
+      <td>LTHFTH</td>
+      <td><code>7Fh</code></td>
+    </tr>
+    <tr>
+      <td>THFTL</td>
+      <td><code>FFh</code></td>
+    </tr>
+    <tr>
+      <td>LTLFTH</td>
+      <td><code>80h</code></td>
+    </tr>
+    <tr>
+      <td>LTLFTL</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTO</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTH</td>
+      <td><code>00h</code></td>
+    </tr>
+    <tr>
+      <td>CJTL</td>
+      <td><code>00h</code></td>
+    </tr>
+  </tbody>
 </table>

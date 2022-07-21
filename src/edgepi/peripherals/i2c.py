@@ -1,3 +1,11 @@
+"""
+Module for I2C devices
+
+Classes:
+    I2CDevice
+"""
+
+
 from periphery import I2C
 
 class I2CDevice():

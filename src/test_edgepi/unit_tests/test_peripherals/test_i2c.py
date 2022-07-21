@@ -1,7 +1,6 @@
-'''
-Testing I2C peripheral module. It will check the system environment during import
-to provide proper mocking of peripheral device for testing purposes
-'''
+""" unit tests for peripherals/i2c.py """
+
+
 from unittest import mock
 from unittest.mock import patch
 import pytest

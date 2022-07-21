@@ -1,21 +1,23 @@
-'''
+"""
 Provides a class for interacting with the GPIO pins through I2C and GPIO peripheral
-'''
+"""
 
 import logging
-import time
-
-from edgepi.peripherals.gpio import GpioDevice
+from edgepi.gpio.gpio_configs import generate_pin_info, GpioExpanderConfig
 from edgepi.peripherals.i2c import I2CDevice
-from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.gpio.gpio_commands import *
-
+from edgepi.gpio.gpio_commands import ( 
+    get_pin_config_address, 
+    break_pin_info_dict, 
+    get_default_values, 
+    check_multiple_dev
+    )
 from edgepi.reg_helper.reg_helper import apply_opcodes
 
 _logger = logging.getLogger(__name__)
 
+
 class EdgePiGPIO(I2CDevice):
-    ''' 
+    '''
     A class used to represent the GPIO. This class will be imported to each module
     that requires GPIO manipulation. It is not intended for user.
     '''

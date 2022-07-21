@@ -1,10 +1,11 @@
+"""unit tests for edgepi_gpio module"""
 import pytest
 from unittest import mock
 from unittest.mock import patch
 import sys
 if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
-from edgepi.gpio.gpio_configs import *
+from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
 from edgepi.gpio.gpio_commands import check_multiple_dev
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 

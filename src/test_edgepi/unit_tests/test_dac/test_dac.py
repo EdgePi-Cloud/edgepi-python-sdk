@@ -1,7 +1,5 @@
-"""tests for edgepi_dac module"""
+'''unit test for dac module'''
 
-# TODO: remove this pylint ignore when SDK is installed
-# pylint: disable=import-error
 
 import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
@@ -16,7 +14,7 @@ def fixture_test_dac_ops():
     return dac_ops
 
 
-# Combine command needs check for integer numbers for op-code, channel and value
+# Combine command needs check for interger numbers for op-code, channel and value
 # It also needs to check the range of each value.
 
 

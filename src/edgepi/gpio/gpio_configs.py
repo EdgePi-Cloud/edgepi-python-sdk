@@ -1,23 +1,35 @@
+""" Utility module for GPIO configuration """
+
+
 from enum import Enum, unique
 from typing import Union
 from dataclasses import dataclass
-from edgepi.gpio.gpio_constants import * 
+from edgepi.gpio.gpio_constants import (
+    GpioAOutputClear,
+    GpioAOutputSet,
+    GpioBOutputClear,
+    GpioBOutputSet,
+    GpioExpanderAddress,
+    GpioAPinDir, 
+    GpioBPinDir
+)
 
-@dataclass(frozen = True)
+
+@dataclass(frozen=True)
 class GpioExpanderConfig:
-    ''' Represents peripheral information for GPIOs used DAC
+    """Represents peripheral information for GPIOs used DAC
 
-        Attributes:
-            name (str): name of config
+    Attributes:
+        name (str): name of config
 
-            device (str): peripheral device
+        device (str): peripheral device
 
-            num_pins (int): number of pins used for this configuration
+        num_pins (int): number of pins used for this configuration
 
-            address (GpioExpanderAdreess): addresses of i2c device
+        address (GpioExpanderAdreess): addresses of i2c device
 
-            dev_path (str): device path to the peripheral device file
-    '''
+        dev_path (str): device path to the peripheral device file
+    """
 
     name: str = None
     device: str = None
@@ -26,6 +38,7 @@ class GpioExpanderConfig:
     port: str = None
     address: Union[GpioExpanderAddress, int] = None
     dev_path: str = None
+
 
 @unique
 class GpioConfigs(Enum):
@@ -36,7 +49,8 @@ class GpioConfigs(Enum):
 
 @dataclass
 class I2cPinInfo:
-    ''' Represents I2C pin information
+    '''
+    Represents I2C pin information
 
         Attributes:
 
@@ -80,8 +94,7 @@ def _generate_DAC_pins():
     return pin_dict
 
 def _generate_LED_pins():
-    ''' Generates a list I2cPinInfo dataclasses for LED pins
-
+    '''
         Args:
             N/A
         
@@ -94,8 +107,7 @@ def _generate_LED_pins():
     return pin_dict
 
 def _generate_ADC_pins():
-    ''' Generates a list I2cPinInfo dataclasses for ADC pins
-
+    '''
         Args:
             N/A
         
@@ -108,8 +120,7 @@ def _generate_ADC_pins():
     return pin_dict
 
 def _generate_RTD_pins():
-    ''' Generates a list I2cPinInfo dataclasses for RTD pins
-
+    '''
         Args:
             N/A
         

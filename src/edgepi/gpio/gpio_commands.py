@@ -1,5 +1,5 @@
-from edgepi.gpio.gpio_constants import *
-from edgepi.gpio.gpio_configs import *
+from edgepi.gpio.gpio_constants import GPIOAddresses
+from edgepi.gpio.gpio_configs import GpioConfigs, GpioExpanderConfig
 from edgepi.reg_helper.reg_helper import apply_opcodes
 
 def get_periph_config(config: str = None):

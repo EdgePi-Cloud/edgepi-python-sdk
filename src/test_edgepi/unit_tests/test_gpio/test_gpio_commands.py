@@ -1,7 +1,16 @@
-import numbers
+'''unit tests for gpio_commands module'''
+
+
 import pytest
-from edgepi.gpio.gpio_commands import *
-from edgepi.gpio.gpio_configs import *
+from edgepi.gpio.gpio_commands import (
+    get_periph_config, 
+    get_pin_config_address, 
+    break_pin_info_dict, 
+    get_default_values, 
+    check_multiple_dev, 
+    set_pin_states)
+from edgepi.gpio.gpio_constants import GPIOAddresses
+from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
 
 @pytest.mark.parametrize('config, result', 
                        [('dac', GpioConfigs.DAC.value),
