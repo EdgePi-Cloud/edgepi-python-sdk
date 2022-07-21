@@ -104,8 +104,8 @@ class EdgePiDAC(spi):
             analog_out (int): the analog out pin number to read voltage from
 
         Returns:
-            the voltage value read from the DAC channel corresponding to the
-            selected analog out pin.
+            float: the voltage value read from the DAC channel corresponding
+                to the selected analog out pin.
         """
         self.dac_ops.check_range(analog_out, 1, len(CH))
         dac_ch = analog_out - 1

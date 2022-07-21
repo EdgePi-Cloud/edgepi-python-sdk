@@ -53,7 +53,7 @@ class DACCommands:
             expected (float): the voltage input by the user
 
         Returns:
-            16 bit binary code value for writing voltage value to DAC
+            int: 16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
         self.check_range(ch, 0, len(CH) - 1)
@@ -80,7 +80,7 @@ class DACCommands:
             read_code (list): a list of unsigned int byte values from DAC read
 
         Returns:
-            the unsigned int value of the 16 bits corresponding to voltage code
+            int: the unsigned int value of the 16 bits corresponding to voltage code
 
         Raises:
             ValueError: if read_code does not contain exactly 3 byte values
@@ -104,7 +104,7 @@ class DACCommands:
             code (int): 16 bit unsigned int value of a DAC register read
 
         Returns:
-            voltage corresponding to 16 bit binary code
+            float: voltage corresponding to 16 bit binary code
         """
         # DAC gain/offset errors
         dac_gain_err = (
@@ -132,8 +132,8 @@ class DACCommands:
             value: 16 bit data
 
         Returns:
-            a list of bytes that form a DAC input shift register message frame, i.e.
-            of the form [op_code_byte, ch_byte, value_byte]
+            list: a list of bytes that form a DAC input shift register message frame,
+                i.e. of the form [op_code_byte, ch_byte, value_byte]
         """
         DACCommands.check_for_int([op_code, ch, value])
         temp = (op_code << 20) + (ch << 16) + value
@@ -168,7 +168,7 @@ class DACCommands:
                 channel, ordered sequentially from DAC 7 (index 0) to DAC 0 (index 7).
 
         Returns:
-            a 16 bit binary code value for updating DAC channel power mode
+            int: a 16 bit binary code value for updating DAC channel power mode
         """
         data = Bits()
         for value in dac_state:
