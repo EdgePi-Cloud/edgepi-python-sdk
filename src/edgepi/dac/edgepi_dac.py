@@ -7,6 +7,7 @@ import logging
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
 from edgepi.dac.dac_constants import (
+    NULL_BITS,
     SW_RESET,
     DAC_PRECISION,
     GainMode,
@@ -74,9 +75,7 @@ class EdgePiDAC(spi):
         dac_ch = analog_out - 1  # analog_out pins numbered 1-8, DAC channels 0-7
         self._dac_state[dac_ch] = power_mode.value
         power_code = self.dac_ops.generate_power_code(self._dac_state.values())
-        cmd = self.dac_ops.combine_command(
-            COM.COM_POWER_DOWN_OP.value, COM.COM_NOP.value, power_code
-        )
+        cmd = self.dac_ops.combine_command(COM.COM_POWER_DOWN_OP.value, NULL_BITS, power_code)
         self.transfer(cmd)
 
     def set_gain_mode(self, gain_mode: GainMode):
@@ -86,14 +85,14 @@ class EdgePiDAC(spi):
         Args:
             gain_mode (GainMode): DAC output amplifier gain setting
         """
-        cmd = self.dac_ops.combine_command(COM.COM_GAIN.value, COM.COM_NOP.value, gain_mode.value)
+        cmd = self.dac_ops.combine_command(COM.COM_GAIN.value, NULL_BITS, gain_mode.value)
         self.transfer(cmd)
 
     def reset(self):
         """
         Performs a software reset of the EdgePi DAC to power-on default values.
         """
-        cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, COM.COM_NOP.value, SW_RESET)
+        cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
         self.transfer(cmd)
 
     def read_voltage(self, analog_out: int) -> float:
@@ -110,13 +109,11 @@ class EdgePiDAC(spi):
         self.dac_ops.check_range(analog_out, 1, len(CH))
         dac_ch = analog_out - 1
         # first transfer triggers read mode, second is needed to fetch data
-        cmd = self.dac_ops.combine_command(
-            COM.COM_READBACK.value, CH(dac_ch).value, COM.COM_NOP.value
-        )
+        cmd = self.dac_ops.combine_command(COM.COM_READBACK.value, CH(dac_ch).value, NULL_BITS)
         self.transfer(cmd)
         # all zero dummy command to trigger second transfer which
         # contains the DAC register contents.
-        read_data = self.transfer([0, 0, 0])
+        read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
         _logger.debug(f"reading code {read_data}")
         code = self.dac_ops.extract_read_data(read_data)
         return self.dac_ops.code_to_voltage(dac_ch, code)
