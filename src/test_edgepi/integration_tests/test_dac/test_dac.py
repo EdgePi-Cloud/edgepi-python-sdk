@@ -15,6 +15,7 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 
 UPPER_VOLT_LIMIT = 5.117  # upper code limit with 3 dec place precision
 LOWER_VOLT_LIMIT = 0  # lower code limit
+NUM_PINS = 8
 
 
 @pytest.fixture(name="dac")
@@ -62,3 +63,17 @@ def test_write_and_read_voltages(analog_out, voltage, raises, dac):
 
 
 # TODO: test actual A/D OUT pin voltages on write
+
+
+def test_reset(dac):
+    voltage = 2.2
+    for i in range(NUM_PINS):
+        dac.write_voltage(i + 1, voltage)
+
+    for i in range(NUM_PINS):
+        assert dac.read_voltage(i + 1) == voltage
+
+    dac.reset()
+
+    for i in range(NUM_PINS):
+        assert dac.read_voltage(i + 1) == 0

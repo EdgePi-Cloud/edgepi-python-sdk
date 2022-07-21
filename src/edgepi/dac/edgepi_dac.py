@@ -103,6 +103,7 @@ class EdgePiDAC(spi):
         """
         self.dac_ops.check_range(analog_out, 1, len(CH))
         dac_ch = analog_out - 1
+        # first transfer triggers read mode, second is needed to fetch data
         cmd = self.dac_ops.combine_command(
             COM.COM_READBACK.value, CH(dac_ch).value, COM.COM_NOP.value
         )
