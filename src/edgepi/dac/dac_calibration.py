@@ -4,10 +4,6 @@
 from dataclasses import dataclass
 
 
-# decimal place precision for voltage conversions
-DAC_PRECISION = 3
-
-
 # TODO: need to combine this calibration dataclass into one to avoid confusion.
 # This requires some more research and revision in calculation
 @dataclass

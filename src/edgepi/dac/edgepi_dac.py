@@ -5,9 +5,10 @@ Module for interacting with the EdgePi DAC via SPI.
 
 import logging
 from edgepi.dac.dac_commands import DACCommands
-from edgepi.dac.dac_calibration import DAC_PRECISION, DAChWCalibConst, DACsWCalibConst
+from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
 from edgepi.dac.dac_constants import (
     SW_RESET,
+    DAC_PRECISION,
     GainMode,
     PowerMode,
     EdgePiDacChannel as CH,

@@ -3,10 +3,13 @@
 import logging
 from typing import Union
 from bitstring import Bits, pack
-from edgepi.dac.dac_calibration import DAC_PRECISION
-from edgepi.dac.dac_constants import READ_WRITE_SIZE, EdgePiDacChannel as CH
-from edgepi.dac.dac_constants import EdgePiDacCom as COMMAND
-from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS
+from edgepi.dac.dac_constants import (
+    READ_WRITE_SIZE,
+    DAC_PRECISION,
+    EdgePiDacChannel as CH,
+    EdgePiDacCom as COMMAND,
+    EdgePiDacCalibrationConstants as CALIB_CONSTS,
+)
 
 
 _logger = logging.getLogger(__name__)

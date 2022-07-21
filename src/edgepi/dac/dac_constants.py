@@ -4,6 +4,7 @@
 from enum import Enum
 
 
+DAC_PRECISION = 3   # decimal place precision for voltage conversions
 SW_RESET = 0x1234   # software reset command data bits
 READ_WRITE_SIZE = 3 # size of DAC read/write in bytes
 
