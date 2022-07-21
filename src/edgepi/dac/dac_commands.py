@@ -136,15 +136,11 @@ class DACCommands:
             a list of bytes that form a DAC input shift register message frame, i.e.
             of the form [op_code_byte, ch_byte, value_byte]
         """
-        try:
-            DACCommands.check_for_int([op_code, ch, value])
-            temp = (op_code << 20) + (ch << 16) + value
-            combined_cmnd = [temp >> 16, (temp >> 8) & 0xFF, temp & 0xFF]
-            _logger.debug(f"Combined Command is: {combined_cmnd}")
-            return combined_cmnd
-        # pylint: disable=broad-except
-        except Exception as err:
-            _logger.error(f"Exception raised {err}")
+        DACCommands.check_for_int([op_code, ch, value])
+        temp = (op_code << 20) + (ch << 16) + value
+        combined_cmnd = [temp >> 16, (temp >> 8) & 0xFF, temp & 0xFF]
+        _logger.debug(f"Combined Command is: {combined_cmnd}")
+        return combined_cmnd
 
     @staticmethod
     def check_for_int(target_list):
