@@ -10,6 +10,7 @@ import pytest
 from edgepi.peripherals.i2c import I2CDevice
 
 # pylint: disable=W0613
+# pylint: disable=E1101
 if sys.platform != 'linux':
     @pytest.mark.parametrize("fd, mock_expects",
                             [( '/dev/i2c-10', ['/dev/i2c-10']),
