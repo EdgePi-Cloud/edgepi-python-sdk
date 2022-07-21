@@ -1,7 +1,6 @@
 """ Command class and methods for DAC devices """
 
 import logging
-from typing import Union
 from bitstring import Bits, pack
 from edgepi.dac.dac_constants import (
     READ_WRITE_SIZE,
@@ -23,7 +22,7 @@ class DACCommands:
         self.dach_w_calib_const = dach_w_calib_const
         self.dacs_w_calib_consts_list = dacs_w_calib_const
 
-    def generate_write_and_update_command(self, ch, data):
+    def generate_write_and_update_command(self, ch: int, data: int) -> list:
         """Construct a write and update command"""
         self.check_range(ch, 0, len(CH))
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
@@ -44,7 +43,7 @@ class DACCommands:
         return len(str(float(voltage)).split(".")[1]) <= DAC_PRECISION
 
     # TODO: change the formula according to calibration if needed
-    def voltage_to_code(self, ch: int, expected: float):
+    def voltage_to_code(self, ch: int, expected: float) -> int:
         """
         Convert a voltage to binary code value
 
@@ -72,7 +71,7 @@ class DACCommands:
         return int(code)
 
     @staticmethod
-    def extract_read_data(read_code: list):
+    def extract_read_data(read_code: list) -> int:
         """
         Extracts bits corresponding to voltage code from a list containing
         the byte values of a DAC register read.
@@ -121,7 +120,7 @@ class DACCommands:
 
     @staticmethod
     # pylint: disable=inconsistent-return-statements
-    def combine_command(op_code, ch, value) -> Union[float, Exception]:
+    def combine_command(op_code: int, ch: int, value: int) -> list:
         """
         Combine op_code, channel and value into a message frame to send out to DAC device
 
@@ -143,7 +142,7 @@ class DACCommands:
         return combined_cmnd
 
     @staticmethod
-    def check_for_int(target_list):
+    def check_for_int(target_list: list) -> bool:
         """Checks if a list contains only integer values"""
         if all(isinstance(value, int) for value in target_list) and target_list:
             return True
@@ -151,7 +150,7 @@ class DACCommands:
         raise ValueError(f"Non integer value passed{target_list}")
 
     @staticmethod
-    def check_range(target, range_min, range_max):
+    def check_range(target, range_min, range_max) -> bool:
         """Validates target is in range between a min and max value"""
         if range_min <= target <= range_max:
             return True
@@ -159,7 +158,7 @@ class DACCommands:
         raise ValueError(f"Target {target} is out of range ")
 
     @staticmethod
-    def generate_power_code(dac_state: list):
+    def generate_power_code(dac_state: list) -> int:
         """
         Converts a list containing the EdgePi DAC's power state for each channel
         to a binary code value.

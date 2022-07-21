@@ -96,7 +96,7 @@ class EdgePiDAC(spi):
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, COM.COM_NOP.value, SW_RESET)
         self.transfer(cmd)
 
-    def read_voltage(self, analog_out: int):
+    def read_voltage(self, analog_out: int) -> float:
         """
         Read voltage from the DAC channel corresponding to analog out pin
 
