@@ -230,3 +230,20 @@ def test_extract_read_data(read_code, code_val, dac_ops):
 )
 def test_generate_power_code(dac_state, expected, dac_ops):
     assert dac_ops.generate_power_code(dac_state) == expected
+
+
+@pytest.mark.parametrize(
+    "voltage, result",
+    [
+        (0, True),
+        (1.1, True),
+        (3.34, True),
+        (4.345, True),
+        (0.1234, False),
+        (1.1111, False),
+        (3.3444, False),
+        (4.3455, False),
+    ],
+)
+def test_validate_voltage_precision(voltage, result, dac_ops):
+    assert dac_ops.validate_voltage_precision(voltage) == result

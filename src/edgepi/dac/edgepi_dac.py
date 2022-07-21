@@ -5,7 +5,7 @@ Module for interacting with the EdgePi DAC via SPI.
 
 import logging
 from edgepi.dac.dac_commands import DACCommands
-from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
+from edgepi.dac.dac_calibration import DAC_PRECISION, DAChWCalibConst, DACsWCalibConst
 from edgepi.dac.dac_constants import (
     SW_RESET,
     GainMode,
@@ -49,7 +49,12 @@ class EdgePiDAC(spi):
             analog_out (int): the analog out pin number to write a voltage value to
 
             voltage (float): the voltage value to write
+
+        Raises:
+            ValueError: if voltage has more decimal places than DAC accuracy limit
         """
+        if not self.dac_ops.validate_voltage_precision(voltage):
+            raise ValueError(f"DAC voltage writes currently support {DAC_PRECISION} decimal places")
         dac_ch = analog_out - 1
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
         self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))

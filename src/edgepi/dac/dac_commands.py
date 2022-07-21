@@ -25,6 +25,20 @@ class DACCommands:
         if self.check_range(ch, 0, len(CH)) and self.check_range(data, 0, CALIB_CONSTS.RANGE.value):
             return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
+    @staticmethod
+    def validate_voltage_precision(voltage: float) -> bool:
+        """
+        Verifies the voltage value meets DAC precision constraints. DAC is currently
+        accurate to the mV.
+
+        Args:
+            voltage (float): voltage value
+
+        Returns:
+            bool: True if voltage value has at most DAC_PRECISION decimal places
+        """
+        return len(str(float(voltage)).split(".")[1]) <= DAC_PRECISION
+
     # TODO: change the formula according to calibration if needed
     def voltage_to_code(self, ch: int, expected: float):
         """
@@ -39,7 +53,7 @@ class DACCommands:
             16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
-        self.check_range(ch, 0, len(CH)-1)
+        self.check_range(ch, 0, len(CH) - 1)
         code = (
             (
                 (expected + self.dacs_w_calib_consts_list[ch].offset)

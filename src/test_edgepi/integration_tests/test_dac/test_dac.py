@@ -52,6 +52,7 @@ def fixture_test_edgepi_dac():
         (8, UPPER_VOLT_LIMIT, does_not_raise()),
         (1, -0.1, pytest.raises(ValueError)),
         (1, 5.118, pytest.raises(ValueError)),
+        (1, 5.1111, pytest.raises(ValueError)),
         (0, 1.1, pytest.raises(ValueError)),
         (9, 1.1, pytest.raises(ValueError)),
     ],
@@ -62,7 +63,7 @@ def test_write_and_read_voltages(analog_out, voltage, raises, dac):
         assert dac.read_voltage(analog_out) == voltage
 
 
-# TODO: test actual A/D OUT pin voltages on write
+# TODO: test actual A/D OUT pin voltages on write via ADC module
 
 
 def test_reset(dac):
