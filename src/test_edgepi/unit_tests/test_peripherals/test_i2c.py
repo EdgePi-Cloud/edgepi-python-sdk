@@ -9,6 +9,7 @@ if sys.platform != 'linux':
 import pytest
 from edgepi.peripherals.i2c import I2CDevice
 
+# pylint: disable=W0613
 if sys.platform != 'linux':
     @pytest.mark.parametrize("fd, mock_expects",
                             [( '/dev/i2c-10', ['/dev/i2c-10']),
@@ -74,7 +75,7 @@ else:
     def test_i2c_set_read_msg(i2c_mock, addrs, msg, result):
         i2c_device = I2CDevice('/dev/i2c-10')
         i2c_device.i2cdev.Message.return_value.data = i2c_device.i2cdev.Message
-        list_msg = i2cDev.set_read_msg(addrs, msg)
+        list_msg = i2c_device.set_read_msg(addrs, msg)
         i2c_device.i2cdev.Message.assert_any_call(result[0], read=result[1])
         i2c_device.i2cdev.Message.assert_any_call(result[2], read=result[3])
         assert len(list_msg) == i2c_device.i2cdev.Message.call_count
@@ -98,11 +99,13 @@ else:
 
     #Transfer Read
     @pytest.mark.parametrize("dev_address, msg, result",
-                            [( 33, [2,False,[0, 0],True], [255, 255]),
-                             ( 32, [2,False,[0, 0],True], [255, 255])
+                            [( 33, [2,False,[0],True], [255]),
+                             ( 32, [3,False,[0],True], [255]),
+                             ( 32, [6,False,[0],True], [255]),
+                             ( 33, [7,False,[0],True], [255]),
                             ])
     def test_i2c_transfer_read(dev_address, msg, result):
         i2c_device = I2CDevice('/dev/i2c-10')
         list_msg = i2c_device.set_read_msg(msg[0], msg[2])
         list_msg = i2c_device.transfer(dev_address, list_msg)
-        assert list_msg == result
+        assert list_msg == result[0]

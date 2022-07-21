@@ -87,15 +87,15 @@ def test_break_pin_info_dict(config, result):
             assert element[key] == result[key]
 
 
-@pytest.mark.parametrize('pin_config',
-                       [(GpioConfigs.DAC.value),
-                        (GpioConfigs.ADC.value),
-                        (GpioConfigs.RTD.value),
-                        (GpioConfigs.LED.value)
+@pytest.mark.parametrize('pin_config, result',
+                       [(GpioConfigs.DAC.value, [False, True]),
+                        (GpioConfigs.ADC.value, [False, True]),
+                        (GpioConfigs.RTD.value, [False, True]),
+                        (GpioConfigs.LED.value, [False, True])
                         ])
-def test_set_pin_states(pin_config):
+def test_set_pin_states(pin_config, result):
     pin_dict = generate_pin_info(pin_config)
     pin_dict = set_pin_states(pin_dict)
-    for key in pin_dict:
-        assert pin_dict[key].is_high is False
-        assert pin_dict[key].is_out is True
+    for key in pin_dict: # pylint: disable=C0206
+        assert pin_dict[key].is_high == result[0]
+        assert pin_dict[key].is_out == result[1]

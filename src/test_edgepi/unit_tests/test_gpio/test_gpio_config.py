@@ -118,15 +118,15 @@ def test_generate_pin_info_rtd(config = GpioConfigs.RTD.value):
         assert pin[1].dir_code == output_dir.value
         assert pin[1].address == GpioExpanderAddress.EXP_TWO.value
 
-def test_generate_pin_info_adc(config = GpioConfigs.ADC.value,
-                               pin_name_list = ['GNDSW_IN1', 'GNDSW_IN2']):
+def test_generate_pin_info_adc(config = GpioConfigs.ADC.value):
     pin_list = generate_pin_info(config)
-    assert pin_list[pin_name_list[0]].set_code == GpioBOutputSet.SET_OUTPUT_2.value
-    assert pin_list[pin_name_list[0]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_2.value
-    assert pin_list[pin_name_list[0]].dir_code == GpioBPinDir.PIN2_DIR_OUT.value
-    assert pin_list[pin_name_list[0]].address == GpioExpanderAddress.EXP_TWO.value
+    pin_keys = list(pin_list.keys())
+    assert pin_list[pin_keys[0]].set_code == GpioBOutputSet.SET_OUTPUT_2.value
+    assert pin_list[pin_keys[0]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_2.value
+    assert pin_list[pin_keys[0]].dir_code == GpioBPinDir.PIN2_DIR_OUT.value
+    assert pin_list[pin_keys[0]].address == GpioExpanderAddress.EXP_TWO.value
 
-    assert pin_list[pin_name_list[1]].set_code == GpioBOutputSet.SET_OUTPUT_3.value
-    assert pin_list[pin_name_list[1]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_3.value
-    assert pin_list[pin_name_list[1]].dir_code == GpioBPinDir.PIN3_DIR_OUT.value
-    assert pin_list[pin_name_list[1]].address == GpioExpanderAddress.EXP_TWO.value
+    assert pin_list[pin_keys[1]].set_code == GpioBOutputSet.SET_OUTPUT_3.value
+    assert pin_list[pin_keys[1]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_3.value
+    assert pin_list[pin_keys[1]].dir_code == GpioBPinDir.PIN3_DIR_OUT.value
+    assert pin_list[pin_keys[1]].address == GpioExpanderAddress.EXP_TWO.value
