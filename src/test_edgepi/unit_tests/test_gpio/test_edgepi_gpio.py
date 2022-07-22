@@ -121,6 +121,8 @@ def test_set_expander_default(mock_transfer,
     gpio_ctrl.set_expander_default()
     assert gpio_ctrl.dict_default_reg_dict == result
 
+
+
 @pytest.mark.parametrize("config, pin_name, mock_value, result", [(GpioConfigs.DAC.value,
                                                                    'AO_EN1',
                                                                    [0, 0,

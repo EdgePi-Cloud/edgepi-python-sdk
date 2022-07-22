@@ -12,7 +12,7 @@ from edgepi.gpio.gpio_commands import (
     check_multiple_dev,
     set_pin_states
     )
-from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.reg_helper.reg_helper import apply_opcodes, convert_dict_to_values
 
 _logger = logging.getLogger(__name__)
 
@@ -107,6 +107,21 @@ class EdgePiGPIO(I2CDevice):
             self.__read_register(self.pin_config_address, dev_address)
         return reg_map
 
+    def __write_changed_values(self, reg_dict: dict = None, dev_address: int = None):
+        '''
+        Function to write changed values to the specified register
+        In:
+            reg_dict (dict): register address to value and is_changed flag
+                             {register_address : {'value' : value(int), is_changed : bool}}
+            dev_address: device address, 32 or 33
+        Returns:
+            void
+        '''
+        for reg_addx, entry in reg_dict.items():
+            if entry['is_changed']:
+                msg_write = self.set_write_msg(reg_addx, [entry['value']])
+                self.transfer(dev_address, msg_write)
+
     def set_expander_pin(self, pin_name: str = None):
         '''
         Function set gpio pin state to high
@@ -119,13 +134,9 @@ class EdgePiGPIO(I2CDevice):
         list_opcode = [self.dict_pin[pin_name].set_code]
         dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
 
-        for reg_addx, entry in dict_register.items():
-            if entry['is_changed']:
-                msg_write = self.set_write_msg(reg_addx, [entry['value']])
-                self.transfer(dev_address, msg_write)
+        self.__write_changed_values(dict_register, dev_address)
+        dict_register = convert_dict_to_values(dict_register)
 
-        for reg_addx, entry in dict_register.items():
-            dict_register[reg_addx] = entry['value']
         self.dict_pin[pin_name].is_high = True
         return self.dict_pin[pin_name].is_high
 
@@ -141,13 +152,9 @@ class EdgePiGPIO(I2CDevice):
         list_opcode = [self.dict_pin[pin_name].clear_code]
         dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
 
-        for reg_addx, entry in dict_register.items():
-            if entry['is_changed']:
-                msg_write = self.set_write_msg(reg_addx, [entry['value']])
-                self.transfer(dev_address, msg_write)
+        self.__write_changed_values(dict_register, dev_address)
+        dict_register = convert_dict_to_values(dict_register)
 
-        for reg_addx, entry in dict_register.items():
-            dict_register[reg_addx] = entry['value']
         self.dict_pin[pin_name].is_high = False
         return self.dict_pin[pin_name].is_high
 
