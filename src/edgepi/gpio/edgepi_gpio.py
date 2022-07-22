@@ -161,4 +161,6 @@ class EdgePiGPIO(I2CDevice):
         Returns:
             void
         '''
-        self.dict_pin[pin_name].is_high = self.clear_expander_pin(pin_name) if self.dict_pin[pin_name].is_high else self.set_expander_pin(pin_name)
+        self.dict_pin[pin_name].is_high = self.clear_expander_pin(pin_name)\
+                                          if self.dict_pin[pin_name].is_high\
+                                          else self.set_expander_pin(pin_name)
