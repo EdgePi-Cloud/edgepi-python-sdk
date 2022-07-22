@@ -127,3 +127,24 @@ class EdgePiGPIO(I2CDevice):
         for reg_addx, entry in dict_register.items():
             dict_register[reg_addx] = entry['value']
         self.dict_pin[pin_name].is_high = True
+
+    def clear_expander_pin(self, pin_name: str = None):
+        '''
+        Function set gpio pin state to high
+        In:
+            pin_name (str): name of the pin to set
+        Returns:
+            pin_info_dict[pin_name].is_high (bool): pin_state
+        '''
+        dev_address = self.dict_pin[pin_name].address
+        list_opcode = [self.dict_pin[pin_name].clear_code]
+        dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
+
+        for reg_addx, entry in dict_register.items():
+            if entry['is_changed']:
+                msg_write = self.set_write_msg(reg_addx, [entry['value']])
+                self.transfer(dev_address, msg_write)
+
+        for reg_addx, entry in dict_register.items():
+            dict_register[reg_addx] = entry['value']
+        self.dict_pin[pin_name].is_high = False

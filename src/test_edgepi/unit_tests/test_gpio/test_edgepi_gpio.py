@@ -150,13 +150,31 @@ def test_set_expander_default(mock_transfer,
                                                                     {32:{2:9, 6:0},
                                                                      33:{2:0, 6:0}}],
                                                                    [True, True, {2:41, 6:0}]
+                                                                  ),
+                                                                  (GpioConfigs.ADC.value,
+                                                                   'GNDSW_IN1',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {33:{3:0, 7:0}}],
+                                                                   [True, True, {3:2, 7:0}]
+                                                                  ),
+                                                                  (GpioConfigs.ADC.value,
+                                                                   'GNDSW_IN2',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {33:{3:2, 7:0}}],
+                                                                   [True, True, {3:6, 7:0}]
                                                                   )
                                                                  ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
-def test_set_gpio(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
+def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
                   config, pin_name, mock_value, result, mock_i2c):
     mock_i2c.return_value = mock_value[0]
     mock_i2c_device.return_value = mock_value[1]
@@ -166,5 +184,71 @@ def test_set_gpio(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c
     gpio_ctrl = EdgePiGPIO(config)
     gpio_ctrl.dict_default_reg_dict = mock_value[5]
     gpio_ctrl.set_expander_pin(pin_name)
+    assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
+    assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
+
+@pytest.mark.parametrize("config, pin_name, mock_value, result", [(GpioConfigs.DAC.value,
+                                                                   'AO_EN1',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {32:{2:35, 6:0},
+                                                                     33:{2:0, 6:0}}],
+                                                                   [True, False, {2:34, 6:0}]
+                                                                  ),
+                                                                  (GpioConfigs.DAC.value,
+                                                                   'AO_EN2',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {32:{2:41, 6:0},
+                                                                     33:{2:0, 6:0}}],
+                                                                   [True, False, {2:33, 6:0}]
+                                                                  ),
+                                                                  (GpioConfigs.DAC.value,
+                                                                   'AO_EN6',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {32:{2:41, 6:0},
+                                                                     33:{2:0, 6:0}}],
+                                                                   [True, False, {2:9, 6:0}]
+                                                                  ),
+                                                                  (GpioConfigs.ADC.value,
+                                                                   'GNDSW_IN1',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {33:{3:6, 7:0}}],
+                                                                   [True, False, {3:4, 7:0}]
+                                                                  ),
+                                                                  (GpioConfigs.ADC.value,
+                                                                   'GNDSW_IN2',
+                                                                   [0, 0,
+                                                                    0,
+                                                                    [0, 0],
+                                                                    [0, 0],
+                                                                    {33:{3:6, 7:0}}],
+                                                                   [True, False, {3:2, 7:0}]
+                                                                  )
+                                                                 ])
+@patch('edgepi.peripherals.i2c.I2CDevice')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
+def test_clear_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
+                  config, pin_name, mock_value, result, mock_i2c):
+    mock_i2c.return_value = mock_value[0]
+    mock_i2c_device.return_value = mock_value[1]
+    mock_transfer.return_value = mock_value[2]
+    mock_set_read_msg.return_value = mock_value[3]
+    mock_set_write_msg.return_value = mock_value[4]
+    gpio_ctrl = EdgePiGPIO(config)
+    gpio_ctrl.dict_default_reg_dict = mock_value[5]
+    gpio_ctrl.clear_expander_pin(pin_name)
     assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
     assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
