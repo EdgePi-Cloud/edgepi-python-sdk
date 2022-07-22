@@ -2,6 +2,7 @@
 
 
 from enum import Enum, unique
+from typing import Union
 from dataclasses import dataclass
 from edgepi.gpio.gpio_constants import (
     GpioAOutputClear,
@@ -9,6 +10,8 @@ from edgepi.gpio.gpio_constants import (
     GpioBOutputClear,
     GpioBOutputSet,
     GpioExpanderAddress,
+    GpioAPinDir,
+    GpioBPinDir
 )
 
 
@@ -31,196 +34,163 @@ class GpioExpanderConfig:
     name: str = None
     device: str = None
     num_pins: int = None
-    address: GpioExpanderAddress = None
+    dir: str = None
+    port: str = None
+    address: Union[GpioExpanderAddress, int] = None
     dev_path: str = None
 
 
 @unique
 class GpioConfigs(Enum):
-    """Configurations for GPIO devices"""
-
-    DAC = GpioExpanderConfig(
-        name="dac",
-        device="i2c",
-        num_pins=9,
-        address=GpioExpanderAddress.EXP_ONE,
-        dev_path="/dev/i2c-10",
-    )
-    ADC = GpioExpanderConfig(
-        name="adc",
-        device="i2c",
-        num_pins=2,
-        address=GpioExpanderAddress.EXP_TWO,
-        dev_path="/dev/i2c-10",
-    )
-    RTD = GpioExpanderConfig(
-        name="rtd",
-        device="i2c",
-        num_pins=1,
-        address=GpioExpanderAddress.EXP_TWO,
-        dev_path="/dev/i2c-10",
-    )
-    LED = GpioExpanderConfig(
-        name="led",
-        device="i2c",
-        num_pins=8,
-        address=GpioExpanderAddress.EXP_ONE,
-        dev_path="/dev/i2c-10",
-    )
-
+    '''Enum Class for GPIO configurations dataclasses'''
+    DAC = GpioExpanderConfig(name = 'dac',
+                             device='i2c',
+                             num_pins=9,
+                             dir='out',
+                             port='A',
+                             address=GpioExpanderAddress,
+                             dev_path='/dev/i2c-10')
+    ADC = GpioExpanderConfig(name = 'adc',
+                             device='i2c',
+                             num_pins=2,
+                             dir='out',
+                             port='B',
+                             address=GpioExpanderAddress.EXP_TWO.value,
+                             dev_path='/dev/i2c-10')
+    RTD = GpioExpanderConfig(name = 'rtd',
+                             device='i2c',
+                             num_pins=1,
+                             dir='out',
+                             port='B',
+                             address=GpioExpanderAddress.EXP_TWO.value,
+                             dev_path='/dev/i2c-10')
+    LED = GpioExpanderConfig(name = 'led',
+                             device='i2c',
+                             num_pins=8,
+                             dir='in',
+                             port='B',
+                             address=GpioExpanderAddress.EXP_ONE.value,
+                             dev_path='/dev/i2c-10')
 
 @dataclass
 class I2cPinInfo:
-    """Represents I2C pin information
+    '''
+    Represents I2C pin information
 
-    Attributes:
-        name (str): name of the pin
+        Attributes:
 
-        dir (str): direction of the pin in or out
+            set_code (GpioAOutputSet, GpioBOutputSet): Output set code
 
-        port (str): port group A or B
+            clear_code (GpioAOutputClear, GpioBOutputClear): Output clear code
 
-        address (int): address of i2c device
-    """
-
-    name: str = None
-    set_code: GpioAOutputSet = None
-    clear_code: GpioAOutputClear = None
+            address (int): address of i2c device
+    '''
+    set_code: Union[GpioAOutputSet, GpioBOutputSet] = None
+    clear_code: Union[GpioAOutputClear, GpioBOutputClear] = None
+    dir_code: Union[GpioAPinDir, GpioBPinDir] = None
     address: int = None
+    is_high: bool = None
+    is_out: bool = None
+
+_list_of_DAC_gpios = ['AO_EN1', 'AO_EN4', 'AO_EN3', 'AO_EN2',
+                      'AO_EN5', 'AO_EN6', 'AO_EN7', 'AO_EN8', 'DAC_GAIN']
+_list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
+_list_of_RTD_gpios = ['RTD_EN']
+_list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4',
+                      'LED_OVR5','LED_OVR6', 'LED_OVR7', 'LED_OVR8']
+_list_of_DIN_gpios =  ['DIN1', 'DIN2', 'DIN3', 'DIN4',
+                       'DIN5', 'DIN6', 'DIN7', 'DIN8']
+_list_of_DOUT_gpios = {'DOUT1', 'DOUT2', 'DOUT3', 'DOUT4',
+                       'DOUT5', 'DOUT6', 'DOUT7', 'DOUT8'}
 
 
-# pylint: disable=fixme
-# TODO: add more configs and list of pins for different modules
+def _generate_DAC_pins(): #pylint: disable=C0103
+    ''' Generates a list I2cPinInfo dataclasses for DAC pins
+        Args:
+            N/A
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    for pin, set_code, clear_code, dir_code in \
+        zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear, GpioAPinDir):
 
-_list_of_dac_gpios = [
-    "AO_EN1",
-    "AO_EN4",
-    "AO_EN3",
-    "AO_EN2",
-    "AO_EN5",
-    "AO_EN6",
-    "AO_EN7",
-    "AO_EN8",
-    "DAC_GAIN",
-]
-_list_of_adc_gpios = ["GNDSW_IN1", "GNDSW_IN2"]
-_list_of_rtd_gpios = ["RTD_EN"]
-_list_of_led_gpios = [
-    "LED_OVR1",
-    "LED_OVR2" + "LED_OVR3" + "LED_OVR4" + "LED_OVR5" + "LED_OVR6",
-    "LED_OVR7",
-    "LED_OVR8",
-]
+        pin_dict.update({pin : I2cPinInfo(set_code.value,
+                                          clear_code.value,
+                                          dir_code.value,
+                                          GpioExpanderAddress.EXP_ONE.value)
+                        })
+    pin_dict['DAC_GAIN'] =\
+        I2cPinInfo(GpioAOutputSet.SET_OUTPUT_1.value,
+                   GpioAOutputClear.CLEAR_OUTPUT_1.value,
+                   GpioAPinDir.PIN1_DIR_OUT.value,
+                   GpioExpanderAddress.EXP_TWO.value)
+    return pin_dict
 
+def _generate_LED_pins(): #pylint: disable=C0103
+    '''
+        Args:
+            N/A
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    for pin, set_code, clear_code, dir_code in\
+        zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear, GpioBPinDir):
 
-def _generate_dac_pins():
-    """Generates a list I2cPinInfo dataclasses for DAC pins
+        pin_dict.update({pin : I2cPinInfo(set_code.value,
+                                          clear_code.value,
+                                          dir_code.value,
+                                          GpioExpanderAddress.EXP_ONE.value)})
+    return pin_dict
 
-    Args:
-        N/A
+def _generate_ADC_pins(): #pylint: disable=C0103
+    '''
+        Args:
+            N/A
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    pin_dict.update({_list_of_ADC_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_2.value,
+                                                        GpioBOutputClear.CLEAR_OUTPUT_2.value,
+                                                        GpioBPinDir.PIN2_DIR_OUT.value,
+                                                        GpioExpanderAddress.EXP_TWO.value)})
+    pin_dict.update({_list_of_ADC_gpios[1] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_3.value,
+                                                        GpioBOutputClear.CLEAR_OUTPUT_3.value,
+                                                        GpioBPinDir.PIN3_DIR_OUT.value,
+                                                        GpioExpanderAddress.EXP_TWO.value)})
+    return pin_dict
 
-    Returns:
-        a list of dataclass with gpio information
-    """
-    pin_list = []
-    for pin, set_code, clear_code in zip(_list_of_dac_gpios, GpioAOutputSet, GpioAOutputClear):
-        pin_list.append(
-            I2cPinInfo(pin, set_code.value, clear_code.value, GpioExpanderAddress.EXP_ONE.value)
-        )
-    pin_list[8] = I2cPinInfo(
-        _list_of_dac_gpios[8],
-        GpioAOutputSet.SET_OUTPUT_1.value,
-        GpioAOutputClear.CLEAR_OUTPUT_1.value,
-        GpioExpanderAddress.EXP_TWO.value,
-    )
-    return pin_list
+def _generate_RTD_pins(): #pylint: disable=C0103
+    '''
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    pin_dict.update({_list_of_RTD_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_1.value,
+                                                        GpioBOutputClear.CLEAR_OUTPUT_1.value,
+                                                        GpioBPinDir.PIN1_DIR_OUT.value,
+                                                        GpioExpanderAddress.EXP_TWO.value)})
+    return pin_dict
 
+def generate_pin_info(config:GpioExpanderConfig = None):
+    ''' Generates a dictionary of pin info dataclasses
+        Args:
+            config (GpioExpanderConfig): name of the module to configure the gpio pins fors
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
 
-def _generate_led_pins():
-    """Generates a list I2cPinInfo dataclasses for LED pins
+    if config.name == 'dac':
+        pin_dict =  _generate_DAC_pins()
+    elif config.name == 'led':
+        pin_dict =  _generate_LED_pins()
+    elif config.name == 'adc':
+        pin_dict =  _generate_ADC_pins()
+    elif config.name == 'rtd':
+        pin_dict =  _generate_RTD_pins()
 
-    Args:
-        N/A
-
-    Returns:
-        a list of dataclass with gpio information
-    """
-    pin_list = []
-    for pin, set_code, clear_code in zip(_list_of_led_gpios, GpioBOutputSet, GpioBOutputClear):
-        pin_list.append(
-            I2cPinInfo(pin, set_code.value, clear_code.value, GpioExpanderAddress.EXP_ONE.value)
-        )
-    return pin_list
-
-
-def _generate_adc_pins():
-    """Generates a list I2cPinInfo dataclasses for ADC pins
-
-    Args:
-        N/A
-
-    Returns:
-        a list of dataclass with gpio information
-    """
-    pin_list = []
-    pin_list.append(
-        I2cPinInfo(
-            _list_of_adc_gpios[0],
-            GpioBOutputSet.SET_OUTPUT_2.value,
-            GpioBOutputClear.CLEAR_OUTPUT_2.value,
-            GpioExpanderAddress.EXP_TWO.value,
-        )
-    )
-    pin_list.append(
-        I2cPinInfo(
-            _list_of_adc_gpios[1],
-            GpioBOutputSet.SET_OUTPUT_3.value,
-            GpioBOutputClear.CLEAR_OUTPUT_3.value,
-            GpioExpanderAddress.EXP_TWO.value,
-        )
-    )
-    return pin_list
-
-
-def _generate_rtd_pins():
-    """Generates a list I2cPinInfo dataclasses for RTD pins
-
-    Args:
-        N/A
-
-    Returns:
-        a list of dataclass with gpio information
-    """
-    pin_list = []
-    pin_list.append(
-        I2cPinInfo(
-            _list_of_rtd_gpios[0],
-            GpioBOutputSet.SET_OUTPUT_1.value,
-            GpioBOutputClear.CLEAR_OUTPUT_1.value,
-            GpioExpanderAddress.EXP_TWO.value,
-        )
-    )
-    return pin_list
-
-
-def generate_pin_info(config: str):
-    """Generates a list pin info dataclasses
-
-    Args:
-        config (str): name of the module to configure the gpio pins fors
-
-    Returns:
-        a list of dataclass with gpio information
-    """
-    pin_list = []
-
-    if config == "dac":
-        pin_list = _generate_dac_pins()
-    if config == "led":
-        pin_list = _generate_led_pins()
-    if config == "adc":
-        pin_list = _generate_adc_pins()
-    if config == "rtd":
-        pin_list = _generate_rtd_pins()
-
-    return pin_list
+    return pin_dict
