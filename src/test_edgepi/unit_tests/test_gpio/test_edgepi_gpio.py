@@ -13,6 +13,10 @@ from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
 from edgepi.gpio.gpio_commands import check_multiple_dev
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
+@pytest.fixture(name='mock_i2c')
+def fixture_mock_i2c_lib(mocker):
+    yield mocker.patch('edgepi.peripherals.i2c.I2C')
+
 @pytest.mark.parametrize("mock_expect,config, result",
                         [(['/dev/i2c-10'],GpioConfigs.DAC.value,[GpioConfigs.DAC.value,6,2]),
                          (['/dev/i2c-10'],GpioConfigs.ADC.value,[GpioConfigs.ADC.value,7,3]),
@@ -20,7 +24,8 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
                          (['/dev/i2c-10'],GpioConfigs.LED.value,[GpioConfigs.LED.value,7,3]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
-def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result):
+def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c):
+    mock_i2c.return_value = None
     mock_i2c_device.fd = mock_expect[0]
     gpio_ctrl = EdgePiGPIO(config)
     assert gpio_ctrl.config == result[0]
@@ -40,7 +45,8 @@ def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result):
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
-def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out):
+def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out, mock_i2c):
+    mock_i2c.return_value = None
     mock_msg.data = [255]
     mock_msg.return_value = (mock_msg ,mock_msg)
     mock_data.return_value = out
@@ -55,7 +61,8 @@ def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out
                          (GpioConfigs.LED.value, 33, {3 : 255, 7 : 255}),
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register')
-def test_edgepi_gpio_map_reg_address_value_dict(mock_data, config, dev_address, out):
+def test_edgepi_gpio_map_reg_address_value_dict(mock_data, config, dev_address, out, mock_i2c):
+    mock_i2c.return_value = None
     mock_data.return_value = 255
     gpio_ctrl = EdgePiGPIO(config)
     out_data = gpio_ctrl._EdgePiGPIO__map_reg_address_value_dict(dev_address)
@@ -66,7 +73,8 @@ def test_edgepi_gpio_map_reg_address_value_dict(mock_data, config, dev_address, 
                          (GpioConfigs.ADC.value, [{2 : 255, 6 : 255}]),
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__map_reg_address_value_dict')
-def test_generate_default_reg_dict(mock_dict,config, result):
+def test_generate_default_reg_dict(mock_dict,config, result, mock_i2c):
+    mock_i2c.return_value = None
     mock_dict.side_effect = [{2 : 255, 6 : 255}, {2 : 255, 6 : 255}]
     gpio_ctrl = EdgePiGPIO(config)
     pin_dict = generate_pin_info(config)
@@ -101,7 +109,9 @@ def test_set_expander_default(mock_transfer,
                               mock_i2c_device,
                               config,
                               mock_vals,
-                              result):
+                              result,
+                              mock_i2c):
+    mock_i2c.return_value = None
     mock_transfer.return_value = mock_vals[4]
     mock_set_read_msg.return_value = mock_vals[1]
     mock_set_write_msg.return_value = mock_vals[2]
