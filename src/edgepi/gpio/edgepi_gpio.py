@@ -113,7 +113,7 @@ class EdgePiGPIO(I2CDevice):
         In:
             pin_name (str): name of the pin to set
         Returns:
-            pin_info_dict[pin_name].is_high (bool): pin_state
+            self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
         list_opcode = [self.dict_pin[pin_name].set_code]
@@ -127,14 +127,15 @@ class EdgePiGPIO(I2CDevice):
         for reg_addx, entry in dict_register.items():
             dict_register[reg_addx] = entry['value']
         self.dict_pin[pin_name].is_high = True
+        return self.dict_pin[pin_name].is_high
 
     def clear_expander_pin(self, pin_name: str = None):
         '''
-        Function set gpio pin state to high
+        Function clear gpio pin state to low
         In:
             pin_name (str): name of the pin to set
         Returns:
-            pin_info_dict[pin_name].is_high (bool): pin_state
+            self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
         list_opcode = [self.dict_pin[pin_name].clear_code]
@@ -148,3 +149,16 @@ class EdgePiGPIO(I2CDevice):
         for reg_addx, entry in dict_register.items():
             dict_register[reg_addx] = entry['value']
         self.dict_pin[pin_name].is_high = False
+        return self.dict_pin[pin_name].is_high
+
+    def toggle_expander_pin(self, pin_name: str = None):
+        '''
+        Function toggle gpio pin state to opposite logic
+        High -> Low
+        Low -> High
+        In:
+            pin_name (str): name of the pin to set
+        Returns:
+            void
+        '''
+        self.dict_pin[pin_name].is_high = self.clear_expander_pin(pin_name) if self.dict_pin[pin_name].is_high else self.set_expander_pin(pin_name)

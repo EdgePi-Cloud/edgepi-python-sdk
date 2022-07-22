@@ -175,7 +175,7 @@ def test_set_expander_default(mock_transfer,
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
 def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
-                  config, pin_name, mock_value, result, mock_i2c):
+                          config, pin_name, mock_value, result, mock_i2c):
     mock_i2c.return_value = mock_value[0]
     mock_i2c_device.return_value = mock_value[1]
     mock_transfer.return_value = mock_value[2]
@@ -195,7 +195,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     [0, 0],
                                                                     {32:{2:35, 6:0},
                                                                      33:{2:0, 6:0}}],
-                                                                   [True, False, {2:34, 6:0}]
+                                                                   [False, False, {2:34, 6:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN2',
@@ -205,7 +205,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     [0, 0],
                                                                     {32:{2:41, 6:0},
                                                                      33:{2:0, 6:0}}],
-                                                                   [True, False, {2:33, 6:0}]
+                                                                   [False, False, {2:33, 6:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN6',
@@ -215,7 +215,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     [0, 0],
                                                                     {32:{2:41, 6:0},
                                                                      33:{2:0, 6:0}}],
-                                                                   [True, False, {2:9, 6:0}]
+                                                                   [False, False, {2:9, 6:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN1',
@@ -224,7 +224,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     [0, 0],
                                                                     [0, 0],
                                                                     {33:{3:6, 7:0}}],
-                                                                   [True, False, {3:4, 7:0}]
+                                                                   [False, False, {3:4, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN2',
@@ -233,7 +233,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     [0, 0],
                                                                     [0, 0],
                                                                     {33:{3:6, 7:0}}],
-                                                                   [True, False, {3:2, 7:0}]
+                                                                   [False, False, {3:2, 7:0}]
                                                                   )
                                                                  ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
@@ -241,7 +241,7 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
 def test_clear_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
-                  config, pin_name, mock_value, result, mock_i2c):
+                            config, pin_name, mock_value, result, mock_i2c):
     mock_i2c.return_value = mock_value[0]
     mock_i2c_device.return_value = mock_value[1]
     mock_transfer.return_value = mock_value[2]
@@ -249,6 +249,28 @@ def test_clear_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer
     mock_set_write_msg.return_value = mock_value[4]
     gpio_ctrl = EdgePiGPIO(config)
     gpio_ctrl.dict_default_reg_dict = mock_value[5]
-    gpio_ctrl.clear_expander_pin(pin_name)
+    assert gpio_ctrl.clear_expander_pin(pin_name) == result[0]
     assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
     assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
+
+@pytest.mark.parametrize('mock_value, config, pin_name, result', [([0,0,True,False,False],
+                                                                   GpioConfigs.DAC.value,
+                                                                   'AO_EN1',
+                                                                   True),
+                                                                  ([0,0,True,False,True],
+                                                                   GpioConfigs.DAC.value,
+                                                                   'AO_EN1',
+                                                                   False)])
+@patch('edgepi.peripherals.i2c.I2CDevice')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin')
+def test_toggle_expander_pin(mock_clear_expander_pin, mock_set_expander_pin, mock_i2c_device,
+                             mock_value, config, pin_name, result, mock_i2c):
+    mock_i2c.return_value = mock_value[0]
+    mock_i2c_device.return_value = mock_value[1]
+    mock_set_expander_pin.return_value = mock_value[2]
+    mock_clear_expander_pin.return_value = mock_value[3]
+    gpio_ctrl = EdgePiGPIO(config)
+    gpio_ctrl.dict_pin[pin_name].is_high = mock_value[4]
+    gpio_ctrl.toggle_expander_pin(pin_name)
+    assert gpio_ctrl.dict_pin[pin_name].is_high == result
