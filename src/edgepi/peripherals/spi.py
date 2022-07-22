@@ -25,8 +25,9 @@ class SpiDevice:
         bits_per_word: int = 8,
         extra_flags: int = 0,
     ):
+        self.devpath = f"/dev/spidev{bus_num}.{dev_id}"
         self.spi = SPI(
-            f"/dev/spidev{bus_num}.{dev_id}",
+            self.devpath,
             mode,
             max_speed,
             bit_order,

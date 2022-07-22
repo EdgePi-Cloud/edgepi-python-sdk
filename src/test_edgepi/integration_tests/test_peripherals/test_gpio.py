@@ -1,4 +1,4 @@
-"""unit tests for gpio.py module"""
+"""integration tests for gpio.py module"""
 
 import pytest
 from edgepi.peripherals.gpio import GpioDevice
@@ -13,8 +13,7 @@ from edgepi.peripherals.gpio import GpioDevice
         ("/dev/gpiochip0", 13, "out", "pull_down"),
     ],
 )
-def test_gpio_init_param(mocker, fd, pin_num, pin_dir, pin_bias):
-    mocker.patch("edgepi.peripherals.gpio.GPIO")
+def test_gpio_init_param(fd, pin_num, pin_dir, pin_bias):
     gpio = GpioDevice(pin_num, pin_dir, pin_bias)
     assert gpio.fd == fd
     assert gpio.pin_num == pin_num
