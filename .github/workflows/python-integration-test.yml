@@ -1,18 +1,18 @@
 # This workflow will install Python dependencies, run tests using PyTest.
 
-name: PyTest
+name: PyTest Integration Test
 
 on:
   push:
     branches:
-      - 'dev'
+      - 'staging'
   pull_request:
     branches:
-      - 'dev'
+      - 'staging'
 
 jobs:
   test:
-    name: Test on Self-Hosted
+    name: Self-Hosted Integration Test
     runs-on: self-hosted
     strategy:
       fail-fast: false
@@ -32,4 +32,4 @@ jobs:
     - name: Test with pytest
       run: |
         source venv_test/bin/activate
-        pytest ./src/test_edgepi/unit_tests
+        pytest ./src/test_edgepi/integration_tests

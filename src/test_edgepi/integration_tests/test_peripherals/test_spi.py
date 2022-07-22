@@ -1,4 +1,4 @@
-"""unit tests for spi.py module"""
+"""integration tests for spi.py module"""
 
 import pytest
 from edgepi.peripherals.spi import SpiDevice
@@ -13,7 +13,6 @@ from edgepi.peripherals.spi import SpiDevice
         (3, 6, "/dev/spidev6.3"),
     ],
 )
-def test_check_range(mocker, dev_id, bus_num, result):
-    mocker.patch("edgepi.peripherals.spi.SPI")
+def test_check_range(dev_id, bus_num, result):
     spi = SpiDevice(bus_num, dev_id)
-    assert spi.devpath == result
+    assert spi.spi.devpath == result
