@@ -65,10 +65,7 @@ class EdgePiGPIO(I2CDevice):
             dev_address = pin_info_list[0].address
             default_reg_dict = get_default_values(default_reg_dict, pin_info_list)
 
-            for reg_addx, entry in default_reg_dict.items():
-                if entry['is_changed']:
-                    msg_write = self.set_write_msg(reg_addx, [entry['value']])
-                    self.transfer(dev_address, msg_write)
+            self.__write_changed_values(default_reg_dict, dev_address)
 
             for reg_address, value in default_reg_dict.items():
                 list_read_msg = self.set_read_msg(reg_address, [value])
