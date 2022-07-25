@@ -1,7 +1,11 @@
 """ Unit tests for edgepi_dac module """
 
 from copy import deepcopy
+from unittest import mock
 from unittest.mock import call
+import sys
+if sys.platform != 'linux':
+    sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.dac.dac_constants import (
@@ -131,6 +135,7 @@ def test_dac_read_voltage(mocker, analog_out, read_data, dac):
 )
 def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name):
     # can't mock entire GPIO class here because need to access its methods
+    mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
     mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")

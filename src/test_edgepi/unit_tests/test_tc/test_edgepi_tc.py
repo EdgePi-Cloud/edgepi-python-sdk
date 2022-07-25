@@ -2,7 +2,11 @@
 
 
 from copy import deepcopy
+from unittest import mock
 from unittest.mock import call, patch
+import sys
+if sys.platform != 'linux':
+    sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.tc.edgepi_tc import EdgePiTC
