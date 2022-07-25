@@ -92,8 +92,8 @@ class I2cPinInfo:
     is_high: bool = None
     is_out: bool = None
 
-_list_of_DAC_gpios = ['AO_EN1', 'AO_EN4', 'AO_EN3', 'AO_EN2',
-                      'AO_EN5', 'AO_EN6', 'AO_EN7', 'AO_EN8', 'DAC_GAIN']
+_list_of_DAC_gpios = ['AO_EN8', 'AO_EN7', 'AO_EN6', 'AO_EN5',
+                      'AO_EN2', 'AO_EN3', 'AO_EN4', 'AO_EN1', 'DAC_GAIN']
 _list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
 _list_of_RTD_gpios = ['RTD_EN']
 _list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4',
