@@ -4,8 +4,10 @@ from copy import deepcopy
 from unittest import mock
 from unittest.mock import call
 import sys
-if sys.platform != 'linux':
-    sys.modules['periphery'] = mock.MagicMock()
+
+sys.modules['periphery'] = mock.MagicMock()
+
+# pylint: disable=wrong-import-position
 
 import pytest
 from edgepi.dac.dac_constants import (
@@ -15,7 +17,6 @@ from edgepi.dac.dac_constants import (
     EdgePiDacCom as COM,
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
-
 
 @pytest.fixture(name="dac")
 def fixture_test_dac(mocker):
