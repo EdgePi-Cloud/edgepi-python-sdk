@@ -164,3 +164,17 @@ def _format_register_map(reg_map: dict) -> dict:
     """
     _convert_values_to_dict(reg_map)
     _add_change_flags(reg_map)
+
+def convert_dict_to_values(reg_dict: dict = None):
+    '''
+    Function to re-formate register dictionary back to original form
+    In:
+        reg_dict (dict): register address to value and is_changed flag
+                        {register_address : {'value' : value(int), is_changed : bool}}
+        Returns:
+            reg_dict (dict): register address to value
+                             {register_address : value}
+    '''
+    for reg_addx, entry in reg_dict.items():
+        reg_dict[reg_addx] = entry['value']
+    return reg_dict

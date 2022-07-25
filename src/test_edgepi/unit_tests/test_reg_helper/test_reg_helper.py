@@ -8,6 +8,7 @@ from edgepi.reg_helper.reg_helper import (
     _add_change_flags,
     apply_opcodes,
     _convert_values_to_dict,
+    convert_dict_to_values,
 )
 from edgepi.tc.tc_constants import (
     AvgMode,
@@ -381,3 +382,11 @@ def test_convert_values_to_dict(reg_map):
         assert (
             reg_map[key]["value"] == map_copy[key]
         )  # assert value field in dict, and reg_value copied correctly
+
+@pytest.mark.parametrize('reg_dict, result',[({3:{'value':32,'is_changed':False}}, {3:32}),
+                                             ({3:{'value':32,'is_changed':True}}, {3:32}),
+                                             ({3:{'value':32,'is_changed':False},
+                                               5:{'value':11,'is_changed':True}}, {3:32, 5:11})])
+def test_convert_dict_to_values(reg_dict, result):
+    reg_dict = convert_dict_to_values(reg_dict)
+    assert reg_dict == result
