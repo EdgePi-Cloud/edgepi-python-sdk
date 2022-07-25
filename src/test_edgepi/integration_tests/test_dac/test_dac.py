@@ -23,6 +23,14 @@ def fixture_test_edgepi_dac():
     return EdgePiDAC()
 
 
+# pylint: disable=protected-access
+
+
+def test_dac_init(dac):
+    for i in range(NUM_PINS):
+        assert not dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[i + 1].value].is_high
+
+
 @pytest.mark.parametrize(
     "analog_out, voltage, raises",
     [
@@ -61,9 +69,13 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
         dac.write_voltage(analog_out, voltage)
         assert dac.read_voltage(analog_out) == voltage
+        if voltage > 0:
+            assert dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[analog_out].value].is_high
+        else:
+            assert not dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[analog_out].value].is_high
 
 
-# TODO: test actual A/D OUT pin voltages on write via ADC module
+# TODO: test actual A/D OUT pin voltages on writes via ADC module
 
 
 def test_dac_reset(dac):
@@ -78,3 +90,4 @@ def test_dac_reset(dac):
 
     for i in range(NUM_PINS):
         assert dac.read_voltage(i + 1) == 0
+        assert not dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[i + 1].value].is_high

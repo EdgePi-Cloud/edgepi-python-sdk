@@ -47,7 +47,7 @@ class EdgePiDAC(spi):
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
         self.gpio.set_expander_default()
 
-        self._dac_power_state = {
+        self.__dac_power_state = {
             CH.DAC7.value: PowerMode.NORMAL.value,
             CH.DAC6.value: PowerMode.NORMAL.value,
             CH.DAC5.value: PowerMode.NORMAL.value,
@@ -69,7 +69,7 @@ class EdgePiDAC(spi):
     def write_voltage(self, analog_out: int, voltage: float):
         """
         Write a voltage value to an analog out pin. Voltage will be continuously
-        transmitted throught he analog out pin until a 0 V value is written to it.
+        transmitted throught the analog out pin until a 0 V value is written to it.
 
         Args:
             analog_out (int): A/D_OUT pin number to write a voltage value to.
@@ -101,8 +101,8 @@ class EdgePiDAC(spi):
         """
         self.dac_ops.check_range(analog_out, 1, len(CH))
         dac_ch = analog_out - 1  # analog_out pins numbered 1-8, DAC channels 0-7
-        self._dac_power_state[dac_ch] = power_mode.value
-        power_code = self.dac_ops.generate_power_code(self._dac_power_state.values())
+        self.__dac_power_state[dac_ch] = power_mode.value
+        power_code = self.dac_ops.generate_power_code(self.__dac_power_state.values())
         cmd = self.dac_ops.combine_command(COM.COM_POWER_DOWN_OP.value, NULL_BITS, power_code)
         self.transfer(cmd)
 

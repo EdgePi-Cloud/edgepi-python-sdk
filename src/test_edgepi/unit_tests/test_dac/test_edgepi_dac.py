@@ -71,7 +71,7 @@ _default_power_modes = {
     ],
 )
 def test_dac_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
-    mocker.patch.object(dac, "_dac_power_state", power_modes)
+    mocker.patch.object(dac, "_EdgePiDAC__dac_power_state", power_modes)
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.set_power_mode(analog_out, mode)
     mock_transfer.assert_called_once_with(expected)
