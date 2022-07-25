@@ -2,10 +2,10 @@
 Hardware-dependent integration tests for DAC
 
 Requirements:
-    - SPI capable device
+    - SPI, I2C capable device
     - AD5676 DAC
+    - EdgePi analog out (AO_ENx) GPIO pin mapping (see edgepi.gpio)
 """
-# TODO: update hardware requirements after adding GPIO
 
 from contextlib import nullcontext as does_not_raise
 
@@ -57,7 +57,7 @@ def fixture_test_edgepi_dac():
         (9, 1.1, pytest.raises(ValueError)),
     ],
 )
-def test_write_and_read_voltages(analog_out, voltage, raises, dac):
+def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
         dac.write_voltage(analog_out, voltage)
         assert dac.read_voltage(analog_out) == voltage
@@ -66,7 +66,7 @@ def test_write_and_read_voltages(analog_out, voltage, raises, dac):
 # TODO: test actual A/D OUT pin voltages on write via ADC module
 
 
-def test_reset(dac):
+def test_dac_reset(dac):
     voltage = 2.2
     for i in range(NUM_PINS):
         dac.write_voltage(i + 1, voltage)

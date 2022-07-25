@@ -4,10 +4,10 @@
 from enum import Enum
 
 
-DAC_PRECISION = 3   # decimal place precision for voltage conversions
-SW_RESET = 0x1234   # software reset command data bits
+DAC_PRECISION = 3  # decimal place precision for voltage conversions
+SW_RESET = 0x1234  # software reset command data bits
 NULL_BITS = 0x0
-READ_WRITE_SIZE = 3 # size of DAC read/write in bytes
+READ_WRITE_SIZE = 3  # size of DAC read/write in bytes
 
 
 class EdgePiDacCom(Enum):
@@ -69,15 +69,14 @@ class PowerMode(Enum):
     POWER_DOWN_3_STATE = 0x3
 
 
-class GainMode(Enum):
-    """
-    EdgePi DAC output amplifier gain modes
+class AOPins(Enum):
+    """Analog/Digital out gpio pin names"""
 
-    Attributes:
-        NO_AMP: amplifier gain = 1
-
-        DOUBLE_AMP: amplifier gain = 2
-    """
-
-    SINGLE = 0x0
-    DOUBLE = 0x4
+    AO_EN1 = "AO_EN1"
+    AO_EN2 = "AO_EN2"
+    AO_EN3 = "AO_EN3"
+    AO_EN4 = "AO_EN4"
+    AO_EN5 = "AO_EN5"
+    AO_EN6 = "AO_EN6"
+    AO_EN7 = "AO_EN7"
+    AO_EN8 = "AO_EN8"

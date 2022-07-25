@@ -5,7 +5,7 @@ from unittest.mock import call
 
 import pytest
 from edgepi.dac.dac_constants import (
-    GainMode,
+    AOPins,
     PowerMode,
     EdgePiDacChannel as CH,
     EdgePiDacCom as COM,
@@ -16,6 +16,7 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 @pytest.fixture(name="dac")
 def fixture_test_dac(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     yield EdgePiDAC()
 
 
@@ -69,27 +70,14 @@ _default_power_modes = {
         ),
     ],
 )
-def test_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
-    mocker.patch.object(dac, "_dac_state", power_modes)
+def test_dac_set_power_mode(mocker, power_modes, analog_out, mode, expected, dac):
+    mocker.patch.object(dac, "_dac_power_state", power_modes)
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.set_power_mode(analog_out, mode)
     mock_transfer.assert_called_once_with(expected)
 
 
-@pytest.mark.parametrize(
-    "gain_mode, expected",
-    [
-        (GainMode.SINGLE, [112, 0, 0]),
-        (GainMode.DOUBLE, [112, 0, 4]),
-    ],
-)
-def test_set_gain_mode(mocker, gain_mode, expected, dac):
-    mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
-    dac.set_gain_mode(gain_mode)
-    mock_transfer.assert_called_once_with(expected)
-
-
-def test_reset(mocker, dac):
+def test_dac_reset(mocker, dac):
     mock_transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
     dac.reset()
     mock_transfer.assert_called_once_with([96, 18, 52])
@@ -108,7 +96,7 @@ def test_reset(mocker, dac):
         (1, [0, 0, 0]),
     ],
 )
-def test_read_voltage(mocker, analog_out, read_data, dac):
+def test_dac_read_voltage(mocker, analog_out, read_data, dac):
 
     mock_transfer = mocker.patch(
         "edgepi.peripherals.spi.SpiDevice.transfer", return_value=read_data
@@ -118,3 +106,43 @@ def test_read_voltage(mocker, analog_out, read_data, dac):
     dac.read_voltage(analog_out)
     write_calls = [call([byte_1, 0, 0]), call([0, 0, 0])]
     mock_transfer.assert_has_calls(write_calls)
+
+
+@pytest.mark.parametrize(
+    "analog_out, pin_name, voltage, mock_name",
+    [
+        (1, AOPins.AO_EN1.value, 1.0, "mock_set"),
+        (2, AOPins.AO_EN2.value, 1.0, "mock_set"),
+        (3, AOPins.AO_EN3.value, 1.0, "mock_set"),
+        (4, AOPins.AO_EN4.value, 1.0, "mock_set"),
+        (5, AOPins.AO_EN5.value, 1.0, "mock_set"),
+        (6, AOPins.AO_EN6.value, 1.0, "mock_set"),
+        (7, AOPins.AO_EN7.value, 1.0, "mock_set"),
+        (8, AOPins.AO_EN8.value, 1.0, "mock_set"),
+        (1, AOPins.AO_EN1.value, 0, "mock_clear"),
+        (2, AOPins.AO_EN2.value, 0, "mock_clear"),
+        (3, AOPins.AO_EN3.value, 0, "mock_clear"),
+        (4, AOPins.AO_EN4.value, 0, "mock_clear"),
+        (5, AOPins.AO_EN5.value, 0, "mock_clear"),
+        (6, AOPins.AO_EN6.value, 0, "mock_clear"),
+        (7, AOPins.AO_EN7.value, 0, "mock_clear"),
+        (8, AOPins.AO_EN8.value, 0, "mock_clear"),
+    ],
+)
+def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name):
+    # can't mock entire GPIO class here because need to access its methods
+    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
+    mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
+    # pylint: disable=protected-access
+    dac = EdgePiDAC()
+    dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
+    # check correct clause is entered depending on voltage written
+    if voltage > 0:
+        mock_set.assert_called_with(pin_name)
+        mock_set.name = "mock_set"
+        assert mock_set.name == mock_name
+    else:
+        mock_clear.assert_called_with(pin_name)
+        mock_clear.name = "mock_clear"
+        assert mock_clear.name == mock_name

@@ -28,7 +28,7 @@ def fixture_test_dac_ops():
         ([-111, -2222], True),
     ],
 )
-def test_check_for_int(sample, result, dac_ops):
+def test_dac_check_for_int(sample, result, dac_ops):
     assert dac_ops.check_for_int(sample) == result
 
 
@@ -41,7 +41,7 @@ def test_check_for_int(sample, result, dac_ops):
         ([-1, -2.22], ValueError),
     ],
 )
-def test_check_for_int_exception(sample, error, dac_ops):
+def test_dac_check_for_int_exception(sample, error, dac_ops):
     with pytest.raises(Exception) as err:
         dac_ops.check_for_int(sample)
     assert err.type is error
@@ -51,7 +51,7 @@ def test_check_for_int_exception(sample, error, dac_ops):
     "range_min, target, range_max, result",
     [(0, 0, 10, True), (0, 10, 10, True), (0, 5, 10, True), (0.5, 1, 1.1, True)],
 )
-def test_check_range(range_min, target, range_max, result, dac_ops):
+def test_dac_check_range(range_min, target, range_max, result, dac_ops):
     assert dac_ops.check_range(target, range_min, range_max) == result
 
 
@@ -64,7 +64,7 @@ def test_check_range(range_min, target, range_max, result, dac_ops):
         (0, 65536, CALIB_CONSTS.RANGE.value, ValueError),
     ],
 )
-def test_check_range_raises(range_min, target, range_max, error, dac_ops):
+def test_dac_check_range_raises(range_min, target, range_max, error, dac_ops):
     with pytest.raises(Exception) as err:
         dac_ops.check_range(target, range_min, range_max)
     assert err.type is error
@@ -78,7 +78,7 @@ def test_check_range_raises(range_min, target, range_max, error, dac_ops):
         (3, 3, 1000, [51, 3, 232]),
     ],
 )
-def test_combine_command(a, b, c, d, dac_ops):
+def test_dac_combine_command(a, b, c, d, dac_ops):
     # pylint: disable=invalid-name
     assert dac_ops.combine_command(a, b, c) == d
 
@@ -87,7 +87,7 @@ def test_combine_command(a, b, c, d, dac_ops):
     "a, b, c",
     [(1, 1000, [49, 3, 232]), (0, 1000, [48, 3, 232]), (3, 1000, [51, 3, 232])],
 )
-def test_generate_write_and_update_command(a, b, c, dac_ops):
+def test_dac_generate_write_and_update_command(a, b, c, dac_ops):
     # pylint: disable=invalid-name
     assert dac_ops.generate_write_and_update_command(a, b) == c
 
@@ -101,7 +101,7 @@ def test_generate_write_and_update_command(a, b, c, dac_ops):
 @pytest.mark.parametrize(
     "ch, expected, result", [(1, 2.345, 30030), (0, 2.345, 30030), (3, 2.345, 30030)]
 )
-def test_voltage_to_code(ch, expected, result, dac_ops):
+def test_dac_voltage_to_code(ch, expected, result, dac_ops):
     assert dac_ops.voltage_to_code(ch, expected) == result
 
 
@@ -113,7 +113,7 @@ def test_voltage_to_code(ch, expected, result, dac_ops):
         (3, 30030, 2.345),
     ],
 )
-def test_code_to_voltage(ch, code, result, dac_ops):
+def test_dac_code_to_voltage(ch, code, result, dac_ops):
     assert dac_ops.code_to_voltage(ch, code) == result
 
 
@@ -125,7 +125,7 @@ def test_code_to_voltage(ch, code, result, dac_ops):
         ([0, 0x75, 0x30], 30000),
     ],
 )
-def test_extract_read_data(read_code, code_val, dac_ops):
+def test_dac_extract_read_data(read_code, code_val, dac_ops):
     assert dac_ops.extract_read_data(read_code) == code_val
 
 
@@ -228,7 +228,7 @@ def test_extract_read_data(read_code, code_val, dac_ops):
         ),
     ],
 )
-def test_generate_power_code(dac_state, expected, dac_ops):
+def test_dac_generate_power_code(dac_state, expected, dac_ops):
     assert dac_ops.generate_power_code(dac_state) == expected
 
 
@@ -245,5 +245,5 @@ def test_generate_power_code(dac_state, expected, dac_ops):
         (4.3455, False),
     ],
 )
-def test_validate_voltage_precision(voltage, result, dac_ops):
+def test_dac_validate_voltage_precision(voltage, result, dac_ops):
     assert dac_ops.validate_voltage_precision(voltage) == result
