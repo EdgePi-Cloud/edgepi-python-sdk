@@ -10,10 +10,11 @@ Requirements:
 from contextlib import nullcontext as does_not_raise
 
 import pytest
+from edgepi.dac.dac_constants import UPPER_LIMIT
 from edgepi.dac.edgepi_dac import EdgePiDAC
 
 
-UPPER_VOLT_LIMIT = 5.117  # upper code limit with 3 dec place precision
+UPPER_VOLT_LIMIT = UPPER_LIMIT  # upper code limit with 3 dec place precision
 LOWER_VOLT_LIMIT = 0  # lower code limit
 NUM_PINS = 8
 

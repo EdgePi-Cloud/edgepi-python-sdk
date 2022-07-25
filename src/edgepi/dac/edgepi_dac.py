@@ -10,6 +10,7 @@ from edgepi.dac.dac_constants import (
     NULL_BITS,
     SW_RESET,
     DAC_PRECISION,
+    UPPER_LIMIT,
     PowerMode,
     EdgePiDacChannel as CH,
     EdgePiDacCom as COM,
@@ -83,6 +84,7 @@ class EdgePiDAC(spi):
         if not self.dac_ops.validate_voltage_precision(voltage):
             raise ValueError(f"DAC voltage writes currently support {DAC_PRECISION} decimal places")
         dac_ch = analog_out - 1
+        self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
         # update DAC register
         self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
