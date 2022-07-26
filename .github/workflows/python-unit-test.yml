@@ -43,6 +43,7 @@ jobs:
           filename: test_cov/coverage.xml
           badge: true
           format: markdown
+          hide_complexity: true
           indicators: true
           output: both
       - name: Add Coverage PR Comment
