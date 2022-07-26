@@ -36,4 +36,12 @@ jobs:
       - name: Test with pytest
         run: |
           source venv_test/bin/activate
-          pytest ./src/test_edgepi/unit_tests
+          pytest ./src/test_edgepi/unit_tests --cov --cov-report=xml
+      - name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.2.0
+        with:
+          filename: test_cov/coverage.xml
+          badge: true
+          format: markdown
+          indicators: true
+          output: console
