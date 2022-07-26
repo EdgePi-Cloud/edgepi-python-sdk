@@ -8,6 +8,7 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 # pylint: disable=wrong-import-position
+# pylint: disable=protected-access
 
 import pytest
 from edgepi.dac.dac_constants import (
@@ -140,7 +141,6 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name)
     mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
     mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
-    # pylint: disable=protected-access
     dac = EdgePiDAC()
     dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
     # check correct clause is entered depending on voltage written
