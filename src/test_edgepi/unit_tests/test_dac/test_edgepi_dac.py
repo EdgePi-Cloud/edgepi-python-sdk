@@ -152,3 +152,19 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name)
         mock_clear.assert_called_with(pin_name)
         mock_clear.name = "mock_clear"
         assert mock_clear.name == mock_name
+
+
+@pytest.mark.parametrize('analog_out, voltage', [
+    (1, -0.1),
+    (2, -0.1),
+    (3, -0.1),
+    (4, -0.1),
+    (5, -0.1),
+    (6, -0.1),
+    (7, -0.1),
+    (8, -0.1),
+])
+def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
+    with pytest.raises(ValueError) as err:
+        dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
+        assert err.value == "voltage cannot be negative"

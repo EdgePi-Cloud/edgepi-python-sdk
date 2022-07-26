@@ -44,6 +44,9 @@ class EdgePiDacChannel(Enum):
     DAC7 = 0x7
 
 
+NUM_PINS = len(EdgePiDacChannel)
+
+
 class EdgePiDacCalibrationConstants(Enum):
     """EdgePi DAC calibration constants"""
 
