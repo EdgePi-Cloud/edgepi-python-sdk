@@ -1,5 +1,8 @@
 # edgepi-python-sdk
-
+---
+![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-unit-test.yml/badge.svg)
+![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-lint.yml/badge.svg)
+---
 ## Develop Environment Setup
 Two separate virtual environment is needed.
 1. venv_build: building environement where the package is compiled and published. import requirements_build.txt for pip dependencies.
