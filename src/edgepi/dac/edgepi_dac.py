@@ -10,7 +10,6 @@ from edgepi.dac.dac_constants import (
     NULL_BITS,
     NUM_PINS,
     SW_RESET,
-    DAC_PRECISION,
     UPPER_LIMIT,
     PowerMode,
     EdgePiDacChannel as CH,
@@ -83,6 +82,7 @@ class EdgePiDAC(spi):
         else:
             raise ValueError("voltage cannot be negative")
 
+    # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: int, voltage: float):
         """
         Write a voltage value to an analog out pin. Voltage will be continuously
@@ -97,21 +97,23 @@ class EdgePiDAC(spi):
         Raises:
             ValueError: if voltage has more decimal places than DAC accuracy limit
         """
-        if not self.dac_ops.validate_voltage_precision(voltage):
-            raise ValueError(f"DAC voltage writes currently support {DAC_PRECISION} decimal places")
         self.dac_ops.check_range(analog_out, 1, NUM_PINS)
         self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
         dac_ch = self.__analog_out_to_dac_ch[analog_out]
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
+        print(code)
         # update DAC register
         self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
         # send voltage to analog out pin
         self.__send_to_gpio_pins(analog_out, voltage)
+        return code
 
     def set_power_mode(self, analog_out: int, power_mode: PowerMode):
         """
         Set power mode for individual DAC channels to either normal power consumption,
         or low power consumption modes.
+
+        For example, this may be of use when no constant power source available.
 
         Args:
             analog_out (int): the analog out pin whose power mode will be changed
@@ -135,6 +137,7 @@ class EdgePiDAC(spi):
         # return gpio pins to low
         self.gpio.set_expander_default()
 
+    # TODO: rename this
     def read_voltage(self, analog_out: int) -> float:
         """
         Read voltage from the DAC channel corresponding to analog out pin

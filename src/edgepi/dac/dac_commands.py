@@ -1,10 +1,11 @@
 """ Command class and methods for DAC devices """
 
 import logging
+from decimal import Decimal
 from bitstring import Bits, pack
 from edgepi.dac.dac_constants import (
+    NUM_PINS,
     READ_WRITE_SIZE,
-    DAC_PRECISION,
     EdgePiDacChannel as CH,
     EdgePiDacCom as COMMAND,
     EdgePiDacCalibrationConstants as CALIB_CONSTS,
@@ -28,22 +29,8 @@ class DACCommands:
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
-    @staticmethod
-    def validate_voltage_precision(voltage: float) -> bool:
-        """
-        Verifies the voltage value meets DAC precision constraints. DAC is currently
-        accurate to the mV.
-
-        Args:
-            voltage (float): voltage value
-
-        Returns:
-            bool: True if voltage value has at most DAC_PRECISION decimal places
-        """
-        return len(str(float(voltage)).split(".")[1]) <= DAC_PRECISION
-
     # TODO: change the formula according to calibration if needed
-    def voltage_to_code(self, ch: int, expected: float) -> int:
+    def voltage_to_code(self, ch: int, expected: Decimal) -> int:
         """
         Convert a voltage to binary code value
 
@@ -56,10 +43,10 @@ class DACCommands:
             int: 16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
-        self.check_range(ch, 0, len(CH) - 1)
+        self.check_range(ch, 0, NUM_PINS - 1)
         code = (
             (
-                (expected + self.dacs_w_calib_consts_list[ch].offset)
+                (Decimal(expected) + self.dacs_w_calib_consts_list[ch].offset)
                 / self.dacs_w_calib_consts_list[ch].gain
             )
             + self.dach_w_calib_const.offset
@@ -116,7 +103,7 @@ class DACCommands:
         amp_offset = self.dacs_w_calib_consts_list[ch].offset
         voltage = (((code * dac_gain_err) - dac_offset_err) * amp_gain) - amp_offset
         _logger.debug(f"code_to_voltage: code {hex(code)} = {voltage} V")
-        return round(voltage, DAC_PRECISION)
+        return Decimal(voltage)
 
     @staticmethod
     # pylint: disable=inconsistent-return-statements

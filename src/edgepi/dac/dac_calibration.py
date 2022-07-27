@@ -2,6 +2,7 @@
 
 
 from dataclasses import dataclass
+from decimal import Decimal
 
 
 # TODO: need to combine this calibration dataclass into one to avoid confusion.
@@ -10,16 +11,16 @@ from dataclasses import dataclass
 class DAChWCalibConst:
     """Calibration constants for DAC error values"""
 
-    gain: float = 0
-    offset: float = 0
+    gain: Decimal = Decimal(0)
+    offset: Decimal = Decimal(0)
 
 
 @dataclass
 class DACsWCalibConst:
     """Calibration constants for DAC amplifier values"""
 
-    gain: float = 2.5
-    offset: float = 0
+    gain: Decimal = Decimal(2.5)
+    offset: Decimal = Decimal(0)
 
 
 # TODO: add functions/classes for calibration
