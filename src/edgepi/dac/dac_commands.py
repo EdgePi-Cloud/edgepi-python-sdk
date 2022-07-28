@@ -1,7 +1,6 @@
 """ Command class and methods for DAC devices """
 
 import logging
-from decimal import Decimal
 from bitstring import Bits, pack
 from edgepi.dac.dac_constants import (
     NUM_PINS,
@@ -29,8 +28,23 @@ class DACCommands:
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
+    def __voltage_to_float_code(self, ch: int, expected: float):
+        """Convert a voltage to full precision binary code value"""
+        float_code = (
+            (
+                (expected + self.dacs_w_calib_consts_list[ch].offset)
+                / self.dacs_w_calib_consts_list[ch].gain
+            )
+            + self.dach_w_calib_const.offset
+        ) / (
+            (CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value)
+            + self.dach_w_calib_const.gain
+        )
+        _logger.debug(f"Full code generated {float_code}")
+        return float_code
+
     # TODO: change the formula according to calibration if needed
-    def voltage_to_code(self, ch: int, expected: Decimal) -> int:
+    def voltage_to_code(self, ch: int, expected: float) -> int:
         """
         Convert a voltage to binary code value
 
@@ -44,18 +58,10 @@ class DACCommands:
         """
         # DAC channels are 0 indexed
         self.check_range(ch, 0, NUM_PINS - 1)
-        code = (
-            (
-                (Decimal(expected) + self.dacs_w_calib_consts_list[ch].offset)
-                / self.dacs_w_calib_consts_list[ch].gain
-            )
-            + self.dach_w_calib_const.offset
-        ) / (
-            (CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value)
-            + self.dach_w_calib_const.gain
-        )
-        _logger.debug(f"Code generated {int(code)}")
-        return int(code)
+        float_code = self.__voltage_to_float_code(ch, expected)
+        _logger.debug(f"Int code generated {int(float_code)}")
+        # DAC only accepts int values, round to nearest int
+        return round(float_code)
 
     @staticmethod
     def extract_read_data(read_code: list) -> int:
@@ -103,7 +109,7 @@ class DACCommands:
         amp_offset = self.dacs_w_calib_consts_list[ch].offset
         voltage = (((code * dac_gain_err) - dac_offset_err) * amp_gain) - amp_offset
         _logger.debug(f"code_to_voltage: code {hex(code)} = {voltage} V")
-        return Decimal(voltage)
+        return voltage
 
     @staticmethod
     # pylint: disable=inconsistent-return-statements

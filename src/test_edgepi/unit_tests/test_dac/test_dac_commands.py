@@ -1,7 +1,6 @@
 """unit test for dac module"""
 
 
-from decimal import Decimal
 import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
@@ -115,7 +114,7 @@ def test_dac_voltage_to_code(ch, expected, result, dac_ops):
     ],
 )
 def test_dac_code_to_voltage(ch, code, result, dac_ops):
-    assert round(dac_ops.code_to_voltage(ch, code), 3) == round(Decimal(result), 3)
+    assert round(dac_ops.code_to_voltage(ch, code), 3) == round((result), 3)
 
 
 @pytest.mark.parametrize(
@@ -234,9 +233,9 @@ def test_dac_generate_power_code(dac_state, expected, dac_ops):
 
 
 def test_dac_voltage_precisions(dac_ops):
-    """ checking if any mV value between 0-5V raises conversion error """
-    i = Decimal(0)
-    step = Decimal(0.001)
-    while i < Decimal(5.0):
+    """checking if any mV value between 0-5V raises conversion error"""
+    i = 0
+    step = 0.001
+    while i < 5.0:
         dac_ops.voltage_to_code(1, i)
         i += step

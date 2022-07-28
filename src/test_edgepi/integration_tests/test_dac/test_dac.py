@@ -69,7 +69,7 @@ def test_dac_init(dac):
 def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
         dac.write_voltage(analog_out, voltage)
-        assert dac.read_voltage(analog_out) == voltage
+        assert dac.compute_expected_voltage(analog_out) == voltage
         if voltage > 0:
             assert dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[analog_out].value].is_high
         else:
@@ -85,10 +85,10 @@ def test_dac_reset(dac):
         dac.write_voltage(i + 1, voltage)
 
     for i in range(NUM_PINS):
-        assert dac.read_voltage(i + 1) == voltage
+        assert dac.compute_expected_voltage(i + 1) == voltage
 
     dac.reset()
 
     for i in range(NUM_PINS):
-        assert dac.read_voltage(i + 1) == 0
+        assert dac.compute_expected_voltage(i + 1) == 0
         assert not dac.gpio.dict_pin[dac._EdgePiDAC__dac_pin_map[i + 1].value].is_high

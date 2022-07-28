@@ -1,7 +1,6 @@
 """ Constants for DAC device modules """
 
 
-from decimal import Decimal
 from enum import Enum
 
 
@@ -51,7 +50,7 @@ NUM_PINS = len(EdgePiDacChannel)
 class EdgePiDacCalibrationConstants(Enum):
     """EdgePi DAC calibration constants"""
 
-    VOLTAGE_REF = Decimal(2.047)
+    VOLTAGE_REF = 2.047
     RANGE = 65535
 
 

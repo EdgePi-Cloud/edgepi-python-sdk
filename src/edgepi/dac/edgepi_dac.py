@@ -137,16 +137,18 @@ class EdgePiDAC(spi):
         # return gpio pins to low
         self.gpio.set_expander_default()
 
-    # TODO: rename this
-    def read_voltage(self, analog_out: int) -> float:
+    def compute_expected_voltage(self, analog_out: int) -> float:
         """
-        Read voltage from the DAC channel corresponding to analog out pin
+        Computes expected voltage from the DAC channel corresponding to analog out pin.
+        This is not guaranteed to be the voltage of the analog_out pin at the terminal block,
+        nor the voltage being output by the DAC channel. It is a calculation that maps
+        the contents of the DAC channel to a voltage value.
 
         Args:
             analog_out (int): the analog out pin number to read voltage from
 
         Returns:
-            float: the voltage value read from the DAC channel corresponding
+            float: the computed voltage value of the DAC channel corresponding
                 to the selected analog out pin.
         """
         self.dac_ops.check_range(analog_out, 1, NUM_PINS)
