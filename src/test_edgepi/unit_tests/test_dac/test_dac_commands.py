@@ -10,7 +10,15 @@ from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst, DAC_cal
 
 @pytest.fixture(name="dac_ops")
 def fixture_test_dac_ops():
-    dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8, DAC_calib_param)
+    dict_calibration_param = {0 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              1 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              2 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              3 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              4 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              5 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              6 : DAC_calib_param(2.5, 0, 5.0, 0),
+                              7 : DAC_calib_param(2.5, 0, 5.0, 0)}
+    dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8, dict_calibration_param)
     return dac_ops
 
 
