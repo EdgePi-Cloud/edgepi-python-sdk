@@ -5,12 +5,12 @@ import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
-from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
+from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst, DAC_calib_param
 
 
 @pytest.fixture(name="dac_ops")
 def fixture_test_dac_ops():
-    dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8)
+    dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8, DAC_calib_param)
     return dac_ops
 
 

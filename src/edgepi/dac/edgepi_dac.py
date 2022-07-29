@@ -5,7 +5,7 @@ Module for interacting with the EdgePi DAC via SPI.
 
 import logging
 from edgepi.dac.dac_commands import DACCommands
-from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst
+from edgepi.dac.dac_calibration import DAChWCalibConst, DACsWCalibConst, DAC_calib_param, generate_dict_calibration
 from edgepi.dac.dac_constants import (
     NULL_BITS,
     NUM_PINS,
@@ -53,11 +53,16 @@ class EdgePiDAC(spi):
         8: 7,
     }
 
+    # TODO: the calib parameter should be saved in a file in the OS environment and the parameters should be 
+    #       imported by reading the file. This list should be deleted when the reading file is implemented
+    __analog_out_calib_param = [[2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0], 
+                                [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0]]
+
     def __init__(self):
         _logger.info("Initializing DAC Bus")
         super().__init__(bus_num=6, dev_id=3, mode=1, max_speed=1000000)
 
-        self.dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8)
+        self.dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8, generate_dict_calibration(DAC_calib_param, list(self.__analog_out_to_dac_ch.values()), self.__analog_out_calib_param))
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
         self.gpio.set_expander_default()
 
