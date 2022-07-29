@@ -6,7 +6,7 @@ This section will demonstrate how to import the EdgePi Thermcouple module, and u
 
 ### Manual Measurements
 ```
-from edgepi.edgepi_tc import EdgePiTC
+from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import ConvMode
 
 # initialize thermocouple

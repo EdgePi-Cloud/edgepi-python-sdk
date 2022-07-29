@@ -4,6 +4,13 @@
 from enum import Enum
 
 
+DAC_PRECISION = 3  # decimal place precision for voltage conversions
+SW_RESET = 0x1234  # software reset command data bits
+NULL_BITS = 0x0
+READ_WRITE_SIZE = 3  # size of DAC read/write in bytes
+UPPER_LIMIT = 5.0 # upper limit for voltage writes to DAC
+
+
 class EdgePiDacCom(Enum):
     """Commands for EdgePi DAC"""
 
@@ -37,8 +44,43 @@ class EdgePiDacChannel(Enum):
     DAC7 = 0x7
 
 
+NUM_PINS = len(EdgePiDacChannel)
+
+
 class EdgePiDacCalibrationConstants(Enum):
     """EdgePi DAC calibration constants"""
 
     VOLTAGE_REF = 2.047
     RANGE = 65535
+
+
+class PowerMode(Enum):
+    """
+    EdgePi DAC power modes
+
+    Attributes:
+        NORMAL: normal power consumption of 1.1 mA typically
+
+        POWER_DOWN_GROUND: low power consumption, 1 μA typically. DAC output stage
+            connected internally to GND through 1 kΩ resistor.
+
+        POWER_DOWN_3_STATE: low power consumption, 1 μA typically. DAC output stage
+            left open circuited (three-state).
+    """
+
+    NORMAL = 0x0
+    POWER_DOWN_GROUND = 0x1
+    POWER_DOWN_3_STATE = 0x3
+
+
+class AOPins(Enum):
+    """Analog/Digital out gpio pin names"""
+
+    AO_EN1 = "AO_EN1"
+    AO_EN2 = "AO_EN2"
+    AO_EN3 = "AO_EN3"
+    AO_EN4 = "AO_EN4"
+    AO_EN5 = "AO_EN5"
+    AO_EN6 = "AO_EN6"
+    AO_EN7 = "AO_EN7"
+    AO_EN8 = "AO_EN8"

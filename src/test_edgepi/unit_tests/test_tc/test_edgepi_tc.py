@@ -2,7 +2,13 @@
 
 
 from copy import deepcopy
+from unittest import mock
 from unittest.mock import call, patch
+import sys
+
+sys.modules['periphery'] = mock.MagicMock()
+
+# pylint: disable=wrong-import-position
 
 import pytest
 from edgepi.tc.edgepi_tc import EdgePiTC
@@ -28,6 +34,7 @@ from edgepi.tc.tc_constants import (
 from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
 # pylint: disable=protected-access
+
 
 
 @pytest.fixture(name="tc")
