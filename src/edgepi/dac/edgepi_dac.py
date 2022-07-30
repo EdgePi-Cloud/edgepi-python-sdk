@@ -6,8 +6,6 @@ Module for interacting with the EdgePi DAC via SPI.
 import logging
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_calibration import (
-    DAChWCalibConst,
-    DACsWCalibConst,
     DACcalibParam,
     generate_dict_calibration
     )
@@ -69,8 +67,7 @@ class EdgePiDAC(spi):
         _logger.info("Initializing DAC Bus")
         super().__init__(bus_num=6, dev_id=3, mode=1, max_speed=1000000)
 
-        self.dac_ops = DACCommands(DAChWCalibConst, [DACsWCalibConst] * 8,
-                                   generate_dict_calibration(DACcalibParam,
+        self.dac_ops = DACCommands(generate_dict_calibration(DACcalibParam,
                                                              list(
                                                              self.__analog_out_to_dac_ch.values()
                                                              ),

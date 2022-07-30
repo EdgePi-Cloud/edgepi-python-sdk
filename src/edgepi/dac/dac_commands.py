@@ -17,10 +17,8 @@ _logger = logging.getLogger(__name__)
 class DACCommands:
     """Class for representing DAC device commands"""
 
-    def __init__(self, dach_w_calib_const, dacs_w_calib_const, dict_calib_param):
+    def __init__(self, dict_calib_param):
         _logger.info("Initializing DAC Methods")
-        self.dach_w_calib_const = dach_w_calib_const
-        self.dacs_w_calib_consts_list = dacs_w_calib_const
         self.dict_calib_param = dict_calib_param
 
     def generate_write_and_update_command(self, ch: int, data: int) -> list:
