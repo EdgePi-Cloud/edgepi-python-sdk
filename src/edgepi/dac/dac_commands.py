@@ -31,16 +31,9 @@ class DACCommands:
 
     def __voltage_to_float_code(self, ch: int, expected: float):
         """Convert a voltage to full precision binary code value"""
-        float_code = (
-            (
-                (expected + self.dacs_w_calib_consts_list[ch].offset)
-                / self.dacs_w_calib_consts_list[ch].gain
-            )
-            + self.dach_w_calib_const.offset
-        ) / (
-            (CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value)
-            + self.dach_w_calib_const.gain
-        )
+        float_code =(expected + self.dict_calib_param[ch].offset_1) / \
+                    (self.dict_calib_param[ch].gain_1 +
+                    (CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value))
         _logger.debug(f"Full code generated {float_code}")
         return float_code
 
@@ -88,6 +81,13 @@ class DACCommands:
         # DB19 to DB4 DAC register contents. B23 (MSB) is index 0 here.
         return bits[-16:].uint
 
+    def __code_to_float_voltage(self, ch: int, code: int) -> float:
+        """Convert a voltage to full precision binary code value"""
+        voltage = (CALIB_CONSTS.VOLTAGE_REF.value /
+                   CALIB_CONSTS.RANGE.value + self.dict_calib_param[ch].gain_1) *\
+                  code - self.dict_calib_param[ch].offset_1
+        return voltage
+
     def code_to_voltage(self, ch: int, code: int) -> float:
         """
         Convert a 16 bit binary code value to voltage
@@ -100,15 +100,7 @@ class DACCommands:
         Returns:
             float: voltage corresponding to 16 bit binary code
         """
-        # DAC gain/offset errors
-        dac_gain_err = (
-            CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value
-        ) + self.dach_w_calib_const.gain
-        dac_offset_err = self.dach_w_calib_const.offset
-        # amplifier gain/offset for this channel
-        amp_gain = self.dacs_w_calib_consts_list[ch].gain
-        amp_offset = self.dacs_w_calib_consts_list[ch].offset
-        voltage = (((code * dac_gain_err) - dac_offset_err) * amp_gain) - amp_offset
+        voltage = self.__code_to_float_voltage(ch, code)
         _logger.debug(f"code_to_voltage: code {hex(code)} = {voltage} V")
         return voltage
 
