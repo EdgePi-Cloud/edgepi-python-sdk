@@ -6,15 +6,24 @@ from dataclasses import dataclass
 
 @dataclass
 class DACcalibParam:
-    """Calibration constants for DAC"""
+    """
+    Calibration constants for DAC
+    gain_1: gain calibration parameter when internal_gain is disabled
+    offset_1: offset calibration parameter when internal_gain is disabled
 
+    gain_2: gain calibration parameter when internal_gain is enabled
+    offset_2: offset calibration parameter when internal_gain is enabled
+
+    Note: default value of 2.5 and 0 are set, these values will be overwritten
+          during the run-time.
+    """
+    # TODO: add documentation regading how these parameters are provided
     gain_1: float = 2.5
     offset_1: float = 0
 
     gain_2: float = 5.0
     offset_2:float = 0
 
-# TODO: add functions/classes for calibration
 
 def generate_dict_calibration(calib: DACcalibParam = None,
                               list_ch: list = None,

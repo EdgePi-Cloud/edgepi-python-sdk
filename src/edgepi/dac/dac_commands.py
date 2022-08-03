@@ -80,7 +80,7 @@ class DACCommands:
         return bits[-16:].uint
 
     def __code_to_float_voltage(self, ch: int, code: int) -> float:
-        """Convert a voltage to full precision binary code value"""
+        """Convert a voltage to float voltage"""
         voltage = (CALIB_CONSTS.VOLTAGE_REF.value /
                    CALIB_CONSTS.RANGE.value + self.dict_calib_param[ch].gain_1) *\
                   code - self.dict_calib_param[ch].offset_1
