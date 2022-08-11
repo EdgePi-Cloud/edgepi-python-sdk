@@ -68,8 +68,6 @@ class EdgePiADC(SPI):
             `adc1_ch` (ADCChannel): the input voltage channel to measure via ADC1
             `adc2_ch` (ADCChannel): the input voltage channel to measure via ADC2
             `adc1_data_rate` (ADCDataRate1): ADC1 data rate in samples per second
-            `adc1_filter_mode` (FilterMode): ADC1 filter mode. Note this affects data rate.
-                Please refer to module documentation for more information.
             `adc2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
                 Note this affects data rate. Please refer to module documentation
