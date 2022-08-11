@@ -6,7 +6,7 @@ from enum import Enum, unique
 
 
 @unique
-class EdgePiADCOp(Enum):
+class ADCOp(Enum):
     """EdgePi ADC operation codes"""
 
     OP_NOP = 0x00
@@ -28,7 +28,7 @@ class EdgePiADCOp(Enum):
 
 
 @unique
-class EdgePiADCReg(Enum):
+class ADCReg(Enum):
     """EdgePi ADC register addresses"""
 
     REG_ID = 0x00

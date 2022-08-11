@@ -1,6 +1,8 @@
 """ User interface for EdgePi ADC """
 
 
+import logging
+
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -9,10 +11,19 @@ from edgepi.adc.adc_constants import (
     ADCChannel,
     ADCNum,
     ConvMode,
+    ADCReg,
     FilterMode,
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
+from edgepi.utilities.utilities import filter_dict
+
+
+_logger = logging.getLogger(__name__)
+
+
+class ChannelMappingError(ValueError):
+    """Raised when an input channel is mapped to both ADC1 and ADC2"""
 
 
 class EdgePiADC(SPI):
@@ -23,12 +34,30 @@ class EdgePiADC(SPI):
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         self.gpio.set_expander_default()
-        # TODO: other configs
+        # TODO: non-user configs
         # - set gain
         # - MUXP = floating, MUXN = AINCOM
         # - enable CRC mode for checksum -> potentially will allow user
         #   to configure this in set_config if too much overhead.
         # - RTD off by default --> leave default settings for related regs
+
+    def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
+        """
+        Read data from ADC registers, either individually or as a block.
+
+        Args:
+            `start_addx` (ADCReg): address of register to start read at.
+
+            `num_regs`: number of registers to read from start_addx, including
+                start_addx register.
+        """
+        if num_regs < 1:
+            raise ValueError("number of registers to read must be at least 1")
+        code = self.adc_ops.read_register_command(start_addx.value, num_regs)
+        _logger.debug(f"ADC __read_register -> data in: {code}")
+        out = self.transfer(code)
+        _logger.debug(f"ADC __read_register -> data out: {out}")
+        return out
 
     def read_voltage(self, adc: ADCNum):
         """
@@ -54,12 +83,12 @@ class EdgePiADC(SPI):
 
     def set_config(
         self,
-        adc1_ch: ADCChannel,
-        adc2_ch: ADCChannel,
-        adc1_data_rate: ADC1DataRate,
-        adc2_data_rate: ADC2DataRate,
-        filter_mode: FilterMode,
-        conversion_mode: ConvMode,
+        adc1_ch: ADCChannel = None,
+        adc2_ch: ADCChannel = None,
+        adc1_data_rate: ADC1DataRate = None,
+        adc2_data_rate: ADC2DataRate = None,
+        filter_mode: FilterMode = None,
+        conversion_mode: ConvMode = None,
     ):
         """
         Configure ADC settings, either collectively or individually.
@@ -75,3 +104,5 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
                 Note, ADC2 runs only in continuous conversion mode.
         """
+        if adc1_ch is not None and adc1_ch == adc2_ch:
+            raise ChannelMappingError("ADC1 and ADC2 must be assigned different input channels")

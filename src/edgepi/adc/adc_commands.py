@@ -1,7 +1,7 @@
 """ Utility module for ADC commands """
 
 import logging
-from edgepi.adc.adc_constants import EdgePiADCOp as opcode
+from edgepi.adc.adc_constants import ADCOp as opcode
 
 _logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ class ADCCommands:
     def __init__(self):
         _logger.info("Initializing ADC Methods")
 
-    def read_register_command(self, address, num):
+    def read_register_command(self, address: int, num: int):
         """Trigger ADC register read"""
         self.check_for_int([address, num])
         command = [opcode.OP_RREG.value + address, num - 1]
