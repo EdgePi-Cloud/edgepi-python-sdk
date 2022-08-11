@@ -50,6 +50,11 @@ class EdgePiADC(SPI):
 
             `num_regs`: number of registers to read from start_addx, including
                 start_addx register.
+
+        Returns:
+            `list`: a list of integer byte values formatted as
+                [null_byte, null_byte, reg_1_data, reg_2_data,...] where reg_1_data
+                is the data of the register at start_addx.
         """
         if num_regs < 1:
             raise ValueError("number of registers to read must be at least 1")
@@ -57,6 +62,24 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __read_register -> data in: {code}")
         out = self.transfer(code)
         _logger.debug(f"ADC __read_register -> data out: {out}")
+        return out
+
+    def __write_register(self, start_addx: ADCReg, data: list[int]):
+        """
+        Write data to ADC registers, either individually or as a block.
+
+        Args:
+            `start_addx` (ADCReg): address of register to start writing data from.
+
+            `data`: list of int values, where each value represents a byte of data
+                to write to a register.
+        """
+        if len(data) < 1:
+            raise ValueError("number of registers to write to must be at least 1")
+        code = self.adc_ops.write_register_command(start_addx.value, data)
+        _logger.debug(f"ADC __write_register -> data in: {code}")
+        out = self.transfer(code)
+        _logger.debug(f"ADC __write_register -> data out: {out}")
         return out
 
     def read_voltage(self, adc: ADCNum):
