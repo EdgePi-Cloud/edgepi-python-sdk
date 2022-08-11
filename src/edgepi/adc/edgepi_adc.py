@@ -3,6 +3,7 @@
 
 import logging
 
+import bitstring
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -16,7 +17,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.utilities.utilities import filter_dict
+from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 
 _logger = logging.getLogger(__name__)
@@ -104,6 +105,44 @@ class EdgePiADC(SPI):
 
     # TODO: optional -> def read_adc_data_status(self, ADCNum):
 
+    @staticmethod
+    def __get_channel_assign_opcodes(adc1_ch, adc2_ch):
+        """
+        Generates OpCodes for assigning positive multiplexer of either ADC1 or ADC2 to an
+        ADC input channel.
+
+        Returns:
+            `generator`: if not empty, contains OpCode(s) for updating channel assignment
+                for ADC1, ADC2, or both.
+        """
+        if adc1_ch is not None and adc1_ch == adc2_ch:
+            raise ChannelMappingError("ADC1 and ADC2 must be assigned different input channels")
+
+        adc_ch_list = [(adc1_ch, ADCReg.REG_INPMUX), (adc2_ch, ADCReg.REG_ADC2MUX)]
+
+        for adc in adc_ch_list:
+            adc_x_ch = adc[0]
+            if adc_x_ch is not None:
+                adc_x_reg = adc[1]
+                adc_x_ch_bits = bitstring.pack("uint:4, uint:4", adc_x_ch.value, 0).uint
+                yield OpCode(adc_x_ch_bits, adc_x_reg.value, BitMask.HIGH_NIBBLE.value)
+
+    def __config(
+        self,
+        adc1_ch: ADCChannel = None,
+        adc2_ch: ADCChannel = None,
+        adc1_data_rate: ADC1DataRate = None,
+        adc2_data_rate: ADC2DataRate = None,
+        filter_mode: FilterMode = None,
+        conversion_mode: ConvMode = None,
+        checksum_mode=None,
+        gain=None,
+    ):
+        """
+        Configure all ADC settings, either collectively or individually.
+        Warning: users should only use set_config for modifying settings.
+        """
+
     def set_config(
         self,
         adc1_ch: ADCChannel = None,
@@ -114,7 +153,7 @@ class EdgePiADC(SPI):
         conversion_mode: ConvMode = None,
     ):
         """
-        Configure ADC settings, either collectively or individually.
+        Configure user accessible ADC settings, either collectively or individually.
 
         Args:
             `adc1_ch` (ADCChannel): the input voltage channel to measure via ADC1
@@ -127,5 +166,4 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
                 Note, ADC2 runs only in continuous conversion mode.
         """
-        if adc1_ch is not None and adc1_ch == adc2_ch:
-            raise ChannelMappingError("ADC1 and ADC2 must be assigned different input channels")
+        # TODO: get dict of args, pass to __config

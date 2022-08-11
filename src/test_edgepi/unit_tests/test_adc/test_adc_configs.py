@@ -11,7 +11,7 @@ from edgepi.adc.adc_configs import (
     AdcRegMode2,
     AdcRegPower,
 )
-from edgepi.adc.adc_constants import EdgePiADCReg as regs
+from edgepi.adc.adc_constants import ADCReg as regs
 
 
 @pytest.fixture(name="adc_configs")

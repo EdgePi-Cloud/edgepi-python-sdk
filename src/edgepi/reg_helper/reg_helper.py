@@ -13,7 +13,9 @@ Functions:
     apply_opcode(OpCode, int)
 """
 
+
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass(frozen=True)
@@ -23,12 +25,12 @@ class OpCode:
 
     Attributes
     ----------
-    op_code : int
+    `op_code` : int
         the value used to update the register bits relevant to this setting or command.
         Please see below for a practical example on how to define the op_code.
-    reg_address : int
+    `reg_address` : int
         the register's address in the device's register memory map
-    op_mask : int
+    `op_mask` : int
         the value used to clear the register bits whose value will be updated
         when the op_code is applied. Mask bits intended to clear corresponding
         bits in the target value should be assigned a value of 0.
@@ -178,3 +180,9 @@ def convert_dict_to_values(reg_dict: dict = None):
     for reg_addx, entry in reg_dict.items():
         reg_dict[reg_addx] = entry['value']
     return reg_dict
+
+
+class BitMask(Enum):
+    """ Bit/Byte masks for use with OpCodes """
+    LOW_NIBBLE = 0xF0
+    HIGH_NIBBLE = 0x0F
