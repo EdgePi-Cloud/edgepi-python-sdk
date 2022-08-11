@@ -1,6 +1,7 @@
 """ Constants for ADC device modules """
 
 
+from dataclasses import dataclass
 from enum import Enum, unique
 
 
@@ -60,7 +61,7 @@ class EdgePiADCReg(Enum):
 
 
 @unique
-class EdgePiADCChannel(Enum):
+class ADCChannel(Enum):
     """EdgePi ADC channels"""
 
     AIN0 = 0
@@ -74,3 +75,41 @@ class EdgePiADCChannel(Enum):
     AIN8 = 8
     AIN9 = 9
     AINCOM = 10
+
+class ADCNum(Enum):
+    ''' ADS1263 ADC's '''
+    ADC_1 = 1
+    ADC_2 = 2
+
+class ConvMode(Enum):
+    '''
+    ADS1263 conversion modes
+
+    Attributes:
+
+        `PULSE`: ADC1 performs a single conversion upon command
+
+        `CONTINUOUS`: ADC1 peforms conversions continuously
+    '''
+
+class ADC1DataRate(Enum):
+    """ ADS1263 data rates for ADC1 """
+
+class ADC2DataRate(Enum):
+    """ ADS1263 data rates for ADC2 """
+
+class FilterMode(Enum):
+    """ ADC filter modes, for both ADC1 and ADC2 """
+
+class ADCAlarmTypes(Enum):
+    """ ADC1 alarm types """
+
+@dataclass
+class ADCAlarm():
+    """
+    Represents information about the status of ADC1 alarm
+    as indicated by a reading of the STATUS byte.
+    """
+    alarm_type: ADCAlarmTypes
+    at_fault: bool
+    err_msg: str
