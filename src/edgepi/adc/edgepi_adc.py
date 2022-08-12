@@ -18,6 +18,7 @@ from edgepi.adc.adc_constants import (
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict
+from edgepi.reg_helper.reg_helper import apply_opcodes
 
 
 _logger = logging.getLogger(__name__)
@@ -149,9 +150,15 @@ class EdgePiADC(SPI):
         )
         args.append(list(mux_opcodes))
 
-        
-        reg_values = dict(self.__read_registers_to_map())
+        reg_values = self.__read_registers_to_map()
         _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
+
+        # update register values
+        apply_opcodes(reg_values, args)
+        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
+
+        # TODO: write updated reg values to ADC. May be better to have a single write,
+        # as certain configs result in ADC restart.
 
     def set_config(
         self,

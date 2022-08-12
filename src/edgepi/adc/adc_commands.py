@@ -94,6 +94,10 @@ class ADCCommands:
         """
         args = filter_dict(locals(), "self")
 
+        # no multiplexer config to update
+        if all(x is None for x in list(args.values())):
+            return []
+
         if len(args) != len(set(args)):
             raise ChannelMappingError(
                 "ADC1 and ADC2 multiplexers must be assigned different input channels"
