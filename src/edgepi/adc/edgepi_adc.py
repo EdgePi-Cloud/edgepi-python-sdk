@@ -106,7 +106,9 @@ class EdgePiADC(SPI):
     # TODO: optional -> def read_adc_data_status(self, ADCNum):
 
     @staticmethod
-    def __get_channel_assign_opcodes(adc1_ch, adc2_ch):
+    def __get_channel_assign_opcodes(
+        adc_1_mux_p=None, adc_2_mux_p=None, adc_1_mux_n=None, adc_2_mux_n=None
+    ):
         """
         Generates OpCodes for assigning positive multiplexer of either ADC1 or ADC2 to an
         ADC input channel.
@@ -115,17 +117,38 @@ class EdgePiADC(SPI):
             `generator`: if not empty, contains OpCode(s) for updating channel assignment
                 for ADC1, ADC2, or both.
         """
-        if adc1_ch is not None and adc1_ch == adc2_ch:
+        if adc_1_mux_p is not None and adc_1_mux_p == adc_2_mux_p:
             raise ChannelMappingError("ADC1 and ADC2 must be assigned different input channels")
 
-        adc_ch_list = [(adc1_ch, ADCReg.REG_INPMUX), (adc2_ch, ADCReg.REG_ADC2MUX)]
+        adc_mux_regs = {
+            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
+            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
+        }
 
-        for adc in adc_ch_list:
-            adc_x_ch = adc[0]
-            if adc_x_ch is not None:
-                adc_x_reg = adc[1]
-                adc_x_ch_bits = bitstring.pack("uint:4, uint:4", adc_x_ch.value, 0).uint
-                yield OpCode(adc_x_ch_bits, adc_x_reg.value, BitMask.HIGH_NIBBLE.value)
+        for addx, byte in adc_mux_regs.items():
+            mux_p = byte[0]
+            mux_n = byte[1]
+
+            # not updating mux's for this adc_num (no args passed)
+            if mux_p is None and mux_n is None:
+                continue
+            # updating mux_p bits only, mask mux_p bits
+            elif mux_n is None:
+                mask = BitMask.HIGH_NIBBLE
+                # replace None with 0 for building bitstring
+                mux_n = 0
+            # updating mux_n bits only, mask mux_n bits
+            elif mux_p is None:
+                mask = BitMask.LOW_NIBBLE
+                # replace None with 0 for building bitstring
+                mux_p = 0
+            # updating both mux_n and mux_p
+            else:
+                mask = BitMask.BYTE
+
+            adc_x_ch_bits = bitstring.pack("uint:4, uint:4", mux_p, mux_n).uint
+
+            yield OpCode(adc_x_ch_bits, addx.value, mask.value)
 
     def __config(
         self,

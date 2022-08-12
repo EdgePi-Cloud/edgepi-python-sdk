@@ -184,5 +184,6 @@ def convert_dict_to_values(reg_dict: dict = None):
 
 class BitMask(Enum):
     """ Bit/Byte masks for use with OpCodes """
-    LOW_NIBBLE = 0xF0
-    HIGH_NIBBLE = 0x0F
+    LOW_NIBBLE = 0xF0   # overwrite low nibble bits, let high nibble bits pass
+    HIGH_NIBBLE = 0x0F  # overwrite high nibble bits, let low nibble bits pass
+    BYTE = 0x00         # overwrite all bits
