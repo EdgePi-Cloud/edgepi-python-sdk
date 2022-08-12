@@ -3,7 +3,6 @@
 
 import logging
 
-import bitstring
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -17,14 +16,9 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 
 _logger = logging.getLogger(__name__)
-
-
-class ChannelMappingError(ValueError):
-    """Raised when an input channel is mapped to both ADC1 and ADC2"""
 
 
 class EdgePiADC(SPI):
@@ -104,63 +98,6 @@ class EdgePiADC(SPI):
         """
 
     # TODO: optional -> def read_adc_data_status(self, ADCNum):
-
-    @staticmethod
-    def __get_channel_assign_opcodes(
-        adc_1_mux_p: ADCChannel = None,
-        adc_2_mux_p: ADCChannel = None,
-        adc_1_mux_n: ADCChannel = None,
-        adc_2_mux_n: ADCChannel = None,
-    ):
-        """
-        Generates OpCodes for assigning positive and negative multiplexers
-        of either ADC1 or ADC2 to an ADC input channel.
-
-        Args:
-            adc_1_mux_p: input channel to assign to MUXP of ADC1
-            adc_2_mux_p: input channel to assign to MUXP of ADC2
-            adc_1_mux_n: input channel to assign to MUXN of ADC1
-            adc_2_mux_n: input channel to assign to MUXN of ADC2
-
-        Returns:
-            `generator`: if not empty, contains OpCode(s) for updating multiplexer
-                channel assignment for ADC1, ADC2, or both.
-        """
-        # TODO: validation needs to be updated
-        if adc_1_mux_p is not None and adc_1_mux_p == adc_2_mux_p:
-            raise ChannelMappingError(
-                "ADC1 and ADC2 must be assigned different input channels"
-            )
-
-        adc_mux_regs = {
-            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
-            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
-        }
-
-        for addx, byte in adc_mux_regs.items():
-            mux_p = byte[0]
-            mux_n = byte[1]
-
-            # not updating mux's for this adc_num (no args passed)
-            if mux_p is None and mux_n is None:
-                continue
-            # updating mux_p bits only, mask mux_p bits
-            elif mux_n is None:
-                mask = BitMask.HIGH_NIBBLE
-                # replace None with 0 for building bitstring
-                mux_n = 0
-            # updating mux_n bits only, mask mux_n bits
-            elif mux_p is None:
-                mask = BitMask.LOW_NIBBLE
-                # replace None with 0 for building bitstring
-                mux_p = 0
-            # updating both mux_n and mux_p
-            else:
-                mask = BitMask.BYTE
-
-            adc_x_ch_bits = bitstring.pack("uint:4, uint:4", mux_p, mux_n).uint
-
-            yield OpCode(adc_x_ch_bits, addx.value, mask.value)
 
     def __config(
         self,

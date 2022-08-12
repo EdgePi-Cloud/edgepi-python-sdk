@@ -6,25 +6,25 @@ from enum import Enum, unique
 
 
 @unique
-class ADCOp(Enum):
+class ADCComs(Enum):
     """EdgePi ADC operation codes"""
 
-    OP_NOP = 0x00
-    OP_RESET = 0x06
-    OP_START1 = 0x09
-    OP_STOP1 = 0x0A
-    OP_START2 = 0x0C
-    OP_STOP2 = 0x0E
-    OP_RDATA1 = 0x12
-    OP_RDATA2 = 0x14
-    OP_SYOCAL1 = 0x16
-    OP_SYGCAL1 = 0x17
-    OP_SFOCAL1 = 0x19
-    OP_SYOCAL2 = 0x1B
-    OP_SYGCAL2 = 0x1C
-    OP_SFOCAL2 = 0x1E
-    OP_RREG = 0x20
-    OP_WREG = 0x40
+    COM_NOP = 0x00
+    COM_RESET = 0x06
+    COM_START1 = 0x09
+    COM_STOP1 = 0x0A
+    COM_START2 = 0x0C
+    COM_STOP2 = 0x0E
+    COM_RDATA1 = 0x12
+    COM_RDATA2 = 0x14
+    COM_SYOCAL1 = 0x16
+    COM_SYGCAL1 = 0x17
+    COM_SFOCAL1 = 0x19
+    COM_SYOCAL2 = 0x1B
+    COM_SYGCAL2 = 0x1C
+    COM_SFOCAL2 = 0x1E
+    COM_RREG = 0x20
+    COM_WREG = 0x40
 
 
 @unique

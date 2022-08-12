@@ -1,9 +1,19 @@
 """ Utility module for ADC commands """
 
+
 import logging
-from edgepi.adc.adc_constants import ADCOp as opcode
+
+import bitstring
+from edgepi.adc.adc_constants import ADCComs, ADCReg
+from edgepi.reg_helper.reg_helper import OpCode, BitMask
+
 
 _logger = logging.getLogger(__name__)
+
+
+class ChannelMappingError(ValueError):
+    """Raised when an input channel is mapped to both ADC1 and ADC2"""
+
 
 # pylint: disable=logging-too-many-args
 class ADCCommands:
@@ -15,7 +25,7 @@ class ADCCommands:
     def read_register_command(self, address: int, num: int):
         """Trigger ADC register read"""
         self.check_for_int([address, num])
-        command = [opcode.OP_RREG.value + address, num - 1]
+        command = [ADCComs.COM_RREG.value + address, num - 1]
         _logger.debug("Command to send is %s", (command + [255] * num))
         return command + [255] * num
 
@@ -24,24 +34,24 @@ class ADCCommands:
         self.check_for_int([address])
         all(self.check_range(value, 0, 255) for value in values)
         self.check_for_int(values)
-        command = [opcode.OP_WREG.value + address, len(values) - 1]
+        command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         _logger.debug("Command to send is %s", (command + values))
         return command + values
 
     def start_adc1(self):
         """Command to start ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_START1.value]))
-        return [opcode.OP_START1.value]
+        _logger.debug("Command to send is %s", ([ADCComs.COM_START1.value]))
+        return [ADCComs.COM_START1.value]
 
     def stop_adc1(self):
         """Command to stop ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_STOP1.value]))
-        return [opcode.OP_STOP1.value]
+        _logger.debug("Command to send is %s", ([ADCComs.COM_STOP1.value]))
+        return [ADCComs.COM_STOP1.value]
 
     def reset_adc(self):
         """Command to reset ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_RESET.value]))
-        return [opcode.OP_RESET.value]
+        _logger.debug("Command to send is %s", ([ADCComs.COM_RESET.value]))
+        return [ADCComs.COM_RESET.value]
 
     @staticmethod
     def check_for_int(target_list):
@@ -56,3 +66,63 @@ class ADCCommands:
         if lower <= target <= upper:
             return True
         raise ValueError(f"Target out of range {target}")
+
+    @staticmethod
+    def get_channel_assign_opcodes(
+        adc_1_mux_p: int = None,
+        adc_2_mux_p: int = None,
+        adc_1_mux_n: int = None,
+        adc_2_mux_n: int = None,
+    ):
+        """
+        Generates OpCodes for assigning positive and negative multiplexers
+        of either ADC1 or ADC2 to an ADC input channel.
+
+        Args:
+            adc_1_mux_p: input channel to assign to MUXP of ADC1
+            adc_2_mux_p: input channel to assign to MUXP of ADC2
+            adc_1_mux_n: input channel to assign to MUXN of ADC1
+            adc_2_mux_n: input channel to assign to MUXN of ADC2
+
+        Returns:
+            `generator`: if not empty, contains OpCode(s) for updating multiplexer
+                channel assignment for ADC1, ADC2, or both.
+
+        Raises:
+            `ChannelMappingError`: if any two multiplexers are assigned the same input channel
+        """
+        # TODO: validation needs to be updated to check for any two, not just mux_p
+        if adc_1_mux_p is not None and adc_1_mux_p == adc_2_mux_p:
+            raise ChannelMappingError(
+                "ADC1 and ADC2 must be assigned different input channels"
+            )
+
+        adc_mux_regs = {
+            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
+            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
+        }
+
+        for addx, byte in adc_mux_regs.items():
+            mux_p = byte[0]
+            mux_n = byte[1]
+
+            # not updating mux's for this adc_num (no args passed)
+            if mux_p is None and mux_n is None:
+                continue
+            # updating mux_p bits only, mask mux_p bits
+            elif mux_n is None:
+                mask = BitMask.HIGH_NIBBLE
+                # replace None with 0 for building bitstring
+                mux_n = 0
+            # updating mux_n bits only, mask mux_n bits
+            elif mux_p is None:
+                mask = BitMask.LOW_NIBBLE
+                # replace None with 0 for building bitstring
+                mux_p = 0
+            # updating both mux_n and mux_p
+            else:
+                mask = BitMask.BYTE
+
+            adc_x_ch_bits = bitstring.pack("uint:4, uint:4", mux_p, mux_n).uint
+
+            yield OpCode(adc_x_ch_bits, addx.value, mask.value)
