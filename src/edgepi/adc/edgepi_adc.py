@@ -13,9 +13,11 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     ADCReg,
     FilterMode,
+    ADC_NUM_REGS
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
+from edgepi.utilities.utilities import filter_dict
 
 
 _logger = logging.getLogger(__name__)
@@ -57,7 +59,8 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __read_register -> data in: {code}")
         out = self.transfer(code)
         _logger.debug(f"ADC __read_register -> data out: {out}")
-        return out
+        # first 2 entries are null bytes
+        return out[2:]
 
     def __write_register(self, start_addx: ADCReg, data: list[int]):
         """
@@ -99,10 +102,30 @@ class EdgePiADC(SPI):
 
     # TODO: optional -> def read_adc_data_status(self, ADCNum):
 
+    def __read_registers_to_map(self):
+        """
+        Reads value of all ADC registers
+
+        Returns:
+            `dict`: contains (register addx (int): register_value (int)) pairs
+        """
+        # get register values
+        reg_values = self.__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
+        addx = ADCReg.REG_ID.value
+
+        # Build dict with (register addx : register_value) pairs.
+        reg_dict = { addx + i: reg_values[i] for i in range(ADC_NUM_REGS) }
+        _logger.debug(f"__read_registers_to_map: {reg_dict}")
+
+        return reg_dict
+
+
     def __config(
         self,
-        adc1_ch: ADCChannel = None,
-        adc2_ch: ADCChannel = None,
+        adc_1_mux_p: ADCChannel = None,
+        adc_2_mux_p: ADCChannel = None,
+        adc_1_mux_n: ADCChannel = None,
+        adc_2_mux_n: ADCChannel = None,
         adc1_data_rate: ADC1DataRate = None,
         adc2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
@@ -112,13 +135,28 @@ class EdgePiADC(SPI):
     ):
         """
         Configure all ADC settings, either collectively or individually.
-        Warning: users should only use set_config for modifying settings.
+        Warning: for developers only, users should use set_config for modifying settings.
         """
+        # pylint: disable=unused-argument
+
+        # filter out self from args, get list of args
+        args = list(filter_dict(locals(), "self", None).values())
+        _logger.debug(f"set_config: args dict:\n\n {args}\n\n")
+
+        # get opcodes for mapping multiplexers
+        mux_opcodes = self.adc_ops.get_channel_assign_opcodes(
+            adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
+        )
+        args.append(list(mux_opcodes))
+
+        
+        reg_values = dict(self.__read_registers_to_map())
+        _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
 
     def set_config(
         self,
-        adc1_ch: ADCChannel = None,
-        adc2_ch: ADCChannel = None,
+        adc_1_analog_in: ADCChannel = None,
+        adc_2_analog_in: ADCChannel = None,
         adc1_data_rate: ADC1DataRate = None,
         adc2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
@@ -128,8 +166,8 @@ class EdgePiADC(SPI):
         Configure user accessible ADC settings, either collectively or individually.
 
         Args:
-            `adc1_ch` (ADCChannel): the input voltage channel to measure via ADC1
-            `adc2_ch` (ADCChannel): the input voltage channel to measure via ADC2
+            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC1
+            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC2
             `adc1_data_rate` (ADCDataRate1): ADC1 data rate in samples per second
             `adc2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.

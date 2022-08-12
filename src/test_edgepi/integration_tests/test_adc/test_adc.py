@@ -17,5 +17,4 @@ def test_read_register_individual(adc):
     for reg_addx in ADCReg:
         out = adc._EdgePiADC__read_register(reg_addx, 1)
         # output data frame bytes = [null, null, reg_data]
-        assert len(out) == 3
-        assert out[0] == 0 and out[1] == 0
+        assert len(out) == 1
