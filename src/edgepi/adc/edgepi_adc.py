@@ -110,12 +110,12 @@ class EdgePiADC(SPI):
         adc_1_mux_p=None, adc_2_mux_p=None, adc_1_mux_n=None, adc_2_mux_n=None
     ):
         """
-        Generates OpCodes for assigning positive multiplexer of either ADC1 or ADC2 to an
-        ADC input channel.
+        Generates OpCodes for assigning positive and negative multiplexers
+        of either ADC1 or ADC2 to an ADC input channel.
 
         Returns:
-            `generator`: if not empty, contains OpCode(s) for updating channel assignment
-                for ADC1, ADC2, or both.
+            `generator`: if not empty, contains OpCode(s) for updating multiplexer
+                channel assignment for ADC1, ADC2, or both.
         """
         if adc_1_mux_p is not None and adc_1_mux_p == adc_2_mux_p:
             raise ChannelMappingError("ADC1 and ADC2 must be assigned different input channels")
