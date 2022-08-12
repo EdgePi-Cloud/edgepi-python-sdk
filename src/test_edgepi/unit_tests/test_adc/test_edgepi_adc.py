@@ -10,8 +10,6 @@ sys.modules["periphery"] = mock.MagicMock()
 
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel as CH, ADCReg
-from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 
 @pytest.fixture(name="adc")

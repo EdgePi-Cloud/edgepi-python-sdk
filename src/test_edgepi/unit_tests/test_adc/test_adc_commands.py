@@ -105,11 +105,13 @@ def test_write_register_command_exception(address, values, error, adc_ops):
 
 
 @pytest.mark.parametrize(
-    "adc_1_ch, adc_2_ch, expected",
+    "adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected",
     [
-        (None, None, []),
+        (None, None, None, None, []),
         (
             CH.AIN0.value,
+            None,
+            None,
             None,
             [
                 OpCode(
@@ -122,6 +124,8 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         (
             None,
             CH.AIN1.value,
+            None,
+            None,
             [
                 OpCode(
                     op_code=0x10,
@@ -133,6 +137,8 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         (
             CH.AIN0.value,
             CH.AIN1.value,
+            None,
+            None,
             [
                 OpCode(
                     op_code=0x00,
@@ -146,10 +152,159 @@ def test_write_register_command_exception(address, values, error, adc_ops):
                 ),
             ],
         ),
+        (
+            None,
+            None,
+            CH.AINCOM.value,
+            None,
+            [
+                OpCode(
+                    op_code=0x0A,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.LOW_NIBBLE.value,
+                )
+            ],
+        ),
+        (
+            None,
+            None,
+            None,
+            CH.AINCOM.value,
+            [
+                OpCode(
+                    op_code=0x0A,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.LOW_NIBBLE.value,
+                )
+            ],
+        ),
+        (
+            CH.AIN0.value,
+            CH.AIN1.value,
+            CH.AIN2.value,
+            CH.AIN3.value,
+            [
+                OpCode(
+                    op_code=0x02,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.BYTE.value,
+                ),
+                OpCode(
+                    op_code=0x13,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.BYTE.value,
+                )
+            ],
+        ),
+        (
+            CH.AIN0.value,
+            None,
+            CH.AIN2.value,
+            CH.AIN3.value,
+            [
+                OpCode(
+                    op_code=0x02,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.BYTE.value,
+                ),
+                OpCode(
+                    op_code=0x03,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.LOW_NIBBLE.value,
+                )
+            ],
+        ),
+        (
+            None,
+            CH.AIN1.value,
+            CH.AIN2.value,
+            CH.AIN3.value,
+            [
+                OpCode(
+                    op_code=0x02,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.LOW_NIBBLE.value,
+                ),
+                OpCode(
+                    op_code=0x13,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.BYTE.value,
+                )
+            ],
+        ),
+        (
+            CH.AIN0.value,
+            CH.AIN1.value,
+            None,
+            CH.AIN3.value,
+            [
+                OpCode(
+                    op_code=0x0,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.HIGH_NIBBLE.value,
+                ),
+                OpCode(
+                    op_code=0x13,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.BYTE.value,
+                )
+            ],
+        ),
+        (
+            CH.AIN0.value,
+            CH.AIN1.value,
+            CH.AIN2.value,
+            None,
+            [
+                OpCode(
+                    op_code=0x02,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.BYTE.value,
+                ),
+                OpCode(
+                    op_code=0x10,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.HIGH_NIBBLE.value,
+                )
+            ],
+        ),
+        (
+            None,
+            CH.AIN1.value,
+            None,
+            CH.AIN3.value,
+            [
+                OpCode(
+                    op_code=0x13,
+                    reg_address=ADCReg.REG_ADC2MUX.value,
+                    op_mask=BitMask.BYTE.value,
+                )
+            ],
+        ),
+        (
+            CH.AIN0.value,
+            None,
+            CH.AIN2.value,
+            None,
+            [
+                OpCode(
+                    op_code=0x02,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.BYTE.value,
+                ),
+            ],
+        ),
     ],
 )
-def test_get_channel_assign_opcodes(adc_1_ch, adc_2_ch, expected, adc_ops):
-    out = adc_ops.get_channel_assign_opcodes(adc_1_ch, adc_2_ch)
+def test_get_channel_assign_opcodes(
+    adc_1_mux_p,
+    adc_2_mux_p,
+    adc_1_mux_n,
+    adc_2_mux_n,
+    expected,
+    adc_ops
+):
+    out = adc_ops.get_channel_assign_opcodes(adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n)
     assert list(out) == expected
 
 
