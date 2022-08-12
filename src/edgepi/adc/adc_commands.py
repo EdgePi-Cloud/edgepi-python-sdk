@@ -6,6 +6,7 @@ import logging
 import bitstring
 from edgepi.adc.adc_constants import ADCComs, ADCReg
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
+from edgepi.utilities.utilities import filter_dict
 
 
 _logger = logging.getLogger(__name__)
@@ -91,10 +92,11 @@ class ADCCommands:
         Raises:
             `ChannelMappingError`: if any two multiplexers are assigned the same input channel
         """
-        # TODO: validation needs to be updated to check for any two, not just mux_p
-        if adc_1_mux_p is not None and adc_1_mux_p == adc_2_mux_p:
+        args = filter_dict(locals(), "self")
+
+        if len(args) != len(set(args)):
             raise ChannelMappingError(
-                "ADC1 and ADC2 must be assigned different input channels"
+                "ADC1 and ADC2 multiplexers must be assigned different input channels"
             )
 
         adc_mux_regs = {
