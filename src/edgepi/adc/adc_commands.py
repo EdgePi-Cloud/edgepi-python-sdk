@@ -77,7 +77,8 @@ class ADCCommands:
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
-        of either ADC1 or ADC2 to an ADC input channel.
+        of either ADC1 or ADC2 to an ADC input channel. This is needed to allow
+        users to assign multiplexers by input channel number.
 
         Args:
             adc_1_mux_p: input channel to assign to MUXP of ADC1
@@ -86,7 +87,7 @@ class ADCCommands:
             adc_2_mux_n: input channel to assign to MUXN of ADC2
 
         Returns:
-            `generator`: if not empty, contains OpCode(s) for updating multiplexer
+            `list`: if not empty, contains OpCode(s) for updating multiplexer
                 channel assignment for ADC1, ADC2, or both.
 
         Raises:
@@ -108,6 +109,8 @@ class ADCCommands:
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
         }
 
+        mux_opcodes = []
+
         for addx, byte in adc_mux_regs.items():
             mux_p = byte[0]
             mux_n = byte[1]
@@ -120,15 +123,21 @@ class ADCCommands:
                 mask = BitMask.HIGH_NIBBLE
                 # replace None with 0 for building bitstring
                 mux_n = 0
+                mux_p = mux_p.value
             # updating mux_n bits only, mask mux_n bits
             elif mux_p is None:
                 mask = BitMask.LOW_NIBBLE
                 # replace None with 0 for building bitstring
                 mux_p = 0
+                mux_n = mux_n.value
             # updating both mux_n and mux_p
             else:
                 mask = BitMask.BYTE
+                mux_p = mux_p.value
+                mux_n = mux_n.value
 
             adc_x_ch_bits = bitstring.pack("uint:4, uint:4", mux_p, mux_n).uint
 
-            yield OpCode(adc_x_ch_bits, addx.value, mask.value)
+            mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
+
+        return mux_opcodes

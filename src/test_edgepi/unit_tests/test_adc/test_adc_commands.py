@@ -2,7 +2,7 @@
 
 
 import pytest
-from edgepi.adc.adc_commands import ADCCommands, ChannelMappingError
+from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
@@ -109,7 +109,7 @@ def test_write_register_command_exception(address, values, error, adc_ops):
     [
         (None, None, None, None, []),
         (
-            CH.AIN0.value,
+            CH.AIN0,
             None,
             None,
             None,
@@ -123,7 +123,7 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         ),
         (
             None,
-            CH.AIN1.value,
+            CH.AIN1,
             None,
             None,
             [
@@ -135,8 +135,8 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
-            CH.AIN1.value,
+            CH.AIN0,
+            CH.AIN1,
             None,
             None,
             [
@@ -155,7 +155,7 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         (
             None,
             None,
-            CH.AINCOM.value,
+            CH.AINCOM,
             None,
             [
                 OpCode(
@@ -169,7 +169,7 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             None,
             None,
             None,
-            CH.AINCOM.value,
+            CH.AINCOM,
             [
                 OpCode(
                     op_code=0x0A,
@@ -179,10 +179,10 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
-            CH.AIN1.value,
-            CH.AIN2.value,
-            CH.AIN3.value,
+            CH.AIN0,
+            CH.AIN1,
+            CH.AIN2,
+            CH.AIN3,
             [
                 OpCode(
                     op_code=0x02,
@@ -197,10 +197,10 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
+            CH.AIN0,
             None,
-            CH.AIN2.value,
-            CH.AIN3.value,
+            CH.AIN2,
+            CH.AIN3,
             [
                 OpCode(
                     op_code=0x02,
@@ -216,9 +216,9 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         ),
         (
             None,
-            CH.AIN1.value,
-            CH.AIN2.value,
-            CH.AIN3.value,
+            CH.AIN1,
+            CH.AIN2,
+            CH.AIN3,
             [
                 OpCode(
                     op_code=0x02,
@@ -233,10 +233,10 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
-            CH.AIN1.value,
+            CH.AIN0,
+            CH.AIN1,
             None,
-            CH.AIN3.value,
+            CH.AIN3,
             [
                 OpCode(
                     op_code=0x0,
@@ -251,9 +251,9 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
-            CH.AIN1.value,
-            CH.AIN2.value,
+            CH.AIN0,
+            CH.AIN1,
+            CH.AIN2,
             None,
             [
                 OpCode(
@@ -270,9 +270,9 @@ def test_write_register_command_exception(address, values, error, adc_ops):
         ),
         (
             None,
-            CH.AIN1.value,
+            CH.AIN1,
             None,
-            CH.AIN3.value,
+            CH.AIN3,
             [
                 OpCode(
                     op_code=0x13,
@@ -282,9 +282,9 @@ def test_write_register_command_exception(address, values, error, adc_ops):
             ],
         ),
         (
-            CH.AIN0.value,
+            CH.AIN0,
             None,
-            CH.AIN2.value,
+            CH.AIN2,
             None,
             [
                 OpCode(

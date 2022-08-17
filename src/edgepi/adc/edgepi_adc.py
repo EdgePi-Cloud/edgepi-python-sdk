@@ -1,6 +1,7 @@
 """ User interface for EdgePi ADC """
 
 
+from enum import Enum
 import logging
 
 from edgepi.peripherals.spi import SpiDevice as SPI
@@ -13,12 +14,12 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     ADCReg,
     FilterMode,
-    ADC_NUM_REGS
+    ADC_NUM_REGS,
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict
-from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 
 
 _logger = logging.getLogger(__name__)
@@ -115,11 +116,20 @@ class EdgePiADC(SPI):
         addx = ADCReg.REG_ID.value
 
         # Build dict with (register addx : register_value) pairs.
-        reg_dict = { addx + i: reg_values[i] for i in range(ADC_NUM_REGS) }
+        reg_dict = {addx + i: reg_values[i] for i in range(ADC_NUM_REGS)}
         _logger.debug(f"__read_registers_to_map: {reg_dict}")
 
         return reg_dict
 
+    def __validate_register_updates(self, updated_regs):
+        # get current register values
+        reg_map = self.__read_registers_to_map()
+
+        for addx, entry in updated_regs.items():
+            if entry["is_changed"]:
+                assert entry["value"] != reg_map[addx]
+            else:
+                assert entry["value"] == reg_map[addx]
 
     def __config(
         self,
@@ -140,25 +150,39 @@ class EdgePiADC(SPI):
         """
         # pylint: disable=unused-argument
 
-        # filter out self from args, get list of args
+        # filter out self and None args
         args = list(filter_dict(locals(), "self", None).values())
-        _logger.debug(f"set_config: args dict:\n\n {args}\n\n")
+        _logger.debug(f"set_config: args dict after filter:\n\n {args}\n\n")
+
+        # extract OpCode type args, since args may contain non-OpCode args
+        ops_list = [
+            entry.value
+            for entry in args
+            if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
+        ]
 
         # get opcodes for mapping multiplexers
         mux_opcodes = self.adc_ops.get_channel_assign_opcodes(
             adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
         )
-        args.append(list(mux_opcodes))
+        ops_list += mux_opcodes
 
+        # get current register values
         reg_values = self.__read_registers_to_map()
         _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
 
-        # update register values
-        apply_opcodes(reg_values, args)
+        # get codes to update register values
+        apply_opcodes(reg_values, ops_list)
         _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
 
-        # TODO: write updated reg values to ADC. May be better to have a single write,
-        # as certain configs result in ADC restart.
+        # validate only updated registers have been modified
+        # self.__validate_register_updates(reg_values)
+
+        # write updated reg values to ADC using a single write.
+        data = [ entry["value"] for entry in reg_values.values() ]
+        self.__write_register(ADCReg.REG_ID, data)
+
+        return reg_values
 
     def set_config(
         self,
@@ -184,3 +208,6 @@ class EdgePiADC(SPI):
                 Note, ADC2 runs only in continuous conversion mode.
         """
         # TODO: get dict of args, pass to __config
+        args = filter_dict(locals(), "self", None)
+        # TODO: adc analog_in names don't map to __config params
+        self.__config(**args)
