@@ -4,6 +4,7 @@
 from enum import Enum
 import logging
 
+from bitstring import pack
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -20,6 +21,7 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
+from edgepi.adc.adc_multiplexers import generate_mux_opcodes, ChannelMappingError
 
 
 _logger = logging.getLogger(__name__)
@@ -121,6 +123,59 @@ class EdgePiADC(SPI):
 
         return reg_dict
 
+    def __get_channel_assign_opcodes(
+        self,
+        adc_1_mux_p: ADCChannel = None,
+        adc_2_mux_p: ADCChannel = None,
+        adc_1_mux_n: ADCChannel = None,
+        adc_2_mux_n: ADCChannel = None,
+    ):
+        """
+        Generates OpCodes for assigning positive and negative multiplexers
+        of either ADC1 or ADC2 to an ADC input channel. This is needed to allow
+        users to assign multiplexers by input channel number.
+
+        Args:
+            adc_1_mux_p: input channel to assign to MUXP of ADC1
+            adc_2_mux_p: input channel to assign to MUXP of ADC2
+            adc_1_mux_n: input channel to assign to MUXN of ADC1
+            adc_2_mux_n: input channel to assign to MUXN of ADC2
+
+        Returns:
+            `list`: if not empty, contains OpCode(s) for updating multiplexer
+                channel assignment for ADC1, ADC2, or both.
+
+        Raises:
+            `ChannelMappingError`: if args assign any two multiplexers to the same input channel
+        """
+        args = filter_dict(locals(), "self")
+
+        # no multiplexer config to update
+        if all(x is None for x in list(args.values())):
+            return []
+
+        if len(args) != len(set(args)):
+            raise ChannelMappingError(
+                "ADC1 and ADC2 multiplexers must be assigned different input channels"
+            )
+
+        adc_mux_updates = {
+            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
+            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
+        }
+
+        # get mux register values for mux_mapping
+        adc_1_mux_val = pack("uint:8", self.__read_register(ADCReg.REG_INPMUX)[0])
+        adc_2_mux_val = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
+
+        # current mux_mapping (for validating no duplicate channel assignment)
+        mux_reg_vals = {
+            ADCReg.REG_INPMUX: (adc_1_mux_val[7:4].uint, adc_1_mux_val[3:0].uint),
+            ADCReg.REG_ADC2MUX: (adc_2_mux_val[7:4].uint, adc_2_mux_val[3:0].uint),
+        }
+
+        return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
+
     def __config(
         self,
         adc_1_analog_in: ADCChannel = None,
@@ -152,7 +207,7 @@ class EdgePiADC(SPI):
         ]
 
         # get opcodes for mapping multiplexers
-        mux_opcodes = self.adc_ops.get_channel_assign_opcodes(
+        mux_opcodes = self.__get_channel_assign_opcodes(
             adc_1_analog_in, adc_2_analog_in, adc_1_mux_n, adc_2_mux_n
         )
         ops_list += mux_opcodes
@@ -166,7 +221,7 @@ class EdgePiADC(SPI):
         _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
 
         # write updated reg values to ADC using a single write.
-        data = [ entry["value"] for entry in reg_values.values() ]
+        data = [entry["value"] for entry in reg_values.values()]
         self.__write_register(ADCReg.REG_ID, data)
 
         return reg_values
