@@ -111,6 +111,9 @@ class ADCCommands:
 
         mux_opcodes = []
 
+        # TODO: what if user tries setting a mux to a channel already in use?
+        # need to read mux register values to check for this
+
         for addx, byte in adc_mux_regs.items():
             mux_p = byte[0]
             mux_n = byte[1]

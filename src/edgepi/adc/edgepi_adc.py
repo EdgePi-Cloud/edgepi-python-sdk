@@ -123,8 +123,8 @@ class EdgePiADC(SPI):
 
     def __config(
         self,
-        adc_1_mux_p: ADCChannel = None,
-        adc_2_mux_p: ADCChannel = None,
+        adc_1_analog_in: ADCChannel = None,
+        adc_2_analog_in: ADCChannel = None,
         adc_1_mux_n: ADCChannel = None,
         adc_2_mux_n: ADCChannel = None,
         adc1_data_rate: ADC1DataRate = None,
@@ -153,7 +153,7 @@ class EdgePiADC(SPI):
 
         # get opcodes for mapping multiplexers
         mux_opcodes = self.adc_ops.get_channel_assign_opcodes(
-            adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
+            adc_1_analog_in, adc_2_analog_in, adc_1_mux_n, adc_2_mux_n
         )
         ops_list += mux_opcodes
 
@@ -194,7 +194,5 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
                 Note, ADC2 runs only in continuous conversion mode.
         """
-        # TODO: get dict of args, pass to __config
         args = filter_dict(locals(), "self", None)
-        # TODO: adc analog_in names don't map to __config params
         self.__config(**args)
