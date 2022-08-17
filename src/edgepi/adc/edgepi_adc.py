@@ -121,16 +121,6 @@ class EdgePiADC(SPI):
 
         return reg_dict
 
-    def __validate_register_updates(self, updated_regs):
-        # get current register values
-        reg_map = self.__read_registers_to_map()
-
-        for addx, entry in updated_regs.items():
-            if entry["is_changed"]:
-                assert entry["value"] != reg_map[addx]
-            else:
-                assert entry["value"] == reg_map[addx]
-
     def __config(
         self,
         adc_1_mux_p: ADCChannel = None,
@@ -174,9 +164,6 @@ class EdgePiADC(SPI):
         # get codes to update register values
         apply_opcodes(reg_values, ops_list)
         _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
-
-        # validate only updated registers have been modified
-        # self.__validate_register_updates(reg_values)
 
         # write updated reg values to ADC using a single write.
         data = [ entry["value"] for entry in reg_values.values() ]

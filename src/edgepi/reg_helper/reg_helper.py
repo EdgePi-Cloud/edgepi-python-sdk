@@ -14,6 +14,7 @@ Functions:
 """
 
 
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 
@@ -65,6 +66,13 @@ class OpCodeMaskIncompatibleError(ValueError):
     """Raised when an OpCode contains an op_code which affects bits not covered by the op_mask"""
 
 
+class RegisterUpdateError(Exception):
+    """
+    Raised if the value of an unmodified register has been changed
+    while opcodes are being applied.
+    """
+
+
 def apply_opcodes(register_values: dict, opcodes: list):
     """
     Generates updated register values after applying opcodes,
@@ -87,6 +95,8 @@ def apply_opcodes(register_values: dict, opcodes: list):
         raise ValueError("register_values and opcodes args must both be non-empty")
     _format_register_map(register_values)
 
+    original_regs = deepcopy(register_values)
+
     # apply each opcode to its corresponding register
     for opcode in opcodes:
         register_entry = register_values.get(opcode.reg_address)
@@ -95,6 +105,8 @@ def apply_opcodes(register_values: dict, opcodes: list):
             # apply the opcode to the register
             register_entry["value"] = _apply_opcode(register_entry["value"], opcode)
             register_entry["is_changed"] = True
+
+    __validate_register_updates(original_regs, register_values)
 
     return register_values
 
@@ -123,6 +135,17 @@ def _apply_opcode(register_value: int, opcode: OpCode):
     register_value |= opcode.op_code  # apply the opcode to the cleared bits
 
     return register_value
+
+
+def __validate_register_updates(original_regs, updated_regs):
+    """
+    Verifies the value of regsiters not targeted for updates has not changed after applying updates
+    """
+    for addx, entry in updated_regs.items():
+        if not entry["is_changed"] and entry["value"] != original_regs[addx]["value"]:
+            raise RegisterUpdateError(
+                f"Register at address {addx} has been incorrectly targeted for updates."
+            )
 
 
 def _add_change_flags(register_values: dict):
@@ -167,8 +190,9 @@ def _format_register_map(reg_map: dict) -> dict:
     _convert_values_to_dict(reg_map)
     _add_change_flags(reg_map)
 
+
 def convert_dict_to_values(reg_dict: dict = None):
-    '''
+    """
     Function to re-formate register dictionary back to original form
     In:
         reg_dict (dict): register address to value and is_changed flag
@@ -176,14 +200,15 @@ def convert_dict_to_values(reg_dict: dict = None):
         Returns:
             reg_dict (dict): register address to value
                              {register_address : value}
-    '''
+    """
     for reg_addx, entry in reg_dict.items():
-        reg_dict[reg_addx] = entry['value']
+        reg_dict[reg_addx] = entry["value"]
     return reg_dict
 
 
 class BitMask(Enum):
-    """ Bit/Byte masks for use with OpCodes """
-    LOW_NIBBLE = 0xF0   # overwrite low nibble bits, let high nibble bits pass
+    """Bit/Byte masks for use with OpCodes"""
+
+    LOW_NIBBLE = 0xF0  # overwrite low nibble bits, let high nibble bits pass
     HIGH_NIBBLE = 0x0F  # overwrite high nibble bits, let low nibble bits pass
-    BYTE = 0x00         # overwrite all bits
+    BYTE = 0x00  # overwrite all bits

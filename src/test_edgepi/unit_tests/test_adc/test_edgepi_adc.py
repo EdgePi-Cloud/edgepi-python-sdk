@@ -32,6 +32,7 @@ def test_read_registers_to_map(mocker, adc):
 @pytest.mark.parametrize(
     "args, update_vals",
     [
+        ({"adc_1_mux_p": CH.AIN0}, {ADCReg.REG_INPMUX.value: 0x01}),
         ({"adc_1_mux_p": CH.AIN2}, {ADCReg.REG_INPMUX.value: 0x21}),
     ],
 )
@@ -43,7 +44,6 @@ def test_config(mocker, args, update_vals, adc):
 
     for addx, entry in reg_values.items():
         if entry["is_changed"]:
-            assert entry["value"] != ADC_DEFAULT_VALS[addx]
             assert entry["value"] == update_vals[addx]
         else:
             assert entry["value"] == ADC_DEFAULT_VALS[addx]
