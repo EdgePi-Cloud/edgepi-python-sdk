@@ -6,6 +6,8 @@ from bitstring import pack
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 
+NUM_MUXS = 4
+
 class ChannelMappingError(ValueError):
     """Raised when an input channel is mapped to both ADC1 and ADC2"""
 
@@ -61,12 +63,12 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
 
         mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
 
-    __validate_mux_mapping(mux_values)
+    _validate_mux_mapping(mux_values)
 
     return mux_opcodes
 
 
-def __validate_mux_mapping(mux_values: dict):
+def _validate_mux_mapping(mux_values: dict):
     """
     Verifies no two multiplexers are assigned the same channel
 
@@ -88,5 +90,5 @@ def __validate_mux_mapping(mux_values: dict):
     for entry in mux_values.values():
         mux_set.update(set(entry))
 
-    if len(mux_set < 4):
+    if len(mux_set) < NUM_MUXS:
         raise ChannelMappingError("Attempting to assign channel already in use")
