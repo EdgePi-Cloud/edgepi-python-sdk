@@ -34,6 +34,9 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
         mux_p = byte[0]
         mux_n = byte[1]
 
+        mux_p_none = not bool(mux_p)
+        mux_n_none = not bool(mux_n)
+
         # not updating mux's for this adc_num (no args passed)
         if mux_p is None and mux_n is None:
             continue
@@ -55,9 +58,13 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
             mux_p = mux_p.value
             mux_n = mux_n.value
 
-        # update mux_register values for duplicate mapping validation
-        mux_values[addx][0] = mux_p
-        mux_values[addx][1] = mux_n
+        # update mux_register values for duplicate mapping validation, but only
+        # if these were updated
+        if not mux_p_none:
+            mux_values[addx][0] = mux_p
+
+        if not mux_n_none:
+            mux_values[addx][1] = mux_n
 
         adc_x_ch_bits = pack("uint:4, uint:4", mux_p, mux_n).uint
 

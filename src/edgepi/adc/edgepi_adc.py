@@ -170,8 +170,8 @@ class EdgePiADC(SPI):
 
         # current mux_mapping (for validating no duplicate channel assignment)
         mux_reg_vals = {
-            ADCReg.REG_INPMUX: (adc_1_mux_val[7:4].uint, adc_1_mux_val[3:0].uint),
-            ADCReg.REG_ADC2MUX: (adc_2_mux_val[7:4].uint, adc_2_mux_val[3:0].uint),
+            ADCReg.REG_INPMUX: [adc_1_mux_val[7:4].uint, adc_1_mux_val[3:0].uint],
+            ADCReg.REG_ADC2MUX: [adc_2_mux_val[7:4].uint, adc_2_mux_val[3:0].uint],
         }
 
         return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
