@@ -2,6 +2,7 @@
 
 
 import sys
+from copy import deepcopy
 from unittest import mock
 
 sys.modules["periphery"] = mock.MagicMock()
@@ -10,8 +11,38 @@ sys.modules["periphery"] = mock.MagicMock()
 
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADC_DEFAULT_VALS, ADC_NUM_REGS, ADCChannel as CH, ADCReg
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
+
+adc_default_vals = [
+    0,
+    0x11,
+    0x5,
+    0,
+    0x80,
+    0x04,
+    0x01,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0x40,
+    0xBB,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0x01,
+    0,
+    0,
+    0,
+    0x40,
+]
 
 
 @pytest.fixture(name="adc")
@@ -22,32 +53,48 @@ def fixture_adc(mocker):
 
 def test_read_registers_to_map(mocker, adc):
     mocker.patch(
-        "edgepi.peripherals.spi.SpiDevice.transfer", return_value=[0, 0] + ADC_DEFAULT_VALS
+        "edgepi.peripherals.spi.SpiDevice.transfer",
+        return_value=[0, 0] + deepcopy(adc_default_vals),
     )
     reg_dict = adc._EdgePiADC__read_registers_to_map()
     assert len(reg_dict) == ADC_NUM_REGS
     for i in range(ADC_NUM_REGS):
-        assert reg_dict[i] == ADC_DEFAULT_VALS[i]
+        assert reg_dict[i] == adc_default_vals[i]
 
 
 @pytest.mark.parametrize(
-    "args, update_vals",
+    "reg_updates, args, update_vals",
     [
-        ({"adc_1_analog_in": CH.AIN3}, {ADCReg.REG_INPMUX.value: 0x01}),
-        ({"adc_1_analog_in": CH.AIN4}, {ADCReg.REG_INPMUX.value: 0x21}),
+        (
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {"adc_1_analog_in": CH.AIN4},
+            {ADCReg.REG_INPMUX.value: 0x41},
+        ),
     ],
 )
-def test_config(mocker, args, update_vals, adc):
+def test_config(mocker, reg_updates, args, update_vals, adc):
+    # modify default register values as needed
+    adc_vals = deepcopy(adc_default_vals)
+    for addx, reg_val in reg_updates.items():
+        adc_vals[addx] = reg_val
+
+    # mock each call to __read_register
     mocker.patch(
-        "edgepi.peripherals.spi.SpiDevice.transfer", return_value=[0, 0] + ADC_DEFAULT_VALS
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
+        side_effect=[
+            [reg_updates[ADCReg.REG_INPMUX.value]],
+            [reg_updates[ADCReg.REG_ADC2MUX.value]],
+            adc_vals,
+        ],
     )
+
     reg_values = adc._EdgePiADC__config(**args)
 
     for addx, entry in reg_values.items():
         if entry["is_changed"]:
             assert entry["value"] == update_vals[addx]
         else:
-            assert entry["value"] == ADC_DEFAULT_VALS[addx]
+            assert entry["value"] == adc_vals[addx]
 
 
 @pytest.mark.parametrize(
@@ -342,11 +389,15 @@ def test_config(mocker, args, update_vals, adc):
 def test_get_channel_assign_opcodes(
     mocker, mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected, adc
 ):
-    mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", side_effect=[[0, 0, mux_map[0]], [0, 0, mux_map[1]]])
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
+        side_effect=[[mux_map[0]], [mux_map[1]]],
+    )
     out = adc._EdgePiADC__get_channel_assign_opcodes(
         adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
     )
     assert out == expected
+
 
 # TODO: pytest.raises() does not see ChannelMappingError as equal to where it's defined
 # the exception is raised in above test if channels are the same, but not here.

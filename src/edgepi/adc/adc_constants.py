@@ -7,36 +7,6 @@ from enum import Enum, unique
 
 ADC_NUM_REGS = 27
 
-ADC_DEFAULT_VALS = [
-    0,
-    0x11,
-    0x5,
-    0,
-    0x80,
-    0x04,
-    0x01,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0x40,
-    0xBB,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0x01,
-    0,
-    0,
-    0,
-    0x40,
-]
-
 
 @unique
 class ADCComs(Enum):
