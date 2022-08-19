@@ -6,7 +6,8 @@ from bitstring import pack
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 
-NUM_MUXS = 4
+MUXS_PER_ADC = 2
+NUM_CHANNELS = 11
 
 class ChannelMappingError(ValueError):
     """Raised when an input channel is mapped to both ADC1 and ADC2"""
@@ -81,7 +82,7 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
 
 def _validate_mux_mapping(mux_values: dict):
     """
-    Verifies no two multiplexers are assigned the same channel
+    Verifies no two multiplexers on the same ADC are assigned the same channel
 
     Args:
         `mux_values`: updated multiplexer mapping
@@ -94,12 +95,19 @@ def _validate_mux_mapping(mux_values: dict):
         `ChannelMappingError`: if the updated multiplexer mapping contains any two
             multiplexers assigned the same input channel.
     """
-    # TODO: by default, on startup some mux's are set to same channels.
-    # Change each mux to different value in EdgePiADC __init__.
-    mux_set = set()
+    # for each ADC, check that positive and negative muxs not set to same channel
+    for adc in mux_values.values():
+        mux_set = set()
+        # i.e. to allow user to set both muxs on an adc to float mode
+        mode_counter = 0
+        for mux_val in adc:
+            # i.e. setting mux to float mode rather than assigning channel
+            if mux_val > NUM_CHANNELS - 1:
+                mode_counter += 1
 
-    for entry in mux_values.values():
-        mux_set.update(set(entry))
+        mux_set.update(set(adc))
 
-    if len(mux_set) < NUM_MUXS:
-        raise ChannelMappingError("Attempting to assign channel already in use")
+        # first clause checks if assigned both muxs to same channel (not allowed)
+        # second clause excepts the case where both muxs assigned to float mode (allowed)
+        if len(mux_set) < MUXS_PER_ADC and mode_counter < MUXS_PER_ADC:
+            raise ChannelMappingError("Attempting to assign channel already in use")

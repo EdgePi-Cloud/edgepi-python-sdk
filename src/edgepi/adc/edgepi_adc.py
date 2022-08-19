@@ -250,5 +250,7 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
                 Note, ADC2 runs only in continuous conversion mode.
         """
+        # pylint: disable=unused-argument
+
         args = filter_dict(locals(), "self", None)
         self.__config(**args)

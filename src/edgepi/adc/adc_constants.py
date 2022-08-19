@@ -78,6 +78,7 @@ class ADCChannel(Enum):
     AIN8 = 8
     AIN9 = 9
     AINCOM = 10
+    FLOAT = 0xF
 
 
 class ADCNum(Enum):

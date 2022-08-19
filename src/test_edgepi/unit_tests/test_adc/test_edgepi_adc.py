@@ -135,19 +135,47 @@ def test_read_registers_to_map(mocker, adc):
             {ADCReg.REG_INPMUX.value: 0x89, ADCReg.REG_ADC2MUX.value: 0x50},
             does_not_raise(),
         ),
-        # set adc1 analog_in to pin already in use
+        # set adc1 analog_in to pin in use on adc2
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x21},
-            pytest.raises(ChannelMappingError),
+            does_not_raise(),
         ),
-        # set two adc mux pins to same pin
+        # set mux pins to same pin on different adc's
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN2, "adc_2_analog_in": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x21, ADCReg.REG_ADC2MUX.value: 0x23},
+            does_not_raise(),
+        ),
+        # set adc1 analog_in to same pin as mux_n
+        (
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {"adc_1_analog_in": CH.AIN1},
+            {ADCReg.REG_INPMUX.value: 0x11},
             pytest.raises(ChannelMappingError),
+        ),
+        # set adc2 analog_in to same pin as mux_n
+        (
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {"adc_2_analog_in": CH.AIN3},
+            {ADCReg.REG_INPMUX.value: 0x33},
+            pytest.raises(ChannelMappingError),
+        ),
+        # set adc 1 mux_n and mux_p to same pin
+        (
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {"adc_1_analog_in": CH.AIN2, "adc_1_mux_n": CH.AIN2},
+            {ADCReg.REG_INPMUX.value: 0x22},
+            pytest.raises(ChannelMappingError),
+        ),
+        # set adc 1 mux_n and mux_p to float mode
+        (
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.FLOAT},
+            {ADCReg.REG_INPMUX.value: 0xFF},
+            does_not_raise()
         ),
     ],
 )

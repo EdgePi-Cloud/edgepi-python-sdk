@@ -23,10 +23,23 @@ def test_read_register_individual(adc):
 @pytest.mark.parametrize(
     "args, expected_vals",
     [
+         (
+            {
+                "adc_1_analog_in": CH.AIN2,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x21,
+            },
+        ),
         (
-            # TODO: can't test individually, since by default mux are set
-            # to same pins, which raises ChannelMappingError. Each mux needs
-            # to be set to different pin at __init__.
+            {
+                "adc_1_mux_n": CH.AIN2,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x02,
+            },
+        ),
+        (
             {
                 "adc_1_analog_in": CH.AIN1,
                 "adc_2_analog_in": CH.AIN2,
