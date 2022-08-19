@@ -477,10 +477,3 @@ def test_get_channel_assign_opcodes(
         adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
     )
     assert out == expected
-
-
-# TODO: pytest.raises() does not see ChannelMappingError as equal to where it's defined
-# the exception is raised in above test if channels are the same, but not here.
-# def test_get_channel_assign_opcodes_raises(adc_ops):
-#     with pytest.raises(ChannelMappingError):
-#         adc_ops.get_channel_assign_opcodes(CH.AIN1.value, CH.AIN1.value)
