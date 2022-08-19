@@ -22,6 +22,7 @@ def test_read_register_individual(adc):
         # output data frame bytes = [null, null, reg_data]
         assert len(out) == 1
 
+# __init__ configures INPMUX = 0xFA
 
 @pytest.mark.parametrize(
     "args, expected_vals, err",
@@ -31,7 +32,7 @@ def test_read_register_individual(adc):
                 "adc_1_analog_in": CH.AIN2,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x21,
+                ADCReg.REG_INPMUX.value: 0x2A,
             },
             does_not_raise()
         ),
@@ -40,7 +41,7 @@ def test_read_register_individual(adc):
                 "adc_1_mux_n": CH.AIN2,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x02,
+                ADCReg.REG_INPMUX.value: 0xF2,
             },
             does_not_raise()
         ),
@@ -63,17 +64,17 @@ def test_read_register_individual(adc):
                 "adc_2_analog_in": CH.AIN2,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x21,
+                ADCReg.REG_INPMUX.value: 0x2A,
                 ADCReg.REG_ADC2MUX.value: 0x21,
             },
             does_not_raise()
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN1,
+                "adc_1_analog_in": CH.AINCOM,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x11,
+                ADCReg.REG_INPMUX.value: 0xAA,
             },
             pytest.raises(ChannelMappingError)
         ),

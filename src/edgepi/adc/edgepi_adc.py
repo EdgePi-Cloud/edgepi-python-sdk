@@ -10,7 +10,7 @@ from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
-    ADCChannel,
+    ADCChannel as CH,
     ADCNum,
     ConvMode,
     ADCReg,
@@ -37,7 +37,8 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_default()
         # TODO: non-user configs
         # - set gain
-        # - MUXP = floating, MUXN = AINCOM
+        # configure ADC1 -> MUXP = floating, MUXN = AINCOM
+        self.__config(adc_1_analog_in=CH.FLOAT, adc_1_mux_n=CH.AINCOM)
         # - enable CRC mode for checksum -> potentially will allow user
         #   to configure this in set_config if too much overhead.
         # - RTD off by default --> leave default settings for related regs
@@ -125,10 +126,10 @@ class EdgePiADC(SPI):
 
     def __get_channel_assign_opcodes(
         self,
-        adc_1_mux_p: ADCChannel = None,
-        adc_2_mux_p: ADCChannel = None,
-        adc_1_mux_n: ADCChannel = None,
-        adc_2_mux_n: ADCChannel = None,
+        adc_1_mux_p: CH = None,
+        adc_2_mux_p: CH = None,
+        adc_1_mux_n: CH = None,
+        adc_2_mux_n: CH = None,
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
@@ -179,10 +180,10 @@ class EdgePiADC(SPI):
     # TODO: refactor this class into intermediate facade
     def __config(
         self,
-        adc_1_analog_in: ADCChannel = None,
-        adc_2_analog_in: ADCChannel = None,
-        adc_1_mux_n: ADCChannel = None,
-        adc_2_mux_n: ADCChannel = None,
+        adc_1_analog_in: CH = None,
+        adc_2_analog_in: CH = None,
+        adc_1_mux_n: CH = None,
+        adc_2_mux_n: CH = None,
         adc1_data_rate: ADC1DataRate = None,
         adc2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
@@ -229,8 +230,8 @@ class EdgePiADC(SPI):
 
     def set_config(
         self,
-        adc_1_analog_in: ADCChannel = None,
-        adc_2_analog_in: ADCChannel = None,
+        adc_1_analog_in: CH = None,
+        adc_2_analog_in: CH = None,
         adc1_data_rate: ADC1DataRate = None,
         adc2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
@@ -240,8 +241,8 @@ class EdgePiADC(SPI):
         Configure user accessible ADC settings, either collectively or individually.
 
         Args:
-            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC1
-            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC2
+            `adc_1_analog_in` (CH): the input voltage channel to measure via ADC1
+            `adc_1_analog_in` (CH): the input voltage channel to measure via ADC2
             `adc1_data_rate` (ADCDataRate1): ADC1 data rate in samples per second
             `adc2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.

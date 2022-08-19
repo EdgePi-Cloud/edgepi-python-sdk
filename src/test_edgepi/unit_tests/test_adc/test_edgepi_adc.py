@@ -50,6 +50,7 @@ adc_default_vals = [
 @pytest.fixture(name="adc")
 def fixture_adc(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     yield EdgePiADC()
 
 
