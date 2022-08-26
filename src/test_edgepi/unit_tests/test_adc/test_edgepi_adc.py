@@ -176,7 +176,7 @@ def test_read_registers_to_map(mocker, adc):
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.FLOAT},
             {ADCReg.REG_INPMUX.value: 0xFF},
-            does_not_raise()
+            does_not_raise(),
         ),
     ],
 )
@@ -506,3 +506,16 @@ def test_get_channel_assign_opcodes(
         adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
     )
     assert out == expected
+
+
+@pytest.mark.parametrize("mode0_val, expected", [
+    (0x00, False),
+    (0x40, True),
+    (0b11100000, True),
+    (0b10100000, False),
+])
+def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[mode0_val]
+    )
+    assert adc._EdgePiADC__is_in_pulse_mode() == expected

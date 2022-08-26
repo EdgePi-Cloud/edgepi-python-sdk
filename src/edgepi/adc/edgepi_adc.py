@@ -109,7 +109,7 @@ class EdgePiADC(SPI):
     def __is_in_pulse_mode(self):
         """Returns true if ADC1 is in pulse conversion mode else false"""
         mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
-        return mode_0[1].uint == ConvMode.PULSE.value
+        return mode_0[1] == bool(ConvMode.PULSE.value)
 
     def read_voltage(self, adc: ADCNum):
         """
