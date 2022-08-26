@@ -96,6 +96,7 @@ class EdgePiADC(SPI):
             `float`: input voltage read from ADC
         """
         # TODO: raise Exception if user performs read with MUXP = 0xF
+        raise NotImplementedError
 
     def read_adc1_alarms(self):
         """
@@ -104,6 +105,7 @@ class EdgePiADC(SPI):
         Returns:
             `dict`: a dictionary of ADCAlarmType: ADCAlarm entries
         """
+        raise NotImplementedError
 
     # TODO: optional -> def read_adc_data_status(self, ADCNum):
 
@@ -184,8 +186,8 @@ class EdgePiADC(SPI):
         adc_2_analog_in: CH = None,
         adc_1_mux_n: CH = None,
         adc_2_mux_n: CH = None,
-        adc1_data_rate: ADC1DataRate = None,
-        adc2_data_rate: ADC2DataRate = None,
+        adc_1_data_rate: ADC1DataRate = None,
+        adc_2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         checksum_mode=None,
@@ -194,6 +196,19 @@ class EdgePiADC(SPI):
         """
         Configure all ADC settings, either collectively or individually.
         Warning: for developers only, users should use set_config for modifying settings.
+
+        Args:
+            `adc_1_analog_in` (ADCChannel): input voltage channel to map to ADC1 mux_p
+            `adc_2_analog_in` (ADCChannel): input voltage channel to map to ADC2 mux_p
+            'adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            'adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
+            `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
+            `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
+                Note this affects data rate. Please refer to module documentation
+                for more information.
+            `conversion_mode` (ConvMode): set conversion mode for ADC1.
+                Note, ADC2 runs only in continuous conversion mode.
         """
         # pylint: disable=unused-argument
 
@@ -231,9 +246,7 @@ class EdgePiADC(SPI):
     def set_config(
         self,
         adc_1_analog_in: CH = None,
-        adc_2_analog_in: CH = None,
-        adc1_data_rate: ADC1DataRate = None,
-        adc2_data_rate: ADC2DataRate = None,
+        adc_1_data_rate: ADC1DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
     ):
@@ -241,15 +254,12 @@ class EdgePiADC(SPI):
         Configure user accessible ADC settings, either collectively or individually.
 
         Args:
-            `adc_1_analog_in` (CH): the input voltage channel to measure via ADC1
-            `adc_1_analog_in` (CH): the input voltage channel to measure via ADC2
-            `adc1_data_rate` (ADCDataRate1): ADC1 data rate in samples per second
-            `adc2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
-            `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
+            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC1
+            `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
+            `filter_mode` (FilterMode): filter mode for ADC1.
                 Note this affects data rate. Please refer to module documentation
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
-                Note, ADC2 runs only in continuous conversion mode.
         """
         # pylint: disable=unused-argument
 
