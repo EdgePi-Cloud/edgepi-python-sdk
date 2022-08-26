@@ -107,10 +107,20 @@ class ADCNum(Enum):
     """ADS1263 ADC's"""
 
     ADC_1 = ADCReadInfo(
-        1, ADCReg.REG_INPMUX, 4, ADCComs.COM_START1, ADCComs.COM_RDATA1, ADCComs.COM_STOP1
+        1,
+        ADCReg.REG_INPMUX,
+        4,
+        ADCComs.COM_START1.value,
+        ADCComs.COM_RDATA1.value,
+        ADCComs.COM_STOP1.value,
     )
     ADC_2 = ADCReadInfo(
-        2, ADCReg.REG_ADC2MUX, 3, ADCComs.COM_START2, ADCComs.COM_RDATA2, ADCComs.COM_STOP2
+        2,
+        ADCReg.REG_ADC2MUX,
+        3,
+        ADCComs.COM_START2.value,
+        ADCComs.COM_RDATA2.value,
+        ADCComs.COM_STOP2.value,
     )
 
 

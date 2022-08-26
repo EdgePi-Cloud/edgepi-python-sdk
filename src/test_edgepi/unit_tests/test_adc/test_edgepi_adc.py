@@ -4,6 +4,7 @@
 import sys
 from copy import deepcopy
 from unittest import mock
+from unittest.mock import call
 from contextlib import nullcontext as does_not_raise
 
 sys.modules["periphery"] = mock.MagicMock()
@@ -13,7 +14,7 @@ sys.modules["periphery"] = mock.MagicMock()
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_multiplexers import ChannelMappingError
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCNum, ADCReg
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 adc_default_vals = [
@@ -508,14 +509,41 @@ def test_get_channel_assign_opcodes(
     assert out == expected
 
 
-@pytest.mark.parametrize("mode0_val, expected", [
-    (0x00, False),
-    (0x40, True),
-    (0b11100000, True),
-    (0b10100000, False),
-])
+@pytest.mark.parametrize(
+    "mode0_val, expected",
+    [
+        (0x00, False),
+        (0x40, True),
+        (0b11100000, True),
+        (0b10100000, False),
+    ],
+)
 def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[mode0_val]
     )
     assert adc._EdgePiADC__is_in_pulse_mode() == expected
+
+
+@pytest.mark.parametrize(
+    "adc_num, adc1_pulse_mode, calls",
+    [
+        (ADCNum.ADC_1, False, [call([ADCNum.ADC_1.value.read_cmd])]),
+        (ADCNum.ADC_2, False, [call([ADCNum.ADC_2.value.read_cmd])]),
+        (ADCNum.ADC_2, True, [call([ADCNum.ADC_2.value.read_cmd])]),
+        (
+            ADCNum.ADC_1,
+            True,
+            [call([ADCNum.ADC_1.value.start_cmd]), call([ADCNum.ADC_1.value.read_cmd])],
+        ),
+    ],
+)
+def test_read_voltage(mocker, adc_num, adc1_pulse_mode, calls, adc):
+    transfer = mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
+    )
+    transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+    adc.read_voltage(adc_num)
+    transfer.assert_has_calls(calls)
