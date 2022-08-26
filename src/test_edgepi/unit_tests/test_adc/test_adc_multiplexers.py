@@ -7,9 +7,11 @@ import pytest
 from edgepi.adc.adc_constants import ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_multiplexers import (
+    ChannelNotSetError,
     generate_mux_opcodes,
     _validate_mux_mapping,
     ChannelMappingError,
+    validate_channels_set,
 )
 
 
@@ -258,3 +260,22 @@ def test_validate_mux_mapping(mux_regs, expected):
 ])
 def test_generate_mux_opcodes(mux_updates, mux_values, expected):
     assert generate_mux_opcodes(mux_updates, mux_values) == expected
+
+
+@pytest.mark.parametrize("mux_reg_val, expected_err", [
+    (0x00, does_not_raise()),
+    (0x10, does_not_raise()),
+    (0x20, does_not_raise()),
+    (0x30, does_not_raise()),
+    (0x40, does_not_raise()),
+    (0x50, does_not_raise()),
+    (0x60, does_not_raise()),
+    (0x70, does_not_raise()),
+    (0x80, does_not_raise()),
+    (0x90, does_not_raise()),
+    (0xA0, does_not_raise()),
+    (0xF0, pytest.raises(ChannelNotSetError)),
+])
+def test_validate_channels_set(mux_reg_val, expected_err):
+    with expected_err:
+        validate_channels_set(mux_reg_val)
