@@ -81,11 +81,25 @@ class ADCChannel(Enum):
     FLOAT = 0xF
 
 
+@dataclass
+class ADCReadInfo:
+    """
+    Data for use in performing ADC voltage reads
+
+    Attributes:
+        addx (ADCChannel): addx of this ADC's mux register
+        num_data_bytes (int): number of data bytes for this ADC's reads
+        read_cmd (ADCComs): command to read this ADC's data-holding register
+    """
+    addx: ADCChannel
+    num_data_bytes: int
+    read_cmd: ADCComs
+
+
 class ADCNum(Enum):
     """ADS1263 ADC's"""
-
-    ADC_1 = 1
-    ADC_2 = 2
+    ADC_1 = ADCReadInfo(ADCReg.REG_INPMUX, 4, ADCComs.COM_RDATA1)
+    ADC_2 = ADCReadInfo(ADCReg.REG_ADC2MUX, 3, ADCComs.COM_RDATA2)
 
 
 class ConvMode(Enum):
@@ -126,41 +140,3 @@ class ADCAlarm:
     alarm_type: ADCAlarmTypes
     at_fault: bool
     err_msg: str
-
-
-class ADCRegGroups(Enum):
-    """ ADS1263 Register Update Restart Groups """
-    GROUP_1 = 0
-    GROUP_2 = 1
-    GROUP_3 = 2
-
-
-adc_reg_groups = {
-    ADCReg.REG_ID.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_POWER.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_INTERFACE.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_MODE0.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_MODE1.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_MODE2.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_INPMUX.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_OFCAL0.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_OFCAL1.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_OFCAL2.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_FSCAL0.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_FSCAL1.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_FSCAL2.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_IDACMUX.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_IDACMAG.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_REFMUX.value: ADCRegGroups.GROUP_1.value,
-    ADCReg.REG_TDACP.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_TDACN.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_GPIOCON.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_GPIODIR.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_GPIODAT.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_ADC2CFG.value: ADCRegGroups.GROUP_2.value,
-    ADCReg.REG_ADC2MUX.value: ADCRegGroups.GROUP_2.value,
-    ADCReg.REG_ADC2OFC0.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_ADC2OFC1.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_ADC2FSC0.value: ADCRegGroups.GROUP_3.value,
-    ADCReg.REG_ADC2FSC1.value: ADCRegGroups.GROUP_3.value,
-}

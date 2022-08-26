@@ -21,7 +21,11 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
-from edgepi.adc.adc_multiplexers import generate_mux_opcodes, ChannelMappingError
+from edgepi.adc.adc_multiplexers import (
+    generate_mux_opcodes,
+    ChannelMappingError,
+    validate_channels_set,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -85,6 +89,27 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __write_register -> data out: {out}")
         return out
 
+    def stop_conversions(self):
+        """
+        Halt voltage read conversions when ADC is set to perform continuous conversions
+        """
+        raise NotImplementedError
+
+    def start_conversions(self):
+        """
+        Start voltage read conversions when ADC is set to perform continuous conversions.
+        The read data can be retrieved via the `read_voltage` method.
+        """
+
+    def single_sample(self):
+        """
+        Conduct a single voltage reading when this ADC is set to perform pulse conversions.
+        """
+        # assert in pulse conversion mode
+        # trigger single read for this adc (send START cmd)
+        # call read_voltage
+        raise NotImplementedError
+
     def read_voltage(self, adc: ADCNum):
         """
         Read input voltage from selected ADC
@@ -95,8 +120,16 @@ class EdgePiADC(SPI):
         returns:
             `float`: input voltage read from ADC
         """
-        # TODO: raise Exception if user performs read with MUXP = 0xF
-        raise NotImplementedError
+        # assert this adc not set to float mode
+        mux_reg_val = self.__read_register(adc.value.addx)[0]
+        validate_channels_set(mux_reg_val)
+
+        # read value stored in this ADC's data holding register
+        read_data = self.transfer([adc.value.read_cmd])
+
+        # TODO: convert read_data from code to voltage
+
+        return read_data
 
     def read_adc1_alarms(self):
         """
@@ -162,6 +195,8 @@ class EdgePiADC(SPI):
                 "ADC1 and ADC2 multiplexers must be assigned different input channels"
             )
 
+        # TODO: restrict available channels based on RTD_EN status
+
         adc_mux_updates = {
             ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
@@ -179,7 +214,6 @@ class EdgePiADC(SPI):
 
         return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
 
-    # TODO: refactor this class into intermediate facade
     def __config(
         self,
         adc_1_analog_in: CH = None,
