@@ -89,26 +89,27 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __write_register -> data out: {out}")
         return out
 
-    def stop_conversions(self):
+    def stop_auto_conversions(self):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
+        # assert adc_1 in continuous conv mode
+        # send stop cmd
         raise NotImplementedError
 
-    def start_conversions(self):
+    def start_auto_conversions(self):
         """
         Start voltage read conversions when ADC is set to perform continuous conversions.
         The read data can be retrieved via the `read_voltage` method.
         """
-
-    def single_sample(self):
-        """
-        Conduct a single voltage reading when this ADC is set to perform pulse conversions.
-        """
-        # assert in pulse conversion mode
-        # trigger single read for this adc (send START cmd)
-        # call read_voltage
+        # assert adc_1 in continuous conv mode
+        # send start cmd
         raise NotImplementedError
+
+    def __is_in_pulse_mode(self):
+        """Returns true if ADC1 is in pulse conversion mode else false"""
+        mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
+        return mode_0[1].uint == ConvMode.PULSE.value
 
     def read_voltage(self, adc: ADCNum):
         """
@@ -124,10 +125,17 @@ class EdgePiADC(SPI):
         mux_reg_val = self.__read_register(adc.value.addx)[0]
         validate_channels_set(mux_reg_val)
 
+        # if reading adc1 and in pulse conversion mode, send start cmd
+        if adc.value.id_num == 1 and self.__is_in_pulse_mode():
+            self.transfer([adc.value.start_cmd])
+
+        # TODO: a delay may be needed between read start and data ready
+
         # read value stored in this ADC's data holding register
+        # TODO: does in data frame have to be same size as out data frame?
         read_data = self.transfer([adc.value.read_cmd])
 
-        # TODO: convert read_data from code to voltage
+        # TODO: convert read_data from code to voltage?
 
         return read_data
 

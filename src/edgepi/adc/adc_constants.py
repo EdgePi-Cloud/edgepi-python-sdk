@@ -87,24 +87,36 @@ class ADCReadInfo:
     Data for use in performing ADC voltage reads
 
     Attributes:
+        id_num (int): the ADS1263 ID number of this ADC
         addx (ADCChannel): addx of this ADC's mux register
         num_data_bytes (int): number of data bytes for this ADC's reads
+        start_cmd (ADCComs): command to trigger conversion(s) for this ADC
         read_cmd (ADCComs): command to read this ADC's data-holding register
+        stop_cmd (ADCComs): command to stop conversion(s) for this ADC
     """
+
+    id_num: int
     addx: ADCChannel
     num_data_bytes: int
+    start_cmd: ADCComs
     read_cmd: ADCComs
+    stop_cmd: ADCComs
 
 
 class ADCNum(Enum):
     """ADS1263 ADC's"""
-    ADC_1 = ADCReadInfo(ADCReg.REG_INPMUX, 4, ADCComs.COM_RDATA1)
-    ADC_2 = ADCReadInfo(ADCReg.REG_ADC2MUX, 3, ADCComs.COM_RDATA2)
+
+    ADC_1 = ADCReadInfo(
+        1, ADCReg.REG_INPMUX, 4, ADCComs.COM_START1, ADCComs.COM_RDATA1, ADCComs.COM_STOP1
+    )
+    ADC_2 = ADCReadInfo(
+        2, ADCReg.REG_ADC2MUX, 3, ADCComs.COM_START2, ADCComs.COM_RDATA2, ADCComs.COM_STOP2
+    )
 
 
 class ConvMode(Enum):
     """
-    ADS1263 conversion modes
+    ADS1263 conversion modes for ADC1
 
     Attributes:
 
@@ -112,6 +124,9 @@ class ConvMode(Enum):
 
         `CONTINUOUS`: ADC1 peforms conversions continuously
     """
+
+    CONTINUOUS = 0
+    PULSE = 1
 
 
 class ADC1DataRate(Enum):
