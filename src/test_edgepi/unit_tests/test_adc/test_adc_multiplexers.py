@@ -11,6 +11,8 @@ from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
     _validate_mux_mapping,
     ChannelMappingError,
+    ChannelNotAvailableError,
+    validate_channels_allowed,
     validate_channels_set,
 )
 
@@ -245,16 +247,16 @@ def test_validate_mux_mapping(mux_regs, expected):
     ),
     (
         {
-            ADCReg.REG_INPMUX: (CH.AIN5, CH.AIN6),
-            ADCReg.REG_ADC2MUX: (CH.AIN7, CH.AIN8),
+            ADCReg.REG_INPMUX: (CH.AIN1, CH.AIN2),
+            ADCReg.REG_ADC2MUX: (CH.AIN3, CH.AIN4),
         },
         {
-            ADCReg.REG_INPMUX: [CH.AIN1.value, CH.AIN2.value],
-            ADCReg.REG_ADC2MUX: [CH.AIN3.value, CH.AIN4.value],
+            ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN1.value],
+            ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN3.value],
         },
         [
-            OpCode(0x56, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
-            OpCode(0x78, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
+            OpCode(0x12, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
+            OpCode(0x34, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
         ],
     ),
 ])
@@ -279,3 +281,12 @@ def test_generate_mux_opcodes(mux_updates, mux_values, expected):
 def test_validate_channels_set(mux_reg_val, expected_err):
     with expected_err:
         validate_channels_set(mux_reg_val)
+
+
+@pytest.mark.parametrize("channels, rtd_enabled, err_type", [
+    ([CH.AIN1], True, does_not_raise()),
+    ([CH.AIN4], False, pytest.raises(ChannelNotAvailableError)),
+])
+def test_validate_channels_allowed(channels, rtd_enabled, err_type):
+    with err_type:
+        validate_channels_allowed(channels, rtd_enabled)

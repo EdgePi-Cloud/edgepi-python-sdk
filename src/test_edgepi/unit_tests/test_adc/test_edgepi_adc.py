@@ -93,8 +93,8 @@ def test_read_registers_to_map(mocker, adc):
         # set both adc analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN9, "adc_2_analog_in": CH.AIN5},
-            {ADCReg.REG_INPMUX.value: 0x91, ADCReg.REG_ADC2MUX.value: 0x53},
+            {"adc_1_analog_in": CH.AIN7, "adc_2_analog_in": CH.AIN5},
+            {ADCReg.REG_INPMUX.value: 0x71, ADCReg.REG_ADC2MUX.value: 0x53},
             does_not_raise(),
         ),
         # set adc1 mux_n
@@ -121,20 +121,20 @@ def test_read_registers_to_map(mocker, adc):
         # set both adc mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_mux_n": CH.AIN9, "adc_2_mux_n": CH.AIN5},
-            {ADCReg.REG_INPMUX.value: 0x09, ADCReg.REG_ADC2MUX.value: 0x25},
+            {"adc_1_mux_n": CH.AIN7, "adc_2_mux_n": CH.AIN5},
+            {ADCReg.REG_INPMUX.value: 0x07, ADCReg.REG_ADC2MUX.value: 0x25},
             does_not_raise(),
         ),
         # set all mux pins
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {
-                "adc_1_mux_n": CH.AIN9,
+                "adc_1_mux_n": CH.AIN7,
                 "adc_2_mux_n": CH.AIN0,
-                "adc_1_analog_in": CH.AIN8,
+                "adc_1_analog_in": CH.AIN6,
                 "adc_2_analog_in": CH.AIN5,
             },
-            {ADCReg.REG_INPMUX.value: 0x89, ADCReg.REG_ADC2MUX.value: 0x50},
+            {ADCReg.REG_INPMUX.value: 0x67, ADCReg.REG_ADC2MUX.value: 0x50},
             does_not_raise(),
         ),
         # set adc1 analog_in to pin in use on adc2
@@ -186,6 +186,9 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
     adc_vals = deepcopy(adc_default_vals)
     for addx, reg_val in reg_updates.items():
         adc_vals[addx] = reg_val
+
+    # mock RTD_EN as on
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=True)
 
     # mock each call to __read_register
     mocker.patch(
@@ -305,7 +308,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
             None,
             None,
             CH.AIN7,
-            CH.AIN8,
+            CH.AIN6,
             [
                 OpCode(
                     op_code=0x07,
@@ -313,7 +316,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
                     op_mask=BitMask.LOW_NIBBLE.value,
                 ),
                 OpCode(
-                    op_code=0x08,
+                    op_code=0x06,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.LOW_NIBBLE.value,
                 ),
@@ -321,13 +324,13 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
         ),
         (
             [0x12, 0x34],
-            CH.AIN8,
+            CH.AIN6,
             None,
-            CH.AIN9,
+            CH.AIN7,
             None,
             [
                 OpCode(
-                    op_code=0x89,
+                    op_code=0x67,
                     reg_address=ADCReg.REG_INPMUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
@@ -390,7 +393,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
             CH.AIN5,
             CH.AIN7,
             CH.AIN6,
-            CH.AIN8,
+            CH.AIN4,
             [
                 OpCode(
                     op_code=0x56,
@@ -398,7 +401,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
                     op_mask=BitMask.BYTE.value,
                 ),
                 OpCode(
-                    op_code=0x78,
+                    op_code=0x74,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
@@ -409,7 +412,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
             CH.AIN0,
             None,
             CH.AIN2,
-            CH.AIN8,
+            CH.AIN7,
             [
                 OpCode(
                     op_code=0x02,
@@ -417,7 +420,7 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
                     op_mask=BitMask.BYTE.value,
                 ),
                 OpCode(
-                    op_code=0x08,
+                    op_code=0x07,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.LOW_NIBBLE.value,
                 ),
@@ -499,6 +502,8 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
 def test_get_channel_assign_opcodes(
     mocker, mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected, adc
 ):
+    # mock RTD_EN as on
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=True)
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         side_effect=[[mux_map[0]], [mux_map[1]]],

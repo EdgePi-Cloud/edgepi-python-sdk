@@ -224,7 +224,7 @@ class EdgePiADC(SPI):
             return []
 
         # allowed channels depend on RTD_EN status
-        channels = filter(lambda x: x is not None, args.values())
+        channels = list(filter(lambda x: x is not None, args.values()))
         rtd_enabled = self.__get_rtd_en_status()
         validate_channels_allowed(channels, rtd_enabled)
 
