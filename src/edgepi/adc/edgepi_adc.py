@@ -3,6 +3,7 @@
 
 from enum import Enum
 import logging
+import time
 
 from bitstring import pack
 from edgepi.peripherals.spi import SpiDevice as SPI
@@ -111,7 +112,21 @@ class EdgePiADC(SPI):
         mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
         return mode_0[1] == bool(ConvMode.PULSE.value)
 
-    def read_voltage(self, adc: ADCNum):
+    def __get_data_read_len(self):
+        read_config = pack("uint:8", self.__read_register(ADCReg.REG_INTERFACE)[0])
+
+        # basic read length: 4 data bytes (adc1) or 3 data bytes + 1 zeros byte (adc2)
+        read_bytes = 5
+
+        # checksum byte enabled?
+        if read_config[6:8].uint != 0x0:
+            read_bytes += 1
+        # status byte enabled?
+        read_bytes += int(read_config[5])
+
+        return read_bytes
+
+    def read_voltage(self):
         """
         Read input voltage from selected ADC
 
@@ -121,6 +136,9 @@ class EdgePiADC(SPI):
         returns:
             `float`: input voltage read from ADC
         """
+        # TODO: when ADC2 functionality is needed, convert this to parameter.
+        adc = ADCNum.ADC_1
+
         # assert this adc not set to float mode
         mux_reg_val = self.__read_register(adc.value.addx)[0]
         validate_channels_set(mux_reg_val)
@@ -129,13 +147,14 @@ class EdgePiADC(SPI):
         if adc.value.id_num == 1 and self.__is_in_pulse_mode():
             self.transfer([adc.value.start_cmd])
 
-        # TODO: a delay may be needed between read start and data ready
+        # TODO: compute delay based on settings
+        time.sleep(0.5)
 
         # read value stored in this ADC's data holding register
-        # TODO: does in data frame have to be same size as out data frame?
-        read_data = self.transfer([adc.value.read_cmd])
+        num_bytes = self.__get_data_read_len()
+        read_data = self.transfer([adc.value.read_cmd] + [255] * num_bytes)
 
-        # TODO: convert read_data from code to voltage?
+        # TODO: convert read_data from code to voltage
 
         return read_data
 

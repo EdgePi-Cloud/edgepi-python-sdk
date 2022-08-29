@@ -211,4 +211,12 @@ class BitMask(Enum):
 
     LOW_NIBBLE = 0xF0  # overwrite low nibble bits, let high nibble bits pass
     HIGH_NIBBLE = 0x0F  # overwrite high nibble bits, let low nibble bits pass
-    BYTE = 0x00  # overwrite all bits
+    BYTE = 0x00 # overwrite all bits
+    BIT0 = 0xFE # overwrite bit 0
+    BIT1 = 0xFD # overwrite bit 1
+    BIT2 = 0xFB # overwrite bit 2
+    BIT3 = 0xF7 # overwrite bit 3
+    BIT4 = 0xEF # overwrite bit 4
+    BIT5 = 0xDF # overwrite bit 5
+    BIT6 = 0xBF # overwrite bit 6
+    BIT7 = 0x7F # overwrite bit 7

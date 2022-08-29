@@ -4,6 +4,8 @@
 from dataclasses import dataclass
 from enum import Enum, unique
 
+from edgepi.reg_helper.reg_helper import BitMask, OpCode
+
 
 ADC_NUM_REGS = 27
 
@@ -135,8 +137,8 @@ class ConvMode(Enum):
         `CONTINUOUS`: ADC1 peforms conversions continuously
     """
 
-    CONTINUOUS = 0
-    PULSE = 1
+    CONTINUOUS = OpCode(0x00, ADCReg.REG_MODE0.value, BitMask.BIT6.value)
+    PULSE = OpCode(0x40, ADCReg.REG_MODE0.value, BitMask.BIT6.value)
 
 
 class ADC1DataRate(Enum):

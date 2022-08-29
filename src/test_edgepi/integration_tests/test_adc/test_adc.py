@@ -4,7 +4,7 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_multiplexers import ChannelMappingError
 
@@ -22,19 +22,21 @@ def test_read_register_individual(adc):
         # output data frame bytes = [null, null, reg_data]
         assert len(out) == 1
 
+
 # __init__ configures INPMUX = 0xFA
+
 
 @pytest.mark.parametrize(
     "args, expected_vals, err",
     [
-         (
+        (
             {
                 "adc_1_analog_in": CH.AIN2,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
             },
-            does_not_raise()
+            does_not_raise(),
         ),
         (
             {
@@ -43,7 +45,7 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0xF2,
             },
-            does_not_raise()
+            does_not_raise(),
         ),
         (
             {
@@ -56,7 +58,7 @@ def test_read_register_individual(adc):
                 ADCReg.REG_INPMUX.value: 0x13,
                 ADCReg.REG_ADC2MUX.value: 0x24,
             },
-            does_not_raise()
+            does_not_raise(),
         ),
         (
             {
@@ -67,7 +69,7 @@ def test_read_register_individual(adc):
                 ADCReg.REG_INPMUX.value: 0x2A,
                 ADCReg.REG_ADC2MUX.value: 0x21,
             },
-            does_not_raise()
+            does_not_raise(),
         ),
         (
             {
@@ -76,7 +78,7 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0xAA,
             },
-            pytest.raises(ChannelMappingError)
+            pytest.raises(ChannelMappingError),
         ),
         (
             {
@@ -86,7 +88,7 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0x11,
             },
-            pytest.raises(ChannelMappingError)
+            pytest.raises(ChannelMappingError),
         ),
     ],
 )
@@ -105,3 +107,17 @@ def test_config(args, expected_vals, err, adc):
         # reset adc registers to pre-test values
         # TODO: replace with reset command once implemented
         adc._EdgePiADC__write_register(ADCReg.REG_ID, regs)
+
+
+def test_read_voltage(adc):
+    # set adc read channel and pulse mode
+    for ch in CH:
+        if ch != CH.FLOAT:
+            args = {
+                "adc_1_analog_in": ch,
+                "conversion_mode": ConvMode.PULSE,
+                "adc_1_mux_n": CH.FLOAT,
+            }
+            adc._EdgePiADC__config(**args)
+            data = adc.read_voltage()
+            assert len(data) == 7
