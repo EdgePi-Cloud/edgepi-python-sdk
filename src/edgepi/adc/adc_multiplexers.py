@@ -18,7 +18,14 @@ class ChannelMappingError(ValueError):
 class ChannelNotSetError(Exception):
     """
     Raised when a read_voltage operation is requested for an ADC
-     whose positive multiplexer is set to floating mode.
+    whose positive multiplexer is set to floating mode.
+    """
+
+
+class ChannelNotAvailableError(ValueError):
+    """
+    Raised when an input channel is unavailable for mapping to a multiplexer
+    due to RTD_EN status.
     """
 
 
@@ -142,3 +149,24 @@ def _validate_mux_mapping(mux_values: dict):
         # second clause excepts the case where both muxs assigned to float mode (allowed)
         if len(mux_set) < MUXS_PER_ADC and mode_counter < MUXS_PER_ADC:
             raise ChannelMappingError("Attempting to assign channel already in use")
+
+
+def validate_channels_allowed(channels: list, rtd_enabled: bool):
+    """
+    Checks if requested input channels to be mapped are available due to RTD_EN status
+
+    Args:
+        channels (list): ADCChannel members, input channel mapping
+        rtd_enabled (bool): RTD_EN status
+    """
+    # channels available depend on RTD_EN status
+    allowed_channels = (
+        [ch for ch in CH]
+        if rtd_enabled
+        else [CH.AIN0, CH.AIN1, CH.AIN2, CH.AIN3, CH.AINCOM, CH.FLOAT]
+    )
+    for ch in channels:
+        if ch not in allowed_channels:
+            raise ChannelNotAvailableError(
+                f"Channel {ch.value} is currently not available. Enable RTD in order to use."
+            )

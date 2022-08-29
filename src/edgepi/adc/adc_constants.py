@@ -77,8 +77,6 @@ class ADCChannel(Enum):
     AIN5 = 5
     AIN6 = 6
     AIN7 = 7
-    AIN8 = 8
-    AIN9 = 9
     AINCOM = 10
     FLOAT = 0xF
 

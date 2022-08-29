@@ -26,6 +26,7 @@ from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
     ChannelMappingError,
     validate_channels_set,
+    validate_channels_allowed,
 )
 
 
@@ -186,6 +187,11 @@ class EdgePiADC(SPI):
 
         return reg_dict
 
+    def __get_rtd_en_status(self):
+        idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
+        idac_1 = idac_mag[4:].uint
+        return idac_1 == 0x0
+
     def __get_channel_assign_opcodes(
         self,
         adc_1_mux_p: CH = None,
@@ -217,12 +223,15 @@ class EdgePiADC(SPI):
         if all(x is None for x in list(args.values())):
             return []
 
+        # allowed channels depend on RTD_EN status
+        channels = filter(lambda x: x is not None, args.values())
+        rtd_enabled = self.__get_rtd_en_status()
+        validate_channels_allowed(channels, rtd_enabled)
+
         if len(args) != len(set(args)):
             raise ChannelMappingError(
                 "ADC1 and ADC2 multiplexers must be assigned different input channels"
             )
-
-        # TODO: restrict available channels based on RTD_EN status
 
         adc_mux_updates = {
             ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
