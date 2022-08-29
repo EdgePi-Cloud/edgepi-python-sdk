@@ -1,6 +1,7 @@
 """ Integration tests for EdgePi ADC module """
 
 
+import time
 from contextlib import nullcontext as does_not_raise
 
 import pytest
@@ -109,17 +110,35 @@ def test_config(args, expected_vals, err, adc):
         adc._EdgePiADC__write_register(ADCReg.REG_ID, regs)
 
 
-def test_read_voltage(adc):
+def test_read_voltage_pulse(adc):
     read_len = adc._EdgePiADC__get_data_read_len()
-    # set adc read channel and pulse mode
+    adc._EdgePiADC__config(conversion_mode=ConvMode.PULSE)
     for ch in CH:
         if ch != CH.FLOAT:
             args = {
                 "adc_1_analog_in": ch,
-                "conversion_mode": ConvMode.PULSE,
                 "adc_1_mux_n": CH.FLOAT,
             }
             adc._EdgePiADC__config(**args)
             data = adc.read_voltage()
+            print(data)
             assert len(data[1:]) == read_len
-            assert data[1:] != [0, 0, 0, 0, 0]
+            assert data[1:] != [0] * read_len
+
+
+def test_read_voltage_continuous(adc):
+    read_len = adc._EdgePiADC__get_data_read_len()
+    adc._EdgePiADC__config(conversion_mode=ConvMode.CONTINUOUS)
+    adc.start_auto_conversions()
+    for ch in CH:
+        if ch != CH.FLOAT:
+            args = {
+                "adc_1_analog_in": ch,
+                "adc_1_mux_n": CH.FLOAT,
+            }
+            adc._EdgePiADC__config(**args)
+            data = adc.read_voltage()
+            print(data)
+            assert len(data[1:]) == read_len
+            assert data[1:] != [0] * read_len
+    adc.stop_auto_conversions()

@@ -94,23 +94,23 @@ class EdgePiADC(SPI):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        # assert adc_1 in continuous conv mode
-        # send stop cmd
-        raise NotImplementedError
+        # TODO: convert to parameter when ADC2 added
+        adc = ADCNum.ADC_1.value
+        self.transfer([adc.stop_cmd])
 
     def start_auto_conversions(self):
         """
         Start voltage read conversions when ADC is set to perform continuous conversions.
         The read data can be retrieved via the `read_voltage` method.
         """
-        # assert adc_1 in continuous conv mode
-        # send start cmd
-        raise NotImplementedError
+        # TODO: convert to parameter when ADC2 added
+        adc = ADCNum.ADC_1.value
+        self.transfer([adc.start_cmd])
 
     def __is_in_pulse_mode(self):
         """Returns true if ADC1 is in pulse conversion mode else false"""
         mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
-        return mode_0[1] == bool(ConvMode.PULSE.value)
+        return mode_0[1] is True
 
     def __get_data_read_len(self):
         read_config = pack("uint:8", self.__read_register(ADCReg.REG_INTERFACE)[0])

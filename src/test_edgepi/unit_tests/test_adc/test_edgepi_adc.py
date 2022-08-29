@@ -568,7 +568,6 @@ def test_get_data_read_len(mocker, interface_reg, expected_len, adc):
     assert adc._EdgePiADC__get_data_read_len() == expected_len
 
 
-# TODO: when ADC2 functionality is added, use this format instead
 @pytest.mark.parametrize(
     "adc1_pulse_mode, call_1, cmd_2, read_len",
     [
