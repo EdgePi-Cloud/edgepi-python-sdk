@@ -525,25 +525,26 @@ def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
     assert adc._EdgePiADC__is_in_pulse_mode() == expected
 
 
-@pytest.mark.parametrize(
-    "adc_num, adc1_pulse_mode, calls",
-    [
-        (ADCNum.ADC_1, False, [call([ADCNum.ADC_1.value.read_cmd])]),
-        (ADCNum.ADC_2, False, [call([ADCNum.ADC_2.value.read_cmd])]),
-        (ADCNum.ADC_2, True, [call([ADCNum.ADC_2.value.read_cmd])]),
-        (
-            ADCNum.ADC_1,
-            True,
-            [call([ADCNum.ADC_1.value.start_cmd]), call([ADCNum.ADC_1.value.read_cmd])],
-        ),
-    ],
-)
-def test_read_voltage(mocker, adc_num, adc1_pulse_mode, calls, adc):
-    transfer = mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
-    )
-    transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
-    adc.read_voltage(adc_num)
-    transfer.assert_has_calls(calls)
+# TODO: when ADC2 functionality is added, use this format instead
+# @pytest.mark.parametrize(
+#     "adc_num, adc1_pulse_mode, calls",
+#     [
+#         (ADCNum.ADC_1, False, [call([ADCNum.ADC_1.value.read_cmd])]),
+#         (ADCNum.ADC_2, False, [call([ADCNum.ADC_2.value.read_cmd])]),
+#         (ADCNum.ADC_2, True, [call([ADCNum.ADC_2.value.read_cmd])]),
+#         (
+#             ADCNum.ADC_1,
+#             True,
+#             [call([ADCNum.ADC_1.value.start_cmd]), call([ADCNum.ADC_1.value.read_cmd])],
+#         ),
+#     ],
+# )
+# def test_read_voltage(mocker, adc_num, adc1_pulse_mode, calls, adc):
+#     transfer = mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
+#     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
+#     mocker.patch(
+#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
+#     )
+#     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+#     adc.read_voltage(adc_num)
+#     transfer.assert_has_calls(calls)

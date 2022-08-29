@@ -110,6 +110,7 @@ def test_config(args, expected_vals, err, adc):
 
 
 def test_read_voltage(adc):
+    read_len = adc._EdgePiADC__get_data_read_len()
     # set adc read channel and pulse mode
     for ch in CH:
         if ch != CH.FLOAT:
@@ -120,4 +121,5 @@ def test_read_voltage(adc):
             }
             adc._EdgePiADC__config(**args)
             data = adc.read_voltage()
-            assert len(data) == 7
+            assert len(data[1:]) == read_len
+            assert data[1:] != [0, 0, 0, 0, 0]

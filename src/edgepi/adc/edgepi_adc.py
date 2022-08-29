@@ -116,7 +116,7 @@ class EdgePiADC(SPI):
         read_config = pack("uint:8", self.__read_register(ADCReg.REG_INTERFACE)[0])
 
         # basic read length: 4 data bytes (adc1) or 3 data bytes + 1 zeros byte (adc2)
-        read_bytes = 5
+        read_bytes = 4
 
         # checksum byte enabled?
         if read_config[6:8].uint != 0x0:
