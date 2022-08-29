@@ -548,3 +548,18 @@ def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
 #     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
 #     adc.read_voltage(adc_num)
 #     transfer.assert_has_calls(calls)
+
+
+@pytest.mark.parametrize("interface_reg, expected_len", [
+    (0x00, 4),
+    (0x01, 5),
+    (0x02, 5),
+    (0x04, 5),
+    (0x05, 6),
+    (0x06, 6),
+])
+def test_get_data_read_len(mocker, interface_reg, expected_len, adc):
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[interface_reg]
+    )
+    assert adc._EdgePiADC__get_data_read_len() == expected_len
