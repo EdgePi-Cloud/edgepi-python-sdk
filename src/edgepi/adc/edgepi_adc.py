@@ -12,7 +12,9 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel as CH,
+    ADCComs,
     ADCNum,
+    ADCPower,
     ConvMode,
     ADCReg,
     FilterMode,
@@ -25,7 +27,6 @@ from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
     ChannelMappingError,
-    validate_channels_set,
     validate_channels_allowed,
 )
 
@@ -41,11 +42,12 @@ class EdgePiADC(SPI):
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         self.gpio.set_expander_default()
+        # TODO: expander_pin might need changing in the future
+        self.gpio.set_expander_pin("GNDSW_IN1")
         # TODO: non-user configs
         # - set gain
-        # configure ADC1 -> MUXP = floating, MUXN = AINCOM
         self.__config(adc_1_analog_in=CH.FLOAT, adc_1_mux_n=CH.AINCOM)
-        # - enable CRC mode for checksum -> potentially will allow user
+        # TODO: - enable CRC mode for checksum -> potentially will allow user
         #   to configure this in set_config if too much overhead.
         # - RTD off by default --> leave default settings for related regs
 
@@ -91,73 +93,123 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __write_register -> data out: {out}")
         return out
 
-    def stop_auto_conversions(self):
+    def stop_conversions(self):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        # TODO: convert to parameter when ADC2 added
+        # TODO: convert adc_num to parameter when ADC2 added
         adc = ADCNum.ADC_1.value
         self.transfer([adc.stop_cmd])
 
-    def start_auto_conversions(self):
+    def start_conversions(self):
         """
-        Start voltage read conversions when ADC is set to perform continuous conversions.
-        The read data can be retrieved via the `read_voltage` method.
+        Start voltage read conversions. If ADC is continuous conversion mode,
+        this method must be called before performing reads. If ADC is in
+        pulse conversion mode, this method does not need to be called before
+        performing reads.
         """
-        # TODO: convert to parameter when ADC2 added
-        adc = ADCNum.ADC_1.value
-        self.transfer([adc.start_cmd])
+        # TODO: convert adc_num to parameter when ADC2 added
+        adc_num = ADCNum.ADC_1.value
+        start_cmd = self.adc_ops.start_adc(adc_num=adc_num)
+        self.transfer(start_cmd)
+        # TODO: compute conversion time delay + wait here
+        # - may not be needed for auto_mode though, include param
+        # option to use time delay
+        time.sleep(0.5)
 
     def __is_in_pulse_mode(self):
         """Returns true if ADC1 is in pulse conversion mode else false"""
         mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
         return mode_0[1] is True
 
-    def __get_data_read_len(self):
-        read_config = pack("uint:8", self.__read_register(ADCReg.REG_INTERFACE)[0])
-
-        # basic read length: 4 data bytes (adc1) or 3 data bytes + 1 zeros byte (adc2)
+    # TODO: refactor this to be simple bool check of params
+    def __get_data_read_len(self, status_byte: bool, check_byte: bool = True):
+        """
+        Returns voltage read data frame size in bytes, depending on whether
+        reads are currently configured to include the STATUS and CRC/CHK bytes
+        """
+        # basic read length: 4 data bytes (adc1), 3 data bytes + 1 null byte (adc2)
         read_bytes = 4
 
-        # checksum byte enabled?
-        if read_config[6:8].uint != 0x0:
-            read_bytes += 1
-        # status byte enabled?
-        read_bytes += int(read_config[5])
+        return read_bytes + int(status_byte) + int(check_byte)
 
-        return read_bytes
+    def clear_reset_bit(self):
+        """
+        Clear the ADC RESET bit of POWER register, in order to enable detecting
+        new ADC resets through the STATUS byte of a voltage read.
+        """
+        self.__config(reset_clear=ADCPower.RESET_CLEAR)
+
+    def __read_data(self, adc: ADCNum, data_size: int):
+        return self.transfer([adc.value.read_cmd] + [255] * data_size)
+
+    def single_sample(self, status_byte: bool=False):
+        """
+        Perform a single ADC1 voltage read in PULSE conversion mode.
+        Note, do not call this method for voltage reading if ADC is configured
+        to CONTINUOUS conversion mode: use `read_voltage` instead.
+        """
+        self.start_conversions()
+
+        num_bytes = self.__get_data_read_len(status_byte=status_byte)
+        read_data = self.__read_data(adc=ADCNum.ADC_1, data_size=num_bytes)
+
+        # TODO: check CRC
+        # TODO: convert read_data from code to voltage
+
+        return read_data
+
 
     def read_voltage(self):
         """
         Read input voltage from selected ADC
 
-        Args:
-            `adc` (ADCNum): the ADC from which to read input voltage
-
-        returns:
+        Returns:
             `float`: input voltage read from ADC
         """
         # TODO: when ADC2 functionality is needed, convert this to parameter.
         adc = ADCNum.ADC_1
 
         # assert this adc not set to float mode
-        mux_reg_val = self.__read_register(adc.value.addx)[0]
-        validate_channels_set(mux_reg_val)
+        # TODO: check if necessary: what happens if you read_voltage in floating mode
+        # is the output garbage, and can you tell this from the data before conversion?
+        # i.e. if data returned is garbage, then raise FloatMode error.
+        # mux_reg_val = self.__read_register(adc.value.addx)[0]
+        # validate_channels_set(mux_reg_val)
 
         # if reading adc1 and in pulse conversion mode, send start cmd
+        # TODO: replace with adc == ADCNum.ADC_1
+        # TODO: checking for pulse mode may conflict with high data rate
+        # refactor to 2 functions to avoid calling read_register twice
+        # or 1 function with passing in is_pulse_mode as boolean
         if adc.value.id_num == 1 and self.__is_in_pulse_mode():
+            # TODO: call the helper function instead of rewriting here
             self.transfer([adc.value.start_cmd])
 
-        # TODO: compute delay based on settings
-        time.sleep(0.5)
-
         # read value stored in this ADC's data holding register
-        num_bytes = self.__get_data_read_len()
+
+        # TODO: refactor to private function that returns status, data, crc
+        # with include status byte being optional
+        # - enable crc byte by default in __init__, don't allow disabling it
+        # - determine number of bytes based on parameter states
+        # - only retrieve STATUS if parameter is TRUE to avoid register reading
+        num_bytes = self.__get_data_read_len(True, True)
         read_data = self.transfer([adc.value.read_cmd] + [255] * num_bytes)
+
+        # TODO: check CRC
 
         # TODO: convert read_data from code to voltage
 
         return read_data
+
+    def is_data_ready(self):
+        read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
+        # start = time.perf_counter_ns()
+        # adc_1_bit = pack("uint:8", read_data[1])
+        # adc_1_bit = read_data[1] & 0b01000000
+        # end = time.perf_counter_ns()
+        # print(f"pack time (ms): {(end-start)*10**-6}")
+        return read_data[1] & 0b01000000
 
     def read_adc1_alarms(self):
         """
@@ -262,6 +314,7 @@ class EdgePiADC(SPI):
         conversion_mode: ConvMode = None,
         checksum_mode=None,
         gain=None,
+        reset_clear: ADCPower = None,
     ):
         """
         Configure all ADC settings, either collectively or individually.

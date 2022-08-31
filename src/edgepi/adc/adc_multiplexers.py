@@ -44,6 +44,7 @@ def validate_channels_set(mux_reg_val: int):
 
     if mux_reg_bits[:4].uint == CH.FLOAT.value:
         raise ChannelNotSetError(
+            # TODO: check if includes newline
             """
             ADC cannot read voltage while set to floating mode:
                 please set to read from an analog input channel.

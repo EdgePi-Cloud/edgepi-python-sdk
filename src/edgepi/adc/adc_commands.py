@@ -3,7 +3,7 @@
 
 import logging
 
-from edgepi.adc.adc_constants import ADCComs
+from edgepi.adc.adc_constants import ADCComs, ADCNum
 
 
 _logger = logging.getLogger(__name__)
@@ -32,15 +32,17 @@ class ADCCommands:
         _logger.debug("Command to send is %s", (command + values))
         return command + values
 
-    def start_adc1(self):
+    def start_adc(self, adc_num: ADCNum):
         """Command to start ADC"""
-        _logger.debug("Command to send is %s", ([ADCComs.COM_START1.value]))
-        return [ADCComs.COM_START1.value]
+        _logger.debug("Command to send is %s", ([adc_num.start_cmd]))
+        return [adc_num.start_cmd]
 
-    def stop_adc1(self):
+
+    def stop_adc(self, adc_num: ADCNum):
         """Command to stop ADC"""
-        _logger.debug("Command to send is %s", ([ADCComs.COM_STOP1.value]))
-        return [ADCComs.COM_STOP1.value]
+        _logger.debug("Command to send is %s", ([adc_num.stop_cmd]))
+        return [adc_num.stop_cmd]
+
 
     def reset_adc(self):
         """Command to reset ADC"""

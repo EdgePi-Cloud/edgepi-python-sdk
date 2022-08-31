@@ -141,14 +141,40 @@ class ConvMode(Enum):
 
 class ADC1DataRate(Enum):
     """ADS1263 data rates for ADC1"""
+    SPS_2P5 = OpCode(0x0, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_5 = OpCode(0x1, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_10 = OpCode(0x2, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_16P6 = OpCode(0x3, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_20 = OpCode(0x4, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_50 = OpCode(0x5, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_60 = OpCode(0x6, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_100 = OpCode(0x7, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_400 = OpCode(0x8, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_1200 = OpCode(0x9, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_2400 = OpCode(0xA, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_4800 = OpCode(0xB, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_7200 = OpCode(0xC, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_14400 = OpCode(0xD, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_19200 = OpCode(0xE, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
+    SPS_38400 = OpCode(0xF, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
 
 
 class ADC2DataRate(Enum):
     """ADS1263 data rates for ADC2"""
 
 
+class ADCMasks(Enum):
+    """ADS1263 OpCode bit masks"""
+    FILTER_BITS = 0x1F  # overwrite bits 7:5 (0-indexed)
+
+
 class FilterMode(Enum):
     """ADC filter modes, for both ADC1 and ADC2"""
+    SINC1 = OpCode(0x0, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+    SINC2 = OpCode(0x20, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+    SINC3 = OpCode(0x40, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+    SINC4 = OpCode(0x60, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+    FIR = OpCode(0x80, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
 
 
 class ADCAlarmTypes(Enum):
@@ -165,3 +191,8 @@ class ADCAlarm:
     alarm_type: ADCAlarmTypes
     at_fault: bool
     err_msg: str
+
+
+class ADCPower(Enum):
+    """OpCodes for configuring the ADS1263 POWER register"""
+    RESET_CLEAR = OpCode(0x0, ADCReg.REG_POWER.value, BitMask.BIT4.value)
