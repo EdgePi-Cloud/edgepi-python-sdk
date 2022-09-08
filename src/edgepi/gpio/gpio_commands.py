@@ -30,7 +30,7 @@ def get_pin_config_address(config:GpioExpanderConfig = None ):
         pin output port (output level) register address
     '''
     return (GPIOAddresses.CONFIGURATION_PORT_0.value, GPIOAddresses.OUTPUT_PORT_0.value)\
-        if config.port == 'A' else\
+        if config.port == 'B' else\
             (GPIOAddresses.CONFIGURATION_PORT_1.value, GPIOAddresses.OUTPUT_PORT_1.value)
 
 def get_default_values(reg_dict: dict = None, pin_list: list = None):

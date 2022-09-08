@@ -129,9 +129,9 @@ def test_set_expander_default(mock_transfer,
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:0, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [True, True, {2:128, 6:0}]
+                                                                    {32:{3:0, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [True, True, {3:128, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN2',
@@ -139,9 +139,9 @@ def test_set_expander_default(mock_transfer,
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:128, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [True, True, {2:144, 6:0}]
+                                                                    {32:{3:128, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [True, True, {3:144, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN6',
@@ -149,9 +149,9 @@ def test_set_expander_default(mock_transfer,
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:144, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [True, True, {2:148, 6:0}]
+                                                                    {32:{3:144, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [True, True, {3:148, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN1',
@@ -159,8 +159,8 @@ def test_set_expander_default(mock_transfer,
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {33:{3:0, 7:0}}],
-                                                                   [True, True, {3:2, 7:0}]
+                                                                    {33:{2:0, 6:0}}],
+                                                                   [True, True, {2:2, 6:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN2',
@@ -168,8 +168,8 @@ def test_set_expander_default(mock_transfer,
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {33:{3:2, 7:0}}],
-                                                                   [True, True, {3:6, 7:0}]
+                                                                    {33:{2:2, 6:0}}],
+                                                                   [True, True, {2:6, 6:0}]
                                                                   )
                                                                  ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
@@ -195,9 +195,9 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:148, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [False, False, {2:20, 6:0}]
+                                                                    {32:{3:148, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [False, False, {3:20, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN2',
@@ -205,9 +205,9 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:255, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [False, False, {2:239, 6:0}]
+                                                                    {32:{3:255, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [False, False, {3:239, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.DAC.value,
                                                                    'AO_EN6',
@@ -215,9 +215,9 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {32:{2:132, 6:0},
-                                                                     33:{2:0, 6:0}}],
-                                                                   [False, False, {2:128, 6:0}]
+                                                                    {32:{3:132, 7:0},
+                                                                     33:{3:0, 7:0}}],
+                                                                   [False, False, {3:128, 7:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN1',
@@ -225,8 +225,8 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {33:{3:6, 7:0}}],
-                                                                   [False, False, {3:4, 7:0}]
+                                                                    {33:{2:6, 6:0}}],
+                                                                   [False, False, {2:4, 6:0}]
                                                                   ),
                                                                   (GpioConfigs.ADC.value,
                                                                    'GNDSW_IN2',
@@ -234,8 +234,8 @@ def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, 
                                                                     0,
                                                                     [0, 0],
                                                                     [0, 0],
-                                                                    {33:{3:6, 7:0}}],
-                                                                   [False, False, {3:2, 7:0}]
+                                                                    {33:{2:6, 6:0}}],
+                                                                   [False, False, {2:2, 6:0}]
                                                                   )
                                                                  ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
