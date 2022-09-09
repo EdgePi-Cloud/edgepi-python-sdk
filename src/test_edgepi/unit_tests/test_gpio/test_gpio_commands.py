@@ -25,17 +25,17 @@ def test_get_periph_config(config, result):
 
 @pytest.mark.parametrize('config, result',
                        [(GpioConfigs.DAC.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
-                          GPIOAddresses.OUTPUT_PORT_0.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
+                          GPIOAddresses.OUTPUT_PORT_1.value]),
                         (GpioConfigs.ADC.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value]),
                         (GpioConfigs.RTD.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value]),
                         (GpioConfigs.LED.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value])
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value])
                         ])
 def test_get_pin_config_address(config, result):
     pin_config, pin_out = get_pin_config_address(config)

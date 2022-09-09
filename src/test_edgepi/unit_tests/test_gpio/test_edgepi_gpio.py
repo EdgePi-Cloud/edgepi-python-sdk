@@ -18,10 +18,10 @@ def fixture_mock_i2c_lib(mocker):
     yield mocker.patch('edgepi.peripherals.i2c.I2C')
 
 @pytest.mark.parametrize("mock_expect,config, result",
-                        [(['/dev/i2c-10'],GpioConfigs.DAC.value,[GpioConfigs.DAC.value,6,2]),
-                         (['/dev/i2c-10'],GpioConfigs.ADC.value,[GpioConfigs.ADC.value,7,3]),
-                         (['/dev/i2c-10'],GpioConfigs.RTD.value,[GpioConfigs.RTD.value,7,3]),
-                         (['/dev/i2c-10'],GpioConfigs.LED.value,[GpioConfigs.LED.value,7,3]),
+                        [(['/dev/i2c-10'],GpioConfigs.DAC.value,[GpioConfigs.DAC.value,7,3]),
+                         (['/dev/i2c-10'],GpioConfigs.ADC.value,[GpioConfigs.ADC.value,6,2]),
+                         (['/dev/i2c-10'],GpioConfigs.RTD.value,[GpioConfigs.RTD.value,6,2]),
+                         (['/dev/i2c-10'],GpioConfigs.LED.value,[GpioConfigs.LED.value,6,2]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
 def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c):
@@ -55,10 +55,10 @@ def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out
     assert out_data == out
 
 @pytest.mark.parametrize("config, dev_address, out",
-                        [(GpioConfigs.DAC.value, 32, {2 : 255, 6 : 255}),
-                         (GpioConfigs.ADC.value, 32, {3 : 255, 7 : 255}),
-                         (GpioConfigs.RTD.value, 33, {3 : 255, 7 : 255}),
-                         (GpioConfigs.LED.value, 33, {3 : 255, 7 : 255}),
+                        [(GpioConfigs.DAC.value, 32, {3 : 255, 7 : 255}),
+                         (GpioConfigs.ADC.value, 32, {2 : 255, 6 : 255}),
+                         (GpioConfigs.RTD.value, 33, {2 : 255, 6 : 255}),
+                         (GpioConfigs.LED.value, 33, {2 : 255, 6 : 255}),
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register')
 def test_edgepi_gpio_map_reg_address_value_dict(mock_data, config, dev_address, out, mock_i2c):
