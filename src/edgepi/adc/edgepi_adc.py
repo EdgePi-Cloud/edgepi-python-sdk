@@ -30,7 +30,6 @@ from edgepi.adc.adc_multiplexers import (
     validate_channels_allowed,
 )
 
-
 _logger = logging.getLogger(__name__)
 
 
