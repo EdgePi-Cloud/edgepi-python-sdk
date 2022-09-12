@@ -25,17 +25,17 @@ def test_get_periph_config(config, result):
 
 @pytest.mark.parametrize('config, result',
                        [(GpioConfigs.DAC.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
-                          GPIOAddresses.OUTPUT_PORT_0.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
+                          GPIOAddresses.OUTPUT_PORT_1.value]),
                         (GpioConfigs.ADC.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value]),
                         (GpioConfigs.RTD.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value]),
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value]),
                         (GpioConfigs.LED.value,
-                         [GPIOAddresses.CONFIGURATION_PORT_1.value,
-                         GPIOAddresses.OUTPUT_PORT_1.value])
+                         [GPIOAddresses.CONFIGURATION_PORT_0.value,
+                         GPIOAddresses.OUTPUT_PORT_0.value])
                         ])
 def test_get_pin_config_address(config, result):
     pin_config, pin_out = get_pin_config_address(config)
@@ -44,17 +44,17 @@ def test_get_pin_config_address(config, result):
 
 @pytest.mark.parametrize('config, reg_dict, result',
                        [(GpioConfigs.ADC.value,
-                         {3 : 255, 7 : 255},
-                         {3: {'value': 249, 'is_changed': True},
-                          7: {'value': 249, 'is_changed': True}}),
+                         {2 : 255, 6 : 255},
+                         {2: {'value': 249, 'is_changed': True},
+                          6: {'value': 249, 'is_changed': True}}),
                         (GpioConfigs.LED.value,
-                         {3 : 255, 7 : 255},
-                         {3: {'value': 0, 'is_changed': True},
-                          7: {'value': 0, 'is_changed': True}}),
+                         {2 : 255, 6 : 255},
+                         {2: {'value': 0, 'is_changed': True},
+                          6: {'value': 0, 'is_changed': True}}),
                         (GpioConfigs.RTD.value,
-                         {3 : 255, 7 : 255},
-                         {3: {'value': 254, 'is_changed': True},
-                          7: {'value': 254, 'is_changed': True}})
+                         {2 : 255, 6 : 255},
+                         {2: {'value': 254, 'is_changed': True},
+                          6: {'value': 254, 'is_changed': True}})
                         ])
 def test_get_default_values(config, reg_dict, result):
     pin_dict_list = break_pin_info_dict(generate_pin_info(config))

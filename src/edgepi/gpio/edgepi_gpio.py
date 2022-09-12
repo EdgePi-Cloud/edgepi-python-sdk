@@ -16,7 +16,6 @@ from edgepi.reg_helper.reg_helper import apply_opcodes, convert_dict_to_values
 
 _logger = logging.getLogger(__name__)
 
-
 class EdgePiGPIO(I2CDevice):
     '''
     A class used to represent the GPIO. This class will be imported to each module
@@ -54,6 +53,7 @@ class EdgePiGPIO(I2CDevice):
             list_default_reg_dict:
                 list of dictionary that includes default regsister address : value pair
         '''
+        _logger.info(f'Setting GPIO to default state')
         list_of_address = check_multiple_dev(generate_pin_info(self.config))
         self.dict_default_reg_dict = self.__generate_default_reg_dict(list_of_address)
         pin_info_dict_list = break_pin_info_dict(generate_pin_info(self.config))
@@ -70,6 +70,7 @@ class EdgePiGPIO(I2CDevice):
             for reg_address, value in default_reg_dict.items():
                 list_read_msg = self.set_read_msg(reg_address, [value['value']])
                 default_reg_dict[reg_address] = self.transfer(dev_address, list_read_msg)
+                _logger.debug(f'Updated Default Register Dictionary Contest {default_reg_dict}')
         set_pin_states(self.dict_pin)
 
     def __read_register(self, reg_address, dev_address):
@@ -117,6 +118,7 @@ class EdgePiGPIO(I2CDevice):
         for reg_addx, entry in reg_dict.items():
             if entry['is_changed']:
                 msg_write = self.set_write_msg(reg_addx, [entry['value']])
+                _logger.debug(f'Write Message Content {msg_write[0]}')
                 self.transfer(dev_address, msg_write)
 
     def set_expander_pin(self, pin_name: str = None):
