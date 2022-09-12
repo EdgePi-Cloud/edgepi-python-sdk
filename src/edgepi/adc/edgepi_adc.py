@@ -75,6 +75,8 @@ class EdgePiADC(SPI):
         # first 2 entries are null bytes
         return out[2:]
 
+    # TODO: compute delay based on stored state of data_rate, filter_mode
+
     def __write_register(self, start_addx: ADCReg, data: list[int]):
         """
         Write data to ADC registers, either individually or as a block.
@@ -302,6 +304,7 @@ class EdgePiADC(SPI):
 
         return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
 
+    # TODO: add option to validate configs have been applied
     def __config(
         self,
         adc_1_analog_in: CH = None,
@@ -334,6 +337,9 @@ class EdgePiADC(SPI):
                 Note, ADC2 runs only in continuous conversion mode.
         """
         # pylint: disable=unused-argument
+
+        # TODO: if the filter_mode or data_rate is changed, track state -
+        # - call function to update the stored filter and data mode
 
         # filter out self and None args
         args = list(filter_dict(locals(), "self", None).values())
