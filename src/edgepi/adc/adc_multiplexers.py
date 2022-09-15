@@ -29,29 +29,6 @@ class ChannelNotAvailableError(ValueError):
     """
 
 
-# read channel mapping for this adc
-def validate_channels_set(mux_reg_val: int):
-    """
-    Checks if an ADC's positive multiplexer is set to floating mode.
-
-    Args:
-        `mux_reg_val` (int): uint value of this ADC's mux config register
-
-    Raises:
-        `ChannelNotSetError`: if this ADC's positive multiplexer is set to floating mode
-    """
-    mux_reg_bits = pack("uint:8", mux_reg_val)
-
-    if mux_reg_bits[:4].uint == CH.FLOAT.value:
-        raise ChannelNotSetError(
-            # TODO: check if includes newline
-            """
-            ADC cannot read voltage while set to floating mode:
-                please set to read from an analog input channel.
-            """
-        )
-
-
 def _format_mux_values(mux_p, mux_n):
     # updating mux_p bits only, mask mux_p bits
     if mux_n is None:
