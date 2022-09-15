@@ -166,6 +166,7 @@ class ADC2DataRate(Enum):
 class ADCMasks(Enum):
     """ADS1263 OpCode bit masks"""
     FILTER_BITS = 0x1F  # overwrite bits 7:5 (0-indexed)
+    CHECK_BITS = 0xFC   # overwrite bits 1:0
 
 
 class FilterMode(Enum):
@@ -196,3 +197,12 @@ class ADCAlarm:
 class ADCPower(Enum):
     """OpCodes for configuring the ADS1263 POWER register"""
     RESET_CLEAR = OpCode(0x0, ADCReg.REG_POWER.value, BitMask.BIT4.value)
+
+
+class ADCReadBytes(Enum):
+    """OpCodes for configuring ADS1263 voltage read data"""
+    STATUS_BYTE_ON = OpCode(0x04, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+    STATUS_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+    CHECK_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
+    CHECK_BYTE_CHK = OpCode(0x01, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
+    CHECK_BYTE_CRC = OpCode(0x02, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
