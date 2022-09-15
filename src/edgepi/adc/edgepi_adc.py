@@ -138,23 +138,8 @@ class EdgePiADC(SPI):
         self.__config(reset_clear=ADCPower.RESET_CLEAR)
 
     def __read_data(self, adc: ADCNum, data_size: int):
+        """Read ADC voltage conversion data"""
         return self.transfer([adc.value.read_cmd] + [255] * data_size)
-
-    def single_sample(self, status_byte: bool=False):
-        """
-        Perform a single ADC1 voltage read in PULSE conversion mode.
-        Note, do not call this method for voltage reading if ADC is configured
-        to CONTINUOUS conversion mode: use `read_voltage` instead.
-        """
-        self.start_conversions()
-
-        num_bytes = self.__get_data_read_len(status_byte=status_byte)
-        read_data = self.__read_data(adc=ADCNum.ADC_1, data_size=num_bytes)
-
-        # TODO: check CRC
-        # TODO: convert read_data from code to voltage
-
-        return read_data
 
     # TODO: is this necessary, if read length is always set to 6?
     @staticmethod
@@ -168,15 +153,15 @@ class EdgePiADC(SPI):
 
         return read_bytes + int(status_byte) + int(check_byte)
 
-    def __get_voltage_data(self, adc):
+    def __voltage_read(self, adc):
         '''
-        Performs voltage read
+        Performs ADC voltage read
 
         Returns:
             (bitstring, bitstring, bitstring): bitstring representations of
-            voltage read (status_byte, voltage_data_bytes, check_byte)
+            voltage read data (status_byte, voltage_data_bytes, check_byte)
         '''
-        read_data = self.transfer([adc.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN)
+        read_data = self.__read_data(adc, ADC_VOLTAGE_READ_LEN)
 
         if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
             raise VoltageReadError(
@@ -192,7 +177,7 @@ class EdgePiADC(SPI):
         return status_code, voltage_code, check_code
 
 
-    def read_voltage(self, status_byte=True):
+    def read_voltage(self, status_byte: bool=False):
         """
         Read input voltage from selected ADC
 
@@ -209,13 +194,34 @@ class EdgePiADC(SPI):
         # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
         # is the output garbage, and can you tell this from the data before conversion?
         # i.e. if data returned is garbage, then raise FloatMode error.
-        status_bits, voltage_bits, check_bits = self.__get_voltage_data(adc)
+        status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
         # TODO: check CRC
 
         # TODO: convert voltage_bits from code to voltage
 
         # TODO: make return status byte optional
+        return voltage_bits
+
+    def single_sample(self, status_byte: bool=True):
+        """
+        Perform a single `ADC1` voltage read in `PULSE` conversion mode.
+        Do not call this method for voltage reading if ADC is configured
+        to `CONTINUOUS` conversion mode: use `read_voltage` instead.
+        """
+        # TODO: assert adc is in PULSE mode (check ADCState)
+
+        # send command to trigger conversion
+        # TODO: pass in adc_num once ADC2 functionality is added
+        self.start_conversions()
+
+        # send command to read conversion data.
+        status_bits, voltage_bits, check_bits = self.__voltage_read(adc=ADCNum.ADC_1)
+
+        # TODO: check CRC
+
+        # TODO: convert read_data from code to voltage
+
         return voltage_bits
 
     def is_data_ready(self):
