@@ -2,7 +2,11 @@
 
     Functions:
         filter_dict(dict, any)
+        bitstring_from_list(list)
 """
+
+
+from bitstring import BitArray, pack
 
 
 def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
@@ -23,3 +27,21 @@ def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
         key: value for (key, value) in dictionary.items() if key != entry_key and value != entry_val
     }
     return filtered_args
+
+@staticmethod
+def bitstring_from_list(data: list) -> BitArray:
+    """
+    Builds a bitstring from a list of uint byte values
+
+    Args:
+        data (List[int]): a list of uint byte values
+
+    Returns:
+        BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
+    """
+    code = BitArray()
+    for value in data:
+        # pack ensures leading 0's are included in bitstring
+        next_byte = pack("uint:8", value)
+        code.append(next_byte)
+    return code

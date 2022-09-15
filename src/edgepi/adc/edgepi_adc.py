@@ -1,6 +1,7 @@
 """ User interface for EdgePi ADC """
 
 
+from dataclasses import dataclass
 from enum import Enum
 import logging
 import time
@@ -19,10 +20,12 @@ from edgepi.adc.adc_constants import (
     ADCReg,
     FilterMode,
     ADC_NUM_REGS,
+    ADC_VOLTAGE_READ_LEN,
+    ADCReadBytes,
 )
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.utilities.utilities import filter_dict
+from edgepi.utilities.utilities import filter_dict, bitstring_from_list
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
@@ -32,6 +35,15 @@ from edgepi.adc.adc_multiplexers import (
 
 _logger = logging.getLogger(__name__)
 
+
+@dataclass
+class ADCState:
+    status_byte: bool
+    check_mode: ADCReadBytes
+    conv_mode: ConvMode
+
+class VoltageReadError(Exception):
+    """Raised if a voltage read fails to return the expected number of bytes"""
 
 class EdgePiADC(SPI):
     """EdgePi ADC device"""
@@ -118,22 +130,6 @@ class EdgePiADC(SPI):
         # option to use time delay
         time.sleep(0.5)
 
-    def __is_in_pulse_mode(self):
-        """Returns true if ADC1 is in pulse conversion mode else false"""
-        mode_0 = pack("uint:8", self.__read_register(ADCReg.REG_MODE0)[0])
-        return mode_0[1] is True
-
-    # TODO: refactor this to be simple bool check of params
-    def __get_data_read_len(self, status_byte: bool, check_byte: bool = True):
-        """
-        Returns voltage read data frame size in bytes, depending on whether
-        reads are currently configured to include the STATUS and CRC/CHK bytes
-        """
-        # basic read length: 4 data bytes (adc1), 3 data bytes + 1 null byte (adc2)
-        read_bytes = 4
-
-        return read_bytes + int(status_byte) + int(check_byte)
-
     def clear_reset_bit(self):
         """
         Clear the ADC RESET bit of POWER register, in order to enable detecting
@@ -160,48 +156,67 @@ class EdgePiADC(SPI):
 
         return read_data
 
+    # TODO: is this necessary, if read length is always set to 6?
+    @staticmethod
+    def __get_data_read_len(status_byte: bool, check_byte: bool = True):
+        """
+        Returns voltage read data frame size in number of bytes, depending on whether
+        reads are currently configured to include the STATUS and CRC/CHK bytes
+        """
+        # basic read length: 4 data bytes (adc1), 3 data bytes + 1 null byte (adc2)
+        read_bytes = 4
 
-    def read_voltage(self):
+        return read_bytes + int(status_byte) + int(check_byte)
+
+    def __get_voltage_data(self, adc):
+        '''
+        Performs voltage read
+
+        Returns:
+            (bitstring, bitstring, bitstring): bitstring representations of
+            voltage read (status_byte, voltage_data_bytes, check_byte)
+        '''
+        read_data = self.transfer([adc.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN)
+
+        if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
+            raise VoltageReadError(
+                f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
+                )
+
+        status_code = pack("uint:8", read_data[1])
+
+        voltage_code = bitstring_from_list(read_data[2:(2 + adc.value.num_data_bytes)])
+
+        check_code = pack("uint:8", read_data[6])
+
+        return status_code, voltage_code, check_code
+
+
+    def read_voltage(self, status_byte=True):
         """
         Read input voltage from selected ADC
 
         Returns:
             `float`: input voltage read from ADC
         """
-        # TODO: when ADC2 functionality is needed, convert this to parameter.
+        # TODO: when ADC2 functionality is added, convert this to parameter.
         adc = ADCNum.ADC_1
 
-        # assert this adc not set to float mode
-        # TODO: check if necessary: what happens if you read_voltage in floating mode
+        # TODO: perform only a single register read per call
+
+        # TODO: assert adc is in continuous mode (use ADCStatus)
+
+        # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
         # is the output garbage, and can you tell this from the data before conversion?
         # i.e. if data returned is garbage, then raise FloatMode error.
-        # mux_reg_val = self.__read_register(adc.value.addx)[0]
-        # validate_channels_set(mux_reg_val)
-
-        # if reading adc1 and in pulse conversion mode, send start cmd
-        # TODO: replace with adc == ADCNum.ADC_1
-        # TODO: checking for pulse mode may conflict with high data rate
-        # refactor to 2 functions to avoid calling read_register twice
-        # or 1 function with passing in is_pulse_mode as boolean
-        if adc.value.id_num == 1 and self.__is_in_pulse_mode():
-            # TODO: call the helper function instead of rewriting here
-            self.transfer([adc.value.start_cmd])
-
-        # read value stored in this ADC's data holding register
-
-        # TODO: refactor to private function that returns status, data, crc
-        # with include status byte being optional
-        # - enable crc byte by default in __init__, don't allow disabling it
-        # - determine number of bytes based on parameter states
-        # - only retrieve STATUS if parameter is TRUE to avoid register reading
-        num_bytes = self.__get_data_read_len(True, True)
-        read_data = self.transfer([adc.value.read_cmd] + [255] * num_bytes)
+        status_bits, voltage_bits, check_bits = self.__get_voltage_data(adc)
 
         # TODO: check CRC
 
-        # TODO: convert read_data from code to voltage
+        # TODO: convert voltage_bits from code to voltage
 
-        return read_data
+        # TODO: make return status byte optional
+        return voltage_bits
 
     def is_data_ready(self):
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)

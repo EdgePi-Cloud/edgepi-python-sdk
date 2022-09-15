@@ -8,6 +8,7 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 
 ADC_NUM_REGS = 27
+ADC_VOLTAGE_READ_LEN = 6 # number of bytes per voltage read
 
 
 @unique
