@@ -187,8 +187,6 @@ class EdgePiADC(SPI):
         # TODO: when ADC2 functionality is added, convert this to parameter.
         adc = ADCNum.ADC_1
 
-        # TODO: perform only a single register read per call
-
         # TODO: assert adc is in continuous mode (use ADCStatus)
 
         # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
@@ -201,9 +199,9 @@ class EdgePiADC(SPI):
         # TODO: convert voltage_bits from code to voltage
 
         # TODO: make return status byte optional
-        return voltage_bits
+        return status_bits, voltage_bits, check_bits
 
-    def single_sample(self, status_byte: bool=True):
+    def single_sample(self, status_byte: bool=False):
         """
         Perform a single `ADC1` voltage read in `PULSE` conversion mode.
         Do not call this method for voltage reading if ADC is configured
@@ -222,7 +220,7 @@ class EdgePiADC(SPI):
 
         # TODO: convert read_data from code to voltage
 
-        return voltage_bits
+        return status_bits, voltage_bits, check_bits
 
     def is_data_ready(self):
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)

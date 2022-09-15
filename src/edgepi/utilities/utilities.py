@@ -28,7 +28,7 @@ def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
     }
     return filtered_args
 
-@staticmethod
+
 def bitstring_from_list(data: list) -> BitArray:
     """
     Builds a bitstring from a list of uint byte values
