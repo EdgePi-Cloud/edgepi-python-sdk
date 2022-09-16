@@ -23,6 +23,7 @@ from edgepi.adc.adc_constants import (
     ADC_VOLTAGE_READ_LEN,
     ADCReadBytes,
 )
+from edgepi.adc.adc_voltage import code_to_voltage
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict, bitstring_from_list
@@ -41,6 +42,7 @@ class ADCState:
     status_byte: bool
     check_mode: ADCReadBytes
     conv_mode: ConvMode
+
 
 class VoltageReadError(Exception):
     """Raised if a voltage read fails to return the expected number of bytes"""
@@ -197,9 +199,10 @@ class EdgePiADC(SPI):
         # TODO: check CRC
 
         # TODO: convert voltage_bits from code to voltage
+        voltage = code_to_voltage(voltage_bits, adc.value)
 
         # TODO: make return status byte optional
-        return status_bits, voltage_bits, check_bits
+        return status_bits, voltage_bits, check_bits, voltage
 
     def single_sample(self, status_byte: bool=False):
         """
@@ -209,18 +212,23 @@ class EdgePiADC(SPI):
         """
         # TODO: assert adc is in PULSE mode (check ADCState)
 
+        # only ADC1 can perform PULSE conversion
+        adc = ADCNum.ADC_1
+
         # send command to trigger conversion
         # TODO: pass in adc_num once ADC2 functionality is added
         self.start_conversions()
 
         # send command to read conversion data.
-        status_bits, voltage_bits, check_bits = self.__voltage_read(adc=ADCNum.ADC_1)
+        status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
         # TODO: check CRC
 
         # TODO: convert read_data from code to voltage
+        voltage = code_to_voltage(voltage_bits, adc.value)
 
-        return status_bits, voltage_bits, check_bits
+        # TODO: make return status byte optional
+        return status_bits, voltage_bits, check_bits, voltage
 
     def is_data_ready(self):
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)

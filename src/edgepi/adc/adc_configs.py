@@ -82,3 +82,11 @@ class AdcRegMode2:
     def get_value(self) -> int:
         """Combines attribute bits in order into a single binary code"""
         return self.bypass << 7 | self.gain << 4 | self.dr << 0
+
+
+@dataclass(frozen=True)
+class ADCVoltageConfig:
+    """ADC voltage measurement configuration"""
+    offset: float
+    gain: float
+    v_ref: float    # input reference voltage

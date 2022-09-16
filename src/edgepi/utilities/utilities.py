@@ -41,7 +41,6 @@ def bitstring_from_list(data: list) -> BitArray:
     """
     code = BitArray()
     for value in data:
-        # pack ensures leading 0's are included in bitstring
         next_byte = pack("uint:8", value)
         code.append(next_byte)
     return code

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum, unique
 
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
+from edgepi.adc.adc_configs import ADCVoltageConfig
 
 
 ADC_NUM_REGS = 27
@@ -82,7 +83,7 @@ class ADCChannel(Enum):
     FLOAT = 0xF
 
 
-@dataclass
+@dataclass(frozen=True)
 class ADCReadInfo:
     """
     Data for use in performing ADC voltage reads
@@ -99,6 +100,7 @@ class ADCReadInfo:
     id_num: int
     addx: ADCChannel
     num_data_bytes: int
+    voltage_config: ADCVoltageConfig
     start_cmd: ADCComs
     read_cmd: ADCComs
     stop_cmd: ADCComs
@@ -111,6 +113,7 @@ class ADCNum(Enum):
         1,
         ADCReg.REG_INPMUX,
         4,
+        ADCVoltageConfig(0, 1.0, 2.5),
         ADCComs.COM_START1.value,
         ADCComs.COM_RDATA1.value,
         ADCComs.COM_STOP1.value,
@@ -119,6 +122,7 @@ class ADCNum(Enum):
         2,
         ADCReg.REG_ADC2MUX,
         3,
+        ADCVoltageConfig(0, 1.0, 2.5),
         ADCComs.COM_START2.value,
         ADCComs.COM_RDATA2.value,
         ADCComs.COM_STOP2.value,
