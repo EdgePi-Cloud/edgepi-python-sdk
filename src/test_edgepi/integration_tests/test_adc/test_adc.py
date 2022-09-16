@@ -144,7 +144,7 @@ def test_config(args, expected_vals, err, adc):
 
 def test_voltage_individual(adc):
     adc._EdgePiADC__config(conversion_mode=ConvMode.PULSE, adc_1_analog_in=CH.AIN3)
-    out = adc.single_sample(status_byte=True)
+    out = adc.single_sample()
     print(out)
 
 

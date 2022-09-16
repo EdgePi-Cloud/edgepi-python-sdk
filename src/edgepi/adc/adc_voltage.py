@@ -55,4 +55,4 @@ def code_to_voltage(code: BitArray, adc_info):
 
     v_out = _input_voltage_to_output_voltage(v_in, config.gain, config.offset)
 
-    return code, v_in, v_out
+    return v_out
