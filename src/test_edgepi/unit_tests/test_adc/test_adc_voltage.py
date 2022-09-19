@@ -4,7 +4,6 @@
 import pytest
 from edgepi.adc.adc_voltage import crc_8_atm, CRCCheckError
 
-# pylint: disable=too-many-lines
 
 @pytest.mark.parametrize("value, frame_len, expected", [
     (0x1961e331, 4, 0x84),

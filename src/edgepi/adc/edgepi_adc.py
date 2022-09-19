@@ -161,7 +161,7 @@ class EdgePiADC(SPI):
         Performs ADC voltage read
 
         Returns:
-            (bitstring, int, int): bitstring representations of
+            (bitstring, bitstring, bitstring): bitstring representations of
             voltage read data (status_byte, voltage_data_bytes, check_byte)
         '''
         read_data = self.__read_data(adc, ADC_VOLTAGE_READ_LEN)
@@ -175,9 +175,9 @@ class EdgePiADC(SPI):
 
         voltage_code = bitstring_from_list(read_data[2:(2 + adc.value.num_data_bytes)])
 
-        check_code = read_data[6]
+        check_code = pack("uint:8", read_data[6])
 
-        return status_code, voltage_code.uint, check_code
+        return status_code, voltage_code, check_code
 
 
     def read_voltage(self, status_byte: bool=False):
@@ -200,9 +200,9 @@ class EdgePiADC(SPI):
         # check CRC
         # TODO: only check CRC if setting enabled
         crc_8_atm(
-            value=voltage_bits,
+            value=voltage_bits.uint,
             frame_len=adc.value.num_data_bytes * 8,
-            code=check_bits
+            code=check_bits.uint
         )
 
         # convert voltage_bits from code to voltage
@@ -232,9 +232,9 @@ class EdgePiADC(SPI):
         # check CRC
         # TODO: only check CRC if setting enabled
         crc_8_atm(
-            value=voltage_bits,
+            value=voltage_bits.uint,
             frame_len=adc.value.num_data_bytes * 8,
-            code=check_bits
+            code=check_bits.uint
         )
 
         # convert read_data from code to voltage
