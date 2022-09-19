@@ -195,6 +195,7 @@ class EdgePiADC(SPI):
         # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
         # is the output garbage, and can you tell this from the data before conversion?
         # i.e. if data returned is garbage, then raise FloatMode error.
+        # Update: FLOAT mode returns valid data, not garbage output
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
         # check CRC
