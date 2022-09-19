@@ -39,9 +39,9 @@ _logger = logging.getLogger(__name__)
 
 @dataclass
 class ADCState:
-    status_byte: bool
-    check_mode: ADCReadBytes
-    conv_mode: ConvMode
+    status_byte: bool           # ON or OFF
+    check_mode: ADCReadBytes    # either CRC or OFF
+    conv_mode: ConvMode         # PULSE or CONTINUOUS
 
 
 class VoltageReadError(Exception):
@@ -57,14 +57,14 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_default()
         # TODO: expander_pin might need changing in the future
         self.gpio.set_expander_pin("GNDSW_IN1")
-        # TODO: non-user configs
-        # - set gain
+        # TODO: non-user configs:
+        # - RTD off by default --> leave default settings for related regs
+        # TODO: set gain
         self.__config(
             adc_1_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=ADCReadBytes.CHECK_BYTE_CRC
             )
-        # - RTD off by default --> leave default settings for related regs
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -89,8 +89,6 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __read_register -> data out: {out}")
         # first 2 entries are null bytes
         return out[2:]
-
-    # TODO: compute delay based on stored state of data_rate, filter_mode
 
     def __write_register(self, start_addx: ADCReg, data: list[int]):
         """
@@ -129,6 +127,7 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1.value
         start_cmd = self.adc_ops.start_adc(adc_num=adc_num)
         self.transfer(start_cmd)
+        # TODO: compute delay based on stored state of data_rate, filter_mode
         # TODO: compute conversion time delay + wait here
         # - may not be needed for auto_mode though, include param
         # option to use time delay
@@ -232,7 +231,11 @@ class EdgePiADC(SPI):
 
         # check CRC
         # TODO: only check CRC if setting enabled
-        crc_8_atm(value=voltage_bits.uint, frame_len=32, code=check_bits.uint)
+        crc_8_atm(
+            value=voltage_bits.uint,
+            frame_len=adc.value.num_data_bytes * 8,
+            code=check_bits.uint
+        )
 
         # convert read_data from code to voltage
         voltage = code_to_voltage(voltage_bits, adc.value)
