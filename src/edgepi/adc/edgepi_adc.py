@@ -63,7 +63,8 @@ class EdgePiADC(SPI):
         self.__config(
             adc_1_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
-            checksum_mode=ADCReadBytes.CHECK_BYTE_CRC
+            checksum_mode=ADCReadBytes.CHECK_BYTE_CRC,
+            reset_clear=ADCPower.RESET_CLEAR
             )
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):

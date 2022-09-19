@@ -11,7 +11,7 @@ STEP_DOWN_RESISTOR_1 = 19.1
 STEP_DOWN_RESISTOR_2 = 4.99
 
 
-_logger = logging.getLogger()
+_logger = logging.getLogger(__name__)
 
 
 def _is_negative_voltage(code: BitArray):
