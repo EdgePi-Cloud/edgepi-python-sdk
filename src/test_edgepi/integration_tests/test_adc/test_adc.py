@@ -4,14 +4,16 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode, ADCReadBytes
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_multiplexers import ChannelMappingError
 
 # pylint: disable=protected-access
 @pytest.fixture(name="adc")
 def fixture_adc():
-    return EdgePiADC()
+    adc = EdgePiADC()
+    adc._EdgePiADC__config(checksum_mode=ADCReadBytes.CHECK_BYTE_CRC)
+    yield adc
 
 
 def test_read_register_individual(adc):

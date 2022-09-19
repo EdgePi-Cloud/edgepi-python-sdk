@@ -23,7 +23,7 @@ from edgepi.adc.adc_constants import (
     ADC_VOLTAGE_READ_LEN,
     ADCReadBytes,
 )
-from edgepi.adc.adc_voltage import code_to_voltage
+from edgepi.adc.adc_voltage import code_to_voltage, crc_8_atm
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.utilities.utilities import filter_dict, bitstring_from_list
@@ -59,9 +59,11 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_pin("GNDSW_IN1")
         # TODO: non-user configs
         # - set gain
-        self.__config(adc_1_analog_in=CH.FLOAT, adc_1_mux_n=CH.AINCOM)
-        # TODO: - enable CRC mode for checksum -> potentially will allow user
-        #   to configure this in set_config if too much overhead.
+        self.__config(
+            adc_1_analog_in=CH.FLOAT,
+            adc_1_mux_n=CH.AINCOM,
+            checksum_mode=ADCReadBytes.CHECK_BYTE_CRC
+            )
         # - RTD off by default --> leave default settings for related regs
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
@@ -196,9 +198,15 @@ class EdgePiADC(SPI):
         # i.e. if data returned is garbage, then raise FloatMode error.
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
-        # TODO: check CRC
+        # check CRC
+        # TODO: only check CRC if setting enabled
+        crc_8_atm(
+            value=voltage_bits.uint,
+            frame_len=adc.value.num_data_bytes * 8,
+            code=check_bits.uint
+        )
 
-        # TODO: convert voltage_bits from code to voltage
+        # convert voltage_bits from code to voltage
         voltage = code_to_voltage(voltage_bits, adc.value)
 
         # TODO: make return status byte optional
@@ -222,9 +230,11 @@ class EdgePiADC(SPI):
         # send command to read conversion data.
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
-        # TODO: check CRC
+        # check CRC
+        # TODO: only check CRC if setting enabled
+        crc_8_atm(value=voltage_bits.uint, frame_len=32, code=check_bits.uint)
 
-        # TODO: convert read_data from code to voltage
+        # convert read_data from code to voltage
         voltage = code_to_voltage(voltage_bits, adc.value)
 
         # TODO: make return status byte optional
@@ -341,7 +351,7 @@ class EdgePiADC(SPI):
         adc_2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
-        checksum_mode=None,
+        checksum_mode: ADCReadBytes = None,
         gain=None,
         reset_clear: ADCPower = None,
     ):
