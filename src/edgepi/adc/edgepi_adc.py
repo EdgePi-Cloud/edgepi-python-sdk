@@ -21,7 +21,7 @@ from edgepi.adc.adc_constants import (
     FilterMode,
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
-    ADCReadBytes,
+    CheckMode,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, crc_8_atm
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -39,9 +39,36 @@ _logger = logging.getLogger(__name__)
 
 @dataclass
 class ADCState:
-    status_byte: bool  # ON or OFF
-    check_mode: ADCReadBytes  # either CRC or OFF
-    conv_mode: ConvMode  # PULSE or CONTINUOUS
+    alarms: int  # uint value of STATUS byte from most recent read
+    reg_map: dict  # map of most recently updated register values
+
+    def get_state(self, addx: int, mask: int):
+        """
+        Get state of an ADC functional mode based on most recently updated register values
+
+        Args:
+            addx (int): address of register this functional mode belongs to
+
+            mask (int): mask applied to set this functional mode during update
+        """
+        # TODO: validate `reg_map` every time get_state is called?
+        # register value at this addx
+        reg_value = self.reg_map[addx]
+        # value of bits corresponding to functional mode: let through "masked" bits
+        return (~mask) & reg_value
+    
+
+
+
+class RegisterUpdateError(Exception):
+    """Raised when a register update fails to set register to expected value"""
+
+    def __init__(self, addx: int, expected: int, actual: int):
+        self.message = f"addx={hex(addx)}, expected: {hex(expected)}, observed: {hex(actual)}"
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"Register update failed: {self.message}"
 
 
 class VoltageReadError(Exception):
@@ -58,13 +85,15 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_default()
         # TODO: expander_pin might need changing in the future
         self.gpio.set_expander_pin("GNDSW_IN1")
+        # internal state
+        self.__state = ADCState(alarms=None, reg_map=None)
         # TODO: non-user configs:
         # - RTD off by default --> leave default settings for related regs
         # TODO: set gain
         self.__config(
             adc_1_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
-            checksum_mode=ADCReadBytes.CHECK_BYTE_CRC,
+            checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
 
@@ -352,7 +381,7 @@ class EdgePiADC(SPI):
         adc_2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
-        checksum_mode: ADCReadBytes = None,
+        checksum_mode: CheckMode = None,
         gain=None,
         reset_clear: ADCPower = None,
     ):
@@ -407,7 +436,27 @@ class EdgePiADC(SPI):
         data = [entry["value"] for entry in reg_values.values()]
         self.__write_register(ADCReg.REG_ID, data)
 
+        # validate updates were applied
+        self.__validate_updates(reg_values)
+
+        # update ADC state
+        self.__state.reg_map = reg_values
+
         return reg_values
+
+    def __validate_updates(self, updated_reg_values: dict):
+        """
+        Validates config values have been applied to ADC registers.
+
+        Args:
+            updated_reg_values (dict): register values that were applied in latest __config()
+        """
+        reg_values = self.__read_registers_to_map()
+
+        # check updated value were applied
+        for addx, value in reg_values.items():
+            if value != updated_reg_values[addx]:
+                raise RegisterUpdateError(addx, value, updated_reg_values[addx])
 
     def set_config(
         self,

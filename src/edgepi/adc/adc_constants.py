@@ -204,10 +204,30 @@ class ADCPower(Enum):
     RESET_CLEAR = OpCode(0x0, ADCReg.REG_POWER.value, BitMask.BIT4.value)
 
 
-class ADCReadBytes(Enum):
-    """OpCodes for configuring ADS1263 voltage read data"""
-    STATUS_BYTE_ON = OpCode(0x04, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
-    STATUS_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+class CheckMode(Enum):
+    """OpCodes for configuring ADS1263 voltage read check mode"""
     CHECK_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     CHECK_BYTE_CHK = OpCode(0x01, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     CHECK_BYTE_CRC = OpCode(0x02, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
+
+
+class StatusByte(Enum):
+    """OpCodes for configuring ADS1263 voltage read status byte"""
+    STATUS_BYTE_ON = OpCode(0x04, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+    STATUS_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+
+
+@dataclass
+class ADCMode:
+    """Stores information about an ADC functional mode"""
+    addx: int
+    mask: int
+
+
+class ADCModes(Enum):
+    """Address and mask values for ADC functional modes"""
+    CONV = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
+    CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.value)
+    STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
+    DATA_RATE_1 = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
+    FILTER = ADCMode(ADCReg.REG_MODE1, ADCMasks.FILTER_BITS.value)
