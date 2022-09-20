@@ -90,15 +90,14 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_pin("GNDSW_IN1")
         # internal state
         self.__state = ADCState(alarms=None, reg_map=None)
-        # TODO: non-user configs:
         # - RTD off by default --> leave default settings for related regs
-        # TODO: set gain
         self.__config(
-            adc_1_analog_in=CH.FLOAT,
+            adc_1_analog_in=CH.AIN0,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
+        # TODO: get configs from the config module
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -161,10 +160,8 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1.value
         start_cmd = self.adc_ops.start_adc(adc_num=adc_num)
         self.transfer(start_cmd)
-        # TODO: compute delay based on stored state of data_rate, filter_mode
-        # TODO: compute conversion time delay + wait here
-        # - may not be needed for auto_mode though, include param
-        # option to use time delay
+        # TODO: compute conversion time delay + wait here (use ADCState)
+        # - may not be needed for auto_mode though
         time.sleep(0.5)
 
     def clear_reset_bit(self):
@@ -177,18 +174,6 @@ class EdgePiADC(SPI):
     def __read_data(self, adc: ADCNum, data_size: int):
         """Read ADC voltage conversion data"""
         return self.transfer([adc.value.read_cmd] + [255] * data_size)
-
-    # TODO: is this necessary, if read length is always set to 6?
-    @staticmethod
-    def __get_data_read_len(status_byte: bool, check_byte: bool = True):
-        """
-        Returns voltage read data frame size in number of bytes, depending on whether
-        reads are currently configured to include the STATUS and CRC/CHK bytes
-        """
-        # basic read length: 4 data bytes (adc1), 3 data bytes + 1 null byte (adc2)
-        read_bytes = 4
-
-        return read_bytes + int(status_byte) + int(check_byte)
 
     def __voltage_read(self, adc):
         """
@@ -213,7 +198,8 @@ class EdgePiADC(SPI):
 
         return status_code, voltage_code, check_code
 
-    def read_voltage(self, status_byte: bool = False):
+    # TODO: use logging for status (debug) and others
+    def read_voltage(self):
         """
         Read input voltage from selected ADC
 
@@ -223,20 +209,15 @@ class EdgePiADC(SPI):
         # TODO: when ADC2 functionality is added, convert this to parameter.
         adc = ADCNum.ADC_1
 
-        # TODO: assert adc is in continuous mode (use ADCStatus)
+        # assert adc is in continuous mode (use ADCStatus)
         if self.__state.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
-                )
+            )
 
-        # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
-        # is the output garbage, and can you tell this from the data before conversion?
-        # i.e. if data returned is garbage, then raise FloatMode error.
-        # Update: FLOAT mode returns valid data, not garbage output
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
         # check CRC
-        # TODO: only check CRC if setting enabled
         crc_8_atm(
             value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
         )
@@ -244,7 +225,6 @@ class EdgePiADC(SPI):
         # convert voltage_bits from code to voltage
         voltage = code_to_voltage(voltage_bits, adc.value)
 
-        # TODO: make return status byte optional
         return status_bits, voltage_bits, check_bits, voltage
 
     def single_sample(self, status_byte: bool = False):
@@ -253,7 +233,7 @@ class EdgePiADC(SPI):
         Do not call this method for voltage reading if ADC is configured
         to `CONTINUOUS` conversion mode: use `read_voltage` instead.
         """
-        # TODO: assert adc is in PULSE mode (check ADCState)
+        # TODO: assert adc is in PULSE mode (check ADCState) -- set_config if not
 
         # only ADC1 can perform PULSE conversion
         adc = ADCNum.ADC_1
@@ -266,7 +246,6 @@ class EdgePiADC(SPI):
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
         # check CRC
-        # TODO: only check CRC if setting enabled
         crc_8_atm(
             value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
         )
@@ -274,7 +253,6 @@ class EdgePiADC(SPI):
         # convert read_data from code to voltage
         voltage = code_to_voltage(voltage_bits, adc.value)
 
-        # TODO: make return status byte optional
         return status_bits, voltage_bits, check_bits, voltage
 
     def is_data_ready(self):
@@ -286,16 +264,15 @@ class EdgePiADC(SPI):
         # print(f"pack time (ms): {(end-start)*10**-6}")
         return read_data[1] & 0b01000000
 
-    def read_adc1_alarms(self):
+    def read_adc_1_alarms(self, status_byte):
         """
         Read ADC1 STATUS byte output faults
 
         Returns:
             `dict`: a dictionary of ADCAlarmType: ADCAlarm entries
         """
+        # TODO: log STATUS byte in readable format
         raise NotImplementedError
-
-    # TODO: optional -> def read_adc_data_status(self, ADCNum):
 
     def __read_registers_to_map(self):
         """
@@ -315,6 +292,12 @@ class EdgePiADC(SPI):
         return reg_dict
 
     def __get_rtd_en_status(self):
+        """
+        Get state of RTD_EN pin (on/off)
+
+        Returns:
+            bool: RTD_EN pin is on/off
+        """
         idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
         idac_1 = idac_mag[4:].uint
         return idac_1 == 0x0
@@ -391,6 +374,7 @@ class EdgePiADC(SPI):
         checksum_mode: CheckMode = None,
         gain=None,
         reset_clear: ADCPower = None,
+        validate: bool = True,
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -444,16 +428,18 @@ class EdgePiADC(SPI):
         self.__write_register(ADCReg.REG_ID, data)
 
         # validate updates were applied
-        self.__validate_updates(reg_values)
+        if validate:
+            self.__validate_updates(reg_values)
 
         # update ADC state
         self.__state.reg_map = reg_values
 
         return reg_values
 
+    # TODO: unit test this
     def __validate_updates(self, updated_reg_values: dict):
         """
-        Validates config values have been applied to ADC registers.
+        Validates updated config values have been applied to ADC registers.
 
         Args:
             updated_reg_values (dict): register values that were applied in latest __config()
@@ -462,7 +448,7 @@ class EdgePiADC(SPI):
 
         # check updated value were applied
         for addx, value in reg_values.items():
-            if value != updated_reg_values[addx]["value"]:
+            if int(value) != int(updated_reg_values[addx]["value"]):
                 raise RegisterUpdateError(addx, value, updated_reg_values[addx]["value"])
 
     def set_config(
@@ -471,6 +457,7 @@ class EdgePiADC(SPI):
         adc_1_data_rate: ADC1DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
+        validate: bool = True,
     ):
         """
         Configure user accessible ADC settings, either collectively or individually.

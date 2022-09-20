@@ -106,6 +106,7 @@ class ADCReadInfo:
     stop_cmd: ADCComs
 
 
+# TODO: use EEPROM values in ADCVoltageConfig
 class ADCNum(Enum):
     """ADS1263 ADC's"""
 

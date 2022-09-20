@@ -197,8 +197,12 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
             [reg_updates[ADCReg.REG_INPMUX.value]],
             [reg_updates[ADCReg.REG_ADC2MUX.value]],
             adc_vals,
+            adc_vals,
         ],
     )
+
+    # need to mock since cannot actually updated register values here
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
 
     with err:
         reg_values = adc._EdgePiADC__config(**args)
@@ -537,19 +541,6 @@ def test_get_channel_assign_opcodes(
 #     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
 #     adc.read_voltage(adc_num)
 #     transfer.assert_has_calls(calls)
-
-
-@pytest.mark.parametrize(
-    "status_byte, check_byte, expected_len",
-    [
-        (False, False, 4),
-        (False, True, 5),
-        (True, False, 5),
-        (True, True, 6),
-    ],
-)
-def test_get_data_read_len(status_byte, check_byte, expected_len, adc):
-    assert adc._EdgePiADC__get_data_read_len(status_byte, check_byte) == expected_len
 
 
 # @pytest.mark.parametrize(
