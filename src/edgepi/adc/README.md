@@ -46,3 +46,18 @@ for _ in range(10):
 # stop automatic conversions
 edgepi_adc.stop_conversions()
 ```
+___
+## Using ADC Module
+This section introduces ADC functionality available to users.
+
+1. Reading Voltage from Analog Input Pins
+    - The main functionality offered by the ADC, voltages can be read from any of the EdgePi's analog input pins.
+2. Configuring ADC Settings
+    - Before performing voltage reads, there are certain settings users must configure:
+        * input voltage pin to measure via ADC1
+        * voltage reading conversion mode (continuous mode by default)
+    - There are also other settings users may be interested in configuring:
+        * ADC filter mode
+        * ADC sampling data rate (samples per second)
+3. Read ADC Alarms
+    - When voltage reads are triggered, the ADC passes along information about the status of several possible faults.
