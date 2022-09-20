@@ -39,13 +39,14 @@ _logger = logging.getLogger(__name__)
 
 @dataclass
 class ADCState:
-    status_byte: bool           # ON or OFF
-    check_mode: ADCReadBytes    # either CRC or OFF
-    conv_mode: ConvMode         # PULSE or CONTINUOUS
+    status_byte: bool  # ON or OFF
+    check_mode: ADCReadBytes  # either CRC or OFF
+    conv_mode: ConvMode  # PULSE or CONTINUOUS
 
 
 class VoltageReadError(Exception):
     """Raised if a voltage read fails to return the expected number of bytes"""
+
 
 class EdgePiADC(SPI):
     """EdgePi ADC device"""
@@ -64,8 +65,8 @@ class EdgePiADC(SPI):
             adc_1_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=ADCReadBytes.CHECK_BYTE_CRC,
-            reset_clear=ADCPower.RESET_CLEAR
-            )
+            reset_clear=ADCPower.RESET_CLEAR,
+        )
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -158,30 +159,29 @@ class EdgePiADC(SPI):
         return read_bytes + int(status_byte) + int(check_byte)
 
     def __voltage_read(self, adc):
-        '''
+        """
         Performs ADC voltage read
 
         Returns:
             (bitstring, bitstring, bitstring): bitstring representations of
             voltage read data (status_byte, voltage_data_bytes, check_byte)
-        '''
+        """
         read_data = self.__read_data(adc, ADC_VOLTAGE_READ_LEN)
 
         if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
             raise VoltageReadError(
                 f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
-                )
+            )
 
         status_code = pack("uint:8", read_data[1])
 
-        voltage_code = bitstring_from_list(read_data[2:(2 + adc.value.num_data_bytes)])
+        voltage_code = bitstring_from_list(read_data[2 : (2 + adc.value.num_data_bytes)])
 
         check_code = pack("uint:8", read_data[6])
 
         return status_code, voltage_code, check_code
 
-
-    def read_voltage(self, status_byte: bool=False):
+    def read_voltage(self, status_byte: bool = False):
         """
         Read input voltage from selected ADC
 
@@ -202,9 +202,7 @@ class EdgePiADC(SPI):
         # check CRC
         # TODO: only check CRC if setting enabled
         crc_8_atm(
-            value=voltage_bits.uint,
-            frame_len=adc.value.num_data_bytes * 8,
-            code=check_bits.uint
+            value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
         )
 
         # convert voltage_bits from code to voltage
@@ -213,7 +211,7 @@ class EdgePiADC(SPI):
         # TODO: make return status byte optional
         return status_bits, voltage_bits, check_bits, voltage
 
-    def single_sample(self, status_byte: bool=False):
+    def single_sample(self, status_byte: bool = False):
         """
         Perform a single `ADC1` voltage read in `PULSE` conversion mode.
         Do not call this method for voltage reading if ADC is configured
@@ -234,9 +232,7 @@ class EdgePiADC(SPI):
         # check CRC
         # TODO: only check CRC if setting enabled
         crc_8_atm(
-            value=voltage_bits.uint,
-            frame_len=adc.value.num_data_bytes * 8,
-            code=check_bits.uint
+            value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
         )
 
         # convert read_data from code to voltage
@@ -256,7 +252,7 @@ class EdgePiADC(SPI):
 
     def read_adc1_alarms(self):
         """
-        Read ADC1 output faults
+        Read ADC1 STATUS byte output faults
 
         Returns:
             `dict`: a dictionary of ADCAlarmType: ADCAlarm entries
