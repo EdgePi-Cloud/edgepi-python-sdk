@@ -514,22 +514,6 @@ def test_get_channel_assign_opcodes(
     assert out == expected
 
 
-@pytest.mark.parametrize(
-    "mode0_val, expected",
-    [
-        (0x00, False),
-        (0x40, True),
-        (0b11100000, True),
-        (0b10100000, False),
-    ],
-)
-def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[mode0_val]
-    )
-    assert adc._EdgePiADC__is_in_pulse_mode() == expected
-
-
 # TODO: when ADC2 functionality is added, use this format instead
 # @pytest.mark.parametrize(
 #     "adc_num, adc1_pulse_mode, calls",
@@ -556,44 +540,39 @@ def test_is_in_pulse_mode(mocker, mode0_val, expected, adc):
 
 
 @pytest.mark.parametrize(
-    "interface_reg, expected_len",
+    "status_byte, check_byte, expected_len",
     [
-        (0x00, 4),
-        (0x01, 5),
-        (0x02, 5),
-        (0x04, 5),
-        (0x05, 6),
-        (0x06, 6),
+        (False, False, 4),
+        (False, True, 5),
+        (True, False, 5),
+        (True, True, 6),
     ],
 )
-def test_get_data_read_len(mocker, interface_reg, expected_len, adc):
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[interface_reg]
-    )
-    assert adc._EdgePiADC__get_data_read_len() == expected_len
+def test_get_data_read_len(status_byte, check_byte, expected_len, adc):
+    assert adc._EdgePiADC__get_data_read_len(status_byte, check_byte) == expected_len
 
 
-@pytest.mark.parametrize(
-    "adc1_pulse_mode, call_1, cmd_2, read_len",
-    [
-        (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 6),
-        (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 5),
-        (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 4),
-        (False, [], COM.COM_RDATA1.value, 4),
-        (False, [], COM.COM_RDATA1.value, 5),
-        (False, [], COM.COM_RDATA1.value, 6),
-    ],
-)
-def test_read_voltage(mocker, adc1_pulse_mode, call_1, cmd_2, read_len, adc):
-    mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_data_read_len", return_value=read_len
-    )
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
-    )
-    transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
-    adc.read_voltage()
-    call_2 = call([cmd_2] + [255] * read_len)
-    transfer.assert_has_calls(call_1 + [call_2])
+# @pytest.mark.parametrize(
+#     "adc1_pulse_mode, call_1, cmd_2, read_len",
+#     [
+#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 6),
+#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 5),
+#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 4),
+#         (False, [], COM.COM_RDATA1.value, 4),
+#         (False, [], COM.COM_RDATA1.value, 5),
+#         (False, [], COM.COM_RDATA1.value, 6),
+#     ],
+# )
+# def test_read_voltage(mocker, adc1_pulse_mode, call_1, cmd_2, read_len, adc):
+#     mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
+#     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
+#     mocker.patch(
+#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_data_read_len", return_value=read_len
+#     )
+#     mocker.patch(
+#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
+#     )
+#     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
+#     adc.read_voltage()
+#     call_2 = call([cmd_2] + [255] * read_len)
+#     transfer.assert_has_calls(call_1 + [call_2])
