@@ -22,6 +22,7 @@ from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
+    ADCModes,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, crc_8_atm
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -42,7 +43,7 @@ class ADCState:
     alarms: int  # uint value of STATUS byte from most recent read
     reg_map: dict  # map of most recently updated register values
 
-    def get_state(self, addx: int, mask: int):
+    def get_state(self, mode: ADCModes):
         """
         Get state of an ADC functional mode based on most recently updated register values
 
@@ -53,11 +54,9 @@ class ADCState:
         """
         # TODO: validate `reg_map` every time get_state is called?
         # register value at this addx
-        reg_value = self.reg_map[addx]
+        reg_value = self.reg_map[mode.value.addx]["value"]
         # value of bits corresponding to functional mode: let through "masked" bits
-        return (~mask) & reg_value
-    
-
+        return (~mode.value.mask) & reg_value
 
 
 class RegisterUpdateError(Exception):
@@ -73,6 +72,10 @@ class RegisterUpdateError(Exception):
 
 class VoltageReadError(Exception):
     """Raised if a voltage read fails to return the expected number of bytes"""
+
+
+class ContinuousModeError(Exception):
+    """Raised when `read_voltage` is called and ADC is not in CONTINUOUS conversion mode"""
 
 
 class EdgePiADC(SPI):
@@ -221,6 +224,10 @@ class EdgePiADC(SPI):
         adc = ADCNum.ADC_1
 
         # TODO: assert adc is in continuous mode (use ADCStatus)
+        if self.__state.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
+            raise ContinuousModeError(
+                "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
+                )
 
         # TODO: check if necessary to enforce changing from FLOAT MODE before reading voltage:
         # is the output garbage, and can you tell this from the data before conversion?
@@ -455,8 +462,8 @@ class EdgePiADC(SPI):
 
         # check updated value were applied
         for addx, value in reg_values.items():
-            if value != updated_reg_values[addx]:
-                raise RegisterUpdateError(addx, value, updated_reg_values[addx])
+            if value != updated_reg_values[addx]["value"]:
+                raise RegisterUpdateError(addx, value, updated_reg_values[addx]["value"])
 
     def set_config(
         self,

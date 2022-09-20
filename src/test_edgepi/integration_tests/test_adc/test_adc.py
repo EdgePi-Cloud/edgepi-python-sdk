@@ -4,7 +4,7 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode, ADCReadBytes
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode, CheckMode
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_multiplexers import ChannelMappingError
 
@@ -12,7 +12,7 @@ from edgepi.adc.adc_multiplexers import ChannelMappingError
 @pytest.fixture(name="adc")
 def fixture_adc():
     adc = EdgePiADC()
-    adc._EdgePiADC__config(checksum_mode=ADCReadBytes.CHECK_BYTE_CRC)
+    adc._EdgePiADC__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
     yield adc
 
 

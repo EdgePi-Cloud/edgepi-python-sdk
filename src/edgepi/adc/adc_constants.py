@@ -227,7 +227,7 @@ class ADCMode:
 class ADCModes(Enum):
     """Address and mask values for ADC functional modes"""
     CONV = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
-    CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.value)
+    CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
     DATA_RATE_1 = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
     FILTER = ADCMode(ADCReg.REG_MODE1, ADCMasks.FILTER_BITS.value)
