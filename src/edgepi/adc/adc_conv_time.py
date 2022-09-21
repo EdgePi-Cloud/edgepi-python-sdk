@@ -10,7 +10,9 @@
 
 from edgepi.adc.adc_constants import FilterMode as FILT, ADC1DataRate as DR1, ADC2DataRate as DR2
 
-ADC1_DELAYS = {
+
+# pulse conversion delay times for ADC1, or first conversion delay time for continuous conversions
+ADC1_PULSE_DELAYS = {
     DR1.SPS_2P5.value.op_code: {
         FILT.SINC1.value.op_code: 400.4,
         FILT.SINC2.value.op_code: 800.4,
@@ -125,9 +127,58 @@ ADC1_DELAYS = {
     },
 }
 
+
+# ADC1 continuous conversion delay times, for conversions following first conversion
+ADC1_CONT_DELAYS = {
+    DR1.SPS_2P5.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_2P5.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_5.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_5.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_10.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_10.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_16P6.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_16P6.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_20.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_20.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_50.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_50.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_60.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_60.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_100.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_100.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_400.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_1200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_1200.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_2400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_2400.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_4800.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_4800.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_7200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_7200.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_14400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_14400.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_19200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_19200.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_38400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_38400.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+}
+
+
+# continuous conversion delay times for ADC2 (ADC2 only uses continuous mode)
 ADC2_DELAYS = {
     DR2.SPS_10.value.op_code: 121,
     DR2.SPS_100.value.op_code: 31.2,
     DR2.SPS_400.value.op_code: 8.71,
     DR2.SPS_800.value.op_code: 4.97,
 }
+
+
+def compute_time_delay(conv_mode: int, data_rate: int, filter_mode: int):
+    pass
