@@ -170,17 +170,17 @@ class EdgePiADC(SPI):
             else self.__state.get_state(ADCModes.DATA_RATE_2)
         )
         filter_mode = self.__state.get_state(ADCModes.FILTER)
-        conv_delay = compute_time_delay(adc_num, conv_mode, data_rate, filter_mode)
+        conv_delay = compute_time_delay(adc_num, conv_mode, data_rate, filter_mode) / 1000
         _logger.debug(
             (
-            f"Computed time delay = {conv_delay} (ms) with the following configs:\n"
+            f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
             f"adc_num={adc_num}, conv_mode={hex(conv_mode)}, "
             f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}"
             )
         )
         self.transfer(start_cmd)
-        # TODO: compute conversion time delay + wait here (use ADCState)
-        # - may not be needed for auto_mode though
+        # TODO: if continuous mode, skip this step and pass delay on to calling method
+        # TODO: integration test this
         time.sleep(conv_delay)
 
     def clear_reset_bit(self):
