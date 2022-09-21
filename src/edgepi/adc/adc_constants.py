@@ -165,14 +165,19 @@ class ADC1DataRate(Enum):
     SPS_38400 = OpCode(0xF, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
 
 
-class ADC2DataRate(Enum):
-    """ADS1263 data rates for ADC2"""
-
-
 class ADCMasks(Enum):
     """ADS1263 OpCode bit masks"""
     FILTER_BITS = 0x1F  # overwrite bits 7:5 (0-indexed)
     CHECK_BITS = 0xFC   # overwrite bits 1:0
+    ADC2_DR_BITS = 0x3F # overwrite bits 7:6
+
+
+class ADC2DataRate(Enum):
+    """ADS1263 data rates for ADC2"""
+    SPS_10 = OpCode(0x00, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
+    SPS_100 = OpCode(0x40, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
+    SPS_400 = OpCode(0x80, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
+    SPS_800 = OpCode(0xC0, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
 
 
 class FilterMode(Enum):

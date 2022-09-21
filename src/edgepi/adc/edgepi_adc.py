@@ -51,6 +51,9 @@ class ADCState:
             addx (int): address of register this functional mode belongs to
 
             mask (int): mask applied to set this functional mode during update
+
+        Returns:
+            int: uint value of the bits corresponding to this functional mode
         """
         # TODO: validate `reg_map` every time get_state is called?
         # register value at this addx
