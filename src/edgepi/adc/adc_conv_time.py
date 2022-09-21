@@ -8,7 +8,13 @@
 # TODO: add integration tests to make sure actual conversion delay is close to
 # figures below
 
-from edgepi.adc.adc_constants import FilterMode as FILT, ADC1DataRate as DR1, ADC2DataRate as DR2, ConvMode, ADCNum
+from edgepi.adc.adc_constants import (
+    FilterMode as FILT,
+    ADC1DataRate as DR1,
+    ADC2DataRate as DR2,
+    ConvMode,
+    ADCNum,
+)
 
 
 # pulse conversion delay times for ADC1, or first conversion delay time for continuous conversions
@@ -186,7 +192,7 @@ def compute_time_delay(adc_num: ADCNum, conv_mode: int, data_rate: int, filter_m
 
     Args:
         `adc_num` (ADCNum): ADC whose conversions are being sampled
-        
+
         `conv_mode` (int): value of conversion mode bits
 
         `data_rate` (int): value of data rate bits
