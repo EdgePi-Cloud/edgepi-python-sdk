@@ -1,10 +1,17 @@
 """ Integration tests for EdgePi ADC module """
 
-
+import time
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCReg, ADCChannel as CH, ConvMode, CheckMode
+from edgepi.adc.adc_constants import (
+    ADC_NUM_REGS,
+    ADCReg,
+    ADCChannel as CH,
+    ConvMode,
+    CheckMode,
+    ADC1DataRate,
+)
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_multiplexers import ChannelMappingError
 
@@ -145,14 +152,22 @@ def test_config(args, expected_vals, err, adc):
 
 
 def test_voltage_individual(adc):
-    adc._EdgePiADC__config(conversion_mode=ConvMode.PULSE, adc_1_analog_in=CH.AIN3)
+    adc._EdgePiADC__config(
+        conversion_mode=ConvMode.PULSE,
+        adc_1_analog_in=CH.AIN3,
+        adc_1_data_rate=ADC1DataRate.SPS_20,
+    )
     out = adc.single_sample()
     print(out)
 
 
 def test_voltage_continuous(adc):
     try:
-        adc._EdgePiADC__config(conversion_mode=ConvMode.CONTINUOUS, adc_1_analog_in=CH.AIN3)
+        adc._EdgePiADC__config(
+            conversion_mode=ConvMode.CONTINUOUS,
+            adc_1_analog_in=CH.AIN3,
+            adc_1_data_rate=ADC1DataRate.SPS_20,
+        )
         adc.start_conversions()
         for _ in range(10):
             out = adc.read_voltage()

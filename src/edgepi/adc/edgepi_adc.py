@@ -34,7 +34,7 @@ from edgepi.adc.adc_multiplexers import (
     ChannelMappingError,
     validate_channels_allowed,
 )
-from edgepi.adc.adc_conv_time import compute_time_delay
+from edgepi.adc.adc_conv_time import compute_initial_time_delay, compute_continuous_time_delay
 
 _logger = logging.getLogger(__name__)
 
@@ -170,18 +170,19 @@ class EdgePiADC(SPI):
             else self.__state.get_state(ADCModes.DATA_RATE_2)
         )
         filter_mode = self.__state.get_state(ADCModes.FILTER)
-        conv_delay = compute_time_delay(adc_num, conv_mode, data_rate, filter_mode) / 1000
+        conv_delay = compute_initial_time_delay(adc_num, data_rate, filter_mode)
         _logger.debug(
             (
             f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
             f"adc_num={adc_num}, conv_mode={hex(conv_mode)}, "
-            f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}"
+            f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}\n"
             )
         )
         self.transfer(start_cmd)
-        # TODO: if continuous mode, skip this step and pass delay on to calling method
+        # TODO: if continuous mode, delay needed between subsequent reads
         # TODO: integration test this
-        time.sleep(conv_delay)
+        # TODO: this wait needs to be the longer initial PULSE mode wait for both conv modes
+        time.sleep(conv_delay / 1000)
 
     def clear_reset_bit(self):
         """
@@ -207,7 +208,7 @@ class EdgePiADC(SPI):
         if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
             raise VoltageReadError(
                 f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
-            )
+            ) 
 
         status_code = pack("uint:8", read_data[1])
 
@@ -233,6 +234,20 @@ class EdgePiADC(SPI):
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
             )
+        # get continuous mode time delay and wait here (delay is needed between each conversion)
+        data_rate = (
+            self.__state.get_state(ADCModes.DATA_RATE_1)
+            if adc == ADCNum.ADC_1
+            else self.__state.get_state(ADCModes.DATA_RATE_2)
+        )
+        delay = compute_continuous_time_delay(adc, data_rate)
+        _logger.debug(
+            (
+            f"\nContinuous time delay = {delay} (ms) with the following config opcodes:\n"
+            f"adc_num={adc},  data_rate={hex(data_rate)}\n"
+            )
+        )
+        time.sleep(delay / 1000)
 
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 

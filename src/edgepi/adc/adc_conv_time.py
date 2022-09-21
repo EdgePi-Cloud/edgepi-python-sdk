@@ -4,9 +4,10 @@
 # - Conversion delay (REG_MODE0)
 # - Digital filter mode (REG_MODE1)
 # - Data rate mode (REG_MODE2)
-# - IDAC/Chop mode (REG_MODE0)
-# TODO: add integration tests to make sure actual conversion delay is close to
-# figures below
+# - IDAC/Chop mode (REG_MODE0) -> currently not configurable (non-factor)
+
+# TODO: add integration tests to make sure actual conversion delay is close to figures below
+
 
 from edgepi.adc.adc_constants import (
     FilterMode as FILT,
@@ -18,7 +19,7 @@ from edgepi.adc.adc_constants import (
 
 
 # pulse conversion delay times for ADC1, or first conversion delay time for continuous conversions
-ADC1_PULSE_DELAYS = {
+ADC1_INITIAL_DELAYS = {
     DR1.SPS_2P5.value.op_code: {
         FILT.SINC1.value.op_code: 400.4,
         FILT.SINC2.value.op_code: 800.4,
@@ -134,44 +135,52 @@ ADC1_PULSE_DELAYS = {
 }
 
 
-# ADC1 continuous conversion delay times, for conversions following first conversion
+# ADC1 continuous conversion delay times, for conversions 2..n (following first conversion)
 ADC1_CONT_DELAYS = {
-    DR1.SPS_2P5.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_2P5.value.op_code][
+    DR1.SPS_2P5.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_2P5.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_5.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_5.value.op_code][FILT.SINC1.value.op_code],
-    DR1.SPS_10.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_10.value.op_code][FILT.SINC1.value.op_code],
-    DR1.SPS_16P6.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_16P6.value.op_code][
+    DR1.SPS_5.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_5.value.op_code][FILT.SINC1.value.op_code],
+    DR1.SPS_10.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_10.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_20.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_20.value.op_code][FILT.SINC1.value.op_code],
-    DR1.SPS_50.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_50.value.op_code][FILT.SINC1.value.op_code],
-    DR1.SPS_60.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_60.value.op_code][FILT.SINC1.value.op_code],
-    DR1.SPS_100.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_100.value.op_code][
+    DR1.SPS_16P6.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_16P6.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_400.value.op_code][
+    DR1.SPS_20.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_20.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_1200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_1200.value.op_code][
+    DR1.SPS_50.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_50.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_2400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_2400.value.op_code][
+    DR1.SPS_60.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_60.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_4800.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_4800.value.op_code][
+    DR1.SPS_100.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_100.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_7200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_7200.value.op_code][
+    DR1.SPS_400.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_400.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_14400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_14400.value.op_code][
+    DR1.SPS_1200.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_1200.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_19200.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_19200.value.op_code][
+    DR1.SPS_2400.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_2400.value.op_code][
         FILT.SINC1.value.op_code
     ],
-    DR1.SPS_38400.value.op_code: ADC1_PULSE_DELAYS[DR1.SPS_38400.value.op_code][
+    DR1.SPS_4800.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_4800.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_7200.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_7200.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_14400.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_14400.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_19200.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_19200.value.op_code][
+        FILT.SINC1.value.op_code
+    ],
+    DR1.SPS_38400.value.op_code: ADC1_INITIAL_DELAYS[DR1.SPS_38400.value.op_code][
         FILT.SINC1.value.op_code
     ],
 }
@@ -186,28 +195,44 @@ ADC2_DELAYS = {
 }
 
 
-def compute_time_delay(adc_num: ADCNum, conv_mode: int, data_rate: int, filter_mode: int):
+def compute_initial_time_delay(adc_num: ADCNum, data_rate: int, filter_mode: int):
     """
     Computes conversion latency (ms) based on ADC configuration
+    for PULSE mode reads or initial read in CONTINUOUS mode.
 
     Args:
         `adc_num` (ADCNum): ADC whose conversions are being sampled
 
-        `conv_mode` (int): value of conversion mode bits
+        `data_rate` (int): opcode value of data rate bits
 
-        `data_rate` (int): value of data rate bits
-
-        `filter_mode` (int): value of filter mode bits
+        `filter_mode` (int): opcode value of filter mode bits
 
     Returns:
         `float`: conversion delay in milliseconds (ms)
     """
     if adc_num == ADCNum.ADC_1:
-        if conv_mode == ConvMode.CONTINUOUS.value.op_code:
-            return ADC1_CONT_DELAYS[data_rate]
-        elif conv_mode == ConvMode.PULSE.value.op_code:
-            return ADC1_PULSE_DELAYS[data_rate][filter_mode]
-        else:
-            return ValueError(f"{hex(conv_mode)} is an invalid conversion mode")
+        # this is the initial delay for both pulse and continuous modes
+        return ADC1_INITIAL_DELAYS[data_rate][filter_mode]
+    else:
+        # no initial figures given in documentation, but initial delay is about 3
+        # times longer than subsequent conversion delays
+        return ADC2_DELAYS[data_rate] * 3
+
+
+def compute_continuous_time_delay(adc_num: ADCNum, data_rate: int):
+    """
+    Computes conversion latency (ms) based on ADC configuration
+    for reads 2...n in continuous conversion mode.
+
+    Args:
+        `adc_num` (ADCNum): ADC whose conversions are being sampled
+
+        `data_rate` (int): opcode value of data rate bits
+
+    Returns:
+        `float`: conversion delay in milliseconds (ms)
+    """
+    if adc_num == ADCNum.ADC_1:
+        return ADC1_CONT_DELAYS[data_rate]
     else:
         return ADC2_DELAYS[data_rate]
