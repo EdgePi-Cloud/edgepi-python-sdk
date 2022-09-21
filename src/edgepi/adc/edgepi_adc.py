@@ -34,6 +34,7 @@ from edgepi.adc.adc_multiplexers import (
     ChannelMappingError,
     validate_channels_allowed,
 )
+from edgepi.adc.adc_conv_time import compute_time_delay
 
 _logger = logging.getLogger(__name__)
 
@@ -160,12 +161,27 @@ class EdgePiADC(SPI):
         performing reads.
         """
         # TODO: convert adc_num to parameter when ADC2 added
-        adc_num = ADCNum.ADC_1.value
-        start_cmd = self.adc_ops.start_adc(adc_num=adc_num)
+        adc_num = ADCNum.ADC_1
+        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
+        conv_mode = self.__state.get_state(ADCModes.CONV)
+        data_rate = (
+            self.__state.get_state(ADCModes.DATA_RATE_1)
+            if adc_num == ADCNum.ADC_1
+            else self.__state.get_state(ADCModes.DATA_RATE_2)
+        )
+        filter_mode = self.__state.get_state(ADCModes.FILTER)
+        conv_delay = compute_time_delay(adc_num, conv_mode, data_rate, filter_mode)
+        _logger.debug(
+            (
+            f"Computed time delay = {conv_delay} (ms) with the following configs:\n"
+            f"adc_num={adc_num}, conv_mode={hex(conv_mode)}, "
+            f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}"
+            )
+        )
         self.transfer(start_cmd)
         # TODO: compute conversion time delay + wait here (use ADCState)
         # - may not be needed for auto_mode though
-        time.sleep(0.5)
+        time.sleep(conv_delay)
 
     def clear_reset_bit(self):
         """

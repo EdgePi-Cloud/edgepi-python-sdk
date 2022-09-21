@@ -236,4 +236,5 @@ class ADCModes(Enum):
     CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
     DATA_RATE_1 = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
+    DATA_RATE_2 = ADCMode(ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
     FILTER = ADCMode(ADCReg.REG_MODE1, ADCMasks.FILTER_BITS.value)
