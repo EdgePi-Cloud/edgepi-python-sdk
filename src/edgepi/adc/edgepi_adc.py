@@ -227,7 +227,7 @@ class EdgePiADC(SPI):
 
         return status_bits, voltage_bits, check_bits, voltage
 
-    def single_sample(self, status_byte: bool = False):
+    def single_sample(self):
         """
         Perform a single `ADC1` voltage read in `PULSE` conversion mode.
         Do not call this method for voltage reading if ADC is configured
@@ -360,7 +360,6 @@ class EdgePiADC(SPI):
 
         return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
 
-    # TODO: add option to validate configs have been applied
     def __config(
         self,
         adc_1_analog_in: CH = None,
@@ -394,9 +393,6 @@ class EdgePiADC(SPI):
                 Note, ADC2 runs only in continuous conversion mode.
         """
         # pylint: disable=unused-argument
-
-        # TODO: if the filter_mode or data_rate is changed, track state -
-        # - call function to update the stored filter and data mode
 
         # filter out self and None args
         args = list(filter_dict(locals(), "self", None).values())
@@ -469,6 +465,7 @@ class EdgePiADC(SPI):
                 Note this affects data rate. Please refer to module documentation
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
+            `valid` (bool): set to False if you wish to skip update validation
         """
         # pylint: disable=unused-argument
 
