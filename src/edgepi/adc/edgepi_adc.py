@@ -179,9 +179,7 @@ class EdgePiADC(SPI):
             )
         )
         self.transfer(start_cmd)
-        # TODO: if continuous mode, delay needed between subsequent reads
         # TODO: integration test this
-        # TODO: this wait needs to be the longer initial PULSE mode wait for both conv modes
         time.sleep(conv_delay / 1000)
 
     def clear_reset_bit(self):

@@ -13,7 +13,6 @@ from edgepi.adc.adc_constants import (
     FilterMode as FILT,
     ADC1DataRate as DR1,
     ADC2DataRate as DR2,
-    ConvMode,
     ADCNum,
 )
 
