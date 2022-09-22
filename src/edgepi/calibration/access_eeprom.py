@@ -1,0 +1,1 @@
+'''Helper class to access on board eeprom'''
