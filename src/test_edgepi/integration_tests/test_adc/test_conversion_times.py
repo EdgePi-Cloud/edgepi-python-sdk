@@ -11,8 +11,7 @@ from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCNum, ConvMode, ADC1DataRate as DR1, FilterMode as FILT
 from edgepi.adc.adc_conv_time import (
     compute_continuous_time_delay,
-    compute_initial_time_delay,
-    SAFETY_MARGIN,
+    compute_initial_time_delay
 )
 
 
@@ -29,12 +28,23 @@ def fixture_adc():
 
 
 NUM_TRIALS = 10  # number of samples for mean actual conversion time
-DELAY_MARGIN = 0.01  # allow 1% margin between computed and actual delay
+DELAY_MARGIN = 1 # allows 1 ms error margin between computed and actual conversion time
+
+
+def _get_data_ready_time(adc):
+    times = []
+    for _ in range(100):
+        start = perf_counter_ns()
+        adc._EdgePiADC__is_data_ready()
+        end = perf_counter_ns()
+        print((end - start) * 10**-6)
+        times.append((end - start) * 10**-6)
+    print(statistics.fmean(times))
+    return statistics.fmean(times)
 
 
 def _get_conv_time(adc):
     start = perf_counter_ns()
-    # adc.start_conversions()
     while not adc._EdgePiADC__is_data_ready():
         continue
     end = perf_counter_ns()
@@ -65,6 +75,81 @@ def _get_mean_delay(adc, adc_num, conv_time_function, **kwargs):
         (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2P5, FILT.SINC3),
         (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2P5, FILT.SINC4),
         (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2P5, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_5, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_5, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_5, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_5, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_5, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_10, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_10, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_10, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_10, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_10, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_16P6, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_16P6, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_16P6, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_16P6, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_16P6, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_20, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_20, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_20, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_20, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_20, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_50, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_50, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_50, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_50, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_50, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_60, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_60, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_60, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_60, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_60, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_100, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_100, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_100, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_100, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_100, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_400, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_400, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_400, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_400, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_400, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_1200, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_1200, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_1200, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_1200, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_1200, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2400, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2400, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2400, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2400, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_2400, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_4800, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_4800, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_4800, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_4800, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_4800, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_7200, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_7200, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_7200, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_7200, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_7200, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_14400, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_14400, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_14400, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_14400, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_14400, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_19200, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_19200, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_19200, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_19200, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_19200, FILT.FIR),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_38400, FILT.SINC1),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_38400, FILT.SINC2),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_38400, FILT.SINC3),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_38400, FILT.SINC4),
+        (ADCNum.ADC_1, ConvMode.PULSE, DR1.SPS_38400, FILT.FIR),
     ],
 )
 def test_compute_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
@@ -90,10 +175,11 @@ def test_compute_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, 
     _logger.info(f"Mean Conversion Time (ms): {mean_time}")
 
     # assert computed time delay is within allowed margin of mean actual delay
-    _logger.info(
-        (
-            f"Computed vs Actual Time Delay Difference = "
-            f"{(abs(expected - mean_time) / mean_time) * 100} %"
-        )
-    )
-    assert abs(expected - mean_time) / mean_time < DELAY_MARGIN
+    # cannot use % difference because higher data rate delay times are in fractions of a ms
+    # where SPI transfer and function overhead times are a significant factor,
+    # resulting in inaccurate sampling of mean actual conversion time.
+    # i.e. 50% of mean conversion time may actually be unrelated overhead from sampling STATUS byte
+    # to check if data is new, or other function overhead.
+    diff = abs(expected - mean_time)
+    print(f"Computed vs Actual Time Delay Difference = {diff} ms")
+    assert diff < DELAY_MARGIN
