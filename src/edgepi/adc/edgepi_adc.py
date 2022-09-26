@@ -153,6 +153,11 @@ class EdgePiADC(SPI):
         adc = ADCNum.ADC_1.value
         self.transfer([adc.stop_cmd])
 
+    def __send_start_command(self, adc_num):
+        """Triggers ADC conversion(s)"""
+        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
+        self.transfer(start_cmd)
+
     def start_conversions(self):
         """
         Start voltage read conversions. If ADC is continuous conversion mode,
@@ -162,7 +167,6 @@ class EdgePiADC(SPI):
         """
         # TODO: convert adc_num to parameter when ADC2 added
         adc_num = ADCNum.ADC_1
-        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
         conv_mode = self.__state.get_state(ADCModes.CONV)
         data_rate = (
             self.__state.get_state(ADCModes.DATA_RATE_1)
@@ -178,8 +182,8 @@ class EdgePiADC(SPI):
             f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}\n"
             )
         )
-        self.transfer(start_cmd)
-        # TODO: integration test this
+        self.__send_start_command(adc_num)
+
         time.sleep(conv_delay / 1000)
 
     def clear_reset_bit(self):
@@ -287,13 +291,15 @@ class EdgePiADC(SPI):
 
         return status_bits, voltage_bits, check_bits, voltage
 
-    def is_data_ready(self):
+    def reset(self):
+        """Reset ADC register values to default power-on state"""
+        self.transfer(self.adc_ops.reset_adc())
+
+    def __is_data_ready(self):
+        # pylint: disable=unused-private-member
+        # used in test_conversion_times.py
+        """Utility for testing conversion times, returns True if ADC indicates new read data"""
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
-        # start = time.perf_counter_ns()
-        # adc_1_bit = pack("uint:8", read_data[1])
-        # adc_1_bit = read_data[1] & 0b01000000
-        # end = time.perf_counter_ns()
-        # print(f"pack time (ms): {(end-start)*10**-6}")
         return read_data[1] & 0b01000000
 
     def read_adc_1_alarms(self, status_byte):
