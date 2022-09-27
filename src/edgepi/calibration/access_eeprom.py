@@ -1,6 +1,6 @@
 '''Helper class to access on board eeprom'''
 
-def sequential_read(bus, reg_addr: int = None, len: int = None, dev_addr: int = None):
+def sequential_read(bus, reg_addr: int = None, length: int = None, dev_addr: int = None):
     '''
     Read operation reads the specified number of memory location starting from provided address. The
     address pointer will wrap around when it reaches the end of the memory.
@@ -13,7 +13,7 @@ def sequential_read(bus, reg_addr: int = None, len: int = None, dev_addr: int = 
         List of read data
 
     '''
-    msg = bus.set_read_msg(reg_addr, [0xFF]*len)
+    msg = bus.set_read_msg(reg_addr, [0xFF]*length)
     return bus.transfer(dev_addr, msg)
 
 def selective_read(bus, reg_addr: int = None, dev_addr: int = None):

@@ -3,6 +3,9 @@
 from enum import Enum
 
 class ModuleNames(Enum):
+    """
+    Module Name Enum
+    """
     DAC = 0x0
     ADC = 0x1
     RTD = 0x2
