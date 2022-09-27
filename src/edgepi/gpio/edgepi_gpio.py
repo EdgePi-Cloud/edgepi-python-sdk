@@ -69,7 +69,7 @@ class EdgePiGPIO(I2CDevice):
 
             for reg_address, value in default_reg_dict.items():
                 list_read_msg = self.set_read_msg(reg_address, [value['value']])
-                default_reg_dict[reg_address] = self.transfer(dev_address, list_read_msg)
+                default_reg_dict[reg_address] = self.transfer(dev_address, list_read_msg)[0]
         set_pin_states(self.dict_pin)
 
     def __read_register(self, reg_address, dev_address):

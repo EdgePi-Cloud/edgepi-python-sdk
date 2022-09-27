@@ -85,16 +85,16 @@ def test_generate_default_reg_dict(mock_dict,config, result, mock_i2c):
 
 @pytest.mark.parametrize("config, mock_vals, result",[
                         (GpioConfigs.DAC.value,
-                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0],
+                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [0]],
                          {32: {2 : 0, 6 : 0}, 33: {2 : 0, 6 : 0}}),
                         (GpioConfigs.ADC.value,
-                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 252],
+                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [252]],
                          {33:{2 : 252, 6 : 252}}),
                         (GpioConfigs.RTD.value,
-                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 254],
+                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [254]],
                          {33:{2 : 254, 6 : 254}}),
                         (GpioConfigs.LED.value,
-                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, 0],
+                         [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [0]],
                          {32:{2 : 0, 6 : 0}}),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
