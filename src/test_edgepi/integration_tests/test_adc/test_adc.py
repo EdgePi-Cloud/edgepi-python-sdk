@@ -8,16 +8,14 @@ from edgepi.adc.adc_constants import (
     ADCReg,
     ADCChannel as CH,
     ConvMode,
-    CheckMode,
     ADC1DataRate,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
 # pylint: disable=protected-access
-@pytest.fixture(name="adc")
+@pytest.fixture(name="adc", scope="module")
 def fixture_adc():
     adc = EdgePiADC()
-    adc._EdgePiADC__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
     yield adc
 
 
@@ -35,6 +33,7 @@ def test_read_register_individual(adc):
 @pytest.mark.parametrize(
     "args, updated_vals",
     [
+        # EdgePI ADC defaults: adc_1_mux_p = AIN0, adc_1_mux_n = AINCOM
         (
             {
                 "adc_1_analog_in": CH.AIN0,
@@ -125,6 +124,175 @@ def test_read_register_individual(adc):
         ),
         (
             {
+                "adc_1_mux_n": CH.AIN3,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x03,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN4,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x04,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN5,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x05,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN6,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x06,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN7,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x07,
+            },
+        ),
+        # EdgePI ADC defaults: adc_2_mux_p = AIN0, adc_2_mux_n = AIN1
+        (
+            {
+                "adc_2_analog_in": CH.AIN0,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x01,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN1,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x11,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN2,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x21,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN3,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x31,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN4,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x41,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN5,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x51,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN6,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x61,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.AIN7,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x71,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN0,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x0,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN1,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x01,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN2,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x02,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN3,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x03,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN4,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x04,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN5,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x05,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN6,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x06,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.AIN7,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x07,
+            },
+        ),
+        (
+            {
                 "adc_1_analog_in": CH.AIN1,
                 "adc_2_analog_in": CH.AIN2,
                 "adc_1_mux_n": CH.AIN3,
@@ -182,7 +350,6 @@ def test_config(args, updated_vals, adc):
 
     # reset adc registers to pre-test values
     adc.reset()
-    # adc._EdgePiADC__write_register(ADCReg.REG_ID, regs)
 
 
 # def test_read_voltage_pulse(adc):
