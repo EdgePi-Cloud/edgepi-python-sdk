@@ -9,7 +9,10 @@ from edgepi.adc.adc_constants import (
     ADCChannel as CH,
     ConvMode,
     ADC1DataRate,
-    ADC2DataRate
+    ADC2DataRate,
+    FilterMode,
+    CheckMode,
+    ADCPower
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -536,6 +539,102 @@ def test_read_register_individual(adc):
             },
             {
                 ADCReg.REG_ADC2CFG.value: 0xC0,
+            },
+        ),
+        (
+            {
+                "filter_mode": FilterMode.SINC1
+            },
+            {
+                ADCReg.REG_MODE1.value: 0x0,
+            },
+        ),
+        (
+            {
+                "filter_mode": FilterMode.SINC2
+            },
+            {
+                ADCReg.REG_MODE1.value: 0b00100000,
+            },
+        ),
+        (
+            {
+                "filter_mode": FilterMode.SINC3
+            },
+            {
+                ADCReg.REG_MODE1.value: 0b01000000,
+            },
+        ),
+        (
+            {
+                "filter_mode": FilterMode.SINC4
+            },
+            {
+                ADCReg.REG_MODE1.value: 0b01100000,
+            },
+        ),
+        (
+            {
+                "filter_mode": FilterMode.FIR
+            },
+            {
+                ADCReg.REG_MODE1.value: 0b10000000,
+            },
+        ),
+        (
+            {
+                "conversion_mode": ConvMode.PULSE
+            },
+            {
+                ADCReg.REG_MODE0.value: 0x40,
+            },
+        ),
+        (
+            {
+                "conversion_mode": ConvMode.CONTINUOUS
+            },
+            {
+                ADCReg.REG_MODE0.value: 0x0,
+            },
+        ),
+        (
+            {
+                "checksum_mode": CheckMode.CHECK_BYTE_CRC
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0b00000110,
+            },
+        ),
+        (
+            {
+                "checksum_mode": CheckMode.CHECK_BYTE_CHK
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0b00000101,
+            },
+        ),
+        (
+            {
+                "checksum_mode": CheckMode.CHECK_BYTE_OFF
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0b00000100,
+            },
+        ),
+        (
+            {
+                "reset_clear": ADCPower.RESET_CLEAR
+            },
+            {
+                ADCReg.REG_POWER.value: 0x01,
+            },
+        ),
+        (
+            {
+                "checksum_mode": CheckMode.CHECK_BYTE_CRC
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0b00000110,
             },
         ),
     ],
