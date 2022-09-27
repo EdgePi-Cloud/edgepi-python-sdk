@@ -1,7 +1,6 @@
 """ Integration tests for EdgePi ADC module """
 
 import time
-from contextlib import nullcontext as does_not_raise
 
 import pytest
 from edgepi.adc.adc_constants import (
@@ -13,7 +12,6 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_multiplexers import ChannelMappingError
 
 # pylint: disable=protected-access
 @pytest.fixture(name="adc")
@@ -35,8 +33,24 @@ def test_read_register_individual(adc):
 
 
 @pytest.mark.parametrize(
-    "args, expected_vals, err",
+    "args, updated_vals",
     [
+        (
+            {
+                "adc_1_analog_in": CH.AIN0,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x0A,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN1,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x1A,
+            },
+        ),
         (
             {
                 "adc_1_analog_in": CH.AIN2,
@@ -44,16 +58,70 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
             },
-            does_not_raise(),
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN3,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x3A,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN4,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x4A,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN5,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x5A,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN6,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x6A,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.AIN7,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x7A,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN0,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x0,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AIN1,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x01,
+            },
         ),
         (
             {
                 "adc_1_mux_n": CH.AIN2,
             },
             {
-                ADCReg.REG_INPMUX.value: 0xF2,
+                ADCReg.REG_INPMUX.value: 0x02,
             },
-            does_not_raise(),
         ),
         (
             {
@@ -66,7 +134,6 @@ def test_read_register_individual(adc):
                 ADCReg.REG_INPMUX.value: 0x13,
                 ADCReg.REG_ADC2MUX.value: 0x24,
             },
-            does_not_raise(),
         ),
         (
             {
@@ -77,7 +144,6 @@ def test_read_register_individual(adc):
                 ADCReg.REG_INPMUX.value: 0x2A,
                 ADCReg.REG_ADC2MUX.value: 0x21,
             },
-            does_not_raise(),
         ),
         (
             {
@@ -86,7 +152,6 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0xAA,
             },
-            pytest.raises(ChannelMappingError),
         ),
         (
             {
@@ -96,25 +161,28 @@ def test_read_register_individual(adc):
             {
                 ADCReg.REG_INPMUX.value: 0x11,
             },
-            pytest.raises(ChannelMappingError),
         ),
     ],
 )
-def test_config(args, expected_vals, err, adc):
-    regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
+def test_config(args, updated_vals, adc):
+    original_regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
 
-    with err:
-        updated_regs = adc._EdgePiADC__config(**args)
+    updates = adc._EdgePiADC__config(**args)
+    updated_regs = adc._EdgePiADC__read_registers_to_map()
 
-        for addx, entry in updated_regs.items():
-            if entry["is_changed"]:
-                assert entry["value"] == expected_vals[addx]
-            else:
-                assert entry["value"] == regs[addx]
+    for addx, entry in updates.items():
+        # assert update values used by __config() were written to registers
+        assert entry["value"] == updated_regs[addx]
 
-        # reset adc registers to pre-test values
-        # TODO: replace with reset command once implemented
-        adc._EdgePiADC__write_register(ADCReg.REG_ID, regs)
+        # assert only updated settings' registers have been modfied
+        if entry["is_changed"]:
+            assert entry["value"] == updated_vals[addx]
+        else:
+            assert entry["value"] == original_regs[addx]            
+
+    # reset adc registers to pre-test values
+    adc.reset()
+    # adc._EdgePiADC__write_register(ADCReg.REG_ID, regs)
 
 
 # def test_read_voltage_pulse(adc):
