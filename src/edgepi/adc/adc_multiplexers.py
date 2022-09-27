@@ -95,8 +95,8 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
     Checks if requested input channels to be mapped are available due to RTD_EN status
 
     Args:
-        channels (list): ADCChannel members, input channel mapping
-        rtd_enabled (bool): RTD_EN status
+        `channels` (list): ADCChannel members, input channel mapping
+        `rtd_enabled` (bool): RTD_EN status
     """
     # channels available depend on RTD_EN status
     allowed_channels = (
