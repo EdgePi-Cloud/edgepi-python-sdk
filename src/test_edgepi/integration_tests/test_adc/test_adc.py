@@ -9,6 +9,7 @@ from edgepi.adc.adc_constants import (
     ADCChannel as CH,
     ConvMode,
     ADC1DataRate,
+    ADC2DataRate
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -100,6 +101,22 @@ def test_read_register_individual(adc):
         ),
         (
             {
+                "adc_1_analog_in": CH.AINCOM,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0xAA,
+            },
+        ),
+        (
+            {
+                "adc_1_analog_in": CH.FLOAT,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0xFA,
+            },
+        ),
+        (
+            {
                 "adc_1_mux_n": CH.AIN0,
             },
             {
@@ -160,6 +177,22 @@ def test_read_register_individual(adc):
             },
             {
                 ADCReg.REG_INPMUX.value: 0x07,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.AINCOM,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x0A,
+            },
+        ),
+        (
+            {
+                "adc_1_mux_n": CH.FLOAT,
+            },
+            {
+                ADCReg.REG_INPMUX.value: 0x0F,
             },
         ),
         # EdgePI ADC defaults: adc_2_mux_p = AIN0, adc_2_mux_n = AIN1
@@ -229,6 +262,22 @@ def test_read_register_individual(adc):
         ),
         (
             {
+                "adc_2_analog_in": CH.AINCOM,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0xA1,
+            },
+        ),
+        (
+            {
+                "adc_2_analog_in": CH.FLOAT,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0xF1,
+            },
+        ),
+        (
+            {
                 "adc_2_mux_n": CH.AIN0,
             },
             {
@@ -293,6 +342,22 @@ def test_read_register_individual(adc):
         ),
         (
             {
+                "adc_2_mux_n": CH.AINCOM,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x0A,
+            },
+        ),
+        (
+            {
+                "adc_2_mux_n": CH.FLOAT,
+            },
+            {
+                ADCReg.REG_ADC2MUX.value: 0x0F,
+            },
+        ),
+        (
+            {
                 "adc_1_analog_in": CH.AIN1,
                 "adc_2_analog_in": CH.AIN2,
                 "adc_1_mux_n": CH.AIN3,
@@ -315,19 +380,162 @@ def test_read_register_individual(adc):
         ),
         (
             {
-                "adc_1_analog_in": CH.AINCOM,
+                "adc_1_data_rate": ADC1DataRate.SPS_2P5
             },
             {
-                ADCReg.REG_INPMUX.value: 0xAA,
+                ADCReg.REG_MODE2.value: 0x0,
             },
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN1,
-                "adc_1_mux_n": CH.AIN1,
+                "adc_1_data_rate": ADC1DataRate.SPS_5
             },
             {
-                ADCReg.REG_INPMUX.value: 0x11,
+                ADCReg.REG_MODE2.value: 0x01,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_10
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x02,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_16P6
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x03,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_20
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x04,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_50
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x05,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_60
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x06,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_100
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x07,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_400
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x08,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_1200
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x09,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_2400
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0A,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_4800
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0B,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_7200
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0C,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_14400
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0D,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_19200
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0E,
+            },
+        ),
+        (
+            {
+                "adc_1_data_rate": ADC1DataRate.SPS_38400
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x0F,
+            },
+        ),
+        (
+            {
+                "adc_2_data_rate": ADC2DataRate.SPS_10
+            },
+            {
+                ADCReg.REG_ADC2CFG.value: 0x0,
+            },
+        ),
+        (
+            {
+                "adc_2_data_rate": ADC2DataRate.SPS_100
+            },
+            {
+                ADCReg.REG_ADC2CFG.value: 0x40,
+            },
+        ),
+        (
+            {
+                "adc_2_data_rate": ADC2DataRate.SPS_400
+            },
+            {
+                ADCReg.REG_ADC2CFG.value: 0x80,
+            },
+        ),
+        (
+            {
+                "adc_2_data_rate": ADC2DataRate.SPS_800
+            },
+            {
+                ADCReg.REG_ADC2CFG.value: 0xC0,
             },
         ),
     ],
@@ -346,7 +554,7 @@ def test_config(args, updated_vals, adc):
         if entry["is_changed"]:
             assert entry["value"] == updated_vals[addx]
         else:
-            assert entry["value"] == original_regs[addx]            
+            assert entry["value"] == original_regs[addx]
 
     # reset adc registers to pre-test values
     adc.reset()
