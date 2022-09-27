@@ -93,14 +93,17 @@ class EdgePiADC(SPI):
         self.gpio.set_expander_pin("GNDSW_IN1")
         # internal state
         self.__state = ADCState(alarms=None, reg_map=None)
-        # - RTD off by default --> leave default settings for related regs
+        self.__set_power_on_configs()
+        # TODO: get configs from the config module
+
+    def __set_power_on_configs(self):
+        """Custom EdgePi ADC configuration for initialization/reset"""
         self.__config(
             adc_1_analog_in=CH.AIN0,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
-        # TODO: get configs from the config module
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -291,8 +294,11 @@ class EdgePiADC(SPI):
         return status_bits, voltage_bits, check_bits, voltage
 
     def reset(self):
-        """Reset ADC register values to default power-on state"""
+        """
+        Reset ADC register values to default power-on state
+        """
         self.transfer(self.adc_ops.reset_adc())
+        self.__set_power_on_configs()
 
     def __is_data_ready(self):
         # pylint: disable=unused-private-member
