@@ -31,7 +31,6 @@ from edgepi.utilities.utilities import filter_dict, bitstring_from_list
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
-    ChannelMappingError,
     validate_channels_allowed,
 )
 from edgepi.adc.adc_conv_time import compute_initial_time_delay, compute_continuous_time_delay
@@ -361,9 +360,6 @@ class EdgePiADC(SPI):
         Returns:
             `list`: if not empty, contains OpCode(s) for updating multiplexer
                 channel assignment for ADC1, ADC2, or both.
-
-        Raises:
-            `ChannelMappingError`: if args assign any two multiplexers to the same input channel
         """
         args = filter_dict(locals(), "self")
 
@@ -376,10 +372,6 @@ class EdgePiADC(SPI):
         rtd_enabled = self.__get_rtd_en_status()
         validate_channels_allowed(channels, rtd_enabled)
 
-        if len(args) != len(set(args)):
-            raise ChannelMappingError(
-                "ADC1 and ADC2 multiplexers must be assigned different input channels"
-            )
 
         adc_mux_updates = {
             ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),

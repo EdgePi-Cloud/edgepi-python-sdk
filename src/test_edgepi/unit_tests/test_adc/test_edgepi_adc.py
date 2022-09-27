@@ -5,7 +5,6 @@ import sys
 from copy import deepcopy
 from unittest import mock
 from unittest.mock import call
-from contextlib import nullcontext as does_not_raise
 
 sys.modules["periphery"] = mock.MagicMock()
 
@@ -13,7 +12,6 @@ sys.modules["periphery"] = mock.MagicMock()
 
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_multiplexers import ChannelMappingError
 from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg, ADCComs as COM
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -67,63 +65,55 @@ def test_read_registers_to_map(mocker, adc):
 
 
 @pytest.mark.parametrize(
-    "reg_updates, args, update_vals, err",
+    "reg_updates, args, update_vals",
     [
         # set adc1 analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN4},
             {ADCReg.REG_INPMUX.value: 0x41},
-            does_not_raise(),
         ),
         # set adc2 analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_2_analog_in": CH.AIN5},
             {ADCReg.REG_ADC2MUX.value: 0x53},
-            does_not_raise(),
         ),
         # set adc analog_in to same pin
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_2_analog_in": CH.AIN2},
             {ADCReg.REG_ADC2MUX.value: 0x23},
-            does_not_raise(),
         ),
         # set both adc analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN7, "adc_2_analog_in": CH.AIN5},
             {ADCReg.REG_INPMUX.value: 0x71, ADCReg.REG_ADC2MUX.value: 0x53},
-            does_not_raise(),
         ),
         # set adc1 mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_mux_n": CH.AINCOM},
             {ADCReg.REG_INPMUX.value: 0x0A},
-            does_not_raise(),
         ),
         # set adc2 mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_2_mux_n": CH.AIN5},
             {ADCReg.REG_ADC2MUX.value: 0x25},
-            does_not_raise(),
         ),
         # set adc mux_n to same pin
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_2_mux_n": CH.AIN3},
             {ADCReg.REG_ADC2MUX.value: 0x23},
-            does_not_raise(),
         ),
         # set both adc mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_mux_n": CH.AIN7, "adc_2_mux_n": CH.AIN5},
             {ADCReg.REG_INPMUX.value: 0x07, ADCReg.REG_ADC2MUX.value: 0x25},
-            does_not_raise(),
         ),
         # set all mux pins
         (
@@ -135,53 +125,46 @@ def test_read_registers_to_map(mocker, adc):
                 "adc_2_analog_in": CH.AIN5,
             },
             {ADCReg.REG_INPMUX.value: 0x67, ADCReg.REG_ADC2MUX.value: 0x50},
-            does_not_raise(),
         ),
         # set adc1 analog_in to pin in use on adc2
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x21},
-            does_not_raise(),
         ),
         # set mux pins to same pin on different adc's
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN2, "adc_2_analog_in": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x21, ADCReg.REG_ADC2MUX.value: 0x23},
-            does_not_raise(),
         ),
         # set adc1 analog_in to same pin as mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN1},
             {ADCReg.REG_INPMUX.value: 0x11},
-            pytest.raises(ChannelMappingError),
         ),
         # set adc2 analog_in to same pin as mux_n
         (
-            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
+            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x33},
             {"adc_2_analog_in": CH.AIN3},
-            {ADCReg.REG_INPMUX.value: 0x33},
-            pytest.raises(ChannelMappingError),
+            {ADCReg.REG_ADC2MUX.value: 0x33},
         ),
         # set adc 1 mux_n and mux_p to same pin
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.AIN2, "adc_1_mux_n": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x22},
-            pytest.raises(ChannelMappingError),
         ),
         # set adc 1 mux_n and mux_p to float mode
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
             {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.FLOAT},
             {ADCReg.REG_INPMUX.value: 0xFF},
-            does_not_raise(),
         ),
     ],
 )
-def test_config(mocker, reg_updates, args, update_vals, err, adc):
+def test_config(mocker, reg_updates, args, update_vals, adc):
     # modify default register values as needed
     adc_vals = deepcopy(adc_default_vals)
     for addx, reg_val in reg_updates.items():
@@ -204,14 +187,13 @@ def test_config(mocker, reg_updates, args, update_vals, err, adc):
     # need to mock since cannot actually updated register values here
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
 
-    with err:
-        reg_values = adc._EdgePiADC__config(**args)
+    reg_values = adc._EdgePiADC__config(**args)
 
-        for addx, entry in reg_values.items():
-            if entry["is_changed"]:
-                assert entry["value"] == update_vals[addx]
-            else:
-                assert entry["value"] == adc_vals[addx]
+    for addx, entry in reg_values.items():
+        if entry["is_changed"]:
+            assert entry["value"] == update_vals[addx]
+        else:
+            assert entry["value"] == adc_vals[addx]
 
 
 @pytest.mark.parametrize(

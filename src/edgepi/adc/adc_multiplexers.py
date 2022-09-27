@@ -11,10 +11,6 @@ MUXS_PER_ADC = 2
 NUM_CHANNELS = 11
 
 
-class ChannelMappingError(ValueError):
-    """Raised when an input channel is mapped to both ADC1 and ADC2"""
-
-
 class ChannelNotSetError(Exception):
     """
     Raised when a read_voltage operation is requested for an ADC
@@ -91,42 +87,7 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
 
         mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
 
-    _validate_mux_mapping(mux_values)
-
     return mux_opcodes
-
-
-def _validate_mux_mapping(mux_values: dict):
-    """
-    Verifies no two multiplexers on the same ADC are assigned the same channel
-
-    Args:
-        `mux_values`: updated multiplexer mapping
-
-        Note: above must be formatted as:
-
-            mux_reg_addx (ADCReg): (mux_p_val, mux_n_val)
-
-    Raises:
-        `ChannelMappingError`: if the updated multiplexer mapping contains any two
-            multiplexers assigned the same input channel.
-    """
-    # for each ADC, check that positive and negative muxs not set to same channel
-    for adc in mux_values.values():
-        mux_set = set()
-        # i.e. to allow user to set both muxs on an adc to float mode
-        mode_counter = 0
-        for mux_val in adc:
-            # i.e. setting mux to float mode rather than assigning channel
-            if mux_val > NUM_CHANNELS - 1:
-                mode_counter += 1
-
-        mux_set.update(set(adc))
-
-        # first clause checks if assigned both muxs to same channel (not allowed)
-        # second clause excepts the case where both muxs assigned to float mode (allowed)
-        if len(mux_set) < MUXS_PER_ADC and mode_counter < MUXS_PER_ADC:
-            raise ChannelMappingError("Attempting to assign channel already in use")
 
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):

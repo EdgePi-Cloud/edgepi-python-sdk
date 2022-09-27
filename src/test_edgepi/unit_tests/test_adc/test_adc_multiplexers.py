@@ -8,98 +8,9 @@ from edgepi.adc.adc_constants import ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
-    _validate_mux_mapping,
-    ChannelMappingError,
     ChannelNotAvailableError,
     validate_channels_allowed,
 )
-
-
-@pytest.mark.parametrize(
-    "mux_regs, expected",
-    [
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN1.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN3.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN0.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN3.value],
-            },
-            pytest.raises(ChannelMappingError),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN1.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN2.value],
-            },
-            pytest.raises(ChannelMappingError),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN0.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN0.value, CH.AIN0.value],
-            },
-            pytest.raises(ChannelMappingError),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN1.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN0.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN2.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN1.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN2.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN0.value, CH.AIN1.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.AIN0.value, CH.AIN1.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN1.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.FLOAT.value, CH.AIN2.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN3.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.FLOAT.value, CH.FLOAT.value],
-                ADCReg.REG_ADC2MUX: [CH.AIN2.value, CH.AIN1.value],
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                ADCReg.REG_INPMUX: [CH.FLOAT.value, CH.FLOAT.value],
-                ADCReg.REG_ADC2MUX: [CH.FLOAT.value, CH.FLOAT.value],
-            },
-            does_not_raise(),
-        ),
-    ],
-)
-def test_validate_mux_mapping(mux_regs, expected):
-    with expected:
-        _validate_mux_mapping(mux_regs)
 
 
 @pytest.mark.parametrize(
