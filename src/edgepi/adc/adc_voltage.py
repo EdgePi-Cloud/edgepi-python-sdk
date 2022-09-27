@@ -26,6 +26,13 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
     Converts digital code obtained from ADC voltage read to
     ADC input voltage (i.e. voltage measured at ADC) based on voltage range
     provided by reference voltage
+
+    Args:
+        `code` (int): uint value of ADC voltage read bytes
+
+        `v_ref` (float): ADC reference voltage in Volts
+
+        `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
     voltage_range = v_ref / 2 ** (num_bits - 1)
     return float(code) * voltage_range
@@ -45,9 +52,9 @@ def code_to_voltage(code: BitArray, adc_info):
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
     Args:
-        code (BitArray): bitstring representation of digital code retrieved from ADC voltage read
+        `code` (BitArray): bitstring representation of digital code retrieved from ADC voltage read
 
-        adc_info (ADCReadInfo): data about this adc's voltage reading configuration
+        `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
     """
     num_bits = adc_info.num_data_bytes * 8
     config = adc_info.voltage_config
@@ -68,6 +75,7 @@ class CRCCheckError(Exception):
         self.computed = hex(computed)
         self.expected = hex(expected)
         self.message = "CRC check failed with codes"
+        super().__init__(self.message)
 
     def __str__(self):
         return f'{self.message}: computed={self.computed}, expected={self.expected}'

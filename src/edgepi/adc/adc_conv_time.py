@@ -1,12 +1,10 @@
 """Utility module for computing ADC conversion delay time"""
 
 # ADC conversion delay time is affected by the following factors:
-# - Conversion delay (REG_MODE0)
+# - Conversion delay (REG_MODE0) -> currently not user-configurable
 # - Digital filter mode (REG_MODE1)
 # - Data rate mode (REG_MODE2)
-# - IDAC/Chop mode (REG_MODE0) -> currently not configurable (non-factor)
-
-# TODO: add integration tests to make sure actual conversion delay is close to figures below
+# - IDAC/Chop mode (REG_MODE0) -> currently not user-configurable
 
 
 from edgepi.adc.adc_constants import (

@@ -8,8 +8,8 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_configs import ADCVoltageConfig
 
 
-ADC_NUM_REGS = 27
-ADC_VOLTAGE_READ_LEN = 6 # number of bytes per voltage read
+ADC_NUM_REGS = 27           # number of ADC1263 registers
+ADC_VOLTAGE_READ_LEN = 6    # number of bytes per voltage read
 
 
 @unique
@@ -69,7 +69,7 @@ class ADCReg(Enum):
 
 @unique
 class ADCChannel(Enum):
-    """EdgePi ADC channels"""
+    """EdgePi ADC channels/channel modes"""
 
     AIN0 = 0
     AIN1 = 1
@@ -89,12 +89,12 @@ class ADCReadInfo:
     Data for use in performing ADC voltage reads
 
     Attributes:
-        id_num (int): the ADS1263 ID number of this ADC
-        addx (ADCChannel): addx of this ADC's mux register
-        num_data_bytes (int): number of data bytes for this ADC's reads
-        start_cmd (ADCComs): command to trigger conversion(s) for this ADC
-        read_cmd (ADCComs): command to read this ADC's data-holding register
-        stop_cmd (ADCComs): command to stop conversion(s) for this ADC
+        `id_num` (int): the ADS1263 ID number of this ADC
+        `addx` (ADCChannel): addx of this ADC's mux register
+        `num_data_bytes` (int): number of data bytes for this ADC's reads
+        `start_cmd` (ADCComs): command to trigger conversion(s) for this ADC
+        `read_cmd` (ADCComs): command to read this ADC's data-holding register
+        `stop_cmd` (ADCComs): command to stop conversion(s) for this ADC
     """
 
     id_num: int
@@ -107,8 +107,9 @@ class ADCReadInfo:
 
 
 # TODO: use EEPROM values in ADCVoltageConfig
+@unique
 class ADCNum(Enum):
-    """ADS1263 ADC's"""
+    """ADS1263 ADCs"""
 
     ADC_1 = ADCReadInfo(
         1,
@@ -190,7 +191,8 @@ class FilterMode(Enum):
 
 
 class ADCAlarmTypes(Enum):
-    """ADC1 alarm types"""
+    """ADC1 STATUS byte alarm types"""
+    # TODO: fault reading not yet implemented
 
 
 @dataclass
