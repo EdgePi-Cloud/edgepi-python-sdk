@@ -20,4 +20,6 @@ from edgepi.calibration.access_eeprom import (
 class EdgePiCalibration(i2c):
     def __init__(self, module: ModuleNames):
         self.module = ModuleNames.module.value()
-        
+#TODO: Import
+#TODO: Export
+#TODO:  Least Square method
