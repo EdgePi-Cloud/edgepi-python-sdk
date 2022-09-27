@@ -17,6 +17,8 @@ from edgepi.calibration.eeprom_map import (
 #     page_write_register
 # )
 
+# TODO: calibration class should only handle the calibration process and separate the data storage
+
 class EdgePiCalibration(i2c):
     '''
     EdgePi Calibration Class handling the following functionality
@@ -35,6 +37,4 @@ class EdgePiCalibration(i2c):
     def __init__(self, module: ModuleNames):
         super().__init__(self.__dev_path)
         self.module = module.value()
-#TODO: Import
-#TODO: Export
 #TODO:  Least Square method

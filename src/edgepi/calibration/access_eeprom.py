@@ -1,5 +1,8 @@
 '''Helper class to access on board eeprom'''
 
+# TODO: eeprom class inheriting i2c
+
+
 def sequential_read(bus, reg_addr: int = None, length: int = None, dev_addr: int = None):
     '''
     Read operation reads the specified number of memory location starting from provided address. The
@@ -16,6 +19,8 @@ def sequential_read(bus, reg_addr: int = None, length: int = None, dev_addr: int
     msg = bus.set_read_msg(reg_addr, [0xFF]*length)
     return bus.transfer(dev_addr, msg)
 
+# TODO: make dev_addr constant
+# ToDO: use proper naming for reg_addr/ memory/ byte address?
 def selective_read(bus, reg_addr: int = None, dev_addr: int = None):
     '''
     Read operation reads a data from the specified address
