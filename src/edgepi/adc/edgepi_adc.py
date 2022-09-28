@@ -43,26 +43,37 @@ _logger = logging.getLogger(__name__)
 class ADCState:
     """Represents ADC register states"""
 
-    alarms: int  # uint value of STATUS byte from most recent read
     reg_map: dict  # map of most recently updated register values
 
-    def get_state(self, mode: ADCModes):
+    def get_state(self, mode: ADCModes) -> int:
         """
-        Get state of an ADC functional mode based on most recently updated register values
+        Get state of an ADC functional mode based on most recently updated register values.
+
+        This returns the op_code value used to set this functional mode.
+        For example, ConvMode.PULSE uses an op_code value of `0x40`. If the current
+        ADC state indicates conversion mode is ConvMode.PULSE and mode=ADCModes.CONV,
+        this will return `0x40`, which can then be compared to `ConvMode.PULSE.value.op_code`
+        to check if the ADC's conversion mode is set to `PULSE`.
 
         Args:
-            addx (int): address of register this functional mode belongs to
-
-            mask (int): mask applied to set this functional mode during update
+            `mode` (ADCModes): addx and mask used for this functional mode.
 
         Returns:
             int: uint value of the bits corresponding to this functional mode. Compare
                 this to expected configuration's op_code.
         """
+        if self.reg_map is None:
+            raise ADCStateMissingMap("ADCState has not been assigned a register map")
         # register value at this addx
         reg_value = self.reg_map[mode.value.addx]["value"]
-        # value of bits corresponding to functional mode: let through "masked" bits
-        return (~mode.value.mask) & reg_value
+        # get op_code corresponding to this mode by letting through only "masked" bits
+        mode_bits = (~mode.value.mask) & reg_value
+        _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
+        return mode_bits
+
+
+class ADCStateMissingMap(Exception):
+    """"Raised if ADCState.get_state() is called before ADCState.reg_map is assigned a value"""
 
 
 class RegisterUpdateError(Exception):
@@ -95,7 +106,7 @@ class EdgePiADC(SPI):
         # TODO: expander_pin might need changing in the future
         self.gpio.set_expander_pin("GNDSW_IN1")
         # internal state
-        self.__state = ADCState(alarms=None, reg_map=None)
+        self.__state = ADCState(reg_map=None)
         self.__set_power_on_configs()
         # TODO: get gain, offset, ref configs from the config module
 
@@ -272,7 +283,6 @@ class EdgePiADC(SPI):
         # log STATUS byte
         status = get_adc_status(status_bits)
         _logger.debug(f"Logging STATUS byte:\n{status}")
-
 
         # check CRC
         crc_8_atm(
