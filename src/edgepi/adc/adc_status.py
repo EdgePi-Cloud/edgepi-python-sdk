@@ -80,20 +80,20 @@ _fault_msg_map = {
     ADCStatusBit.EXTCLK: (ADCStatusMsg.EXTCLK_INT, ADCStatusMsg.EXTCLK_EXT),
     ADCStatusBit.REF_ALM: (ADCStatusMsg.REF_ALM_OK, ADCStatusMsg.REF_ALM_BAD),
     ADCStatusBit.PGAL_ALM: (ADCStatusMsg.PGAL_ALM_OK, ADCStatusMsg.PGAL_ALM_BAD),
-    ADCStatusBit.PGAH_ALM: (ADCStatusMsg.PGAH_ALM_OK, ADCStatusMsg.PGAH_ALM_OK),
+    ADCStatusBit.PGAH_ALM: (ADCStatusMsg.PGAH_ALM_OK, ADCStatusMsg.PGAH_ALM_BAD),
     ADCStatusBit.PGAD_ALM: (ADCStatusMsg.PGAD_ALM_OK, ADCStatusMsg.PGAD_ALM_BAD),
     ADCStatusBit.RESET: (ADCStatusMsg.RESET_FALSE, ADCStatusMsg.RESET_TRUE),
 }
 
 
-def map_fault_status(status_byte) -> dict:
-    """Generates a dictionary of Fault objects
+def get_adc_status(status_byte) -> dict:
+    """Generates a dictionary of ADC Status objects
 
     Args:
-        status_byte
+        `status_byte`: bitstring representation of ADC STATUS byte from voltage reading
 
     Returns:
-        a dict containing information on the current status of each Fault Status register bit
+        `dict`: contains information on the current status of each STATUS byte bit
     """
     status_dict = {}
 

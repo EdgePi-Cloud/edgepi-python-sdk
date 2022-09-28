@@ -34,6 +34,7 @@ from edgepi.adc.adc_multiplexers import (
     validate_channels_allowed,
 )
 from edgepi.adc.adc_conv_time import compute_initial_time_delay, compute_continuous_time_delay
+from edgepi.adc.adc_status import get_adc_status
 
 _logger = logging.getLogger(__name__)
 
@@ -268,7 +269,10 @@ class EdgePiADC(SPI):
 
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
-        # TODO: log STATUS byte -> call formatting method
+        # log STATUS byte
+        status = get_adc_status(status_bits)
+        _logger.debug(f"Logging STATUS byte:\n{status}")
+
 
         # check CRC
         crc_8_atm(
@@ -300,7 +304,9 @@ class EdgePiADC(SPI):
         # send command to read conversion data.
         status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
 
-        # TODO: log STATUS byte -> call formatting method
+        # log STATUS byte
+        status = get_adc_status(status_bits)
+        _logger.debug(f"Logging STATUS byte:\n{status}")
 
         # check CRC
         crc_8_atm(
@@ -327,16 +333,6 @@ class EdgePiADC(SPI):
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
         return read_data[1] & 0b01000000
-
-    def read_adc_1_alarms(self, status_byte):
-        """
-        Read ADC1 STATUS byte output faults
-
-        Returns:
-            `dict`: a dictionary of ADCAlarmType: ADCAlarm entries
-        """
-        # TODO: log STATUS byte in readable format
-        raise NotImplementedError
 
     def __read_registers_to_map(self):
         """
