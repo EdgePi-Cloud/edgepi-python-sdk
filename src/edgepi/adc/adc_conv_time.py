@@ -210,10 +210,10 @@ def compute_initial_time_delay(adc_num: ADCNum, data_rate: int, filter_mode: int
     if adc_num == ADCNum.ADC_1:
         # this is the initial delay for both pulse and continuous modes
         return ADC1_INITIAL_DELAYS[data_rate][filter_mode]
-    else:
-        # no initial figures given in documentation, but initial delay is about 3
-        # times longer than subsequent conversion delays
-        return ADC2_DELAYS[data_rate] * 3
+
+    # no initial figures given in documentation, but initial delay is about 3
+    # times longer than subsequent conversion delays
+    return ADC2_DELAYS[data_rate] * 3
 
 
 def compute_continuous_time_delay(adc_num: ADCNum, data_rate: int):
@@ -231,5 +231,5 @@ def compute_continuous_time_delay(adc_num: ADCNum, data_rate: int):
     """
     if adc_num == ADCNum.ADC_1:
         return ADC1_CONT_DELAYS[data_rate]
-    else:
-        return ADC2_DELAYS[data_rate]
+
+    return ADC2_DELAYS[data_rate]

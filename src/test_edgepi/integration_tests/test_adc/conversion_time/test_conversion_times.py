@@ -12,7 +12,6 @@ from edgepi.adc.adc_constants import (
     ADCNum,
     ConvMode,
     ADC1DataRate as DR1,
-    ADC2DataRate as DR2,
     FilterMode as FILT,
 )
 from edgepi.adc.adc_conv_time import compute_continuous_time_delay, compute_initial_time_delay

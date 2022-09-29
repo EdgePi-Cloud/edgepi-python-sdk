@@ -3,7 +3,11 @@
 
 import pytest
 from edgepi.adc.adc_constants import ADCNum
-from edgepi.adc.adc_voltage import crc_8_atm, CRCCheckError, _code_to_input_voltage, _input_voltage_to_output_voltage
+from edgepi.adc.adc_voltage import (
+    crc_8_atm,
+    CRCCheckError,
+    _code_to_input_voltage,
+)
 
 # pylint: disable=too-many-lines
 

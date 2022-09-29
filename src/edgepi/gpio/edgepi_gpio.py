@@ -53,7 +53,7 @@ class EdgePiGPIO(I2CDevice):
             list_default_reg_dict:
                 list of dictionary that includes default regsister address : value pair
         '''
-        _logger.info(f'Setting GPIO to default state')
+        _logger.info('Setting GPIO to default state')
         list_of_address = check_multiple_dev(generate_pin_info(self.config))
         self.dict_default_reg_dict = self.__generate_default_reg_dict(list_of_address)
         pin_info_dict_list = break_pin_info_dict(generate_pin_info(self.config))
