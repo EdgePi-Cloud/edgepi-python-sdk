@@ -95,12 +95,11 @@ def crc_8_atm(value: int, frame_len: int, code: int):
     """
     crc = 0b100000111   # CRC-8-ATM polynomial
     crc_len = 9         # num bits in CRC-8-ATM polynomial
-    _logger.info(f"\nExpected CRC Code:\t\t{hex(crc)}")
 
     # pad value with zeros (to ensure 8-bit code returned)
     _logger.debug(f"Initial Value:\t\t{bin(value)}")
     value <<= (crc_len - 1)
-    _logger.debug(f"Paddded Value:\t\t{bin(value)}")
+    _logger.debug(f"Padded Value:\t\t{bin(value)}")
 
     # align crc polynomial to leading 1 of value
     _logger.debug(f"Initial CRC:\t\t{bin(crc)}")
