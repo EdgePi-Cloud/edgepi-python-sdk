@@ -138,6 +138,7 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
 def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name):
     # can't mock entire GPIO class here because need to access its methods
     mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
     mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
