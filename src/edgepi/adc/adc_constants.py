@@ -190,23 +190,6 @@ class FilterMode(Enum):
     FIR = OpCode(0x80, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
 
 
-class ADCAlarmTypes(Enum):
-    """ADC1 STATUS byte alarm types"""
-    # TODO: fault reading not yet implemented
-
-
-@dataclass
-class ADCAlarm:
-    """
-    Represents information about the status of ADC1 alarm
-    as indicated by a reading of the STATUS byte.
-    """
-
-    alarm_type: ADCAlarmTypes
-    at_fault: bool
-    err_msg: str
-
-
 class ADCPower(Enum):
     """OpCodes for configuring the ADS1263 POWER register"""
     RESET_CLEAR = OpCode(0x0, ADCReg.REG_POWER.value, BitMask.BIT4.value)
