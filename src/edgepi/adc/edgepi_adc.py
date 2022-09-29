@@ -79,13 +79,6 @@ class ADCStateMissingMap(Exception):
 class RegisterUpdateError(Exception):
     """Raised when a register update fails to set register to expected value"""
 
-    def __init__(self, addx: int, expected: int, actual: int):
-        self.message = f"addx={hex(addx)}, expected: {hex(expected)}, observed: {hex(actual)}"
-        super().__init__(self.message)
-
-    def __str__(self):
-        return f"Register update failed: {self.message}"
-
 
 class VoltageReadError(Exception):
     """Raised if a voltage read fails to return the expected number of bytes"""
@@ -510,8 +503,14 @@ class EdgePiADC(SPI):
 
         # check updated value were applied
         for addx, value in reg_values.items():
+            observed_val = updated_reg_values[addx]["value"]
             if int(value) != int(updated_reg_values[addx]["value"]):
-                raise RegisterUpdateError(addx, value, updated_reg_values[addx]["value"])
+                raise RegisterUpdateError(
+                    (
+                        "Register failed to update: "
+                        f"addx={hex(addx)}, expected: {hex(value)}, observed: {hex(observed_val)}"
+                    )
+                )
 
     def set_config(
         self,
