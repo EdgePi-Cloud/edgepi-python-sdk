@@ -4,13 +4,14 @@
 import sys
 from copy import deepcopy
 from unittest import mock
+from contextlib import nullcontext as does_not_raise
 
 sys.modules["periphery"] = mock.MagicMock()
 
 # pylint: disable=wrong-import-position, protected-access
 
 import pytest
-from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.edgepi_adc import ADCRegisterUpdateError, EdgePiADC
 from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -497,3 +498,67 @@ def test_get_channel_assign_opcodes(
         adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
     )
     assert out == expected
+
+
+@pytest.mark.parametrize(
+    "updated_regs, actual_regs, err",
+    [
+        (
+            {ADCReg.REG_INTERFACE.value: {"value": 0x4}},
+            {ADCReg.REG_INTERFACE.value: 0x4},
+            does_not_raise(),
+        ),
+        (
+            {
+                ADCReg.REG_INTERFACE.value: {"value": 0x0},
+                ADCReg.REG_INPMUX.value: {"value": 0x1},
+                ADCReg.REG_MODE0.value: {"value": 0x2},
+                ADCReg.REG_MODE1.value: {"value": 0x3},
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0x0,
+                ADCReg.REG_INPMUX.value: 0x1,
+                ADCReg.REG_MODE0.value: 0x2,
+                ADCReg.REG_MODE1.value: 0x3,
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                ADCReg.REG_INTERFACE.value: {"value": 0x0},
+                ADCReg.REG_INPMUX.value: {"value": 0x1},
+                ADCReg.REG_MODE0.value: {"value": 0x2},
+                ADCReg.REG_MODE1.value: {"value": 0x3},
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0x0,
+                ADCReg.REG_INPMUX.value: 0x0,
+                ADCReg.REG_MODE0.value: 0x2,
+                ADCReg.REG_MODE1.value: 0x3,
+            },
+            pytest.raises(ADCRegisterUpdateError),
+        ),
+        (
+            {
+                ADCReg.REG_INTERFACE.value: {"value": 0x0},
+                ADCReg.REG_INPMUX.value: {"value": 0x0},
+                ADCReg.REG_MODE0.value: {"value": 0x2},
+                ADCReg.REG_MODE1.value: {"value": 0x3},
+            },
+            {
+                ADCReg.REG_INTERFACE.value: 0x0,
+                ADCReg.REG_INPMUX.value: 0x1,
+                ADCReg.REG_MODE0.value: 0x2,
+                ADCReg.REG_MODE1.value: 0x3,
+            },
+            pytest.raises(ADCRegisterUpdateError),
+        ),
+    ],
+)
+def test_validate_updates(mocker, updated_regs, actual_regs, err, adc):
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_registers_to_map",
+        return_value=actual_regs,
+    )
+    with err:
+        assert adc._EdgePiADC__validate_updates(updated_regs)

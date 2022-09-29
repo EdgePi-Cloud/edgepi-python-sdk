@@ -76,7 +76,7 @@ class ADCStateMissingMap(Exception):
     """"Raised if ADCState.get_state() is called before ADCState.reg_map is assigned a value"""
 
 
-class RegisterUpdateError(Exception):
+class ADCRegisterUpdateError(Exception):
     """Raised when a register update fails to set register to expected value"""
 
 
@@ -491,7 +491,6 @@ class EdgePiADC(SPI):
 
         return reg_values
 
-    # TODO: unit test this
     def __validate_updates(self, updated_reg_values: dict):
         """
         Validates updated config values have been applied to ADC registers.
@@ -505,12 +504,14 @@ class EdgePiADC(SPI):
         for addx, value in reg_values.items():
             observed_val = updated_reg_values[addx]["value"]
             if int(value) != int(updated_reg_values[addx]["value"]):
-                raise RegisterUpdateError(
+                raise ADCRegisterUpdateError(
                     (
                         "Register failed to update: "
                         f"addx={hex(addx)}, expected: {hex(value)}, observed: {hex(observed_val)}"
                     )
                 )
+
+        return True
 
     def set_config(
         self,
