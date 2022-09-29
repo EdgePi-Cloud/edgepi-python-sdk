@@ -1,6 +1,5 @@
 """ Integration tests for EdgePi ADC module """
 
-import time
 
 import pytest
 from edgepi.adc.adc_constants import (
@@ -16,22 +15,12 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
+
 # pylint: disable=protected-access
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
     adc = EdgePiADC()
     yield adc
-
-
-def test_read_register_individual(adc):
-    # read each ADC register individually
-    for reg_addx in ADCReg:
-        out = adc._EdgePiADC__read_register(reg_addx, 1)
-        # output data frame bytes = [null, null, reg_data]
-        assert len(out) == 1
-
-
-# __init__ configures INPMUX = 0xFA
 
 
 @pytest.mark.parametrize(
@@ -659,40 +648,6 @@ def test_config(args, updated_vals, adc):
     adc.reset()
 
 
-# def test_read_voltage_pulse(adc):
-#     read_len = adc._EdgePiADC__get_data_read_len()
-#     adc._EdgePiADC__config(conversion_mode=ConvMode.PULSE)
-#     for ch in CH:
-#         if ch != CH.FLOAT:
-#             args = {
-#                 "adc_1_analog_in": ch,
-#                 "adc_1_mux_n": CH.FLOAT,
-#             }
-#             adc._EdgePiADC__config(**args)
-#             data = adc.read_voltage()
-#             print(data)
-#             assert len(data[1:]) == read_len
-#             assert data[1:] != [0] * read_len
-
-
-# def test_read_voltage_continuous(adc):
-#     read_len = adc._EdgePiADC__get_data_read_len()
-#     adc._EdgePiADC__config(conversion_mode=ConvMode.CONTINUOUS)
-#     adc.start_auto_conversions()
-#     for ch in CH:
-#         if ch != CH.FLOAT:
-#             args = {
-#                 "adc_1_analog_in": ch,
-#                 "adc_1_mux_n": CH.FLOAT,
-#             }
-#             adc._EdgePiADC__config(**args)
-#             data = adc.read_voltage()
-#             print(data)
-#             assert len(data[1:]) == read_len
-#             assert data[1:] != [0] * read_len
-#     adc.stop_auto_conversions()
-
-
 def test_voltage_individual(adc):
     adc._EdgePiADC__config(
         conversion_mode=ConvMode.PULSE,
@@ -700,7 +655,7 @@ def test_voltage_individual(adc):
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()
-    print(out)
+    assert out != 0
 
 
 def test_voltage_continuous(adc):
@@ -713,6 +668,6 @@ def test_voltage_continuous(adc):
         adc.start_conversions()
         for _ in range(10):
             out = adc.read_voltage()
-            print(out)
+            assert out != 0
     finally:
         adc.stop_conversions()

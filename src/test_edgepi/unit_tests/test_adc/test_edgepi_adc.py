@@ -4,7 +4,6 @@
 import sys
 from copy import deepcopy
 from unittest import mock
-from unittest.mock import call
 
 sys.modules["periphery"] = mock.MagicMock()
 
@@ -12,7 +11,7 @@ sys.modules["periphery"] = mock.MagicMock()
 
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg, ADCComs as COM
+from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 adc_default_vals = [
@@ -498,54 +497,3 @@ def test_get_channel_assign_opcodes(
         adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n
     )
     assert out == expected
-
-
-# TODO: when ADC2 functionality is added, use this format instead
-# @pytest.mark.parametrize(
-#     "adc_num, adc1_pulse_mode, calls",
-#     [
-#         (ADCNum.ADC_1, False, [call([ADCNum.ADC_1.value.read_cmd])]),
-#         (ADCNum.ADC_2, False, [call([ADCNum.ADC_2.value.read_cmd])]),
-#         (ADCNum.ADC_2, True, [call([ADCNum.ADC_2.value.read_cmd])]),
-#         (
-#             ADCNum.ADC_1,
-#             True,
-#             [call([ADCNum.ADC_1.value.start_cmd]), call([ADCNum.ADC_1.value.read_cmd])],
-#         ),
-#     ],
-# )
-# def test_read_voltage(mocker, adc_num, adc1_pulse_mode, calls, adc):
-#     mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
-#     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
-#     mocker.patch(
-#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
-#     )
-#     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
-#     adc.read_voltage(adc_num)
-#     transfer.assert_has_calls(calls)
-
-
-# @pytest.mark.parametrize(
-#     "adc1_pulse_mode, call_1, cmd_2, read_len",
-#     [
-#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 6),
-#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 5),
-#         (True, [call([COM.COM_START1.value])], COM.COM_RDATA1.value, 4),
-#         (False, [], COM.COM_RDATA1.value, 4),
-#         (False, [], COM.COM_RDATA1.value, 5),
-#         (False, [], COM.COM_RDATA1.value, 6),
-#     ],
-# )
-# def test_read_voltage(mocker, adc1_pulse_mode, call_1, cmd_2, read_len, adc):
-#     mocker.patch("edgepi.adc.adc_multiplexers.validate_channels_set")
-#     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register")
-#     mocker.patch(
-#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_data_read_len", return_value=read_len
-#     )
-#     mocker.patch(
-#         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_in_pulse_mode", return_value=adc1_pulse_mode
-#     )
-#     transfer = mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer")
-#     adc.read_voltage()
-#     call_2 = call([cmd_2] + [255] * read_len)
-#     transfer.assert_has_calls(call_1 + [call_2])
