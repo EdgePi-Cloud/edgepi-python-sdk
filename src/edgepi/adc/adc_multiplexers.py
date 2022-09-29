@@ -11,13 +11,6 @@ MUXS_PER_ADC = 2
 NUM_CHANNELS = 11
 
 
-class ChannelNotSetError(Exception):
-    """
-    Raised when a read_voltage operation is requested for an ADC
-    whose positive multiplexer is set to floating mode.
-    """
-
-
 class ChannelNotAvailableError(ValueError):
     """
     Raised when an input channel is unavailable for mapping to a multiplexer
