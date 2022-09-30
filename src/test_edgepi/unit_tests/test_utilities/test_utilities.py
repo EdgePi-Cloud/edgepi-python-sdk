@@ -1,7 +1,8 @@
 """unit test for utilities.py module"""
 
 import pytest
-from edgepi.utilities.utilities import filter_dict
+from bitstring import pack
+from edgepi.utilities.utilities import filter_dict, bitstring_from_list
 from edgepi.tc.tc_constants import AvgMode
 
 
@@ -40,3 +41,15 @@ from edgepi.tc.tc_constants import AvgMode
 )
 def test_filter_dict(args_dict, key, val, out):
     assert filter_dict(args_dict, key, val) == out
+
+
+@pytest.mark.parametrize("data_bytes, expected", [
+    ([0x0, 0x0, 0x0], pack("uint:24", 0)),
+    ([0x0, 0x0, 0x0, 0x0], pack("uint:32", 0)),
+    ([0x01, 0x02, 0x03, 0x04], pack("hex:32", "0x01020304")),
+    ([0x1, 0x2, 0x3, 0x4], pack("hex:32", "0x01020304")),
+    ([0x10, 0x20, 0x30, 0x40], pack("hex:32", "0x10203040")),
+    ([0xFF, 0xFF, 0xFF, 0xFF], pack("hex:32", "0xFFFFFFFF")),
+])
+def test_bitstring_from_list(data_bytes, expected):
+    assert bitstring_from_list(data_bytes) == expected
