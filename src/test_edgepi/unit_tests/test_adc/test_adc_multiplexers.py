@@ -183,9 +183,9 @@ def test_generate_mux_opcodes(mux_updates, mux_values, expected):
                 CH.FLOAT,
             ],
             True,
-            does_not_raise(),
+            pytest.raises(ChannelNotAvailableError),
         ),
-        ([CH.AIN4], False, pytest.raises(ChannelNotAvailableError)),
+        ([CH.AIN4], True, pytest.raises(ChannelNotAvailableError)),
         (
             [
                 CH.AIN4,
@@ -193,7 +193,7 @@ def test_generate_mux_opcodes(mux_updates, mux_values, expected):
                 CH.AIN6,
                 CH.AIN7,
             ],
-            False,
+            True,
             pytest.raises(ChannelNotAvailableError),
         ),
     ],

@@ -38,7 +38,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
     return float(code) * voltage_range
 
 
-def _input_voltage_to_output_voltage(v_in: float, gain: float, offset: float):
+def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     """
     Converts ADC input voltage (i.e. voltage measured at ADC) to
     ADC output voltage (i.e. voltage measured at terminal block)
@@ -65,7 +65,7 @@ def code_to_voltage(code: BitArray, adc_info):
 
     v_in = _code_to_input_voltage(code.uint, config.v_ref, num_bits)
 
-    v_out = _input_voltage_to_output_voltage(v_in, config.gain, config.offset)
+    v_out = _adc_voltage_to_input_voltage(v_in, config.gain, config.offset)
 
     return v_out
 

@@ -2,8 +2,8 @@
 
 import pytest
 from edgepi.adc.adc_conv_time import (
-    compute_initial_time_delay,
-    compute_continuous_time_delay,
+    expected_initial_time_delay,
+    expected_continuous_time_delay,
     ADC1_CONT_DELAYS,
     ADC1_INITIAL_DELAYS,
     ADC2_DELAYS,
@@ -625,9 +625,9 @@ from edgepi.adc.adc_constants import (
 )
 def test_compute_initial_time_delay(adc_num, data_rate, filter_mode, expected):
     if adc_num == ADCNum.ADC_1:
-        assert compute_initial_time_delay(adc_num, data_rate, filter_mode) == expected
+        assert expected_initial_time_delay(adc_num, data_rate, filter_mode) == expected
     else:
-        assert compute_initial_time_delay(adc_num, data_rate, filter_mode) == expected * 3
+        assert expected_initial_time_delay(adc_num, data_rate, filter_mode) == expected * 3
 
 
 @pytest.mark.parametrize(
@@ -738,4 +738,4 @@ def test_compute_initial_time_delay(adc_num, data_rate, filter_mode, expected):
     ],
 )
 def test_compute_continuous_time_delay_adc_1(adc_num, data_rate, expected):
-    assert compute_continuous_time_delay(adc_num, data_rate) == expected
+    assert expected_continuous_time_delay(adc_num, data_rate) == expected

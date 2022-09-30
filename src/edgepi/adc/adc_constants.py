@@ -107,6 +107,7 @@ class ADCReadInfo:
 
 
 # TODO: use EEPROM values in ADCVoltageConfig
+# TODO: refactor voltage configs from per ADC to per channel
 @unique
 class ADCNum(Enum):
     """ADS1263 ADCs"""

@@ -171,8 +171,10 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
     for addx, reg_val in reg_updates.items():
         adc_vals[addx] = reg_val
 
-    # mock RTD_EN as on
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=True)
+    # mock RTD_EN as off
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=False
+    )
 
     # mock each call to __read_register
     mocker.patch(
@@ -489,8 +491,10 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
 def test_get_channel_assign_opcodes(
     mocker, mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected, adc
 ):
-    # mock RTD_EN as on
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=True)
+    # mock RTD_EN as off
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=False
+    )
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         side_effect=[[mux_map[0]], [mux_map[1]]],

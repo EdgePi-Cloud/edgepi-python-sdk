@@ -33,7 +33,7 @@ from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
     validate_channels_allowed,
 )
-from edgepi.adc.adc_conv_time import compute_initial_time_delay, compute_continuous_time_delay
+from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
 
 _logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ class EdgePiADC(SPI):
         )
         filter_mode = self.__state.get_state(ADCModes.FILTER)
 
-        conv_delay = compute_initial_time_delay(adc_num, data_rate, filter_mode)
+        conv_delay = expected_initial_time_delay(adc_num, data_rate, filter_mode)
         _logger.debug(
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
@@ -262,7 +262,7 @@ class EdgePiADC(SPI):
             if adc == ADCNum.ADC_1
             else self.__state.get_state(ADCModes.DATA_RATE_2)
         )
-        delay = compute_continuous_time_delay(adc, data_rate)
+        delay = expected_continuous_time_delay(adc, data_rate)
         _logger.debug(
             (
                 f"\nContinuous time delay = {delay} (ms) with the following config opcodes:\n"

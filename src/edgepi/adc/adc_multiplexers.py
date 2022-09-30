@@ -18,7 +18,7 @@ class ChannelNotAvailableError(ValueError):
     """
 
 
-def _format_mux_values(mux_p, mux_n):
+def _format_mux_values(mux_p: CH, mux_n: CH):
     # updating mux_p bits only, mask mux_p bits
     if mux_n is None:
         mask = BitMask.HIGH_NIBBLE
@@ -45,9 +45,11 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
     Generates list of OpCodes for updating mux mapping
 
     Args:
-        `mux_updates` (dict): values for updating multiplexer mapping
+        `mux_updates` (dict): values for updating multiplexer mapping.
+            This should be formatted as {ADCReg: (ADCChannel, ADChannel)}.
 
-        `mux_values` (dict): current multiplexer mapping
+        `mux_values` (dict): current multiplexer mapping.
+            This should be formatted as {ADCReg: (int, int)}.
 
         Note: both of the above must be dictionaries formatted as:
 
@@ -93,12 +95,12 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
     # channels available depend on RTD_EN status
     allowed_channels = (
-        list(CH)
+        [CH.AIN0, CH.AIN1, CH.AIN2, CH.AIN3, CH.AINCOM, CH.FLOAT]
         if rtd_enabled
-        else [CH.AIN0, CH.AIN1, CH.AIN2, CH.AIN3, CH.AINCOM, CH.FLOAT]
+        else list(CH)
     )
     for ch in channels:
         if ch not in allowed_channels:
             raise ChannelNotAvailableError(
-                f"Channel {ch.value} is currently not available. Enable RTD in order to use."
+                f"Channel {ch.value} is currently not available. Disable RTD in order to use."
             )

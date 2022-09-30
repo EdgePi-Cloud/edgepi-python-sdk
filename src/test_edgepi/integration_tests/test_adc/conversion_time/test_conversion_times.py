@@ -14,7 +14,7 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate as DR1,
     FilterMode as FILT,
 )
-from edgepi.adc.adc_conv_time import compute_continuous_time_delay, compute_initial_time_delay
+from edgepi.adc.adc_conv_time import expected_continuous_time_delay, expected_initial_time_delay
 
 
 _logger = logging.getLogger(__name__)
@@ -259,7 +259,7 @@ def _get_mean_conv_time_continuous(adc, adc_num):
         # (ADCNum.ADC_2, ConvMode.CONTINUOUS, DR2.SPS_800, FILT.FIR),
     ],
 )
-def test_compute_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
+def test_expected_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
     # configure ADC with new filter and data rate modes
     if adc_num == ADCNum.ADC_1:
         adc._EdgePiADC__config(
@@ -279,7 +279,7 @@ def test_compute_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, 
     )
 
     # get computed time delay
-    expected = compute_initial_time_delay(
+    expected = expected_initial_time_delay(
         adc_num, data_rate.value.op_code, filter_mode.value.op_code
     )
     _logger.info(f"Computed Conversion Time (ms): {expected}")
@@ -405,7 +405,7 @@ def test_compute_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, 
         # (ADCNum.ADC_2, ConvMode.CONTINUOUS, DR2.SPS_800, FILT.FIR),
     ],
 )
-def test_compute_continuous_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
+def test_expected_continuous_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
     # configure ADC with new filter and data rate modes
     if adc_num == ADCNum.ADC_1:
         adc._EdgePiADC__config(
@@ -425,7 +425,7 @@ def test_compute_continuous_time_delay(adc_num, conv_mode, data_rate, filter_mod
     )
 
     # get computed time delay
-    expected = compute_continuous_time_delay(adc_num, data_rate.value.op_code)
+    expected = expected_continuous_time_delay(adc_num, data_rate.value.op_code)
     _logger.info(f"Computed Conversion Time (ms): {expected}")
 
     # get actual time delay (time until STATUS byte shows new data)
