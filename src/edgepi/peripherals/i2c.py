@@ -50,7 +50,7 @@ class I2CDevice():
         '''
         self.i2cdev.transfer(dev_addr, msg)
         if len(msg)>1:
-            return msg[1].data[0]
+            return msg[1].data
         return None
 
     def close(self):
