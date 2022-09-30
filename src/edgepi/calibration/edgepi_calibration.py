@@ -5,7 +5,7 @@ from the external eeprom
 
 # import logging
 from edgepi.peripherals.i2c import I2CDevice as i2c
-from edgepi.calibration.eeprom_map import (
+from edgepi.calibration.eeprom_constants import (
     # DACParam,
     # ADCParam,
     ModuleNames

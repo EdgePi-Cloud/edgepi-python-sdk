@@ -2,6 +2,13 @@
 
 from enum import Enum
 
+class EEPROMAddress(Enum):
+    """
+    EEPROM device address for I2C addressing
+    """
+    # TODO: to be changed when the chip arrives
+    DEV_ADDR = 0xFF
+
 class ModuleNames(Enum):
     """
     Module Name Enum
