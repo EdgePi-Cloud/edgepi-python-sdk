@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 from enum import Enum, unique
 
+import bitstring
+
 
 @unique
 class ADCStatusBit(Enum):
@@ -86,16 +88,18 @@ _fault_msg_map = {
 }
 
 
-def get_adc_status(status_byte) -> dict:
+def get_adc_status(status_code: int) -> dict:
     """Generates a dictionary of ADC Status objects
 
     Args:
-        `status_byte`: bitstring representation of ADC STATUS byte from voltage reading
+        `status_byte` (int): uint value of ADC STATUS byte from voltage reading
 
     Returns:
         `dict`: contains information on the current status of each STATUS byte bit
     """
     status_dict = {}
+
+    status_byte = bitstring.pack("uint:8", status_code)
 
     # check each bit in status_byte
     for bit_num in ADCStatusBit:

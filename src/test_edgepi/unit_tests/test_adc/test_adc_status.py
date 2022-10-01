@@ -1,7 +1,6 @@
 """unit tests for adc_status.py module"""
 
 
-import bitstring
 import pytest
 from edgepi.adc.adc_status import get_adc_status, ADCStatusBit, ADCStatusMsg, ADCStatus
 
@@ -103,5 +102,4 @@ from edgepi.adc.adc_status import get_adc_status, ADCStatusBit, ADCStatusMsg, AD
     ],
 )
 def test_get_adc_status(status_byte, expected_status):
-    status_bits = bitstring.pack("uint:8", status_byte)
-    assert get_adc_status(status_bits) == expected_status
+    assert get_adc_status(status_byte) == expected_status

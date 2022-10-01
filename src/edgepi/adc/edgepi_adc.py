@@ -24,10 +24,10 @@ from edgepi.adc.adc_constants import (
     CheckMode,
     ADCModes,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, crc_8_atm
+from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.utilities.utilities import filter_dict, bitstring_from_list
+from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
@@ -220,8 +220,8 @@ class EdgePiADC(SPI):
         and check bytes
 
         Returns:
-            (bitstring, bitstring, bitstring): bitstring representations of
-            voltage read data (status_byte, voltage_data_bytes, check_byte)
+            (int): uint values of representations of voltage read data ordered as
+                (status_byte, voltage_data_bytes, check_byte)
         """
         read_data = self.__read_data(adc, ADC_VOLTAGE_READ_LEN)
 
@@ -230,11 +230,11 @@ class EdgePiADC(SPI):
                 f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
             )
 
-        status_code = pack("uint:8", read_data[1])
+        status_code = read_data[1]
 
-        voltage_code = bitstring_from_list(read_data[2 : (2 + adc.value.num_data_bytes)])
+        voltage_code = read_data[2 : (2 + adc.value.num_data_bytes)]
 
-        check_code = pack("uint:8", read_data[6])
+        check_code = read_data[6]
 
         return status_code, voltage_code, check_code
 
@@ -271,19 +271,17 @@ class EdgePiADC(SPI):
         )
         time.sleep(delay / 1000)
 
-        status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
+        status_code, voltage_code, check_code = self.__voltage_read(adc)
 
         # log STATUS byte
-        status = get_adc_status(status_bits)
+        status = get_adc_status(status_code)
         _logger.debug(f"Logging STATUS byte:\n{status}")
 
         # check CRC
-        crc_8_atm(
-            value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
-        )
+        check_crc(voltage_code, check_code)
 
         # convert voltage_bits from code to voltage
-        voltage = code_to_voltage(voltage_bits, adc.value)
+        voltage = code_to_voltage(voltage_code, adc.value)
 
         return voltage
 
@@ -305,19 +303,17 @@ class EdgePiADC(SPI):
         self.start_conversions()
 
         # send command to read conversion data.
-        status_bits, voltage_bits, check_bits = self.__voltage_read(adc)
+        status_code, voltage_code, check_code = self.__voltage_read(adc)
 
         # log STATUS byte
-        status = get_adc_status(status_bits)
+        status = get_adc_status(status_code)
         _logger.debug(f"Logging STATUS byte:\n{status}")
 
         # check CRC
-        crc_8_atm(
-            value=voltage_bits.uint, frame_len=adc.value.num_data_bytes * 8, code=check_bits.uint
-        )
+        check_crc(voltage_code, check_code)
 
         # convert read_data from code to voltage
-        voltage = code_to_voltage(voltage_bits, adc.value)
+        voltage = code_to_voltage(voltage_code, adc.value)
 
         return voltage
 
