@@ -26,8 +26,6 @@ from edgepi.gpio.gpio_configs import GpioConfigs
 
 _logger = logging.getLogger(__name__)
 
-# TODO: map analog_out number to AO EN pins
-
 
 class EdgePiDAC(spi):
     """A EdgePi DAC device"""

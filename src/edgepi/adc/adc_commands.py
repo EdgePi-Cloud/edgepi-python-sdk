@@ -1,9 +1,13 @@
 """ Utility module for ADC commands """
 
+
 import logging
-from edgepi.adc.adc_constants import EdgePiADCOp as opcode
+
+from edgepi.adc.adc_constants import ADCComs, ADCNum
+
 
 _logger = logging.getLogger(__name__)
+
 
 # pylint: disable=logging-too-many-args
 class ADCCommands:
@@ -12,10 +16,10 @@ class ADCCommands:
     def __init__(self):
         _logger.info("Initializing ADC Methods")
 
-    def read_register_command(self, address, num):
+    def read_register_command(self, address: int, num: int):
         """Trigger ADC register read"""
         self.check_for_int([address, num])
-        command = [opcode.OP_RREG.value + address, num - 1]
+        command = [ADCComs.COM_RREG.value + address, num - 1]
         _logger.debug("Command to send is %s", (command + [255] * num))
         return command + [255] * num
 
@@ -24,24 +28,26 @@ class ADCCommands:
         self.check_for_int([address])
         all(self.check_range(value, 0, 255) for value in values)
         self.check_for_int(values)
-        command = [opcode.OP_WREG.value + address, len(values) - 1]
+        command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         _logger.debug("Command to send is %s", (command + values))
         return command + values
 
-    def start_adc1(self):
+    def start_adc(self, adc_num: ADCNum):
         """Command to start ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_START1.value]))
-        return [opcode.OP_START1.value]
+        _logger.debug("Command to send is %s", ([adc_num.start_cmd]))
+        return [adc_num.start_cmd]
 
-    def stop_adc1(self):
+
+    def stop_adc(self, adc_num: ADCNum):
         """Command to stop ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_STOP1.value]))
-        return [opcode.OP_STOP1.value]
+        _logger.debug("Command to send is %s", ([adc_num.stop_cmd]))
+        return [adc_num.stop_cmd]
+
 
     def reset_adc(self):
         """Command to reset ADC"""
-        _logger.debug("Command to send is %s", ([opcode.OP_RESET.value]))
-        return [opcode.OP_RESET.value]
+        _logger.debug("Command to send is %s", ([ADCComs.COM_RESET.value]))
+        return [ADCComs.COM_RESET.value]
 
     @staticmethod
     def check_for_int(target_list):
