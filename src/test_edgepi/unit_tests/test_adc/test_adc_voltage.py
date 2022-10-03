@@ -9,7 +9,10 @@ from edgepi.adc.adc_voltage import (
     check_crc,
     CRCCheckError,
     _code_to_input_voltage,
+    generate_crc_8_table,
+    CRC_8_ATM_GEN
 )
+from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 
 # pylint: disable=too-many-lines
 
@@ -55,3 +58,7 @@ def test_code_to_voltage(code, voltage, num_bytes):
 def test_crc_8_atm_adc_1(voltage_bytes, crc_code, err):
     with err:
         check_crc(voltage_bytes, crc_code)
+
+
+def test_generate_crc_8_table():
+    assert generate_crc_8_table(CRC_8_ATM_GEN) == CRC_8_ATM_LUT
