@@ -2,9 +2,6 @@
 
 # pylint: disable=C0413
 
-
-from errno import EDEADLK
-from modulefinder import Module
 from unittest import mock
 import sys
 sys.modules['periphery'] = mock.MagicMock()
@@ -12,11 +9,6 @@ sys.modules['periphery'] = mock.MagicMock()
 import pytest
 from edgepi.calibration.edgepi_calibration import EdgePiCalibration
 from edgepi.calibration.eeprom_constants import ModuleNames
-from edgepi.calibration.calibration_constants import (
-    NumOfCh,
-    CalibParam,
-    ReferenceV
-)
 
 # @pytest.fixture(name="calib")
 # def fixture_test_dac():
@@ -26,7 +18,7 @@ from edgepi.calibration.calibration_constants import (
                                                  (ModuleNames.ADC, [1, 8]),
                                                  (ModuleNames.RTD, [2, 1]),
                                                  (ModuleNames.TC, [3, 1])])
-def test_init_EdgePiCalibration(module_name, result):
+def test_init_class(module_name, result):
     edge_calib = EdgePiCalibration(module_name)
     assert edge_calib.module == result[0]
     assert edge_calib.num_of_ch == result[1]
@@ -66,7 +58,7 @@ def test_generate_channel_measurements_dict(module_name, num_of_points, result):
     edge_calib = EdgePiCalibration(module_name)
     measurements_dict = edge_calib.generate_channel_measurements_dict(num_of_points)
     for ch in range(edge_calib.num_of_ch):
-        for keys, values in measurements_dict[ch].items():
+        for keys, _ in measurements_dict[ch].items():
             assert measurements_dict[ch][keys]['input_unit'] == result
             assert measurements_dict[ch][keys]['expected_out'] == result
             assert measurements_dict[ch][keys]['actual_out'] == result

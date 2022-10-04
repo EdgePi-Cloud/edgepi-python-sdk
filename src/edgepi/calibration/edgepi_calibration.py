@@ -3,14 +3,13 @@ Module for importing calibration paratmeter
 from the external eeprom
 '''
 
-import numbers
 from edgepi.calibration.eeprom_constants import (
     ModuleNames,
 )
 from edgepi.calibration.calibration_constants import(
     NumOfCh,
     CalibParam,
-    ReferenceV
+    # ReferenceV
 )
 
 # TODO: calibration class should only handle the calibration process and separate the data storage
@@ -58,7 +57,7 @@ class EdgePiCalibration():
         Args:
             num_of_points (int): number of points to be generated, used as length of the dictionary
         Return:
-            measurements_dict (dict): dictionary mapping expected value to 
+            measurements_dict (dict): dictionary mapping expected value to
             ie) {0 : {'input_unit' : int, 'expected_out' : float, 'actual_out' : float},
                  .
                  .
@@ -87,13 +86,13 @@ class EdgePiCalibration():
                                   expected: float = None,
                                   actual: float = None):
         '''
-        Modify the expected and actual measurements of nth item of measuremnts dictionary 
+        Modify the expected and actual measurements of nth item of measuremnts dictionary
         Arg:
             nth_measurements (dict): nth point in measurements dictionary
             ie) {'expected' : float, 'actual' : float}
             expected (float): expeceted measurements
             actual (float): actual measurements
-        Return: 
+        Return:
             N/A
         '''
         nth_measurements['input_unit'] = input_unit

@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 class NumOfCh(Enum):
+    '''
+    Number of channels for each module
+    '''
     DAC = 0x8
     ADC = 0x8
     RTD = 0x1
