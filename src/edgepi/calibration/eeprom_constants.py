@@ -18,7 +18,7 @@ class ModuleNames(Enum):
     RTD = 0x2
     TC = 0x3
 
-class DACParam(Enum):
+class DACParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
     Each parameter, gain and offset, are 4 bytes long
@@ -33,7 +33,7 @@ class DACParam(Enum):
     CH6 = 0x230
     CH7 = 0x238
 
-class ADCParam(Enum):
+class ADCParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
     Each parameter, gain and offset, are 4 bytes long
