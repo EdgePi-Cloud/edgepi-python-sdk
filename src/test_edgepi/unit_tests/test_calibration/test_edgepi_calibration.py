@@ -101,3 +101,56 @@ def test_record_measurements(module_name, num_of_points, values_to_record):
         assert value_dict['input_unit'] != 0
         assert value_dict['expected_out'] != 0
         assert value_dict['actual_out'] != 0
+
+@pytest.mark.parametrize("module_name, num_of_pnts, result",
+                        [(ModuleNames.DAC, 10,[[0,1,2,3,4,5,6,7,8,9],
+                                               [15,25,35,45,55,65,75,85,95,105]]),
+                         (ModuleNames.ADC, 10,[[0,1,2,3,4,5,6,7,8,9],
+                                               [15,25,35,45,55,65,75,85,95,105]]),
+                         (ModuleNames.RTD, 10,[[0,1,2,3,4,5,6,7,8,9],
+                                               [15,25,35,45,55,65,75,85,95,105]]),
+                         (ModuleNames.TC,  10,[[0,1,2,3,4,5,6,7,8,9],
+                                               [15,25,35,45,55,65,75,85,95,105]])])
+def test_prepare_variable_list(module_name, num_of_pnts, result):
+    cls_calib = EdgePiCalibration(module_name)
+    ch_meas_dict = cls_calib.generate_channel_measurements_dict(num_of_pnts)
+    for ch, _ in ch_meas_dict.items():
+        for nth_pnt in range(num_of_pnts):
+            cls_calib.record_measurements(_[nth_pnt],
+                                          nth_pnt*10,
+                                          nth_pnt*10,
+                                          nth_pnt*10+15-ch)
+    _x, _xx, _y, _xy = cls_calib.prepare_variable_list(ch_meas_dict)
+    assert len(_x) == num_of_pnts
+    assert _x  == result[0]
+    assert _xx == [i*i for i in result[0]]
+    assert len(_y) == cls_calib.num_of_ch
+    # iterate through y and assert on its elements
+    for ch, y_n in enumerate(_y):
+        for nth, dt_pnt in enumerate(y_n):
+            assert dt_pnt == result[1][nth]-ch
+    assert len(_xy) == cls_calib.num_of_ch
+    for ch, xy_n in enumerate(_xy):
+        for nth, dt_pnt in enumerate(xy_n):
+            assert dt_pnt == (result[1][nth]-ch) * _x[nth]
+
+
+@pytest.mark.parametrize("module_name, num_of_pnts, result",
+                        [(ModuleNames.DAC, 10,[10,[15,14,13,12,11,10,9,8]]),
+                         (ModuleNames.ADC, 10,[10,[15,14,13,12,11,10,9,8]]),
+                         (ModuleNames.RTD, 10,[10,[15]]),
+                         (ModuleNames.TC,  10,[10,[15]])])
+def test_least_square_regression(module_name, num_of_pnts, result):
+    cls_calib = EdgePiCalibration(module_name)
+    ch_calib_dict = cls_calib.generate_calib_param_dict()
+    ch_meas_dict = cls_calib.generate_channel_measurements_dict(num_of_pnts)
+    for ch, _ in ch_meas_dict.items():
+        for nth_pnt in range(num_of_pnts):
+            cls_calib.record_measurements(_[nth_pnt],
+                                          nth_pnt*10,
+                                          nth_pnt*10,
+                                          nth_pnt*10+15-ch)
+    cls_calib.least_square_regression(ch_meas_dict, ch_calib_dict)
+    for key, value in ch_calib_dict.items():
+        assert value.gain == result[0]
+        assert value.offset == result[1][key]

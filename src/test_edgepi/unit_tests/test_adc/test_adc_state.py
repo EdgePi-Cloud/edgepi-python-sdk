@@ -1,6 +1,8 @@
 """Unit tests for ADCState class"""
 
-
+import sys
+from unittest import mock
+sys.modules["periphery"] = mock.MagicMock()
 from copy import deepcopy
 
 import pytest

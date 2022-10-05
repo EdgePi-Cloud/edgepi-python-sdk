@@ -75,6 +75,17 @@ class EdgePiCalibration():
         -ate each channel individually
         Args:
             num_of_points (int): number of points to be generated, used as length of the dictionary
+            ie) {1: {0 : {'input_unit' : int, 'expected_out' : float, 'actual_out' : float},
+                 .   .
+                 .   .
+                 .   .
+                 .  nth_point : {'input_unit' : int, 'expected_out' : float, 'actual_out' : float}}
+                 .
+               nth_ch : {0 : {'input_unit' : int, 'expected_out' : float, 'actual_out' : float},
+                           .
+                           .
+                           .
+                        nth_point : {'input_unit' : int, 'expected_out' :float,'actual_out':float}}}
         '''
         ch_measurements_dict = {}
         for ch in range(self.num_of_ch):
@@ -98,3 +109,49 @@ class EdgePiCalibration():
         nth_measurements['input_unit'] = input_unit
         nth_measurements['expected_out'] = expected
         nth_measurements['actual_out'] = actual
+
+    def least_square_regression(self, ch_meas_dict: dict = None, ch_calib_dict: dict = None):
+        '''
+        Comput Calibration parameters using least square regression method
+        Args:
+            ch_meas_dict (dict): channel measurements dictionary which stores measured data at each
+            input code value
+            ch_calib_dict (dict): channel calibration dictionary which stores calibration parameter
+            for each channel
+        Return:
+            N/A
+        '''
+        dt_ptn_len = len(ch_meas_dict[0].keys())
+
+        _x, _xx, _y, _xy = self.prepare_variable_list(ch_meas_dict)
+
+        for ch in range(self.num_of_ch):
+            gain = ((dt_ptn_len*sum(_xy[ch])) - (sum(_x)*sum(_y[ch]))) / \
+                    (dt_ptn_len*sum(_xx) - sum(_x)**2)
+            offset = (sum(_y[ch])-gain*sum(_x))/dt_ptn_len
+            ch_calib_dict[ch].gain = gain
+            ch_calib_dict[ch].offset = offset
+
+    def prepare_variable_list(self, ch_meas_dict: dict = None):
+        '''
+        Compute list of variables used in least square regression formula. x, y, xy, xx
+        Args:
+            ch_meas_dict (dict): channel measurements dictionary which stores measured data at each
+            input code value
+         Return:
+            x (list): list of inputs, code value for DAC module, voltage for ADC module
+            y (list): list of outpus, voltage value for DAC module, code value for ADC module
+            xy (list): list of x[n] * y[n], element wise multiplication
+            xx (list): x squared
+        '''
+        _x = list(ch_meas_dict[0].keys())
+        _xx = [key**2 for key in ch_meas_dict[0].keys()]
+
+        _y =   []
+        _xy =  []
+
+        for ch in range(self.num_of_ch):
+            _y.append([actual_out['actual_out'] for _, actual_out in ch_meas_dict[ch].items()])
+            _xy.append([x_n * y_n for x_n, y_n in zip(_x, _y[ch])])
+
+        return _x, _xx, _y, _xy
