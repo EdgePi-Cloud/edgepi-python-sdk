@@ -3,6 +3,8 @@
 
 from copy import deepcopy
 
+import sys
+from unittest import mock
 import pytest
 from edgepi.adc.adc_constants import (
     ADC1DataRate,
@@ -13,6 +15,8 @@ from edgepi.adc.adc_constants import (
     FilterMode,
     StatusByte,
 )
+# pylint: disable=wrong-import-position, protected-access
+sys.modules["periphery"] = mock.MagicMock()
 from edgepi.adc.edgepi_adc import ADCState
 
 ADC_REGS = {
