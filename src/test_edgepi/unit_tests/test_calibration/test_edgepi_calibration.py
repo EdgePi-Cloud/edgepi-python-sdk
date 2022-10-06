@@ -8,6 +8,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.calibration.edgepi_calibration import EdgePiCalibration
+from edgepi.calibration.calibration_constants import ConvParam
 from edgepi.calibration.eeprom_constants import ModuleNames
 
 # @pytest.fixture(name="calib")
@@ -20,7 +21,7 @@ from edgepi.calibration.eeprom_constants import ModuleNames
                                                  (ModuleNames.TC, [3, 1])])
 def test_init_class(module_name, result):
     edge_calib = EdgePiCalibration(module_name)
-    assert edge_calib.module == result[0]
+    assert edge_calib.module.value == result[0]
     assert edge_calib.num_of_ch == result[1]
 
 @pytest.mark.parametrize("module_name, result", [(ModuleNames.DAC, [1, 0]),
@@ -66,38 +67,37 @@ def test_generate_channel_measurements_dict(module_name, num_of_points, result):
     assert dict_length == edge_calib.num_of_ch
 
 @pytest.mark.parametrize("module_name, num_of_points, values_to_record",
-                        [(ModuleNames.DAC, 10, [[2, 3.45, 5.34],
-                                                [26, 3245.24, 123.13],
-                                                [25, 325.224, 123.123],
-                                                [56, 345.224, 12.123],
-                                                [456, 3245.24, 123.123],
-                                                [2456, 325.224, 123.23],
-                                                [246, 3245.224, 123.123],
-                                                [256, 3245.24, 123.13],
-                                                [246, 325.224, 123.13],
-                                                [245, 325.24, 13.123]]),
-                         (ModuleNames.ADC, 5, [[2, 3.45, 5.34],
-                                               [246, 325.4, 123.1],
-                                               [246, 325.24, 123.3],
-                                               [246, 325.22, 12.13],
-                                               [246, 3.224, 1.13]]),
-                         (ModuleNames.RTD, 2, [[2, 3.45, 5.34],
-                                               [246, 325.224, 123.13]]),
-                         (ModuleNames.TC,  7, [[2, 3.45, 5.34],
-                                              [246, 325.2, 123.13],
-                                              [246, 325.224, 23.13],
-                                              [246, 325.224, 13.13],
-                                              [246, 325.224, 12.13],
-                                              [246, 325.224, 123.3],
-                                              [246, 325.224, 123.1]])
+                        [(ModuleNames.DAC, 10, [[2, 5.34],
+                                                [26, 123.13],
+                                                [25, 123.123],
+                                                [56, 12.123],
+                                                [456, 123.123],
+                                                [2456, 123.23],
+                                                [246, 123.123],
+                                                [256, 123.13],
+                                                [246, 123.13],
+                                                [245, 13.123]]),
+                         (ModuleNames.ADC, 5, [[2, 5.34],
+                                               [246, 123.1],
+                                               [246, 123.3],
+                                               [246, 12.13],
+                                               [246, 1.13]]),
+                         (ModuleNames.RTD, 2, [[2, 5.34],
+                                               [246, 123.13]]),
+                         (ModuleNames.TC,  7, [[2, 5.34],
+                                              [246, 123.13],
+                                              [246, 23.13],
+                                              [246, 13.13],
+                                              [246, 12.13],
+                                              [246, 123.3],
+                                              [246, 123.1]])
                         ])
 def test_record_measurements(module_name, num_of_points, values_to_record):
     edge_calib = EdgePiCalibration(module_name)
     measurements_dict = edge_calib.generate_measurements_dict(num_of_points)
     for key, value_dict in measurements_dict.items():
         edge_calib.record_measurements(value_dict, values_to_record[key][0],
-                                                   values_to_record[key][1],
-                                                   values_to_record[key][2])
+                                                   values_to_record[key][1])
         assert value_dict['input_unit'] != 0
         assert value_dict['expected_out'] != 0
         assert value_dict['actual_out'] != 0
@@ -118,10 +118,10 @@ def test_prepare_variable_list(module_name, num_of_pnts, result):
         for nth_pnt in range(num_of_pnts):
             cls_calib.record_measurements(_[nth_pnt],
                                           nth_pnt*10,
-                                          nth_pnt*10,
                                           nth_pnt*10+15-ch)
     _x, _xx, _y, _xy = cls_calib.prepare_variable_list(ch_meas_dict)
     assert len(_x) == num_of_pnts
+    result[0] = [val*10*ConvParam[module_name.name].value for val in result[0]]
     assert _x  == result[0]
     assert _xx == [i*i for i in result[0]]
     assert len(_y) == cls_calib.num_of_ch
@@ -136,10 +136,14 @@ def test_prepare_variable_list(module_name, num_of_pnts, result):
 
 
 @pytest.mark.parametrize("module_name, num_of_pnts, result",
-                        [(ModuleNames.DAC, 10,[10,[15,14,13,12,11,10,9,8]]),
-                         (ModuleNames.ADC, 10,[10,[15,14,13,12,11,10,9,8]]),
-                         (ModuleNames.RTD, 10,[10,[15]]),
-                         (ModuleNames.TC,  10,[10,[15]])])
+                        [(ModuleNames.DAC, 10,[[32015.14411,32015.14411,32015.14411,32015.14411,
+                                                32015.14411,32015.14411,32015.14411,32015.14411],
+                                              [15,14,13,12,11,10,9,8]]),
+                         (ModuleNames.ADC, 10,[[858993459.2,858993459.2,858993459.2,858993459.2,
+                                                858993459.2,858993459.2,858993459.2,858993459.2],
+                                               [15,14,13,12,11,10,9,8]]),
+                         (ModuleNames.RTD, 10,[[1],[15]]),
+                         (ModuleNames.TC,  10,[[1],[15]])])
 def test_least_square_regression(module_name, num_of_pnts, result):
     cls_calib = EdgePiCalibration(module_name)
     ch_calib_dict = cls_calib.generate_calib_param_dict()
@@ -148,9 +152,8 @@ def test_least_square_regression(module_name, num_of_pnts, result):
         for nth_pnt in range(num_of_pnts):
             cls_calib.record_measurements(_[nth_pnt],
                                           nth_pnt*10,
-                                          nth_pnt*10,
                                           nth_pnt*10+15-ch)
     cls_calib.least_square_regression(ch_meas_dict, ch_calib_dict)
     for key, value in ch_calib_dict.items():
-        assert value.gain == result[0]
-        assert value.offset == result[1][key]
+        assert value.gain == pytest.approx(result[0][key])
+        assert value.offset == pytest.approx(result[1][key])

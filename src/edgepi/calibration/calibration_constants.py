@@ -28,3 +28,13 @@ class ReferenceV:
     dac: float = None
     adc: float = None
     adc_gnd: float = None
+
+# TODO: change conv param for RTD and TC
+class ConvParam(float, Enum):
+    '''
+    conversion parameter, v/code, °C/code etc
+    '''
+    DAC = 2.047/65535
+    ADC = 2.5/(2**31)
+    RTD = 1
+    TC = 1

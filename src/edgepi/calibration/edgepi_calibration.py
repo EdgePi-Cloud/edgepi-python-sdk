@@ -9,10 +9,10 @@ from edgepi.calibration.eeprom_constants import (
 from edgepi.calibration.calibration_constants import(
     NumOfCh,
     CalibParam,
+    ConvParam
     # ReferenceV
 )
 
-# TODO: calibration class should only handle the calibration process and separate the data storage
 
 class EdgePiCalibration():
     '''
@@ -27,7 +27,7 @@ class EdgePiCalibration():
     '''
 
     def __init__(self, module: ModuleNames):
-        self.module = module.value
+        self.module = module
         self.num_of_ch = NumOfCh[module.name].value
         self.full_scale_range = None
         self.full_scale_code = None
@@ -94,7 +94,6 @@ class EdgePiCalibration():
 
     def record_measurements(self, nth_measurements: dict = None,
                                   input_unit: int = None,
-                                  expected: float = None,
                                   actual: float = None):
         '''
         Modify the expected and actual measurements of nth item of measuremnts dictionary
@@ -106,8 +105,9 @@ class EdgePiCalibration():
         Return:
             N/A
         '''
+        
         nth_measurements['input_unit'] = input_unit
-        nth_measurements['expected_out'] = expected
+        nth_measurements['expected_out'] = input_unit * ConvParam[self.module.name].value
         nth_measurements['actual_out'] = actual
 
     def least_square_regression(self, ch_meas_dict: dict = None, ch_calib_dict: dict = None):
@@ -144,11 +144,18 @@ class EdgePiCalibration():
             xy (list): list of x[n] * y[n], element wise multiplication
             xx (list): x squared
         '''
-        _x = list(ch_meas_dict[0].keys())
-        _xx = [key**2 for key in ch_meas_dict[0].keys()]
+        # _x = list(value[0].keys())
+        # _xx = [key**2 for key in ch_meas_dict[0].keys()]
 
+        _x = []
+        _xx = []
         _y =   []
         _xy =  []
+
+
+        for _, value in ch_meas_dict[0].items():
+            _x.append(value['expected_out'])
+            _xx.append(value['expected_out']**2)
 
         for ch in range(self.num_of_ch):
             _y.append([actual_out['actual_out'] for _, actual_out in ch_meas_dict[ch].items()])
