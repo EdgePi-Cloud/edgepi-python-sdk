@@ -232,19 +232,23 @@ class EdgePiGPIO(I2CDevice):
             self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
-        reg_addx = self.dict_pin[pin_name].set_code.reg_address
+        set_code = self.dict_pin[pin_name].set_code
+        reg_addx = set_code.reg_address
 
         # get register value of port this pin belongs to
         # TODO: use private method
         read_msg = self.set_read_msg(reg_addx, [0xFF])
         reg_val = self.transfer(dev_address, read_msg)[0]
 
-        # apply opcode to set this pin high
+        # apply opcode to get code for setting this pin high
         # TODO: private method
         reg_map = {reg_addx: {"value": reg_val}}
-        updated_reg_map = apply_opcodes(reg_map, [self.dict_pin[pin_name].set_code])
+        updated_reg_map = apply_opcodes(reg_map, [set_code])
         updated_reg_val = updated_reg_map[reg_addx]["value"]
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
+
+        # set pin to low before setting to output (hazard)
+        self.clear_expander_pin(pin_name)
 
         # set pin direction to output
         self.set_pin_direction_out(pin_name)
@@ -267,11 +271,26 @@ class EdgePiGPIO(I2CDevice):
             self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
-        list_opcode = [self.dict_pin[pin_name].clear_code]
-        dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
+        clear_code = self.dict_pin[pin_name].clear_code
+        reg_addx = clear_code.reg_address
 
-        self.__write_changed_values(dict_register, dev_address)
-        dict_register = convert_dict_to_values(dict_register)
+        # get register value of port this pin belongs to
+        # TODO: use private method
+        read_msg = self.set_read_msg(reg_addx, [0xFF])
+        reg_val = self.transfer(dev_address, read_msg)[0]
+
+        # apply opcode to get code for setting this pin low
+        # TODO: private method
+        reg_map = {reg_addx: {"value": reg_val}}
+        updated_reg_map = apply_opcodes(reg_map, [clear_code])
+        updated_reg_val = updated_reg_map[reg_addx]["value"]
+        _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
+
+        # set pin state to low
+        # TODO: refactor private method `__write_changed_values`
+        write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
+        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
+        self.transfer(dev_address, write_msg)
 
         self.dict_pin[pin_name].is_high = False
         return self.dict_pin[pin_name].is_high
