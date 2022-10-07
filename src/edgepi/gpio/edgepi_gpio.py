@@ -216,7 +216,7 @@ class EdgePiGPIO(I2CDevice):
 
         # apply opcode to set this pin high
         # TODO: private method
-        reg_map = {reg_addx: reg_val}
+        reg_map = {reg_addx: {"value": reg_val}}
         updated_reg_map = apply_opcodes(reg_map, [self.dict_pin[pin_name].set_code])
         updated_reg_val = updated_reg_map[reg_addx]["value"]
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
