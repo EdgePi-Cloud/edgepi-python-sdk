@@ -16,6 +16,7 @@ from edgepi.reg_helper.reg_helper import apply_opcodes, convert_dict_to_values
 
 _logger = logging.getLogger(__name__)
 
+# pylint: disable=logging-too-many-args
 class EdgePiGPIO(I2CDevice):
     '''
     A class used to represent the GPIO Expander configuration for an I2C Device.
@@ -173,7 +174,6 @@ class EdgePiGPIO(I2CDevice):
         # read register at reg_addx
         read_msg = self.set_read_msg(reg_addx, [0xFF])
         reg_val = self.transfer(dev_address, read_msg)[0]
-        # pylint: disable=logging-too-many-args
         _logger.debug(
             "GPIO reading device '%s' starting at register '%s': value bytes='%s'",
             hex(dev_address),
@@ -186,7 +186,7 @@ class EdgePiGPIO(I2CDevice):
         return reg_val & (~pin_mask)
 
 
-    def set_pin_direction(self, pin_name: str = None):
+    def set_pin_direction(self, pin_name, direction):
         '''
         Set the direction of a GPIO expander pin (low or high).
 
@@ -196,6 +196,7 @@ class EdgePiGPIO(I2CDevice):
         Returns:
             `bool`: True if direction is input, False if direction is output
         '''
+        raise NotImplementedError
 
     def set_expander_pin(self, pin_name: str = None):
         '''
@@ -206,24 +207,30 @@ class EdgePiGPIO(I2CDevice):
             self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
-        list_opcode = [self.dict_pin[pin_name].set_code]
-        dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
+        reg_addx = self.dict_pin[pin_name].set_code.reg_address
 
-        # read this pin's current state
-        self.read_expander_pin(pin_name)
+        # get register value of port this pin belongs to
+        # TODO: use private method
+        read_msg = self.set_read_msg(reg_addx, [0xFF])
+        reg_val = self.transfer(dev_address, read_msg)[0]
 
-        # need to set pin to output: if state is high, set to low first
+        # apply opcode to set this pin high
+        # TODO: private method
+        reg_map = {reg_addx: reg_val}
+        updated_reg_map = apply_opcodes(reg_map, [self.dict_pin[pin_name].set_code])
+        updated_reg_val = updated_reg_map[reg_addx]["value"]
+        _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
 
+        # set pin direction to output
+        self.set_pin_direction(pin_name, "output")
 
-        # set pin state
+        # set pin state to high
+        # TODO: refactor private method `__write_changed_values`
+        write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
+        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
+        self.transfer(dev_address, write_msg)
 
-        
-
-
-        # self.__write_changed_values(dict_register, dev_address)
-        # dict_register = convert_dict_to_values(dict_register)
-
-        # self.dict_pin[pin_name].is_high = True
+        self.dict_pin[pin_name].is_high = True
         return self.dict_pin[pin_name].is_high
 
     def clear_expander_pin(self, pin_name: str = None):
