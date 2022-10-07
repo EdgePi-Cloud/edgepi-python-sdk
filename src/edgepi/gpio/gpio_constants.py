@@ -6,7 +6,7 @@ from edgepi.reg_helper.reg_helper import OpCode
 
 
 class GpioExpanderAddress(Enum):
-    """GPIO expander addresses"""
+    """GPIO expander i2c device addresses"""
 
     EXP_ONE = 32
     EXP_TWO = 33
@@ -14,17 +14,17 @@ class GpioExpanderAddress(Enum):
 
 @unique
 class GPIOAddresses(Enum):
-    """GPIO port addresses"""
+    """GPIO expander port addresses"""
 
     # Read addresses
     INPUT_PORT_0 = 0x00
     INPUT_PORT_1 = 0x01
-    OUTPUT_PORT_0 = 0x02
-    OUTPUT_PORT_1 = 0x03
+    OUTPUT_PORT_0 = 0x02    # Port B
+    OUTPUT_PORT_1 = 0x03    # Port A
     POLARITY_INVERSION_PORT_0 = 0x04
     POLARITY_INVERSION_PORT_1 = 0x05
-    CONFIGURATION_PORT_0 = 0x06
-    CONFIGURATION_PORT_1 = 0x07
+    CONFIGURATION_PORT_0 = 0x06 # Port B
+    CONFIGURATION_PORT_1 = 0x07 # Port A
 
 
 class BitMask(Enum):
@@ -43,7 +43,7 @@ class BitMask(Enum):
 
 @unique
 class GpioAOutputSet(Enum):
-    """valid opcodes setting GPIO A output"""
+    """valid opcodes for setting a GPIO Expander's Port A (Output Port 1)"""
 
     SET_OUTPUT_1 = OpCode(0x01, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT0.value)
     SET_OUTPUT_2 = OpCode(0x02, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT1.value)
@@ -58,7 +58,7 @@ class GpioAOutputSet(Enum):
 
 @unique
 class GpioAOutputClear(Enum):
-    """valid opcodes clearing GPIO A output"""
+    """valid opcodes for clearing a GPIO Expander's A (Output Port 1)"""
 
     CLEAR_OUTPUT_1 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT0.value)
     CLEAR_OUTPUT_2 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_1.value, BitMask.BIT1.value)
@@ -75,7 +75,7 @@ class GpioAOutputClear(Enum):
 
 @unique
 class GpioBOutputSet(Enum):
-    """valid opcodes setting GPIO B output"""
+    """valid opcodes for setting a GPIO Expander's Port B (Output Port 0)"""
 
     SET_OUTPUT_1 = OpCode(0x01, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BIT0.value)
     SET_OUTPUT_2 = OpCode(0x02, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BIT1.value)
@@ -90,7 +90,7 @@ class GpioBOutputSet(Enum):
 
 @unique
 class GpioBOutputClear(Enum):
-    """valid opcodes clearing GPIO B output"""
+    """valid opcodes for clearing a GPIO Expander's Port B (Output Port 0)"""
 
     CLEAR_OUTPUT_1 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BIT0.value)
     CLEAR_OUTPUT_2 = OpCode(0x00, GPIOAddresses.OUTPUT_PORT_0.value, BitMask.BIT1.value)
@@ -104,7 +104,7 @@ class GpioBOutputClear(Enum):
 
 @unique
 class GpioAPinDir(Enum):
-    """valid opcodes setting GPIO A pin direction"""
+    """valid opcodes for setting a GPIO Expander's Port A pin direction (Configuration Port 1)"""
     PIN1_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT0.value)
     PIN2_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT1.value)
     PIN3_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT2.value)
@@ -129,7 +129,7 @@ class GpioAPinDir(Enum):
 
 @unique
 class GpioBPinDir(Enum):
-    """valid opcodes setting GPIO B pin direction"""
+    """valid opcodes for setting a GPIO Expander's Port B pin direction (Configuration Port 0)"""
     PIN1_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT0.value)
     PIN2_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT1.value)
     PIN3_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT2.value)
