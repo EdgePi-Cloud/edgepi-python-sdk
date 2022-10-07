@@ -155,6 +155,48 @@ class EdgePiGPIO(I2CDevice):
         return reg_val & (~pin_mask)
 
 
+    def get_pin_direction(self, pin_name: str = None):
+        '''
+        Get the current direction of a GPIO expander pin (low or high).
+
+        Args:
+            `pin_name` (str): name of the pin whose state to read
+
+        Returns:
+            `bool`: True if direction is input, False if direction is output
+        '''
+        dev_address = self.dict_pin[pin_name].address
+        reg_addx = self.dict_pin[pin_name].dir_code.reg_address
+        pin_mask = self.dict_pin[pin_name].dir_code.op_mask
+
+        # TODO: refactor this to private method
+        # read register at reg_addx
+        read_msg = self.set_read_msg(reg_addx, [0xFF])
+        reg_val = self.transfer(dev_address, read_msg)[0]
+        # pylint: disable=logging-too-many-args
+        _logger.debug(
+            "GPIO reading device '%s' starting at register '%s': value bytes='%s'",
+            hex(dev_address),
+            hex(reg_addx),
+            bin(reg_val)
+        )
+        # print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
+
+        # get value at pin_index by masking the other bits
+        return reg_val & (~pin_mask)
+
+
+    def set_pin_direction(self, pin_name: str = None):
+        '''
+        Set the direction of a GPIO expander pin (low or high).
+
+        Args:
+            `pin_name` (str): name of the pin whose state to read
+
+        Returns:
+            `bool`: True if direction is input, False if direction is output
+        '''
+
     def set_expander_pin(self, pin_name: str = None):
         '''
         Function set gpio pin state to high
@@ -167,10 +209,21 @@ class EdgePiGPIO(I2CDevice):
         list_opcode = [self.dict_pin[pin_name].set_code]
         dict_register = apply_opcodes(self.dict_default_reg_dict[dev_address], list_opcode)
 
-        self.__write_changed_values(dict_register, dev_address)
-        dict_register = convert_dict_to_values(dict_register)
+        # read this pin's current state
+        self.read_expander_pin(pin_name)
 
-        self.dict_pin[pin_name].is_high = True
+        # need to set pin to output: if state is high, set to low first
+
+
+        # set pin state
+
+        
+
+
+        # self.__write_changed_values(dict_register, dev_address)
+        # dict_register = convert_dict_to_values(dict_register)
+
+        # self.dict_pin[pin_name].is_high = True
         return self.dict_pin[pin_name].is_high
 
     def clear_expander_pin(self, pin_name: str = None):
