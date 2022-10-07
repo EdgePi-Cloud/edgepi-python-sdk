@@ -2,6 +2,8 @@
 Provides a class for interacting with the GPIO pins through I2C and GPIO peripheral
 '''
 
+from typing import Union
+
 import logging
 from edgepi.gpio.gpio_configs import generate_pin_info, GpioExpanderConfig
 from edgepi.peripherals.i2c import I2CDevice
@@ -12,7 +14,7 @@ from edgepi.gpio.gpio_commands import (
     check_multiple_dev,
     set_pin_states
     )
-from edgepi.reg_helper.reg_helper import apply_opcodes, convert_dict_to_values
+from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, convert_dict_to_values
 
 _logger = logging.getLogger(__name__)
 
@@ -167,8 +169,9 @@ class EdgePiGPIO(I2CDevice):
             `bool`: True if direction is input, False if direction is output
         '''
         dev_address = self.dict_pin[pin_name].address
-        reg_addx = self.dict_pin[pin_name].dir_code.reg_address
-        pin_mask = self.dict_pin[pin_name].dir_code.op_mask
+        # dir_out_code and dir_in_code have the same addx and mask, doesn't matter which
+        reg_addx = self.dict_pin[pin_name].dir_out_code.reg_address
+        pin_mask = self.dict_pin[pin_name].dir_out_code.op_mask
 
         # TODO: refactor this to private method
         # read register at reg_addx
@@ -186,7 +189,7 @@ class EdgePiGPIO(I2CDevice):
         return reg_val & (~pin_mask)
 
 
-    def set_pin_direction(self, pin_name, direction):
+    def set_pin_direction_out(self, pin_name):
         '''
         Set the direction of a GPIO expander pin (low or high).
 
@@ -196,7 +199,29 @@ class EdgePiGPIO(I2CDevice):
         Returns:
             `bool`: True if direction is input, False if direction is output
         '''
-        raise NotImplementedError
+        dev_address = self.dict_pin[pin_name].address
+        reg_addx = self.dict_pin[pin_name].dir_out_code.reg_address
+
+        # get register value of port this pin belongs to
+        # TODO: use private method
+        read_msg = self.set_read_msg(reg_addx, [0xFF])
+        reg_val = self.transfer(dev_address, read_msg)[0]
+
+        # apply opcode to set this pin to output
+        # TODO: private method
+        reg_map = {reg_addx: {"value": reg_val}}
+        updated_reg_map = apply_opcodes(reg_map, [self.dict_pin[pin_name].dir_out_code])
+        updated_reg_val = updated_reg_map[reg_addx]["value"]
+        _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
+
+        # set pin state to high
+        # TODO: refactor private method `__write_changed_values`
+        write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
+        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
+        self.transfer(dev_address, write_msg)
+
+        self.dict_pin[pin_name].is_out = True
+        return self.dict_pin[pin_name].is_out
 
     def set_expander_pin(self, pin_name: str = None):
         '''
@@ -222,7 +247,7 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
 
         # set pin direction to output
-        self.set_pin_direction(pin_name, "output")
+        self.set_pin_direction_out(pin_name)
 
         # set pin state to high
         # TODO: refactor private method `__write_changed_values`
