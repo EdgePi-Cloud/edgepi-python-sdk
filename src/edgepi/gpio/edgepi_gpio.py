@@ -18,8 +18,9 @@ _logger = logging.getLogger(__name__)
 
 class EdgePiGPIO(I2CDevice):
     '''
-    A class used to represent the GPIO. This class will be imported to each module
-    that requires GPIO manipulation. It is not intended for user.
+    A class used to represent the GPIO Expander configuration for an I2C Device.
+    This class will be imported to each module that requires GPIO manipulation.
+    It is not intended for users.
     '''
     def __init__(self, config: GpioExpanderConfig = None):
         if config is None:
@@ -28,8 +29,11 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(f'{self.config.name} Configuration Selected: {self.config}')
         if self.config is not None and 'i2c' in self.config.dev_path:
             super().__init__(self.config.dev_path)
+            # get expander configuration port and output port addxs for this device
             self.pin_config_address, self.pin_out_address = get_pin_config_address(self.config)
+            # get this device's expander pin names and opcodes for set, clear, direction ops
             self.dict_pin = generate_pin_info(self.config)
+            # this is initialized by `set_expander_default` call
             self.dict_default_reg_dict = None
         # TODO: add GPIO init, GPIO and I2C init
 
@@ -120,6 +124,36 @@ class EdgePiGPIO(I2CDevice):
                 msg_write = self.set_write_msg(reg_addx, [entry['value']])
                 _logger.debug(f'Write Message Content {msg_write[0]}')
                 self.transfer(dev_address, msg_write)
+
+    def read_expander_pin(self, pin_name: str = None):
+        '''
+        Get the current state of a GPIO expander pin (low or high).
+
+        Args:
+            `pin_name` (str): name of the pin whose state to read
+
+        Returns:
+            `bool`: True if state is high, False if state is low
+        '''
+        dev_address = self.dict_pin[pin_name].address
+        reg_addx = self.dict_pin[pin_name].set_code.reg_address
+        pin_mask = self.dict_pin[pin_name].set_code.op_mask
+
+        # read register at reg_addx
+        read_msg = self.set_read_msg(reg_addx, [0xFF])
+        reg_val = self.transfer(dev_address, read_msg)[0]
+        # pylint: disable=logging-too-many-args
+        _logger.debug(
+            "GPIO reading device '%s' starting at register '%s': value bytes='%s'",
+            hex(dev_address),
+            hex(reg_addx),
+            bin(reg_val)
+        )
+        # print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
+
+        # get value at pin_index by masking the other bits
+        return reg_val & (~pin_mask)
+
 
     def set_expander_pin(self, pin_name: str = None):
         '''

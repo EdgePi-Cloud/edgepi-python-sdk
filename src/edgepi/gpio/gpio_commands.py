@@ -22,7 +22,7 @@ def get_periph_config(config: str = None):
 
 def get_pin_config_address(config:GpioExpanderConfig = None ):
     '''
-    Depending on the config, return register addresses
+    Depending on the config, return GPIO expander port register addresses
     In:
         config (GpioExpanderConfig) GPIO Expander Config data class
     Return:
