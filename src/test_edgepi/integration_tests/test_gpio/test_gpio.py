@@ -2,7 +2,7 @@
 
 
 import pytest
-from edgepi.gpio.gpio_configs import GpioConfigs, _list_of_LED_gpios
+from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 

@@ -2,7 +2,6 @@
 Provides a class for interacting with the GPIO pins through I2C and GPIO peripheral
 '''
 
-from typing import Union
 
 import logging
 from edgepi.gpio.gpio_configs import generate_pin_info, GpioExpanderConfig
@@ -14,7 +13,7 @@ from edgepi.gpio.gpio_commands import (
     check_multiple_dev,
     set_pin_states
     )
-from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, convert_dict_to_values
+from edgepi.reg_helper.reg_helper import apply_opcodes
 
 _logger = logging.getLogger(__name__)
 
@@ -52,6 +51,7 @@ class EdgePiGPIO(I2CDevice):
             list_reg_dict[address]=self.__map_reg_address_value_dict(address)
         return list_reg_dict
 
+    # TODO: not needed anymore?
     def set_expander_default(self):
         '''
         function to set the pins to default configuration
@@ -185,13 +185,12 @@ class EdgePiGPIO(I2CDevice):
         # get value at pin_index by masking the other bits
         return bool(reg_val & (~pin_mask))
 
-
+    # TODO: merge with __read_register (note: they don't work the same)
     def __read_port(self, dev_addx, port_addx):
         '''read value of a port/register'''
         read_msg = self.set_read_msg(port_addx, [0xFF])
         reg_val = self.transfer(dev_addx, read_msg)[0]
         return reg_val
-
 
     def set_pin_direction_out(self, pin_name):
         '''
