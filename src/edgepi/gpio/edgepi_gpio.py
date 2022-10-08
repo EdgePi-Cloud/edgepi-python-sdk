@@ -128,7 +128,7 @@ class EdgePiGPIO(I2CDevice):
                 _logger.debug(f'Write Message Content {msg_write[0]}')
                 self.transfer(dev_address, msg_write)
 
-    def read_expander_pin(self, pin_name: str = None):
+    def read_expander_pin_state(self, pin_name: str = None):
         '''
         Get the current state of a GPIO expander pin (low or high).
 
@@ -136,7 +136,7 @@ class EdgePiGPIO(I2CDevice):
             `pin_name` (str): name of the pin whose state to read
 
         Returns:
-            `bool`: True if state is high, False if state is low
+            `bool`: 1 if state is high, 0 if state is low
         '''
         dev_address = self.dict_pin[pin_name].address
         reg_addx = self.dict_pin[pin_name].set_code.reg_address
@@ -157,7 +157,6 @@ class EdgePiGPIO(I2CDevice):
         # get value at pin_index by masking the other bits
         return reg_val & (~pin_mask)
 
-
     def get_pin_direction(self, pin_name: str = None):
         '''
         Get the current direction of a GPIO expander pin (low or high).
@@ -166,7 +165,7 @@ class EdgePiGPIO(I2CDevice):
             `pin_name` (str): name of the pin whose state to read
 
         Returns:
-            `bool`: True if direction is input, False if direction is output
+            `int`: 1 if direction is input, 0 if direction is output
         '''
         dev_address = self.dict_pin[pin_name].address
         # dir_out_code and dir_in_code have the same addx and mask, doesn't matter which
@@ -201,7 +200,7 @@ class EdgePiGPIO(I2CDevice):
         Set the direction of a GPIO expander pin (low or high).
 
         Args:
-            `pin_name` (str): name of the pin whose state to read
+            `pin_name` (str): name of the pin whose direction to set
 
         Returns:
             `bool`: True if direction is input, False if direction is output
