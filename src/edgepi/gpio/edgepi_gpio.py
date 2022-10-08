@@ -189,6 +189,13 @@ class EdgePiGPIO(I2CDevice):
         return reg_val & (~pin_mask)
 
 
+    def __read_port(self, dev_addx, port_addx):
+        '''read value of a port/register'''
+        read_msg = self.set_read_msg(port_addx, [0xFF])
+        reg_val = self.transfer(dev_addx, read_msg)[0]
+        return reg_val
+
+
     def set_pin_direction_out(self, pin_name):
         '''
         Set the direction of a GPIO expander pin (low or high).
@@ -203,21 +210,21 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = self.dict_pin[pin_name].dir_out_code.reg_address
 
         # get register value of port this pin belongs to
-        # TODO: use private method
-        read_msg = self.set_read_msg(reg_addx, [0xFF])
-        reg_val = self.transfer(dev_address, read_msg)[0]
+        reg_val = self.__read_port(dev_address, reg_addx)
 
         # apply opcode to set this pin to output
         # TODO: private method
-        reg_map = {reg_addx: {"value": reg_val}}
+        reg_map = {reg_addx: reg_val}
         updated_reg_map = apply_opcodes(reg_map, [self.dict_pin[pin_name].dir_out_code])
         updated_reg_val = updated_reg_map[reg_addx]["value"]
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
 
-        # set pin state to high
+        # set pin to low before setting to output (hazard)
+        self.clear_expander_pin(pin_name)
+
+        # set pin direction to out
         # TODO: refactor private method `__write_changed_values`
         write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
-        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
         self.transfer(dev_address, write_msg)
 
         self.dict_pin[pin_name].is_out = True
@@ -236,19 +243,14 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = set_code.reg_address
 
         # get register value of port this pin belongs to
-        # TODO: use private method
-        read_msg = self.set_read_msg(reg_addx, [0xFF])
-        reg_val = self.transfer(dev_address, read_msg)[0]
+        reg_val = self.__read_port(dev_address, reg_addx)
 
         # apply opcode to get code for setting this pin high
         # TODO: private method
-        reg_map = {reg_addx: {"value": reg_val}}
+        reg_map = {reg_addx: reg_val}
         updated_reg_map = apply_opcodes(reg_map, [set_code])
         updated_reg_val = updated_reg_map[reg_addx]["value"]
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
-
-        # set pin to low before setting to output (hazard)
-        self.clear_expander_pin(pin_name)
 
         # set pin direction to output
         self.set_pin_direction_out(pin_name)
@@ -274,9 +276,7 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = clear_code.reg_address
 
         # get register value of port this pin belongs to
-        # TODO: use private method
-        read_msg = self.set_read_msg(reg_addx, [0xFF])
-        reg_val = self.transfer(dev_address, read_msg)[0]
+        reg_val = self.__read_port(dev_address, reg_addx)
 
         # apply opcode to get code for setting this pin low
         # TODO: private method
