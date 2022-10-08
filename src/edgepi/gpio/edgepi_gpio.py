@@ -152,7 +152,7 @@ class EdgePiGPIO(I2CDevice):
             hex(reg_addx),
             bin(reg_val)
         )
-        # print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
+        print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
 
         # get value at pin_index by masking the other bits
         return reg_val & (~pin_mask)
@@ -256,7 +256,6 @@ class EdgePiGPIO(I2CDevice):
         # set pin state to high
         # TODO: refactor private method `__write_changed_values`
         write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
-        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
         self.transfer(dev_address, write_msg)
 
         self.dict_pin[pin_name].is_high = True
@@ -281,7 +280,7 @@ class EdgePiGPIO(I2CDevice):
 
         # apply opcode to get code for setting this pin low
         # TODO: private method
-        reg_map = {reg_addx: {"value": reg_val}}
+        reg_map = {reg_addx: reg_val}
         updated_reg_map = apply_opcodes(reg_map, [clear_code])
         updated_reg_val = updated_reg_map[reg_addx]["value"]
         _logger.debug("Updating port '%s' value from '%s' to '%s'", reg_addx, hex(reg_val), hex(updated_reg_val))
@@ -289,7 +288,6 @@ class EdgePiGPIO(I2CDevice):
         # set pin state to low
         # TODO: refactor private method `__write_changed_values`
         write_msg = self.set_write_msg(reg_addx, [updated_reg_val])
-        _logger.debug(f'GPIO Write Message Content {bin(write_msg[0])}')
         self.transfer(dev_address, write_msg)
 
         self.dict_pin[pin_name].is_high = False
