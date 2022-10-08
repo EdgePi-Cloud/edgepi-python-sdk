@@ -136,7 +136,7 @@ class EdgePiGPIO(I2CDevice):
             `pin_name` (str): name of the pin whose state to read
 
         Returns:
-            `bool`: 1 if state is high, 0 if state is low
+            `bool`: True if state is high, False if state is low
         '''
         dev_address = self.dict_pin[pin_name].address
         reg_addx = self.dict_pin[pin_name].set_code.reg_address
@@ -152,10 +152,9 @@ class EdgePiGPIO(I2CDevice):
             hex(reg_addx),
             bin(reg_val)
         )
-        print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
 
         # get value at pin_index by masking the other bits
-        return reg_val & (~pin_mask)
+        return bool(reg_val & (~pin_mask))
 
     def get_pin_direction(self, pin_name: str = None):
         '''
@@ -165,7 +164,7 @@ class EdgePiGPIO(I2CDevice):
             `pin_name` (str): name of the pin whose state to read
 
         Returns:
-            `int`: 1 if direction is input, 0 if direction is output
+            `bool`: True if direction is input, False if direction is output
         '''
         dev_address = self.dict_pin[pin_name].address
         # dir_out_code and dir_in_code have the same addx and mask, doesn't matter which
@@ -182,10 +181,9 @@ class EdgePiGPIO(I2CDevice):
             hex(reg_addx),
             bin(reg_val)
         )
-        # print(f"Reading device '{dev_address}' starting at register '{hex(reg_addx)}': value bytes='{bin(reg_val)}'")
 
         # get value at pin_index by masking the other bits
-        return reg_val & (~pin_mask)
+        return bool(reg_val & (~pin_mask))
 
 
     def __read_port(self, dev_addx, port_addx):
