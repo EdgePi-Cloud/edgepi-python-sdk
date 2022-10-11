@@ -204,9 +204,6 @@ class EdgePiGPIO(I2CDevice):
 
         Args:
             `pin_name` (str): name of the pin whose direction to set
-
-        Returns:
-            `bool`: True if direction is input, False if direction is output
         '''
         dev_address = self.dict_pin[pin_name].address
         dir_out_code = self.dict_pin[pin_name].dir_out_code
@@ -223,15 +220,36 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(":set_pin_direction_out: pin '%s' set to output", pin_name)
 
         self.dict_pin[pin_name].is_out = True
-        return self.dict_pin[pin_name].is_out
+
+    def set_pin_direction_in(self, pin_name):
+        '''
+        Set the direction of a GPIO expander pin to high impedance input.
+
+        Args:
+            `pin_name` (str): name of the pin whose direction to set
+        '''
+        dev_address = self.dict_pin[pin_name].address
+        dir_in_code = self.dict_pin[pin_name].dir_in_code
+        reg_addx = dir_in_code.reg_address
+
+        # get register value of port this pin belongs to
+        reg_val = self.__read_port(dev_address, reg_addx)
+
+        # set pin to low before setting to output (hazard)
+        self.clear_expander_pin(pin_name)
+
+        # set pin direction to out
+        self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_in_code)
+        _logger.debug(":set_pin_direction_in: pin '%s' set to output", pin_name)
+
+        self.dict_pin[pin_name].is_out = False
 
     def set_expander_pin(self, pin_name: str = None):
         '''
         Function set gpio pin state to high
-        In:
-            pin_name (str): name of the pin to set
-        Returns:
-            self.dict_pin[pin_name].is_high
+
+        Args:
+            `pin_name` (str): name of the pin to set
         '''
         dev_address = self.dict_pin[pin_name].address
         set_code = self.dict_pin[pin_name].set_code
@@ -278,8 +296,6 @@ class EdgePiGPIO(I2CDevice):
         Function clear gpio pin state to low
         In:
             pin_name (str): name of the pin to set
-        Returns:
-            self.dict_pin[pin_name].is_high
         '''
         dev_address = self.dict_pin[pin_name].address
         clear_code = self.dict_pin[pin_name].clear_code
@@ -293,7 +309,6 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(":set_expander_pin: pin '%s' = set to low", pin_name)
 
         self.dict_pin[pin_name].is_high = False
-        return self.dict_pin[pin_name].is_high
 
     def toggle_expander_pin(self, pin_name: str = None):
         '''
