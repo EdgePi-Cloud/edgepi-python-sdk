@@ -206,6 +206,22 @@ def convert_dict_to_values(reg_dict: dict = None):
     return reg_dict
 
 
+def is_bit_set(reg_val: int, bit_mask: int):
+    """
+    Get state of a bit from an 8-bit register
+
+    Args:
+        reg_val (int): 8-bit value of the register this bit belongs to
+        bit_mask (int): value used to mask all other bits in this register.
+            Hint: use bit mask corresponding to opcode used to set this bit.
+
+    Returns:
+        `bool`: True if the bit is set, False otherwise.
+    """
+    # TODO: unit test this
+    return bool(reg_val & (~bit_mask))
+
+
 class BitMask(Enum):
     """Bit/Byte masks for use with OpCodes"""
 

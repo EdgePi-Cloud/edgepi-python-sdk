@@ -13,7 +13,7 @@ from edgepi.gpio.gpio_commands import (
     check_multiple_dev,
     set_pin_states
     )
-from edgepi.reg_helper.reg_helper import apply_opcodes
+from edgepi.reg_helper.reg_helper import apply_opcodes, is_bit_set
 
 _logger = logging.getLogger(__name__)
 
@@ -145,16 +145,11 @@ class EdgePiGPIO(I2CDevice):
 
         # read register at reg_addx
         reg_val = self.__read_port(dev_address, reg_addx)
-        # pylint: disable=logging-too-many-args
-        _logger.debug(
-            "GPIO reading device '%s' starting at register '%s': value bytes='%s'",
-            hex(dev_address),
-            hex(reg_addx),
-            bin(reg_val)
-        )
+        pin_val = is_bit_set(reg_val, pin_mask)
+        _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_val)
 
         # get value at pin_index by masking the other bits
-        return bool(reg_val & (~pin_mask))
+        return pin_val
 
     def get_pin_direction(self, pin_name: str = None):
         '''
@@ -173,15 +168,11 @@ class EdgePiGPIO(I2CDevice):
 
         # read register at reg_addx
         reg_val = self.__read_port(dev_address, reg_addx)
-        _logger.debug(
-            "GPIO reading device '%s' starting at register '%s': value bytes='%s'",
-            hex(dev_address),
-            hex(reg_addx),
-            bin(reg_val)
-        )
+        pin_val = is_bit_set(reg_val, pin_mask)
+        _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_val)
 
         # get value at pin_index by masking the other bits
-        return bool(reg_val & (~pin_mask))
+        return pin_val
 
     # TODO: merge with __read_register (note: they don't return the same value)
     def __read_port(self, dev_addx, port_addx) -> int:
@@ -198,6 +189,12 @@ class EdgePiGPIO(I2CDevice):
         '''
         read_msg = self.set_read_msg(port_addx, [0xFF])
         reg_val = self.transfer(dev_addx, read_msg)[0]
+        _logger.debug(
+            "__read_port: dev_addx='%s', port_addx='%s': value='%s'",
+            dev_addx,
+            hex(port_addx),
+            hex(reg_val)
+        )
         return reg_val
 
     def set_pin_direction_out(self, pin_name):
@@ -223,6 +220,7 @@ class EdgePiGPIO(I2CDevice):
 
         # set pin direction to out
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_out_code)
+        _logger.debug(":set_pin_direction_out: pin '%s' set to output", pin_name)
 
         self.dict_pin[pin_name].is_out = True
         return self.dict_pin[pin_name].is_out
@@ -247,6 +245,7 @@ class EdgePiGPIO(I2CDevice):
 
         # set pin state to high
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, set_code)
+        _logger.debug(":set_expander_pin: pin '%s' = set to high", pin_name)
 
         self.dict_pin[pin_name].is_high = True
         return self.dict_pin[pin_name].is_high
@@ -259,13 +258,20 @@ class EdgePiGPIO(I2CDevice):
             dev_addx (int): I2C device address
             reg_addx (int): register/port address
             reg_val (int): current 8-bit value of register at reg_addx
-            opcode (int): opcode to apply to register at reg_addx
+            opcode (OpCode): opcode to apply to register at reg_addx
         """
-        # apply opcode to get code for setting this pin low
+        # apply opcode to get new register value
         reg_map = {reg_addx: reg_val}
         updated_reg_map = apply_opcodes(reg_map, [opcode])
-        # set pin state to low
+        # write new register value to set pin new state
         self.__write_changed_values(updated_reg_map, dev_addx)
+        _logger.debug(
+            "__apply_code_to_register: dev_addx='%s', reg_addx='%s', reg_val='%s, opcode='%s'",
+            dev_addx,
+            hex(reg_addx),
+            hex(reg_val),
+            opcode
+        )
 
     def clear_expander_pin(self, pin_name: str = None):
         '''
@@ -284,6 +290,7 @@ class EdgePiGPIO(I2CDevice):
 
         # set pin state to low
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, clear_code)
+        _logger.debug(":set_expander_pin: pin '%s' = set to low", pin_name)
 
         self.dict_pin[pin_name].is_high = False
         return self.dict_pin[pin_name].is_high
