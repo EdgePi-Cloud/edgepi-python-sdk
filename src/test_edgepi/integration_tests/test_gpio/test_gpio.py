@@ -43,7 +43,6 @@ def test_get_pin_direction(gpio_config, pin_name):
     gpio.set_pin_direction_out(pin_name)
     pin_dir = gpio.get_pin_direction(pin_name)
     assert pin_dir is False
-    # TODO: add test for setting direction to input too
 
 
 @pytest.mark.parametrize("gpio_config, pin_name", [
