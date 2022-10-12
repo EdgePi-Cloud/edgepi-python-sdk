@@ -94,7 +94,7 @@ def test_set_pin_direction_in(gpio_config, pin_name):
 def test_set_expander_pin(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
     # TODO: setting pins 5-8 to high causes crash
-    pin_val = gpio.set_expander_pin(pin_name)
+    gpio.set_expander_pin(pin_name)
     pin_val = gpio.read_expander_pin_state(pin_name)
     assert pin_val is True
 
