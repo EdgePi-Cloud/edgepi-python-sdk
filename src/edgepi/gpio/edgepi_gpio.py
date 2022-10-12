@@ -13,7 +13,7 @@ from edgepi.gpio.gpio_commands import (
     check_multiple_dev,
     set_pin_states
     )
-from edgepi.reg_helper.reg_helper import apply_opcodes, is_bit_set
+from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, is_bit_set
 
 _logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class EdgePiGPIO(I2CDevice):
             self.__read_register(self.pin_config_address, dev_address)
         return reg_map
 
-    def __write_changed_values(self, reg_dict: dict = None, dev_address: int = None):
+    def __write_changed_values(self, reg_dict: dict, dev_address: int):
         '''
         Function to write changed values to the specified register
         In:
@@ -129,7 +129,7 @@ class EdgePiGPIO(I2CDevice):
                 _logger.debug(f'Write Message Content {msg_write[0]}')
                 self.transfer(dev_address, msg_write)
 
-    def read_expander_pin_state(self, pin_name: str = None):
+    def read_expander_pin_state(self, pin_name: str) -> bool:
         '''
         Get the current state of a GPIO expander pin (low or high).
 
@@ -145,12 +145,12 @@ class EdgePiGPIO(I2CDevice):
 
         # read register at reg_addx
         reg_val = self.__read_port(dev_address, reg_addx)
-        pin_val = is_bit_set(reg_val, pin_mask)
-        _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_val)
+        pin_state = is_bit_set(reg_val, pin_mask)
+        _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_state)
 
-        return pin_val
+        return pin_state
 
-    def get_pin_direction(self, pin_name: str = None):
+    def get_pin_direction(self, pin_name: str) -> bool:
         '''
         Get the current direction of a GPIO expander pin (low or high).
 
@@ -167,13 +167,13 @@ class EdgePiGPIO(I2CDevice):
 
         # read register at reg_addx
         reg_val = self.__read_port(dev_address, reg_addx)
-        pin_val = is_bit_set(reg_val, pin_mask)
-        _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_val)
+        pin_state = is_bit_set(reg_val, pin_mask)
+        _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_state)
 
-        return pin_val
+        return pin_state
 
     # TODO: merge with __read_register (note: they don't return the same value)
-    def __read_port(self, dev_addx, port_addx) -> int:
+    def __read_port(self, dev_addx: int, port_addx: int) -> int:
         '''
         Read value of a port/register on a I2C device
 
@@ -195,7 +195,7 @@ class EdgePiGPIO(I2CDevice):
         )
         return reg_val
 
-    def set_pin_direction_out(self, pin_name):
+    def set_pin_direction_out(self, pin_name: str):
         '''
         Set the direction of a GPIO expander pin to output. Note this will
         set pin to low before setting to output for safety reasons.
@@ -219,7 +219,7 @@ class EdgePiGPIO(I2CDevice):
 
         self.dict_pin[pin_name].is_out = True
 
-    def set_pin_direction_in(self, pin_name):
+    def set_pin_direction_in(self, pin_name: str):
         '''
         Set the direction of a GPIO expander pin to high impedance input.
 
@@ -239,7 +239,7 @@ class EdgePiGPIO(I2CDevice):
 
         self.dict_pin[pin_name].is_out = False
 
-    def set_expander_pin(self, pin_name: str = None):
+    def set_expander_pin(self, pin_name: str):
         '''
         Function set gpio pin state to high
 
@@ -261,17 +261,16 @@ class EdgePiGPIO(I2CDevice):
         _logger.debug(":set_expander_pin: pin '%s' = set to high", pin_name)
 
         self.dict_pin[pin_name].is_high = True
-        return self.dict_pin[pin_name].is_high
 
-    def __apply_code_to_register(self, dev_addx, reg_addx, reg_val, opcode):
+    def __apply_code_to_register(self, dev_addx: int, reg_addx: int, reg_val: int, opcode: OpCode):
         """
         Applies an opcode obtained from I2CPinInfo object to a register.
 
         Args:
-            dev_addx (int): I2C device address
-            reg_addx (int): register/port address
-            reg_val (int): current 8-bit value of register at reg_addx
-            opcode (OpCode): opcode to apply to register at reg_addx
+            `dev_addx` (int): I2C device address
+            `reg_addx` (int): register/port address
+            `reg_val` (int): current 8-bit value of register at reg_addx
+            `opcode` (OpCode): opcode to apply to register at reg_addx
         """
         # apply opcode to get new register value
         reg_map = {reg_addx: reg_val}
@@ -286,11 +285,11 @@ class EdgePiGPIO(I2CDevice):
             opcode
         )
 
-    def clear_expander_pin(self, pin_name: str = None):
+    def clear_expander_pin(self, pin_name: str):
         '''
         Function clear gpio pin state to low
         In:
-            pin_name (str): name of the pin to set
+            `pin_name` (str): name of the pin to set
         '''
         dev_address = self.dict_pin[pin_name].address
         clear_code = self.dict_pin[pin_name].clear_code
@@ -305,7 +304,7 @@ class EdgePiGPIO(I2CDevice):
 
         self.dict_pin[pin_name].is_high = False
 
-    def toggle_expander_pin(self, pin_name: str = None):
+    def toggle_expander_pin(self, pin_name: str):
         '''
         Function toggle gpio pin state to opposite logic
         High -> Low
