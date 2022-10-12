@@ -43,7 +43,7 @@ def get_default_values(reg_dict: dict = None, pin_list: list = None):
                           {register address : {'value': register_vlaue, is_changed : true/false}}
     '''
     # Generating list of OpCode, order = GpioXOutputClear, GpioXPinDir
-    list_opcode = [pin.clear_code for pin in pin_list] + [pin.dir_code for pin in pin_list]
+    list_opcode = [pin.clear_code for pin in pin_list] + [pin.dir_out_code for pin in pin_list]
     apply_opcodes(reg_dict, list_opcode)
     return reg_dict
 

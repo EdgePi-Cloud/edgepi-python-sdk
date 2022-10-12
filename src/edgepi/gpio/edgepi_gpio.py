@@ -148,7 +148,6 @@ class EdgePiGPIO(I2CDevice):
         pin_val = is_bit_set(reg_val, pin_mask)
         _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_val)
 
-        # get value at pin_index by masking the other bits
         return pin_val
 
     def get_pin_direction(self, pin_name: str = None):
@@ -171,7 +170,6 @@ class EdgePiGPIO(I2CDevice):
         pin_val = is_bit_set(reg_val, pin_mask)
         _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_val)
 
-        # get value at pin_index by masking the other bits
         return pin_val
 
     # TODO: merge with __read_register (note: they don't return the same value)
@@ -235,10 +233,7 @@ class EdgePiGPIO(I2CDevice):
         # get register value of port this pin belongs to
         reg_val = self.__read_port(dev_address, reg_addx)
 
-        # set pin to low before setting to output (hazard)
-        self.clear_expander_pin(pin_name)
-
-        # set pin direction to out
+        # set pin direction to input
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_in_code)
         _logger.debug(":set_pin_direction_in: pin '%s' set to output", pin_name)
 

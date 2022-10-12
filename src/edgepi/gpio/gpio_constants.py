@@ -2,7 +2,7 @@
 
 
 from enum import Enum, unique
-from edgepi.reg_helper.reg_helper import OpCode
+from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 
 class GpioExpanderAddress(Enum):
@@ -25,20 +25,6 @@ class GPIOAddresses(Enum):
     POLARITY_INVERSION_PORT_1 = 0x05
     CONFIGURATION_PORT_0 = 0x06 # Port B
     CONFIGURATION_PORT_1 = 0x07 # Port A
-
-
-class BitMask(Enum):
-    """bit masks for 8 bit registers"""
-
-    BIT0 = 0xFE
-    BIT1 = 0xFD
-    BIT2 = 0xFB
-    BIT3 = 0xF7
-    BIT4 = 0xEF
-    BIT5 = 0xDF
-    BIT6 = 0xBF
-    BIT7 = 0x7F
-    BYTE = 0x00
 
 
 @unique
@@ -104,7 +90,9 @@ class GpioBOutputClear(Enum):
 
 @unique
 class GpioAPinDirOut(Enum):
-    """valid opcodes for setting a GPIO Expander's Port A pin direction to output (Configuration Port 1)"""
+    """
+    Opcodes for setting a GPIO Expander's Port A pin direction to output (Configuration Port 1)
+    """
     PIN1_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT0.value)
     PIN2_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT1.value)
     PIN3_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT2.value)
@@ -117,7 +105,9 @@ class GpioAPinDirOut(Enum):
 
 @unique
 class GpioAPinDirIn(Enum):
-    """valid opcodes for setting a GPIO Expander's Port A pin direction to input (Configuration Port 1)"""
+    """
+    Opcodes for setting a GPIO Expander's Port A pin direction to input (Configuration Port 1)
+    """
     PIN1_DIR_IN = OpCode(0x01, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT0.value)
     PIN2_DIR_IN = OpCode(0x02, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT1.value)
     PIN3_DIR_IN = OpCode(0x04, GPIOAddresses.CONFIGURATION_PORT_1.value, BitMask.BIT2.value)
@@ -131,7 +121,9 @@ class GpioAPinDirIn(Enum):
 
 @unique
 class GpioBPinDirOut(Enum):
-    """valid opcodes for setting a GPIO Expander's Port B pin direction to output (Configuration Port 0)"""
+    """
+    Opcodes for setting a GPIO Expander's Port B pin direction to output (Configuration Port 0)
+    """
     PIN1_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT0.value)
     PIN2_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT1.value)
     PIN3_DIR_OUT = OpCode(0x00, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT2.value)
@@ -144,7 +136,9 @@ class GpioBPinDirOut(Enum):
 
 @unique
 class GpioBPinDirIn(Enum):
-    """valid opcodes for setting a GPIO Expander's Port B pin direction to input (Configuration Port 0)"""
+    """
+    Opcodes for setting a GPIO Expander's Port B pin direction to input (Configuration Port 0)
+    """
     PIN1_DIR_IN = OpCode(0x01, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT0.value)
     PIN2_DIR_IN = OpCode(0x02, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT1.value)
     PIN3_DIR_IN = OpCode(0x04, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT2.value)

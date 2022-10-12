@@ -55,23 +55,6 @@ def test_get_pin_direction(gpio_config, pin_name):
     (GpioConfigs.LED, "LED_OVR7"),
     (GpioConfigs.LED, "LED_OVR8"),
 ])
-def test_clear_expander_pin(gpio_config, pin_name):
-    gpio = EdgePiGPIO(gpio_config.value)
-    pin_val = gpio.clear_expander_pin(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
-    assert pin_val is False
-
-
-@pytest.mark.parametrize("gpio_config, pin_name", [
-    (GpioConfigs.LED, "LED_OVR1"),
-    (GpioConfigs.LED, "LED_OVR2"),
-    (GpioConfigs.LED, "LED_OVR3"),
-    (GpioConfigs.LED, "LED_OVR4"),
-    (GpioConfigs.LED, "LED_OVR5"),
-    (GpioConfigs.LED, "LED_OVR6"),
-    (GpioConfigs.LED, "LED_OVR7"),
-    (GpioConfigs.LED, "LED_OVR8"),
-])
 def test_set_pin_direction_out(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
     gpio.set_pin_direction_out(pin_name)
@@ -114,3 +97,20 @@ def test_set_expander_pin(gpio_config, pin_name):
     pin_val = gpio.set_expander_pin(pin_name)
     pin_val = gpio.read_expander_pin_state(pin_name)
     assert pin_val is True
+
+
+@pytest.mark.parametrize("gpio_config, pin_name", [
+    (GpioConfigs.LED, "LED_OVR1"),
+    (GpioConfigs.LED, "LED_OVR2"),
+    (GpioConfigs.LED, "LED_OVR3"),
+    (GpioConfigs.LED, "LED_OVR4"),
+    (GpioConfigs.LED, "LED_OVR5"),
+    (GpioConfigs.LED, "LED_OVR6"),
+    (GpioConfigs.LED, "LED_OVR7"),
+    (GpioConfigs.LED, "LED_OVR8"),
+])
+def test_clear_expander_pin(gpio_config, pin_name):
+    gpio = EdgePiGPIO(gpio_config.value)
+    gpio.clear_expander_pin(pin_name)
+    pin_val = gpio.read_expander_pin_state(pin_name)
+    assert pin_val is False
