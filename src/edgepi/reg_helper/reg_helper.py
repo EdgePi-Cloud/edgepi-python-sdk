@@ -86,7 +86,10 @@ def apply_opcodes(register_values: dict, opcodes: list):
         opcodes (list): a list of OpCode objects to be used for updating register values.
 
     Returns:
-        a map of the device's registers to a dictionary containg the updated values and change flags
+        `dict`: a map of the device's registers to a dictionary containing
+        the updated values and change flags, formatted as:
+
+            { reg_addx (int): {"value": int, "is_changed": bool} }
 
     Raises:
         ValueError: if either register_values or opcodes is empty
@@ -218,7 +221,6 @@ def is_bit_set(reg_val: int, bit_mask: int):
     Returns:
         `bool`: True if the bit is set, False otherwise.
     """
-    # TODO: unit test this
     return bool(reg_val & (~bit_mask))
 
 
