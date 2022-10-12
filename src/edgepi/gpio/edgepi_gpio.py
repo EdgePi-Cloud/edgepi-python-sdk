@@ -307,8 +307,10 @@ class EdgePiGPIO(I2CDevice):
     def toggle_expander_pin(self, pin_name: str):
         '''
         Function toggle gpio pin state to opposite logic
-        High -> Low
-        Low -> High
+
+            High -> Low,
+            Low -> High
+
         Args:
             `pin_name` (str): name of the pin to toggle
         '''
