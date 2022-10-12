@@ -256,24 +256,24 @@ def test_generate_default_reg_dict(mock_dict,config, result, mock_i2c):
 #     assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
 #     assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
 
-@pytest.mark.parametrize('mock_value, config, pin_name, result', [([0,0,True,False,False],
-                                                                   GpioConfigs.DAC.value,
-                                                                   'AO_EN1',
-                                                                   True),
-                                                                  ([0,0,True,False,True],
-                                                                   GpioConfigs.DAC.value,
-                                                                   'AO_EN1',
-                                                                   False)])
-@patch('edgepi.peripherals.i2c.I2CDevice')
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin')
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin')
-def test_toggle_expander_pin(mock_clear_expander_pin, mock_set_expander_pin, mock_i2c_device,
-                             mock_value, config, pin_name, result, mock_i2c):
-    mock_i2c.return_value = mock_value[0]
-    mock_i2c_device.return_value = mock_value[1]
-    mock_set_expander_pin.return_value = mock_value[2]
-    mock_clear_expander_pin.return_value = mock_value[3]
-    gpio_ctrl = EdgePiGPIO(config)
-    gpio_ctrl.dict_pin[pin_name].is_high = mock_value[4]
-    gpio_ctrl.toggle_expander_pin(pin_name)
-    assert gpio_ctrl.dict_pin[pin_name].is_high == result
+# @pytest.mark.parametrize('mock_value, config, pin_name, result', [([0,0,True,False,False],
+#                                                                    GpioConfigs.DAC.value,
+#                                                                    'AO_EN1',
+#                                                                    True),
+#                                                                   ([0,0,True,False,True],
+#                                                                    GpioConfigs.DAC.value,
+#                                                                    'AO_EN1',
+#                                                                    False)])
+# @patch('edgepi.peripherals.i2c.I2CDevice')
+# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin')
+# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin')
+# def test_toggle_expander_pin(mock_clear_expander_pin, mock_set_expander_pin, mock_i2c_device,
+#                              mock_value, config, pin_name, result, mock_i2c):
+#     mock_i2c.return_value = mock_value[0]
+#     mock_i2c_device.return_value = mock_value[1]
+#     mock_set_expander_pin.return_value = mock_value[2]
+#     mock_clear_expander_pin.return_value = mock_value[3]
+#     gpio_ctrl = EdgePiGPIO(config)
+#     gpio_ctrl.dict_pin[pin_name].is_high = mock_value[4]
+#     gpio_ctrl.toggle_expander_pin(pin_name)
+#     assert gpio_ctrl.dict_pin[pin_name].is_high == result

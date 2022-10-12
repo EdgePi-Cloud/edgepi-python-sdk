@@ -309,11 +309,21 @@ class EdgePiGPIO(I2CDevice):
         Function toggle gpio pin state to opposite logic
         High -> Low
         Low -> High
-        In:
-            pin_name (str): name of the pin to set
-        Returns:
-            void
+        Args:
+            `pin_name` (str): name of the pin to toggle
         '''
-        self.dict_pin[pin_name].is_high = self.clear_expander_pin(pin_name)\
-                                          if self.dict_pin[pin_name].is_high\
-                                          else self.set_expander_pin(pin_name)
+        dev_address = self.dict_pin[pin_name].address
+        # set and clear codes for a pin have same reg_addx and mask
+        code = self.dict_pin[pin_name].clear_code
+        reg_addx = code.reg_address
+        pin_mask = code.op_mask
+
+        # get register value of port this pin belongs to
+        reg_val = self.__read_port(dev_address, reg_addx)
+
+        # if pin is set to low, set to high and vice-versa
+        _logger.debug(":toggle_expander_pin: toggling pin '%s'", pin_name)
+        if is_bit_set(reg_val, pin_mask):
+            self.clear_expander_pin(pin_name)
+        else:
+            self.set_expander_pin(pin_name)

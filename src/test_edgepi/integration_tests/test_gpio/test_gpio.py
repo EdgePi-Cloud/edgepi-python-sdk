@@ -104,6 +104,25 @@ def test_set_expander_pin(gpio_config, pin_name):
     (GpioConfigs.LED, "LED_OVR2"),
     (GpioConfigs.LED, "LED_OVR3"),
     (GpioConfigs.LED, "LED_OVR4"),
+    # TODO: setting pins 5-8 to high causes crash
+    # (GpioConfigs.LED, "LED_OVR5"),
+    # (GpioConfigs.LED, "LED_OVR6"),
+    # (GpioConfigs.LED, "LED_OVR7"),
+    # (GpioConfigs.LED, "LED_OVR8"),
+])
+def test_toggle_expander_pin(gpio_config, pin_name):
+    gpio = EdgePiGPIO(gpio_config.value)
+    pin_val_1 = gpio.read_expander_pin_state(pin_name)
+    gpio.toggle_expander_pin(pin_name)
+    pin_val_2 = gpio.read_expander_pin_state(pin_name)
+    assert pin_val_2 is not pin_val_1
+
+
+@pytest.mark.parametrize("gpio_config, pin_name", [
+    (GpioConfigs.LED, "LED_OVR1"),
+    (GpioConfigs.LED, "LED_OVR2"),
+    (GpioConfigs.LED, "LED_OVR3"),
+    (GpioConfigs.LED, "LED_OVR4"),
     (GpioConfigs.LED, "LED_OVR5"),
     (GpioConfigs.LED, "LED_OVR6"),
     (GpioConfigs.LED, "LED_OVR7"),
