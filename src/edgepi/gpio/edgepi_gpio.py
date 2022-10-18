@@ -80,19 +80,18 @@ class EdgePiGPIO(I2CDevice):
                 _logger.debug(f'Updated Default Register Dictionary Contest {default_reg_dict}')
         set_pin_states(self.dict_pin)
 
-    def __read_register(self, reg_address, dev_address):
+    def __read_register(self, reg_address: int, dev_address: int) -> int:
         '''
-        function to read one register value
-        In:
-            reg_address: register address to read data from
-            dev_address: expander address to read
+        function to read one register value from an I2C device
+        Args:
+            `reg_address`: register/port address to read data from
+            `dev_address`: expander address to read
         Returns:
-            A byte data
+            `int`: 8-bit uint value of port/register
         '''
         msg_read = self.set_read_msg(reg_address, [0xFF])
         _logger.debug(f'Read Message: Register Address {msg_read[0].data}\
                       , Msg Place Holder {msg_read[1].data}')
-        # TODO: this doesn't return result of the register read?
         self.transfer(dev_address, msg_read)
         _logger.debug(f'Message Read: Register Address {msg_read[0].data},\
          Msg Place Holder {msg_read[1].data}')
@@ -144,7 +143,7 @@ class EdgePiGPIO(I2CDevice):
         pin_mask = self.dict_pin[pin_name].set_code.op_mask
 
         # read register at reg_addx
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
         pin_state = is_bit_set(reg_val, pin_mask)
         _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_state)
 
@@ -166,34 +165,11 @@ class EdgePiGPIO(I2CDevice):
         pin_mask = self.dict_pin[pin_name].dir_out_code.op_mask
 
         # read register at reg_addx
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
         pin_state = is_bit_set(reg_val, pin_mask)
         _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_state)
 
         return pin_state
-
-    # TODO: merge with __read_register (note: they don't return the same value)
-    def __read_port(self, dev_addx: int, port_addx: int) -> int:
-        '''
-        Read value of a port/register on a I2C device
-
-        Args:
-            `dev_addx` (int): I2C device address
-
-            `port_addx` (int): port/register address to read value of
-
-        Returns:
-            `int`: 8-bit uint value of port/register
-        '''
-        read_msg = self.set_read_msg(port_addx, [0xFF])
-        reg_val = self.transfer(dev_addx, read_msg)[0]
-        _logger.debug(
-            "__read_port: dev_addx='%s', port_addx='%s': value='%s'",
-            dev_addx,
-            hex(port_addx),
-            hex(reg_val)
-        )
-        return reg_val
 
     def set_pin_direction_out(self, pin_name: str):
         '''
@@ -208,7 +184,7 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = dir_out_code.reg_address
 
         # get register value of port this pin belongs to
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin to low before setting to output (hazard)
         self.clear_expander_pin(pin_name)
@@ -231,7 +207,7 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = dir_in_code.reg_address
 
         # get register value of port this pin belongs to
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin direction to input
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_in_code)
@@ -251,7 +227,7 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = set_code.reg_address
 
         # get register value of port this pin belongs to
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin direction to output (also sets to low)
         self.set_pin_direction_out(pin_name)
@@ -296,7 +272,7 @@ class EdgePiGPIO(I2CDevice):
         reg_addx = clear_code.reg_address
 
         # get register value of port this pin belongs to
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin state to low
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, clear_code)
@@ -321,7 +297,7 @@ class EdgePiGPIO(I2CDevice):
         pin_mask = code.op_mask
 
         # get register value of port this pin belongs to
-        reg_val = self.__read_port(dev_address, reg_addx)
+        reg_val = self.__read_register(reg_addx, dev_address)
 
         # if pin is set to low, set to high and vice-versa
         _logger.debug(":toggle_expander_pin: toggling pin '%s'", pin_name)
