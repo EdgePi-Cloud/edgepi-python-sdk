@@ -95,16 +95,102 @@ class I2cPinInfo:
     is_high: bool = None
     is_out: bool = None
 
-_list_of_DAC_gpios = ['AO_EN8', 'AO_EN7', 'AO_EN6', 'AO_EN5',
-                      'AO_EN2', 'AO_EN3', 'AO_EN4', 'AO_EN1', 'DAC_GAIN']
-_list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
-_list_of_RTD_gpios = ['RTD_EN']
-_list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4',
-                      'LED_OVR5','LED_OVR6', 'LED_OVR7', 'LED_OVR8']
-_list_of_DIN_gpios =  ['DIN1', 'DIN2', 'DIN3', 'DIN4',
-                       'DIN5', 'DIN6', 'DIN7', 'DIN8']
-_list_of_DOUT_gpios = {'DOUT1', 'DOUT2', 'DOUT3', 'DOUT4',
-                       'DOUT5', 'DOUT6', 'DOUT7', 'DOUT8'}
+
+class DACPins(Enum):
+    "DAC GPIO Pin Names"
+    A0_EN1 = 'AO_EN1'
+    A0_EN2 = 'AO_EN2'
+    A0_EN3 = 'AO_EN3'
+    A0_EN4 = 'AO_EN4'
+    A0_EN5 = 'AO_EN5'
+    A0_EN6 = 'AO_EN6'
+    A0_EN7 = 'AO_EN7'
+    A0_EN8 = 'AO_EN8'
+    DAC_GAIN = 'DAC_GAIN'
+
+
+_list_of_DAC_gpios = [
+    DACPins.A0_EN8.value, DACPins.A0_EN7.value, DACPins.A0_EN6.value,
+    DACPins.A0_EN5.value, DACPins.A0_EN4.value, DACPins.A0_EN3.value,
+    DACPins.A0_EN2.value, DACPins.A0_EN1.value, DACPins.DAC_GAIN.value,
+    ]
+
+
+class ADCPins(Enum):
+    "ADC GPIO Pin Names"
+    GNDSW_IN1 = 'GNDSW_IN1'
+    GNDSW_IN2 = 'GNDSW_IN2'
+
+
+_list_of_ADC_gpios = [ADCPins.GNDSW_IN1.value, ADCPins.GNDSW_IN2.value]
+
+
+class RTDPins(Enum):
+    "RTD GPIO Pin Names"
+    RTD_EN = 'RTD_EN'
+
+
+_list_of_RTD_gpios = [RTDPins.RTD_EN.value]
+
+
+class LEDPins(Enum):
+    "LED GPIO Pin Names"
+    LED_OVR1 = 'LED_OVR1'
+    LED_OVR2 = 'LED_OVR2'
+    LED_OVR3 = 'LED_OVR3'
+    LED_OVR4 = 'LED_OVR4'
+    LED_OVR5 = 'LED_OVR5'
+    LED_OVR6 = 'LED_OVR6'
+    LED_OVR7 = 'LED_OVR7'
+    LED_OVR8 = 'LED_OVR8'
+
+
+_list_of_LED_gpios = [
+    LEDPins.LED_OVR1.value, LEDPins.LED_OVR2.value,
+    LEDPins.LED_OVR3.value, LEDPins.LED_OVR4.value,
+    LEDPins.LED_OVR5.value, LEDPins.LED_OVR6.value,
+    LEDPins.LED_OVR7.value, LEDPins.LED_OVR8.value,
+]
+
+
+class DINPins(Enum):
+    "DIN GPIO Pin Names"
+    DIN1 = 'DIN1'
+    DIN2 = 'DIN2'
+    DIN3 = 'DIN3'
+    DIN4 = 'DIN4'
+    DIN5 = 'DIN5'
+    DIN6 = 'DIN6'
+    DIN7 = 'DIN7'
+    DIN8 = 'DIN8'
+
+
+_list_of_DIN_gpios =  [
+    DINPins.DIN1.value, DINPins.DIN2.value,
+    DINPins.DIN3.value, DINPins.DIN4.value,
+    DINPins.DIN5.value, DINPins.DIN6.value,
+    DINPins.DIN7.value, DINPins.DIN8.value,
+]
+
+
+class DOUTPins(Enum):
+    "DOUT GPIO Pin Names"
+    DOUT1 = 'DOUT1'
+    DOUT2 = 'DOUT2'
+    DOUT3 = 'DOUT3'
+    DOUT4 = 'DOUT4'
+    DOUT5 = 'DOUT5'
+    DOUT6 = 'DOUT6'
+    DOUT7 = 'DOUT7'
+    DOUT8 = 'DOUT8'
+
+
+_list_of_DOUT_gpios =  [
+    DOUTPins.DOUT1.value, DOUTPins.DOUT2.value,
+    DOUTPins.DOUT3.value, DOUTPins.DOUT4.value,
+    DOUTPins.DOUT5.value, DOUTPins.DOUT6.value,
+    DOUTPins.DOUT7.value, DOUTPins.DOUT8.value,
+]
 
 
 def _generate_DAC_pins(): #pylint: disable=C0103
