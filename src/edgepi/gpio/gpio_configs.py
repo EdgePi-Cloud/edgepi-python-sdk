@@ -1,17 +1,19 @@
 """ Utility module for GPIO configuration """
 
-
 from enum import Enum, unique
 from typing import Union
 from dataclasses import dataclass
 from edgepi.gpio.gpio_constants import (
     GpioAOutputClear,
     GpioAOutputSet,
+    GpioAPinDirIn,
+    GpioAPinDirOut,
     GpioBOutputClear,
     GpioBOutputSet,
+    GpioBPinDirIn,
+    GpioBPinDirOut,
     GpioExpanderAddress,
-    GpioAPinDir,
-    GpioBPinDir
+
 )
 
 
@@ -87,21 +89,108 @@ class I2cPinInfo:
     '''
     set_code: Union[GpioAOutputSet, GpioBOutputSet] = None
     clear_code: Union[GpioAOutputClear, GpioBOutputClear] = None
-    dir_code: Union[GpioAPinDir, GpioBPinDir] = None
+    dir_out_code: Union[GpioAPinDirOut, GpioBPinDirOut] = None
+    dir_in_code: Union[GpioAPinDirIn, GpioBPinDirIn] = None
     address: int = None
     is_high: bool = None
     is_out: bool = None
 
-_list_of_DAC_gpios = ['AO_EN8', 'AO_EN7', 'AO_EN6', 'AO_EN5',
-                      'AO_EN2', 'AO_EN3', 'AO_EN4', 'AO_EN1', 'DAC_GAIN']
-_list_of_ADC_gpios = ['GNDSW_IN1', 'GNDSW_IN2']
-_list_of_RTD_gpios = ['RTD_EN']
-_list_of_LED_gpios = ['LED_OVR1', 'LED_OVR2', 'LED_OVR3', 'LED_OVR4',
-                      'LED_OVR5','LED_OVR6', 'LED_OVR7', 'LED_OVR8']
-_list_of_DIN_gpios =  ['DIN1', 'DIN2', 'DIN3', 'DIN4',
-                       'DIN5', 'DIN6', 'DIN7', 'DIN8']
-_list_of_DOUT_gpios = {'DOUT1', 'DOUT2', 'DOUT3', 'DOUT4',
-                       'DOUT5', 'DOUT6', 'DOUT7', 'DOUT8'}
+
+class DACPins(Enum):
+    "DAC GPIO Pin Names"
+    A0_EN1 = 'AO_EN1'
+    A0_EN2 = 'AO_EN2'
+    A0_EN3 = 'AO_EN3'
+    A0_EN4 = 'AO_EN4'
+    A0_EN5 = 'AO_EN5'
+    A0_EN6 = 'AO_EN6'
+    A0_EN7 = 'AO_EN7'
+    A0_EN8 = 'AO_EN8'
+    DAC_GAIN = 'DAC_GAIN'
+
+
+_list_of_DAC_gpios = [
+    DACPins.A0_EN8.value, DACPins.A0_EN7.value, DACPins.A0_EN6.value,
+    DACPins.A0_EN5.value, DACPins.A0_EN4.value, DACPins.A0_EN3.value,
+    DACPins.A0_EN2.value, DACPins.A0_EN1.value, DACPins.DAC_GAIN.value,
+    ]
+
+
+class ADCPins(Enum):
+    "ADC GPIO Pin Names"
+    GNDSW_IN1 = 'GNDSW_IN1'
+    GNDSW_IN2 = 'GNDSW_IN2'
+
+
+_list_of_ADC_gpios = [ADCPins.GNDSW_IN1.value, ADCPins.GNDSW_IN2.value]
+
+
+class RTDPins(Enum):
+    "RTD GPIO Pin Names"
+    RTD_EN = 'RTD_EN'
+
+
+_list_of_RTD_gpios = [RTDPins.RTD_EN.value]
+
+
+class LEDPins(Enum):
+    "LED GPIO Pin Names"
+    LED_OVR1 = 'LED_OVR1'
+    LED_OVR2 = 'LED_OVR2'
+    LED_OVR3 = 'LED_OVR3'
+    LED_OVR4 = 'LED_OVR4'
+    LED_OVR5 = 'LED_OVR5'
+    LED_OVR6 = 'LED_OVR6'
+    LED_OVR7 = 'LED_OVR7'
+    LED_OVR8 = 'LED_OVR8'
+
+
+_list_of_LED_gpios = [
+    LEDPins.LED_OVR1.value, LEDPins.LED_OVR2.value,
+    LEDPins.LED_OVR3.value, LEDPins.LED_OVR4.value,
+    LEDPins.LED_OVR5.value, LEDPins.LED_OVR6.value,
+    LEDPins.LED_OVR7.value, LEDPins.LED_OVR8.value,
+]
+
+
+class DINPins(Enum):
+    "DIN GPIO Pin Names"
+    DIN1 = 'DIN1'
+    DIN2 = 'DIN2'
+    DIN3 = 'DIN3'
+    DIN4 = 'DIN4'
+    DIN5 = 'DIN5'
+    DIN6 = 'DIN6'
+    DIN7 = 'DIN7'
+    DIN8 = 'DIN8'
+
+
+_list_of_DIN_gpios =  [
+    DINPins.DIN1.value, DINPins.DIN2.value,
+    DINPins.DIN3.value, DINPins.DIN4.value,
+    DINPins.DIN5.value, DINPins.DIN6.value,
+    DINPins.DIN7.value, DINPins.DIN8.value,
+]
+
+
+class DOUTPins(Enum):
+    "DOUT GPIO Pin Names"
+    DOUT1 = 'DOUT1'
+    DOUT2 = 'DOUT2'
+    DOUT3 = 'DOUT3'
+    DOUT4 = 'DOUT4'
+    DOUT5 = 'DOUT5'
+    DOUT6 = 'DOUT6'
+    DOUT7 = 'DOUT7'
+    DOUT8 = 'DOUT8'
+
+
+_list_of_DOUT_gpios =  [
+    DOUTPins.DOUT1.value, DOUTPins.DOUT2.value,
+    DOUTPins.DOUT3.value, DOUTPins.DOUT4.value,
+    DOUTPins.DOUT5.value, DOUTPins.DOUT6.value,
+    DOUTPins.DOUT7.value, DOUTPins.DOUT8.value,
+]
 
 
 def _generate_DAC_pins(): #pylint: disable=C0103
@@ -112,18 +201,20 @@ def _generate_DAC_pins(): #pylint: disable=C0103
             a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
-    for pin, set_code, clear_code, dir_code in \
-        zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear, GpioAPinDir):
+    for pin, set_code, clear_code, dir_out_code, dir_in_code in \
+        zip(_list_of_DAC_gpios, GpioAOutputSet, GpioAOutputClear, GpioAPinDirOut, GpioAPinDirIn):
 
         pin_dict.update({pin : I2cPinInfo(set_code.value,
                                           clear_code.value,
-                                          dir_code.value,
+                                          dir_out_code.value,
+                                          dir_in_code.value,
                                           GpioExpanderAddress.EXP_ONE.value)
                         })
     pin_dict['DAC_GAIN'] =\
         I2cPinInfo(GpioAOutputSet.SET_OUTPUT_1.value,
                    GpioAOutputClear.CLEAR_OUTPUT_1.value,
-                   GpioAPinDir.PIN1_DIR_OUT.value,
+                   GpioAPinDirOut.PIN1_DIR_OUT.value,
+                   GpioAPinDirIn.PIN1_DIR_IN.value,
                    GpioExpanderAddress.EXP_TWO.value)
     return pin_dict
 
@@ -135,12 +226,13 @@ def _generate_LED_pins(): #pylint: disable=C0103
             a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
-    for pin, set_code, clear_code, dir_code in\
-        zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear, GpioBPinDir):
+    for pin, set_code, clear_code, dir_out_code, dir_in_code in\
+        zip(_list_of_LED_gpios, GpioBOutputSet, GpioBOutputClear, GpioBPinDirOut, GpioBPinDirIn):
 
         pin_dict.update({pin : I2cPinInfo(set_code.value,
                                           clear_code.value,
-                                          dir_code.value,
+                                          dir_out_code.value,
+                                          dir_in_code.value,
                                           GpioExpanderAddress.EXP_ONE.value)})
     return pin_dict
 
@@ -154,11 +246,13 @@ def _generate_ADC_pins(): #pylint: disable=C0103
     pin_dict = {}
     pin_dict.update({_list_of_ADC_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_2.value,
                                                         GpioBOutputClear.CLEAR_OUTPUT_2.value,
-                                                        GpioBPinDir.PIN2_DIR_OUT.value,
+                                                        GpioBPinDirOut.PIN2_DIR_OUT.value,
+                                                        GpioBPinDirIn.PIN2_DIR_IN.value,
                                                         GpioExpanderAddress.EXP_TWO.value)})
     pin_dict.update({_list_of_ADC_gpios[1] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_3.value,
                                                         GpioBOutputClear.CLEAR_OUTPUT_3.value,
-                                                        GpioBPinDir.PIN3_DIR_OUT.value,
+                                                        GpioBPinDirOut.PIN3_DIR_OUT.value,
+                                                        GpioBPinDirIn.PIN3_DIR_IN.value,
                                                         GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
@@ -172,7 +266,8 @@ def _generate_RTD_pins(): #pylint: disable=C0103
     pin_dict = {}
     pin_dict.update({_list_of_RTD_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_1.value,
                                                         GpioBOutputClear.CLEAR_OUTPUT_1.value,
-                                                        GpioBPinDir.PIN1_DIR_OUT.value,
+                                                        GpioBPinDirOut.PIN1_DIR_OUT.value,
+                                                        GpioBPinDirIn.PIN1_DIR_IN.value,
                                                         GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 

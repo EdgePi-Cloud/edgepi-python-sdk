@@ -9,6 +9,7 @@ from edgepi.reg_helper.reg_helper import (
     apply_opcodes,
     _convert_values_to_dict,
     convert_dict_to_values,
+    is_bit_set,
 )
 from edgepi.tc.tc_constants import (
     AvgMode,
@@ -390,3 +391,41 @@ def test_convert_values_to_dict(reg_map):
 def test_convert_dict_to_values(reg_dict, result):
     reg_dict = convert_dict_to_values(reg_dict)
     assert reg_dict == result
+
+
+@pytest.mark.parametrize("reg_val, bit_mask, result", [
+    (0b00000001, 0b11111110, True),
+    (0b00000000, 0b11111110, False),
+    (0b00000010, 0b11111101, True),
+    (0b00000000, 0b11111101, False),
+    (0b00000100, 0b11111011, True),
+    (0b00000000, 0b11111011, False),
+    (0b00001000, 0b11110111, True),
+    (0b00000000, 0b11110111, False),
+    (0b00010000, 0b11101111, True),
+    (0b00000000, 0b11101111, False),
+    (0b00100000, 0b11011111, True),
+    (0b00000000, 0b11011111, False),
+    (0b01000000, 0b10111111, True),
+    (0b00000000, 0b10111111, False),
+    (0b10000000, 0b01111111, True),
+    (0b00000000, 0b01111111, False),
+    (0xFF, 0b11111110, True),
+    (0b11111110, 0b11111110, False),
+    (0xFF, 0b11111101, True),
+    (0b11111101, 0b11111101, False),
+    (0xFF, 0b11111011, True),
+    (0b11111011, 0b11111011, False),
+    (0xFF, 0b11110111, True),
+    (0b11110111, 0b11110111, False),
+    (0xFF, 0b11101111, True),
+    (0b11101111, 0b11101111, False),
+    (0xFF, 0b11011111, True),
+    (0b11011111, 0b11011111, False),
+    (0xFF, 0b10111111, True),
+    (0b10111111, 0b10111111, False),
+    (0xFF, 0b01111111, True),
+    (0b01111111, 0b01111111, False),
+])
+def test_is_bit_set(reg_val, bit_mask, result):
+    assert is_bit_set(reg_val, bit_mask) == result

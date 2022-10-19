@@ -3,7 +3,12 @@
 
 import pytest
 from edgepi.reg_helper.reg_helper import _apply_opcode
-from edgepi.gpio.gpio_constants import GpioAOutputClear, GpioAOutputSet, GpioAPinDir
+from edgepi.gpio.gpio_constants import (
+    GpioAOutputClear,
+    GpioAOutputSet,
+    GpioAPinDirIn,
+    GpioAPinDirOut,
+)
 
 
 @pytest.mark.parametrize(
@@ -45,15 +50,15 @@ def test_output_clear(reg_value, opcode, updated_reg_value):
 @pytest.mark.parametrize(
     "reg_value, opcode, updated_reg_value",
     [
-        (0b11111111, GpioAPinDir.PIN8_DIR_OUT.value, 0b01111111),  # Output Dir Bit8
-        (0b01111111, GpioAPinDir.PIN7_DIR_OUT.value, 0b00111111),  # Output Dir Bit7
-        (0b00111111, GpioAPinDir.PIN6_DIR_OUT.value, 0b00011111),  # Output Dir Bit6
-        (0b00011111, GpioAPinDir.PIN5_DIR_OUT.value, 0b00001111),  # Output Dir Bit5
-        (0b00001111, GpioAPinDir.PIN4_DIR_OUT.value, 0b00000111),  # Output Dir Bit4
-        (0b00000111, GpioAPinDir.PIN3_DIR_OUT.value, 0b00000011),  # Output Dir Bit3
-        (0b00000011, GpioAPinDir.PIN2_DIR_OUT.value, 0b00000001),  # Output Dir Bit2
-        (0b00000001, GpioAPinDir.PIN1_DIR_OUT.value, 0b00000000),  # Output Dir Bit1
-        (0b11111111, GpioAPinDir.ALL_DIR_OUT.value, 0b00000000),  # Output Dir ALL
+        (0b11111111, GpioAPinDirOut.PIN8_DIR_OUT.value, 0b01111111),  # Output Dir Bit8
+        (0b01111111, GpioAPinDirOut.PIN7_DIR_OUT.value, 0b00111111),  # Output Dir Bit7
+        (0b00111111, GpioAPinDirOut.PIN6_DIR_OUT.value, 0b00011111),  # Output Dir Bit6
+        (0b00011111, GpioAPinDirOut.PIN5_DIR_OUT.value, 0b00001111),  # Output Dir Bit5
+        (0b00001111, GpioAPinDirOut.PIN4_DIR_OUT.value, 0b00000111),  # Output Dir Bit4
+        (0b00000111, GpioAPinDirOut.PIN3_DIR_OUT.value, 0b00000011),  # Output Dir Bit3
+        (0b00000011, GpioAPinDirOut.PIN2_DIR_OUT.value, 0b00000001),  # Output Dir Bit2
+        (0b00000001, GpioAPinDirOut.PIN1_DIR_OUT.value, 0b00000000),  # Output Dir Bit1
+        (0b11111111, GpioAPinDirOut.ALL_DIR_OUT.value, 0b00000000),  # Output Dir ALL
     ],
 )
 def test_pin_dir_out(reg_value, opcode, updated_reg_value):
@@ -63,15 +68,15 @@ def test_pin_dir_out(reg_value, opcode, updated_reg_value):
 @pytest.mark.parametrize(
     "reg_value, opcode, updated_reg_value",
     [
-        (0b00000000, GpioAPinDir.PIN1_DIR_IN.value, 0b00000001),  # Input Dir Bit8
-        (0b00000001, GpioAPinDir.PIN2_DIR_IN.value, 0b00000011),  # Input Dir Bit7
-        (0b00000011, GpioAPinDir.PIN3_DIR_IN.value, 0b00000111),  # Input Dir Bit6
-        (0b00000111, GpioAPinDir.PIN4_DIR_IN.value, 0b00001111),  # Input Dir Bit5
-        (0b00001111, GpioAPinDir.PIN5_DIR_IN.value, 0b00011111),  # Input Dir Bit4
-        (0b00011111, GpioAPinDir.PIN6_DIR_IN.value, 0b00111111),  # Input Dir Bit3
-        (0b00111111, GpioAPinDir.PIN7_DIR_IN.value, 0b01111111),  # Input Dir Bit2
-        (0b01111111, GpioAPinDir.PIN8_DIR_IN.value, 0b11111111),  # Input Dir Bit1
-        (0b00000000, GpioAPinDir.ALL_DIR_IN.value, 0b11111111),  # Input Dir ALL
+        (0b00000000, GpioAPinDirIn.PIN1_DIR_IN.value, 0b00000001),  # Input Dir Bit8
+        (0b00000001, GpioAPinDirIn.PIN2_DIR_IN.value, 0b00000011),  # Input Dir Bit7
+        (0b00000011, GpioAPinDirIn.PIN3_DIR_IN.value, 0b00000111),  # Input Dir Bit6
+        (0b00000111, GpioAPinDirIn.PIN4_DIR_IN.value, 0b00001111),  # Input Dir Bit5
+        (0b00001111, GpioAPinDirIn.PIN5_DIR_IN.value, 0b00011111),  # Input Dir Bit4
+        (0b00011111, GpioAPinDirIn.PIN6_DIR_IN.value, 0b00111111),  # Input Dir Bit3
+        (0b00111111, GpioAPinDirIn.PIN7_DIR_IN.value, 0b01111111),  # Input Dir Bit2
+        (0b01111111, GpioAPinDirIn.PIN8_DIR_IN.value, 0b11111111),  # Input Dir Bit1
+        (0b00000000, GpioAPinDirIn.ALL_DIR_IN.value, 0b11111111),  # Input Dir ALL
     ],
 )
 def test_pin_dir_in(reg_value, opcode, updated_reg_value):
