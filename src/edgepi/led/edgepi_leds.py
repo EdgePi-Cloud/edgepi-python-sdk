@@ -4,7 +4,7 @@
 import logging
 
 
-from edgepi.gpio.gpio_configs import LEDPins
+from edgepi.gpio.gpio_configs import LEDPins, GpioConfigs
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 
@@ -19,7 +19,7 @@ class EdgePiLED:
     """Interact with the EdgePi LED Array"""
 
     def __init__(self):
-        self.gpio_ops = EdgePiGPIO()
+        self.gpio_ops = EdgePiGPIO(GpioConfigs.LED.value)
         self.log = logging.getLogger(__name__)
 
     @staticmethod
