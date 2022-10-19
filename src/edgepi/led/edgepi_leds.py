@@ -14,7 +14,6 @@ class InvalidLEDNameError(Exception):
     an EdgePiLED method."""
 
 
-# TODO: unit/integration test
 class EdgePiLED:
     """Interact with the EdgePi LED Array"""
 
