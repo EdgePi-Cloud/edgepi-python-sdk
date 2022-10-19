@@ -14,6 +14,7 @@ class InvalidLEDNameError(Exception):
     an EdgePiLED method."""
 
 
+# TODO: unit/integration test
 class EdgePiLED:
     """Interact with the EdgePi LED Array"""
 
@@ -26,7 +27,7 @@ class EdgePiLED:
         """Checks if an LED name is valid"""
         if not isinstance(led_name, LEDPins):
             raise InvalidLEDNameError(
-                f"{led_name} is not a valid EdgePi LED name, use EdgePiLED enums for names."
+                f"{led_name} is not a valid EdgePi LED name, use LEDPins enums for names."
             )
 
     def turn_led_on(self, led_name: LEDPins):
