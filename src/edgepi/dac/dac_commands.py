@@ -27,11 +27,10 @@ class DACCommands:
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
-    def __voltage_to_float_code(self, ch: int, expected: float):
+    def __voltage_to_float_code(self, expected: float):
         """Convert a voltage to full precision binary code value"""
-        float_code =(expected + self.dict_calib_param[ch].offset_1) / \
-                    (self.dict_calib_param[ch].gain_1 +
-                    (CALIB_CONSTS.VOLTAGE_REF.value / CALIB_CONSTS.RANGE.value))
+        # TODO: apply proper calculation
+        float_code =((expected * 0.4 /CALIB_CONSTS.VOLTAGE_REF.value) * CALIB_CONSTS.RANGE.value)
         _logger.debug(f"Full code generated {float_code}")
         return float_code
 
@@ -50,7 +49,7 @@ class DACCommands:
         """
         # DAC channels are 0 indexed
         self.check_range(ch, 0, NUM_PINS - 1)
-        float_code = self.__voltage_to_float_code(ch, expected)
+        float_code = self.__voltage_to_float_code(expected)
         _logger.debug(f"Int code generated {int(float_code)}")
         # DAC only accepts int values, round to nearest int
         return round(float_code)

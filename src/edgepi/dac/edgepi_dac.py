@@ -24,7 +24,6 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 
 
-_logger = logging.getLogger(__name__)
 
 
 class EdgePiDAC(spi):
@@ -62,7 +61,8 @@ class EdgePiDAC(spi):
                                 [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0]]
 
     def __init__(self):
-        _logger.info("Initializing DAC Bus")
+        self.log = logging.getLogger(__name__)
+        self.log.info("Initializing DAC Bus")
         super().__init__(bus_num=6, dev_id=3, mode=1, max_speed=1000000)
 
         self.dac_ops = DACCommands(generate_dict_calibration(DACcalibParam,
@@ -71,7 +71,6 @@ class EdgePiDAC(spi):
                                                              ),
                                                              self.__analog_out_calib_param))
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
-        self.gpio.set_expander_default()
 
         self.__dac_power_state = {
             CH.DAC7.value: PowerMode.NORMAL.value,
@@ -113,7 +112,12 @@ class EdgePiDAC(spi):
         self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
         dac_ch = self.__analog_out_to_dac_ch[analog_out]
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
-        print(code)
+        self.log.debug(f'Code: {code}')
+
+        if self.gpio.dict_pin[self.__analog_out_pin_map[analog_out].value].is_out is not True:
+            self.gpio.clear_expander_pin(self.__analog_out_pin_map[analog_out].value)
+            self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out].value)
+
         # update DAC register
         self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
         # send voltage to analog out pin
@@ -147,7 +151,6 @@ class EdgePiDAC(spi):
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
         self.transfer(cmd)
         # return gpio pins to low
-        self.gpio.set_expander_default()
 
     def compute_expected_voltage(self, analog_out: int) -> float:
         """
@@ -171,6 +174,6 @@ class EdgePiDAC(spi):
         # all zero dummy command to trigger second transfer which
         # contains the DAC register contents.
         read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
-        _logger.debug(f"reading code {read_data}")
+        self.log.debug(f"reading code {read_data}")
         code = self.dac_ops.extract_read_data(read_data)
         return self.dac_ops.code_to_voltage(dac_ch, code)
