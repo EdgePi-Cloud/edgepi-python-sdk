@@ -152,6 +152,28 @@ class EdgePiDAC(spi):
         self.transfer(cmd)
         # return gpio pins to low
 
+    def channel_readback(self, analog_out: int) -> int:
+        """
+        Readback the input register of DAC.
+
+        Args:
+            analog_out (int): the analog out pin number to read voltage from
+        Return:
+            (int): code value stored in the input register, can be used to calculate expected
+            voltage
+        """
+        self.dac_ops.check_range(analog_out, 1, NUM_PINS)
+        dac_ch = self.__analog_out_to_dac_ch[analog_out]
+        # first transfer triggers read mode, second is needed to fetch data
+        cmd = self.dac_ops.combine_command(COM.COM_READBACK.value, CH(dac_ch).value, NULL_BITS)
+        self.transfer(cmd)
+        # all zero dummy command to trigger second transfer which
+        # contains the DAC register contents.
+        read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
+        self.log.debug(f"reading code {read_data}")
+        return self.dac_ops.extract_read_data(read_data)
+
+
     def compute_expected_voltage(self, analog_out: int) -> float:
         """
         Computes expected voltage from the DAC channel corresponding to analog out pin.
@@ -166,14 +188,23 @@ class EdgePiDAC(spi):
             float: the computed voltage value of the DAC channel corresponding
                 to the selected analog out pin.
         """
-        self.dac_ops.check_range(analog_out, 1, NUM_PINS)
         dac_ch = self.__analog_out_to_dac_ch[analog_out]
-        # first transfer triggers read mode, second is needed to fetch data
-        cmd = self.dac_ops.combine_command(COM.COM_READBACK.value, CH(dac_ch).value, NULL_BITS)
-        self.transfer(cmd)
-        # all zero dummy command to trigger second transfer which
-        # contains the DAC register contents.
-        read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
-        self.log.debug(f"reading code {read_data}")
-        code = self.dac_ops.extract_read_data(read_data)
+        code = self.channel_readback(analog_out)
         return self.dac_ops.code_to_voltage(dac_ch, code)
+
+    def get_state(self) -> dict:
+        """
+        Gets status of each channel of DAC
+
+        Args:
+            N/A
+        Returns:
+            ch_state_dict: (dict): dictionary of channel mapped with code and voltage values
+            {channel_name : {code}}
+        """
+        ch_state_dict = {}
+        for key, value in self.__analog_out_pin_map.items():
+            ch_state_dict[value.value] = {'code' : self.channel_readback(key),
+                                          'voltage' : self.compute_expected_voltage(key)}
+        return ch_state_dict
+        

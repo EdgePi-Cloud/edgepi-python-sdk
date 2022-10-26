@@ -11,6 +11,7 @@ sys.modules['periphery'] = mock.MagicMock()
 # pylint: disable=protected-access
 
 import pytest
+from bitstring import pack
 from edgepi.dac.dac_constants import (
     AOPins,
     PowerMode,
@@ -94,6 +95,21 @@ def test_dac_reset(mocker, dac):
     dac.reset()
     mock_transfer.assert_called_once_with([96, 18, 52])
 
+@pytest.mark.parametrize("analog_out, mock_val",
+                         [(1, [0xA1,0x69, 0xDF]),
+                          (2, [0xA1,0x69, 0xDF]),
+                          (3, [0xA1,0x69, 0xDF]),
+                          (4, [0xA1,0x69, 0xDF]),
+                          (5, [0xA1,0x69, 0xDF]),
+                          (6, [0xA1,0x69, 0xDF]),
+                          (7, [0xA1,0x69, 0xDF]),
+                          (8, [0xA1,0x69, 0xDF])])
+def test_channel_readback(mocker, analog_out, mock_val, dac):
+    mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val)
+    bits = pack("uint:8, uint:8, uint:8", mock_val[0], mock_val[1], mock_val[2])
+    result = bits[-16:].uint
+    code = dac.channel_readback(analog_out)
+    assert code == result
 
 @pytest.mark.parametrize(
     "analog_out, read_data",
@@ -106,7 +122,7 @@ def test_dac_reset(mocker, dac):
         (3, [0, 0, 0]),
         (2, [0, 0, 0]),
         (1, [0, 0, 0]),
-    ],
+    ]
 )
 def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
 
@@ -139,7 +155,7 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
         (6, AOPins.AO_EN6.value, 0, "mock_clear"),
         (7, AOPins.AO_EN7.value, 0, "mock_clear"),
         (8, AOPins.AO_EN8.value, 0, "mock_clear"),
-    ],
+    ]
 )
 def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name):
     # can't mock entire GPIO class here because need to access its methods
@@ -178,14 +194,29 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
 
 
 @pytest.mark.parametrize("anaolog_out, voltage, result",
-                         [(1, 2.123, [27187]),
-                          (2, 2.123, [27187]),
-                          (3, 2.123, [27187]),
-                          (4, 2.123, [27187]),
-                          (5, 2.123, [27187]),
-                          (6, 2.123, [27187]),
-                          (7, 2.123, [27187]),
-                          (8, 2.123, [27187])
+                         [(1, 2.123, [1]),
+                          (2, 2.123, [1]),
+                          (3, 2.123, [1]),
+                          (4, 2.123, [1]),
+                          (5, 2.123, [1]),
+                          (6, 2.123, [1]),
+                          (7, 2.123, [1]),
+                          (8, 2.123, [1])
                         ])
 def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
+
+@pytest.mark.parametrize("mock_val, result",
+                         [([0xA1,0x69, 0xDF], {"AO_EN1" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN2" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN3" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN4" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN5" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN6" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN7" : {'code':27103, 'voltage':2.116},
+                                                  "AO_EN8" : {'code':27103, 'voltage':2.116}})])
+def test_get_state(mocker, result, mock_val,dac):
+    mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val)
+    for key, value in dac.get_state().items():
+        assert result[key]['code'] == value['code']
+        assert result[key]['voltage'] == pytest.approx(value['voltage'], 1e-3)
