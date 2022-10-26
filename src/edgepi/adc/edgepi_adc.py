@@ -158,15 +158,25 @@ class EdgePiADC(SPI):
         return out
 
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
+        """
+        Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
+        be configured as regular 0V GND or 12V GND.
+
+        Args:
+            reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
+        """
         if reference_config == ADCReferenceSwitching.GND_SW1.value:
             self.gpio.set_expander_pin("GNDSW_IN1")
             self.gpio.clear_expander_pin("GNDSW_IN2")
         elif reference_config == ADCReferenceSwitching.GND_SW2.value:
             self.gpio.set_expander_pin("GNDSW_IN2")
             self.gpio.clear_expander_pin("GNDSW_IN1")
-        else :
+        elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
             self.gpio.set_expander_pin("GNDSW_IN1")
             self.gpio.set_expander_pin("GNDSW_IN2")
+        elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
+            self.gpio.clear_expander_pin("GNDSW_IN1")
+            self.gpio.clear_expander_pin("GNDSW_IN2")
 
     def stop_conversions(self):
         """

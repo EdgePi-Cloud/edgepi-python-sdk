@@ -192,6 +192,7 @@ class FilterMode(Enum):
 
 class ADCReferenceSwitching(Enum):
     """ Each ADC Reference ground can be configured """
+    GND_SW_NONE = 0
     GND_SW1 = 1
     GND_SW2 = 2
     GND_SW_BOTH = 3
