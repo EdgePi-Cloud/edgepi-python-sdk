@@ -114,7 +114,7 @@ class EdgePiDAC(spi):
         code = self.dac_ops.voltage_to_code(dac_ch, voltage)
         self.log.debug(f'Code: {code}')
 
-        if self.gpio.dict_pin[self.__analog_out_pin_map[analog_out].value].is_out is not True:
+        if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out].value):
             self.gpio.clear_expander_pin(self.__analog_out_pin_map[analog_out].value)
             self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out].value)
 
@@ -150,7 +150,6 @@ class EdgePiDAC(spi):
         """
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
         self.transfer(cmd)
-        # return gpio pins to low
 
     def channel_readback(self, analog_out: int) -> int:
         """
