@@ -194,14 +194,14 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
 
 
 @pytest.mark.parametrize("anaolog_out, voltage, result",
-                         [(1, 2.123, [1]),
-                          (2, 2.123, [1]),
-                          (3, 2.123, [1]),
-                          (4, 2.123, [1]),
-                          (5, 2.123, [1]),
-                          (6, 2.123, [1]),
-                          (7, 2.123, [1]),
-                          (8, 2.123, [1])
+                         [(1, 2.123, [27187]),
+                          (2, 2.123, [27187]),
+                          (3, 2.123, [27187]),
+                          (4, 2.123, [27187]),
+                          (5, 2.123, [27187]),
+                          (6, 2.123, [27187]),
+                          (7, 2.123, [27187]),
+                          (8, 2.123, [27187])
                         ])
 def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
