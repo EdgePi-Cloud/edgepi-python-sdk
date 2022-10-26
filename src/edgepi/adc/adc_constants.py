@@ -190,6 +190,11 @@ class FilterMode(Enum):
     SINC4 = OpCode(0x60, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
     FIR = OpCode(0x80, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
 
+class ADCReferenceSwitching(Enum):
+    """ Each ADC Reference ground can be configured """
+    GND_SW1 = 1
+    GND_SW2 = 2
+    GND_SW_BOTH = 3
 
 class ADCPower(Enum):
     """OpCodes for configuring the ADS1263 POWER register"""

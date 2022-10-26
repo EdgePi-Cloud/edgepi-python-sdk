@@ -19,6 +19,7 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     ADCReg,
     FilterMode,
+    ADCReferenceSwitching,
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
@@ -95,9 +96,6 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
-        self.gpio.set_expander_default()
-        # TODO: expander_pin might need changing in the future
-        self.gpio.set_expander_pin("GNDSW_IN1")
         # internal state
         self.__state = ADCState(reg_map=None)
         self.__set_power_on_configs()
@@ -111,6 +109,8 @@ class EdgePiADC(SPI):
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
+        self.gpio.clear_expander_pin("GNDSW_IN1")
+        self.gpio.clear_expander_pin("GNDSW_IN2")
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -156,6 +156,17 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __write_register -> data out: {out}")
 
         return out
+
+    def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
+        if reference_config == ADCReferenceSwitching.GND_SW1.value:
+            self.gpio.set_expander_pin("GNDSW_IN1")
+            self.gpio.clear_expander_pin("GNDSW_IN2")
+        elif reference_config == ADCReferenceSwitching.GND_SW2.value:
+            self.gpio.set_expander_pin("GNDSW_IN2")
+            self.gpio.clear_expander_pin("GNDSW_IN1")
+        else :
+            self.gpio.set_expander_pin("GNDSW_IN1")
+            self.gpio.set_expander_pin("GNDSW_IN2")
 
     def stop_conversions(self):
         """
