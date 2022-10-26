@@ -207,14 +207,14 @@ def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
 
 @pytest.mark.parametrize("mock_val, result",
-                         [([0xA1,0x69, 0xDF], {"AO_EN1" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN2" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN3" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN4" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN5" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN6" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN7" : {'code':27103, 'voltage':2.116},
-                                                  "AO_EN8" : {'code':27103, 'voltage':2.116}})])
+                         [([0xA1,0x69, 0xDF], {1 : {'code':27103, 'voltage':2.116},
+                                                  2 : {'code':27103, 'voltage':2.116},
+                                                  3 : {'code':27103, 'voltage':2.116},
+                                                  4 : {'code':27103, 'voltage':2.116},
+                                                  5 : {'code':27103, 'voltage':2.116},
+                                                  6 : {'code':27103, 'voltage':2.116},
+                                                  7 : {'code':27103, 'voltage':2.116},
+                                                  8 : {'code':27103, 'voltage':2.116}})])
 def test_get_state(mocker, result, mock_val,dac):
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val)
     for key, value in dac.get_state().items():

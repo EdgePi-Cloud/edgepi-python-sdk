@@ -203,8 +203,8 @@ class EdgePiDAC(spi):
             {channel_name : {code}}
         """
         ch_state_dict = {}
-        for key, value in self.__analog_out_pin_map.items():
-            ch_state_dict[value.value] = {'code' : self.channel_readback(key),
+        for key, _ in self.__analog_out_pin_map.items():
+            ch_state_dict[key] = {'code' : self.channel_readback(key),
                                           'voltage' : self.compute_expected_voltage(key)}
         return ch_state_dict
         
