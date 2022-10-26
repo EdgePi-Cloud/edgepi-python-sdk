@@ -25,6 +25,12 @@ def fixture_test_dac(mocker):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     yield EdgePiDAC()
 
+@pytest.fixture(name="dac_mock_periph")
+def fixture_test_dac_write_voltage(mocker):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    yield EdgePiDAC()
+
 
 _default_power_modes = {
     CH.DAC7.value: PowerMode.NORMAL.value,
@@ -169,3 +175,17 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
     with pytest.raises(ValueError) as err:
         dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
         assert err.value == "voltage cannot be negative"
+
+
+@pytest.mark.parametrize("anaolog_out, voltage, result",
+                         [(1, 2.123, [27187]),
+                          (2, 2.123, [27187]),
+                          (3, 2.123, [27187]),
+                          (4, 2.123, [27187]),
+                          (5, 2.123, [27187]),
+                          (6, 2.123, [27187]),
+                          (7, 2.123, [27187]),
+                          (8, 2.123, [27187])
+                        ])
+def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
+    assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
