@@ -197,7 +197,7 @@ class EdgePiDAC(spi):
                         voltage: bool = None,
                         gain: bool = None):
         """
-        the method returns the state of requested parameters. It will either read the register of 
+        the method returns the state of requested parameters. It will either read the register of
         DAC or GPIO expander to retrieve the current state.
 
         Args:
