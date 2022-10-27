@@ -84,3 +84,7 @@ class AOPins(Enum):
     AO_EN6 = "AO_EN6"
     AO_EN7 = "AO_EN7"
     AO_EN8 = "AO_EN8"
+
+class GainPin(Enum):
+    """DAC gain enable/disable pin"""
+    DAC_GAIN = "DAC_GAINs"

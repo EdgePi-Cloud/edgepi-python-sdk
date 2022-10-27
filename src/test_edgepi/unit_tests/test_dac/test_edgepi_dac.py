@@ -206,17 +206,23 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
 def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
 
-@pytest.mark.parametrize("mock_val, result",
-                         [([0xA1,0x69, 0xDF], {1 : {'code':27103, 'voltage':2.116},
-                                                  2 : {'code':27103, 'voltage':2.116},
-                                                  3 : {'code':27103, 'voltage':2.116},
-                                                  4 : {'code':27103, 'voltage':2.116},
-                                                  5 : {'code':27103, 'voltage':2.116},
-                                                  6 : {'code':27103, 'voltage':2.116},
-                                                  7 : {'code':27103, 'voltage':2.116},
-                                                  8 : {'code':27103, 'voltage':2.116}})])
-def test_get_state(mocker, result, mock_val,dac):
-    mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val)
-    for key, value in dac.get_state().items():
-        assert result[key]['code'] == value['code']
-        assert result[key]['voltage'] == pytest.approx(value['voltage'], 1e-3)
+@pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",
+                         [([0xA1,0x69, 0xDF, True], 1, True, True, True, [27103, 2.116, True]),
+                          ([0xA1,0x69, 0xDF, False], 2, True, True, True, [27103, 2.116, False]),
+                          ([0xA1,0x69, 0xDF, True], 3, True, True, False, [27103, 2.116, None]),
+                          ([0xA1,0x69, 0xDF, True], 4, True, True, None, [27103, 2.116, None]),
+                          ([0xA1,0x69, 0xDF, True], 5, True, False, True, [27103, None, True]),
+                          ([0xA1,0x69, 0xDF, True], 6, True, None, True, [27103, None, True]),
+                          ([0xA1,0x69, 0xDF, True], 7, False, True, True, [None, 2.116, True]),
+                          ([0xA1,0x69, 0xDF, True], 8, None, True, True, [None, 2.116, True])])
+def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[3])
+    mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val[0:3])
+    dac = EdgePiDAC()
+    code_val, voltage_val, gain_state = dac.get_state(analog_out, code, voltage, gain)
+    assert code_val == result[0]
+    assert pytest.approx(voltage_val, 1e-3) == voltage_val
+    assert gain_state == result[2]

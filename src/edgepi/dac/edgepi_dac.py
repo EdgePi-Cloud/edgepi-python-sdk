@@ -18,6 +18,7 @@ from edgepi.dac.dac_constants import (
     EdgePiDacChannel as CH,
     EdgePiDacCom as COM,
     AOPins,
+    GainPin
 )
 from edgepi.peripherals.spi import SpiDevice as spi
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -191,19 +192,28 @@ class EdgePiDAC(spi):
         code = self.channel_readback(analog_out)
         return self.dac_ops.code_to_voltage(dac_ch, code)
 
-    def get_state(self) -> dict:
+    def get_state(self, analog_out: int = None,
+                        code: bool = None,
+                        voltage: bool = None,
+                        gain: bool = None):
         """
-        Gets status of each channel of DAC
+        the method returns the state of requested parameters. It will either read the register of 
+        DAC or GPIO expander to retrieve the current state.
 
         Args:
-            N/A
+            analog_out (int): channel number of interest
+            code (bool): requesting the current code value written in the specified channel input
+                         register
+            voltage (bool): requesting the current expected voltage at the terminal block pin
+            gian (bool): requesting the current gain value set for the DAC
         Returns:
-            ch_state_dict: (dict): dictionary of channel mapped with code and voltage values
-            {channel_name : {code}}
+            code_val (int): code value read from the input register, None when not requested
+            voltage_val (float): voltage calculated using the code value, None when not requested
+            gain_state (bool): true if dac gain is enabled or False disabled, None when not
+                               requested
         """
-        ch_state_dict = {}
-        for key, _ in self.__analog_out_pin_map.items():
-            ch_state_dict[key] = {'code' : self.channel_readback(key),
-                                          'voltage' : self.compute_expected_voltage(key)}
-        return ch_state_dict
+        code_val = self.channel_readback(analog_out) if code else None
+        voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
+        gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
+        return code_val, voltage_val, gain_state
         
