@@ -581,7 +581,7 @@ def test_set_adc_reference(mocker,reference_config, pin_name, adc):
     set_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     adc.set_adc_reference(reference_config)
-    if reference_config == 1 or reference_config == 2:
+    if reference_config in [1, 2]:
         set_pin.assert_called_once_with(pin_name[0])
         clear_pin.assert_called_once_with(pin_name[1])
     elif reference_config == 3:

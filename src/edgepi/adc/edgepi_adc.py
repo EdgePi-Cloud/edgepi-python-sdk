@@ -99,6 +99,9 @@ class EdgePiADC(SPI):
         # internal state
         self.__state = ADCState(reg_map=None)
         self.__set_power_on_configs()
+        # TODO: adc reference should ba a config that customer passes depending on the range of
+        # voltage they are measuring. To be changed later when range config is implemented
+        self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
 
     def __set_power_on_configs(self):
