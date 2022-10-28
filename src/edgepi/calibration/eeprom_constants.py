@@ -31,7 +31,7 @@ class DACParamAddr(Enum):
     CH5 = 0x228
     CH6 = 0x230
     CH7 = 0x238
-    LEN = 63 
+    LEN = 63
 
 class ADCParamAddr(Enum):
     """

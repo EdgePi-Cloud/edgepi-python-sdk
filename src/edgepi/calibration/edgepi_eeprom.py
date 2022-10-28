@@ -1,8 +1,10 @@
 '''Helper class to access on board eeprom'''
+
+import logging
+
 from edgepi.calibration.eeprom_constants import EEPROMAddress
 from edgepi.peripherals.i2c import I2CDevice
 
-import logging
 
 class EdgePiEEPROM(I2CDevice):
     '''
@@ -12,7 +14,6 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
-        self.log.debug(f'Initializing EEPROM access...')
         super().__init__(self.__dev_path)
 
 
