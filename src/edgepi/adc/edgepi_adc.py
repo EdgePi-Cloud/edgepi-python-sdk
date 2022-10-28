@@ -112,8 +112,6 @@ class EdgePiADC(SPI):
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
-        self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
-        self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
