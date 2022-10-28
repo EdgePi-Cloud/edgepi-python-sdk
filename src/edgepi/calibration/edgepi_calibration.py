@@ -57,9 +57,8 @@ class EdgePiCalibration():
             calib_dict (dict): 
         '''
         calib_dict={}
-        offset = MemoryAddr.CH_OFFSET.value
         for ch in range(self.num_of_ch):
-            offset = ch * offset
+            offset = ch * MemoryAddr.CH_OFFSET.value
             packed_gain = self.__from_memory_to_value(calib_param[offset:offset+4])
             packed_offset = self.__from_memory_to_value(calib_param[offset+4:offset+8])
             calib_dict[ch] = CalibParam(gain = packed_gain, offset=packed_offset)
