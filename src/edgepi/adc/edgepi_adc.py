@@ -27,7 +27,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import GpioConfigs
+from edgepi.gpio.gpio_configs import GpioConfigs, ADCPins
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
@@ -112,8 +112,8 @@ class EdgePiADC(SPI):
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
             reset_clear=ADCPower.RESET_CLEAR,
         )
-        self.gpio.clear_expander_pin("GNDSW_IN1")
-        self.gpio.clear_expander_pin("GNDSW_IN2")
+        self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
+        self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -169,17 +169,17 @@ class EdgePiADC(SPI):
             reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
         """
         if reference_config == ADCReferenceSwitching.GND_SW1.value:
-            self.gpio.set_expander_pin("GNDSW_IN1")
-            self.gpio.clear_expander_pin("GNDSW_IN2")
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
         elif reference_config == ADCReferenceSwitching.GND_SW2.value:
-            self.gpio.set_expander_pin("GNDSW_IN2")
-            self.gpio.clear_expander_pin("GNDSW_IN1")
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
         elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
-            self.gpio.set_expander_pin("GNDSW_IN1")
-            self.gpio.set_expander_pin("GNDSW_IN2")
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
         elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
-            self.gpio.clear_expander_pin("GNDSW_IN1")
-            self.gpio.clear_expander_pin("GNDSW_IN2")
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
 
     def stop_conversions(self):
         """
