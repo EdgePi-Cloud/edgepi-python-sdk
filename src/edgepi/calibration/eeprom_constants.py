@@ -6,8 +6,7 @@ class EEPROMAddress(Enum):
     """
     EEPROM device address for I2C addressing
     """
-    # TODO: to be changed when the chip arrives
-    DEV_ADDR = 0xFF
+    DEV_ADDR = 0x50
 
 class ModuleNames(Enum):
     """
@@ -21,7 +20,7 @@ class ModuleNames(Enum):
 class DACParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
-    Each parameter, gain and offset, are 4 bytes long
+    Each parameter, gain and offset, are 4 bytes long 0x200~0x23F
     """
 
     CH0 = 0x200
@@ -32,6 +31,7 @@ class DACParamAddr(Enum):
     CH5 = 0x228
     CH6 = 0x230
     CH7 = 0x238
+    LEN = 63 
 
 class ADCParamAddr(Enum):
     """
@@ -51,3 +51,14 @@ class ADCParamAddr(Enum):
     DIFF2 =0x258
     DIFF3 =0x260
     DIFF4 =0x268
+
+class MemoryAddr(Enum):
+    """
+    Memory offset values
+    """
+    START = 0x000
+    DAC = 0x200
+    ADC = 0x240
+    TC = 0x280
+    RTD = 0x2C0
+    END = 0x3FF

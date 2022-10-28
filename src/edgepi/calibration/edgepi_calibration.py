@@ -1,6 +1,6 @@
 '''
-Module for importing calibration paratmeter
-from the external eeprom
+Module for generating calibration parameter data structure for each module. This module should be
+able to generate new calibration parameters using measurements tools.
 '''
 
 from edgepi.calibration.eeprom_constants import (
@@ -31,6 +31,84 @@ class EdgePiCalibration():
         self.num_of_ch = NumOfCh[module.name].value
         self.full_scale_range = None
         self.full_scale_code = None
+
+    def __generat_dac_calib_dict(self, calib_param: list = None) :
+        '''
+        Function to generate DAC calibration parameter dictionary based on the list of imported cal-
+        ibration parameter from DAC module.
+
+        Arg:
+            calib_param (list): list contains the parameter read from eeprom and passed from each mo
+            -dule
+        Return:
+            calib_dict (dict): 
+        '''
+
+        return 1
+
+    def __generat_adc_calib_dict(self, calib_param: list = None) :
+        '''
+        Function to generate ADC calibration parameter dictionary based on the list of imported cal-
+        ibration parameter from ADC module.
+
+        Arg:
+            calib_param (list): list contains the parameter read from eeprom and passed from each mo
+            -dule
+        Return:
+            calib_dict (dict): 
+        '''
+
+        return 2
+
+    def __generat_rtd_calib_dict(self, calib_param: list = None) :
+        '''
+        Function to generate RTD calibration parameter dictionary based on the list of imported cal-
+        ibration parameter from RTD module.
+
+        Arg:
+            calib_param (list): list contains the parameter read from eeprom and passed from each mo
+            -dule
+        Return:
+            calib_dict (dict): 
+        '''
+
+        return 3
+
+    def __generat_tc_calib_dict(self, calib_param: list = None) :
+        '''
+        Function to generate TC calibration parameter dictionary based on the list of imported cal-
+        ibration parameter from TC module.
+
+        Arg:
+            calib_param (list): list contains the parameter read from eeprom and passed from each mo
+            -dule
+        Return:
+            calib_dict (dict): 
+        '''
+
+        return 4
+
+    def get_calibration_dict(self, calib_param: list = None):
+        '''
+        Function to generate calibration parameter dictionary based on the list of imported calibra-
+        -tion parameter from each module.
+
+        Arg:
+            calib_param (list): list contains the parameter read from eeprom and passed from each mo
+            -dule
+        Return:
+            calib_dict (dict): 
+        '''
+        calib_dict = 0
+        if self.module == ModuleNames.DAC.value:
+                calib_dict = self.__generat_dac_calib_dict(calib_param)
+        elif self.module == ModuleNames.ADC.value:
+                calib_dict = self.__generat_adc_calib_dict(calib_param)
+        elif self.module == ModuleNames.RTD.value:
+                calib_dict = self.__generat_rtd_calib_dict(calib_param)
+        elif self.module == ModuleNames.TC.value:
+                calib_dict = self.__generat_tc_calib_dict(calib_param)
+        return calib_dict
 
     def generate_calib_param_dict(self):
         '''

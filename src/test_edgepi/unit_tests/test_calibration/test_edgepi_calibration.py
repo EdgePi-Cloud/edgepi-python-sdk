@@ -101,3 +101,13 @@ def test_record_measurements(module_name, num_of_points, values_to_record):
         assert value_dict['input_unit'] != 0
         assert value_dict['expected_out'] != 0
         assert value_dict['actual_out'] != 0
+
+@pytest.mark.parametrize("module_name, calib_param, result", [(ModuleNames.DAC,[1,2,3,4], 1),
+                                                      (ModuleNames.ADC,[1,2,3,4], 2),
+                                                      (ModuleNames.RTD,[1,2,3,4], 3),
+                                                      (ModuleNames.TC,[1,2,3,4], 4)])
+def test_get_calibration_dict(module_name, calib_param, result):
+    edge_calib = EdgePiCalibration(module_name)
+    calib_dict = edge_calib.get_calibration_dict(calib_param)
+    assert calib_dict == result
+
