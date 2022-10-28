@@ -102,6 +102,18 @@ def test_record_measurements(module_name, num_of_points, values_to_record):
         assert value_dict['expected_out'] != 0
         assert value_dict['actual_out'] != 0
 
+@pytest.mark.parametrize("module_name, memory, result", [(ModuleNames.DAC,[105,60,232,254], -0.018334615)])
+def test_from_memory_to_value(module_name, memory, result):
+    edge_calib = EdgePiCalibration(module_name)
+    assert edge_calib._EdgePiCalibration__from_memory_to_value(memory) == result
+
+@pytest.mark.parametrize("module_name, value, result", [(ModuleNames.DAC, -0.018334615,[105,60,232,254]),
+                                                        (ModuleNames.DAC, -0.018334615234,[105,60,232,254]),
+                                                        (ModuleNames.DAC, -0.018334615999,[105,60,232,254])])
+def test_from_value_to_memory(module_name, value, result):
+    edge_calib = EdgePiCalibration(module_name)
+    assert edge_calib._EdgePiCalibration__from_value_to_memory(value) == result
+
 @pytest.mark.parametrize("module_name, calib_param, result", [(ModuleNames.DAC,[1,2,3,4], 1),
                                                       (ModuleNames.ADC,[1,2,3,4], 2),
                                                       (ModuleNames.RTD,[1,2,3,4], 3),

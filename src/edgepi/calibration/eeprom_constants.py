@@ -62,3 +62,4 @@ class MemoryAddr(Enum):
     TC = 0x280
     RTD = 0x2C0
     END = 0x3FF
+    CH_OFFSET = 0x8

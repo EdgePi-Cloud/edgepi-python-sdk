@@ -5,12 +5,15 @@ able to generate new calibration parameters using measurements tools.
 
 from edgepi.calibration.eeprom_constants import (
     ModuleNames,
+    MemoryAddr
 )
 from edgepi.calibration.calibration_constants import(
     NumOfCh,
     CalibParam,
     # ReferenceV
 )
+
+from struct import pack, unpack
 
 # TODO: calibration class should only handle the calibration process and separate the data storage
 
@@ -32,6 +35,16 @@ class EdgePiCalibration():
         self.full_scale_range = None
         self.full_scale_code = None
 
+    def __from_value_to_memory(self, param: float = None):
+        param = int(param*10**9)
+        value = pack("i", param)
+        return list(value)
+
+    def __from_memory_to_value(self, memory: list = None) -> float:
+        value = pack("BBBB", memory[0], memory[1], memory[2], memory[3])
+        value = int.from_bytes(value, "little", signed=True)
+        return float(format(value*10**-9, '.9f'))
+
     def __generat_dac_calib_dict(self, calib_param: list = None) :
         '''
         Function to generate DAC calibration parameter dictionary based on the list of imported cal-
@@ -43,8 +56,15 @@ class EdgePiCalibration():
         Return:
             calib_dict (dict): 
         '''
+        calib_dict={}
+        offset = MemoryAddr.CH_OFFSET.value
+        for ch in range(self.num_of_ch):
+            offset = ch * offset
+            packed_gain = self.__from_memory_to_value(calib_param[offset:offset+4])
+            packed_offset = self.__from_memory_to_value(calib_param[offset+4:offset+8])
+            calib_dict[ch] = CalibParam(gain = packed_gain, offset=packed_offset)
 
-        return 1
+        return calib_dict
 
     def __generat_adc_calib_dict(self, calib_param: list = None) :
         '''
