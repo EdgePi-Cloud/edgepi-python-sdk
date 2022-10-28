@@ -136,10 +136,7 @@ def test_from_value_to_memory(module_name, value, result):
                                  4:CalibParam(gain=0.5,offset=0.5),
                                  5:CalibParam(gain=0.6,offset=0.6),
                                  6:CalibParam(gain=0.7,offset=0.7),
-                                 7:CalibParam(gain=0.8,offset=0.8),}),
-                         (ModuleNames.ADC,[1,2,3,4], 2),
-                         (ModuleNames.RTD,[1,2,3,4], 3),
-                         (ModuleNames.TC,[1,2,3,4], 4)])
+                                 7:CalibParam(gain=0.8,offset=0.8)})])
 def test_get_calibration_dict(module_name, calib_param, result):
     edge_calib = EdgePiCalibration(module_name)
     calib_dict = edge_calib.get_calibration_dict(calib_param)
