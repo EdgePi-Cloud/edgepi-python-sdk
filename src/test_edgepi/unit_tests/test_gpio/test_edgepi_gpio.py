@@ -54,76 +54,7 @@ def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out
     out_data = gpio_ctrl._EdgePiGPIO__read_register(gpio_ctrl.pin_config_address, dev_address)
     assert out_data == out
 
-@pytest.mark.parametrize("config, dev_address, out",
-                        [(GpioConfigs.DAC.value, 32, {3 : 255, 7 : 255}),
-                         (GpioConfigs.ADC.value, 32, {2 : 255, 6 : 255}),
-                         (GpioConfigs.RTD.value, 33, {2 : 255, 6 : 255}),
-                         (GpioConfigs.LED.value, 33, {2 : 255, 6 : 255}),
-                        ])
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register')
-def test_edgepi_gpio_map_reg_address_value_dict(mock_data, config, dev_address, out, mock_i2c):
-    mock_i2c.return_value = None
-    mock_data.return_value = 255
-    gpio_ctrl = EdgePiGPIO(config)
-    out_data = gpio_ctrl._EdgePiGPIO__map_reg_address_value_dict(dev_address)
-    assert out_data == out
-
-@pytest.mark.parametrize("config, result",
-                        [(GpioConfigs.DAC.value, {32:{2 : 255, 6 : 255}, 33:{2 : 255, 6 : 255}}),
-                         (GpioConfigs.ADC.value, {33:{2 : 255, 6 : 255}}),
-                        ])
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__map_reg_address_value_dict')
-def test_generate_default_reg_dict(mock_dict,config, result, mock_i2c):
-    mock_i2c.return_value = None
-    mock_dict.side_effect = [{2 : 255, 6 : 255}, {2 : 255, 6 : 255}]
-    gpio_ctrl = EdgePiGPIO(config)
-    pin_dict = generate_pin_info(config)
-    list_address = check_multiple_dev(pin_dict)
-    list_dict= gpio_ctrl._EdgePiGPIO__generate_default_reg_dict(list_address)
-    assert list_dict == result
-
-
 # TODO: these need to be refactored to work with new methods
-# @pytest.mark.parametrize("config, mock_vals, result",[
-#                         (GpioConfigs.DAC.value,
-#                          [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [0]],
-#                          {32: {2 : 0, 6 : 0}, 33: {2 : 0, 6 : 0}}),
-#                         (GpioConfigs.ADC.value,
-#                          [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [252]],
-#                          {33:{2 : 252, 6 : 252}}),
-#                         (GpioConfigs.RTD.value,
-#                          [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [254]],
-#                          {33:{2 : 254, 6 : 254}}),
-#                         (GpioConfigs.LED.value,
-#                          [0, [0, 0], [0, 0], {2 : 255, 6 : 255}, [0]],
-#                          {32:{2 : 0, 6 : 0}}),
-#                         ])
-# @patch('edgepi.peripherals.i2c.I2CDevice')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__map_reg_address_value_dict')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
-# def test_set_expander_default(mock_transfer,
-#                               mock_set_read_msg,
-#                               mock_set_write_msg,
-#                               mock_map_address_value_dict,
-#                               mock_i2c_device,
-#                               config,
-#                               mock_vals,
-#                               result,
-#                               mock_i2c):
-#     mock_i2c.return_value = None
-#     mock_transfer.return_value = mock_vals[4]
-#     mock_set_read_msg.return_value = mock_vals[1]
-#     mock_set_write_msg.return_value = mock_vals[2]
-#     mock_map_address_value_dict.side_effect = [{2 : 255, 6 : 255},{2 : 255, 6 : 255}]
-#     mock_i2c_device.return_value = mock_vals[0]
-#     gpio_ctrl = EdgePiGPIO(config)
-#     gpio_ctrl.set_expander_default()
-#     assert gpio_ctrl.dict_default_reg_dict == result
-
-
-
 # @pytest.mark.parametrize("config, pin_name, mock_value, result", [(GpioConfigs.DAC.value,
 #                                                                    'AO_EN1',
 #                                                                    [0, 0,
