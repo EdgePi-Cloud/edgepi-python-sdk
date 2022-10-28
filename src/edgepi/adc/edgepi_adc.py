@@ -19,6 +19,7 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     ADCReg,
     FilterMode,
+    ADCReferenceSwitching,
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
@@ -26,7 +27,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import GpioConfigs
+from edgepi.gpio.gpio_configs import GpioConfigs, ADCPins
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
@@ -95,12 +96,12 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
-        self.gpio.set_expander_default()
-        # TODO: expander_pin might need changing in the future
-        self.gpio.set_expander_pin("GNDSW_IN1")
         # internal state
         self.__state = ADCState(reg_map=None)
         self.__set_power_on_configs()
+        # TODO: adc reference should ba a config that customer passes depending on the range of
+        # voltage they are measuring. To be changed later when range config is implemented
+        self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
 
     def __set_power_on_configs(self):
@@ -156,6 +157,27 @@ class EdgePiADC(SPI):
         _logger.debug(f"ADC __write_register -> data out: {out}")
 
         return out
+
+    def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
+        """
+        Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
+        be configured as regular 0V GND or 12V GND.
+
+        Args:
+            reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
+        """
+        if reference_config == ADCReferenceSwitching.GND_SW1.value:
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW2.value:
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
 
     def stop_conversions(self):
         """

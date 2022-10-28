@@ -12,7 +12,12 @@ sys.modules["periphery"] = mock.MagicMock()
 
 import pytest
 from edgepi.adc.edgepi_adc import ADCRegisterUpdateError, EdgePiADC
-from edgepi.adc.adc_constants import ADC_NUM_REGS, ADCChannel as CH, ADCReg
+from edgepi.adc.adc_constants import (
+    ADC_NUM_REGS,
+    ADCReg,
+    ADCChannel as CH,
+    ADCReferenceSwitching
+)
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
 adc_default_vals = [
@@ -52,7 +57,6 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     yield EdgePiADC()
-
 
 def test_read_registers_to_map(mocker, adc):
     mocker.patch(
@@ -567,3 +571,20 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err, adc):
     )
     with err:
         assert adc._EdgePiADC__validate_updates(updated_regs)
+
+@pytest.mark.parametrize("reference_config, pin_name",
+                        [(ADCReferenceSwitching.GND_SW1.value, ["GNDSW_IN1", "GNDSW_IN2"]),
+                         (ADCReferenceSwitching.GND_SW2.value, ["GNDSW_IN2", "GNDSW_IN1"]),
+                         (ADCReferenceSwitching.GND_SW_BOTH.value, ["GNDSW_IN1", "GNDSW_IN2"]),
+                         (ADCReferenceSwitching.GND_SW_NONE.value, ["GNDSW_IN1", "GNDSW_IN2"])])
+def test_set_adc_reference(mocker,reference_config, pin_name, adc):
+    set_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
+    clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
+    adc.set_adc_reference(reference_config)
+    if reference_config in [1, 2]:
+        set_pin.assert_called_once_with(pin_name[0])
+        clear_pin.assert_called_once_with(pin_name[1])
+    elif reference_config == 3:
+        set_pin.assert_has_calls([mock.call(pin_name[0]), mock.call(pin_name[1])])
+    elif reference_config == 0:
+        clear_pin.assert_has_calls([mock.call(pin_name[0]), mock.call(pin_name[1])])
