@@ -8,9 +8,10 @@ from unittest.mock import patch
 import sys
 if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
+from copy import deepcopy
+
 import pytest
-from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
-from edgepi.gpio.gpio_commands import check_multiple_dev
+from edgepi.gpio.gpio_configs import GpioConfigs, DACPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 @pytest.fixture(name='mock_i2c')
@@ -32,11 +33,6 @@ def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c
     assert gpio_ctrl.pin_config_address == result[1]
     assert gpio_ctrl.pin_out_address == result[2]
 
-# generate_write_message with default values and state
-# trnsfer_message
-# return pin state
-# def test_edgepi_gpio_set_default():
-
 @pytest.mark.parametrize("config, dev_address, out",
                         [(GpioConfigs.DAC.value,32, 255),
                          (GpioConfigs.ADC.value,33, 255),
@@ -55,156 +51,126 @@ def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out
     assert out_data == out
 
 # TODO: these need to be refactored to work with new methods
-# @pytest.mark.parametrize("config, pin_name, mock_value, result", [(GpioConfigs.DAC.value,
-#                                                                    'AO_EN1',
-#                                                                    [0, 0,
-#                                                                     0,
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:0, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [True, True, {3:128, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.DAC.value,
-#                                                                    'AO_EN2',
-#                                                                    [0, 0,
-#                                                                     0,
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:128, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [True, True, {3:144, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.DAC.value,
-#                                                                    'AO_EN6',
-#                                                                    [0, 0,
-#                                                                     0,
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:144, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [True, True, {3:148, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.ADC.value,
-#                                                                    'GNDSW_IN1',
-#                                                                    [0, 0,
-#                                                                     0,
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {33:{2:0, 6:0}}],
-#                                                                    [True, True, {2:2, 6:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.ADC.value,
-#                                                                    'GNDSW_IN2',
-#                                                                    [0, 0,
-#                                                                     0,
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {33:{2:2, 6:0}}],
-#                                                                    [True, True, {2:6, 6:0}]
-#                                                                   )
-#                                                                  ])
-# @patch('edgepi.peripherals.i2c.I2CDevice')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
-# def test_set_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
-#                           config, pin_name, mock_value, result, mock_i2c):
-#     mock_i2c.return_value = mock_value[0]
-#     mock_i2c_device.return_value = mock_value[1]
-#     mock_transfer.return_value = mock_value[2]
-#     mock_set_read_msg.return_value = mock_value[3]
-#     mock_set_write_msg.return_value = mock_value[4]
-#     gpio_ctrl = EdgePiGPIO(config)
-#     gpio_ctrl.dict_default_reg_dict = mock_value[5]
-#     gpio_ctrl.set_expander_pin(pin_name)
-#     assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
-#     assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
+@pytest.mark.parametrize("config, pin_name, mock_value, result",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN1.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN1.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
+def test_read_expander_pin_state(mocker, config, pin_name, mock_value, result):
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    gpio_ctrl = EdgePiGPIO(config)
+    assert gpio_ctrl.read_expander_pin_state(pin_name) == result
 
-# @pytest.mark.parametrize("config, pin_name, mock_value, result", [(GpioConfigs.DAC.value,
-#                                                                    'AO_EN1',
-#                                                                    [0, 0,
-#                                                                     [0],
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:148, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [False, False, {3:20, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.DAC.value,
-#                                                                    'AO_EN2',
-#                                                                    [0, 0,
-#                                                                     [0],
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:255, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [False, False, {3:239, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.DAC.value,
-#                                                                    'AO_EN6',
-#                                                                    [0, 0,
-#                                                                     [0],
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {32:{3:132, 7:0},
-#                                                                      33:{3:0, 7:0}}],
-#                                                                    [False, False, {3:128, 7:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.ADC.value,
-#                                                                    'GNDSW_IN1',
-#                                                                    [0, 0,
-#                                                                     [0],
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {33:{2:6, 6:0}}],
-#                                                                    [False, False, {2:4, 6:0}]
-#                                                                   ),
-#                                                                   (GpioConfigs.ADC.value,
-#                                                                    'GNDSW_IN2',
-#                                                                    [0, 0,
-#                                                                     [0],
-#                                                                     [0, 0],
-#                                                                     [0, 0],
-#                                                                     {33:{2:6, 6:0}}],
-#                                                                    [False, False, {2:2, 6:0}]
-#                                                                   )
-#                                                                  ])
-# @patch('edgepi.peripherals.i2c.I2CDevice')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_write_msg')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
-# def test_clear_expander_pin(mock_set_read_msg, mock_set_write_msg, mock_transfer, mock_i2c_device,
-#                             config, pin_name, mock_value, result, mock_i2c):
-#     mock_i2c.return_value = mock_value[0]
-#     mock_i2c_device.return_value = mock_value[1]
-#     mock_transfer.return_value = mock_value[2]
-#     mock_set_read_msg.return_value = mock_value[3]
-#     mock_set_write_msg.return_value = mock_value[4]
-#     gpio_ctrl = EdgePiGPIO(config)
-#     gpio_ctrl.dict_default_reg_dict = mock_value[5]
-#     gpio_ctrl.clear_expander_pin(pin_name)
-#     assert gpio_ctrl.dict_pin[pin_name].is_high == result[1]
-#     assert gpio_ctrl.dict_default_reg_dict[gpio_ctrl.dict_pin[pin_name].address] == result[2]
+@pytest.mark.parametrize("config, pin_name, mock_value, result",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN1.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN1.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
+def test_get_pin_direction(mocker, config, pin_name, mock_value, result):
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    gpio_ctrl = EdgePiGPIO(config)
+    assert gpio_ctrl.get_pin_direction(pin_name) == result
 
-# @pytest.mark.parametrize('mock_value, config, pin_name, result', [([0,0,True,False,False],
-#                                                                    GpioConfigs.DAC.value,
-#                                                                    'AO_EN1',
-#                                                                    True),
-#                                                                   ([0,0,True,False,True],
-#                                                                    GpioConfigs.DAC.value,
-#                                                                    'AO_EN1',
-#                                                                    False)])
-# @patch('edgepi.peripherals.i2c.I2CDevice')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin')
-# @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin')
-# def test_toggle_expander_pin(mock_clear_expander_pin, mock_set_expander_pin, mock_i2c_device,
-#                              mock_value, config, pin_name, result, mock_i2c):
-#     mock_i2c.return_value = mock_value[0]
-#     mock_i2c_device.return_value = mock_value[1]
-#     mock_set_expander_pin.return_value = mock_value[2]
-#     mock_clear_expander_pin.return_value = mock_value[3]
-#     gpio_ctrl = EdgePiGPIO(config)
-#     gpio_ctrl.dict_pin[pin_name].is_high = mock_value[4]
-#     gpio_ctrl.toggle_expander_pin(pin_name)
-#     assert gpio_ctrl.dict_pin[pin_name].is_high == result
+@pytest.mark.parametrize("config, pin_name, mock_value",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
+def test_clear_expander_pin(mocker, config, pin_name, mock_value):
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    gpio_ctrl = EdgePiGPIO(config)
+    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    gpio_ctrl.clear_expander_pin(pin_name)
+    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+
+@pytest.mark.parametrize("config, pin_name, mock_value",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
+def test_set_expander_pin(mocker, config, pin_name, mock_value, mock_i2c):
+    mock_i2c.return_value = None
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    set_pin_dir = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_pin_direction_out")
+    gpio_ctrl = EdgePiGPIO(config)
+    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    gpio_ctrl.set_expander_pin(pin_name)
+    if set_pin_dir.call_count == 1:
+        gpio_ctrl.dict_pin[pin_name].is_out = True
+    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+
+@pytest.mark.parametrize("config, pin_name, mock_value",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
+def test_set_pin_direction_out(mocker, config, pin_name, mock_value, mock_i2c):
+    mock_i2c.return_value = None
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
+    gpio_ctrl = EdgePiGPIO(config)
+    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    gpio_ctrl.set_pin_direction_out(pin_name)
+    if clear_pin.call_count == 1:
+        gpio_ctrl.dict_pin[pin_name].is_high = False
+    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+
+@pytest.mark.parametrize("config, pin_name, mock_value",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
+def test_set_pin_direction_in(mocker, config, pin_name, mock_value, mock_i2c):
+    mock_i2c.return_value = None
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                  return_value = mock_value)
+    gpio_ctrl = EdgePiGPIO(config)
+    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    gpio_ctrl.set_pin_direction_in(pin_name)
+    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+
+@pytest.mark.parametrize("config, pin_name, mock_value, result",
+                         [(GpioConfigs.DAC.value, DACPins.A0_EN1.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 170, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 170, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN1.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN2.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN3.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN4.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN5.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN6.value, 85, True),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
+                          (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
+def test_toggle_expander_pin(mocker, config, pin_name, mock_value, result):
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+                 return_value = mock_value)
+    gpio_ctrl = EdgePiGPIO(config)
+    gpio_ctrl.toggle_expander_pin(pin_name)
+    assert gpio_ctrl.dict_pin[pin_name] != result

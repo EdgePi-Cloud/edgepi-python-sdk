@@ -8,10 +8,6 @@ from edgepi.gpio.gpio_configs import generate_pin_info, GpioExpanderConfig
 from edgepi.peripherals.i2c import I2CDevice
 from edgepi.gpio.gpio_commands import (
     get_pin_config_address,
-    break_pin_info_dict,
-    get_default_values,
-    check_multiple_dev,
-    set_pin_states
     )
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, is_bit_set
 

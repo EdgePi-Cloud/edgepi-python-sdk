@@ -111,8 +111,8 @@ class DACPins(Enum):
 
 _list_of_DAC_gpios = [
     DACPins.A0_EN8.value, DACPins.A0_EN7.value, DACPins.A0_EN6.value,
-    DACPins.A0_EN5.value, DACPins.A0_EN4.value, DACPins.A0_EN3.value,
-    DACPins.A0_EN2.value, DACPins.A0_EN1.value, DACPins.DAC_GAIN.value,
+    DACPins.A0_EN5.value, DACPins.A0_EN2.value, DACPins.A0_EN3.value,
+    DACPins.A0_EN4.value, DACPins.A0_EN1.value, DACPins.DAC_GAIN.value,
     ]
 
 
