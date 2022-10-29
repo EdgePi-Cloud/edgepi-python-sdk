@@ -98,6 +98,8 @@ class EdgePiADC(SPI):
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # internal state
         self.__state = ADCState(reg_map=None)
+        # TODO: remove this from init(), rename to reset_config, after init call reset onfig to
+        # reset registers.
         self.__set_power_on_configs()
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
@@ -107,9 +109,11 @@ class EdgePiADC(SPI):
     def __set_power_on_configs(self):
         """Custom EdgePi ADC configuration for initialization/reset"""
         self.__config(
+            # TODO: this is also problematic, chainging the state when another module is working
             adc_1_analog_in=CH.AIN0,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
+            # TODO: have a manual function to clear the reset bit.
             reset_clear=ADCPower.RESET_CLEAR,
         )
 
