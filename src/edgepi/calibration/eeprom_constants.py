@@ -21,6 +21,7 @@ class DACParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
     Each parameter, gain and offset, are 4 bytes long 0x200~0x23F
+    Ex) CH0_gain = 0x200~0x203, CH0_offset = 0x204~0x207
     """
 
     CH0 = 0x200

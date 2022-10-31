@@ -33,6 +33,7 @@ class EdgePiCalibration():
     def __init__(self, module: ModuleNames):
         self.module = module.value
         self.num_of_ch = NumOfCh[module.name].value
+        self.calib_dict_gen = {ModuleNames.DAC.value : self.__generat_dac_calib_dict}
         self.full_scale_range = None
         self.full_scale_code = None
 
@@ -124,16 +125,8 @@ class EdgePiCalibration():
         Return:
             calib_dict (dict):
         '''
-        calib_dict = 0
-        if self.module == ModuleNames.DAC.value:
-            calib_dict = self.__generat_dac_calib_dict(calib_param)
-        # elif self.module == ModuleNames.ADC.value:
-        #     calib_dict = self.__generat_adc_calib_dict(calib_param)
-        # elif self.module == ModuleNames.RTD.value:
-        #     calib_dict = self.__generat_rtd_calib_dict(calib_param)
-        # elif self.module == ModuleNames.TC.value:
-        #     calib_dict = self.__generat_tc_calib_dict(calib_param)
-        return calib_dict
+        gen_calib_dict = self.calib_dict_gen[self.module]
+        return gen_calib_dict(calib_param)
 
     def generate_calib_param_dict(self):
         '''
