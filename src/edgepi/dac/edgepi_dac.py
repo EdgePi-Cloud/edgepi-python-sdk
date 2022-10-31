@@ -65,7 +65,6 @@ class EdgePiDAC(spi):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing DAC Bus")
         super().__init__(bus_num=6, dev_id=3, mode=1, max_speed=1000000)
-
         self.dac_ops = DACCommands(generate_dict_calibration(DACcalibParam,
                                                              list(
                                                              self.__analog_out_to_dac_ch.values()
