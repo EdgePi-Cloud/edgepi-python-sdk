@@ -426,17 +426,7 @@ class EdgePiADC(SPI):
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
         }
 
-        # get mux register values for mux_mapping validation
-        adc_1_mux_val = pack("uint:8", self.__read_register(ADCReg.REG_INPMUX)[0])
-        adc_2_mux_val = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
-
-        # current mux_mapping (for validating no duplicate channel assignment)
-        mux_reg_vals = {
-            ADCReg.REG_INPMUX: [adc_1_mux_val[:4].uint, adc_1_mux_val[4:].uint],
-            ADCReg.REG_ADC2MUX: [adc_2_mux_val[:4].uint, adc_2_mux_val[4:].uint],
-        }
-
-        return generate_mux_opcodes(adc_mux_updates, mux_reg_vals)
+        return generate_mux_opcodes(adc_mux_updates)
 
     def __config(
         self,

@@ -184,10 +184,9 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         side_effect=[
+            adc_vals,
             [reg_updates[ADCReg.REG_INPMUX.value]],
             [reg_updates[ADCReg.REG_ADC2MUX.value]],
-            adc_vals,
-            adc_vals,
         ],
     )
 

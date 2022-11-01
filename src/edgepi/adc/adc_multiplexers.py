@@ -40,9 +40,12 @@ def _format_mux_values(mux_p: CH, mux_n: CH):
     return mux_p_val, mux_n_val, mask
 
 
-def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
+def generate_mux_opcodes(mux_updates: dict):
     """
-    Generates list of OpCodes for updating mux mapping
+    Generates list of OpCodes for updating mux mapping. Only updates requested
+    multiplexer(s). For example, if user passes in update for mux_p, this
+    will be applied without overwriting the previous configuration for mux_n.
+    If a user updates both mux_p, and mux_n, both will be updated.
 
     Args:
         `mux_updates` (dict): values for updating multiplexer mapping.
@@ -69,14 +72,6 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
             continue
 
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
-
-        # update mux_register values for duplicate mapping validation, but only
-        # if these were updated
-        if not mux_p is None:
-            mux_values[addx][0] = mux_p_val
-
-        if not mux_n is None:
-            mux_values[addx][1] = mux_n_val
 
         adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
 

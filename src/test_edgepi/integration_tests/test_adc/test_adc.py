@@ -25,6 +25,7 @@ from edgepi.adc.edgepi_adc import EdgePiADC
 # pylint: disable=protected-access
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
+    # TODO: init is raising registerUpdateFailError
     adc = EdgePiADC()
     yield adc
 
