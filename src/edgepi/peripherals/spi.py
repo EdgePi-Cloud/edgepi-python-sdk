@@ -6,8 +6,12 @@ Classes:
 """
 
 
+import logging
+
 from periphery import SPI
 
+
+_logger = logging.getLogger(__name__)
 
 # TODO: This class needs to be changed as the SPI library changes
 class SpiDevice:
@@ -26,6 +30,7 @@ class SpiDevice:
         extra_flags: int = 0,
     ):
         self.devpath = f"/dev/spidev{bus_num}.{dev_id}"
+        _logger.debug(f"Initialized SPI device with path '{self.devpath}'")
         self.spi = SPI(
             self.devpath,
             mode,
@@ -37,7 +42,9 @@ class SpiDevice:
 
     def transfer(self, data: list) -> list:
         """Conduct an SPI data transfer"""
+        _logger.debug(f"Before SPI transfer: data={data}")
         out = self.spi.transfer(data)
+        _logger.debug(f"After SPI transfer: data={out}")
         return out
 
     def close(self):
