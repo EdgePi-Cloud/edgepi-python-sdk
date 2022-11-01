@@ -467,7 +467,7 @@ class EdgePiADC(SPI):
 
         # filter out self and None args
         args = list(filter_dict(locals(), "self", None).values())
-        _logger.debug(f"set_config: args dict after filter:\n\n {args}\n\n")
+        _logger.debug(f"__config: args dict after filter:\n\n {args}\n\n")
 
         # extract OpCode type args, since args may contain non-OpCode args
         ops_list = [
@@ -484,11 +484,11 @@ class EdgePiADC(SPI):
 
         # get current register values
         reg_values = self.__read_registers_to_map()
-        _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
         apply_opcodes(reg_values, ops_list)
-        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
         # write updated reg values to ADC using a single write.
         data = [entry["value"] for entry in reg_values.values()]
