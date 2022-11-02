@@ -82,7 +82,8 @@ def generate_mux_opcodes(mux_updates: dict):
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
-    Checks if requested input channels to be mapped are available due to RTD_EN status
+    Checks if requested input channels to be mapped are available due to RTD_EN status,
+    i.e. in case ADC2 is being used while ADC1 is in RTD mode.
 
     Args:
         `channels` (list): list of ADCChannel objects representing input channel mapping

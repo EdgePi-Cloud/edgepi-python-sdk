@@ -91,7 +91,7 @@ class ContinuousModeError(Exception):
 
 
 class RTDEnabledError(Exception):
-    """Riased when user attempts to set channel configuration that conflicts with RTD"""
+    """Raised when user attempts to set ADC configuration that conflicts with RTD mode"""
 
 
 class EdgePiADC(SPI):
@@ -387,11 +387,12 @@ class EdgePiADC(SPI):
         ADC channels are available for reading.
 
         Returns:
-            `bool`: RTD_EN pin is on/off
+            `bool`: True if RTD_EN pin is on, False otherwise
         """
         _logger.debug("Checking RTD status")
         idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
         idac_1 = idac_mag[4:].uint
+        # TODO: this should be updated to check all RTD properties not just this one
         status = idac_1 != 0x0
         _logger.debug(f"RTD enabled: {status}")
         return status
@@ -437,10 +438,62 @@ class EdgePiADC(SPI):
         return generate_mux_opcodes(adc_mux_updates)
 
     def select_differential(self, adc: ADCNum, diff_mode: DifferentialPair):
-        is_rtd_on = self.__get_rtd_en_status()
+        """
+        Select a differential voltage sampling mode for either ADC1 or ADC2
 
-        if is_rtd_on and adc == ADCNum.ADC_1:
-            raise RTDEnabledError("ADC1 is unavailable for differential mode ")
+        Args:
+            `adc` (ADCNum): identity of ADC to configure
+
+            `diff_mode` (DifferentialPair): a pair of input channels to sample, or off
+
+        Raises:
+            `KeyError`: if adc is not a valid ADCNum enum
+        """
+        mux_p = diff_mode.value.mux_p
+        mux_n = diff_mode.value.mux_n
+        mux_properties = {
+            ADCNum.ADC_1: {
+                'adc_1_analog_in': mux_p,
+                'adc_1_mux_n': mux_n,
+            },
+            ADCNum.ADC_2: {
+                'adc_2_analog_in': mux_p,
+                'adc_2_mux_n': mux_n,
+            }
+        }
+        diff_update = mux_properties[adc]
+        self.__config(**diff_update)
+
+    def __validate_no_rtd_conflict(self, updates: dict):
+        """
+        Checks no RTD related properties are being updated if RTD mode is enabled
+
+        Args:
+            `updates` (dict): updates formatted as {'property_name': update_value}
+
+        Raises:
+            `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
+        """
+        # ADC2 channel setting conflicts with RTD handled during channel mapping
+        rtd_properties = {
+            'adc_1_analog_in',
+            'adc_1_mux_n',
+            'idac_1_mux',
+            'idac_2_mux',
+            'idac_1_mag',
+            'idac_2_mag',
+            'pos_ref_inp',
+            'neg_reg_inp'
+        }
+        is_rtd_on = self.__get_rtd_en_status()
+        if not is_rtd_on:
+            return
+
+        for update in updates:
+            if update in rtd_properties:
+                raise RTDEnabledError(
+                    f"ADC property {update} cannot be updated while RTD is enabled"
+                )
 
     def __config(
         self,
@@ -480,8 +533,10 @@ class EdgePiADC(SPI):
         # pylint: disable=unused-argument
 
         # filter out self and None args
-        args = list(filter_dict(locals(), "self", None).values())
-        _logger.debug(f"__config: args dict after filter:\n\n {args}\n\n")
+        args = filter_dict(locals(), "self", None)
+        self.__validate_no_rtd_conflict(args)
+        args = list(args.values())
+        _logger.debug(f"__config: args dict after filter:\n\n{args}\n\n")
 
         # extract OpCode type args, since args may contain non-OpCode args
         ops_list = [
