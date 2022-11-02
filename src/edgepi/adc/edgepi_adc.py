@@ -398,6 +398,7 @@ class EdgePiADC(SPI):
         _logger.debug(f"RTD enabled: {status}")
         return status
 
+    # TODO: is this really needed? Refactor to use predefined opcodes?
     def __get_channel_assign_opcodes(
         self,
         adc_1_mux_p: CH = None,
