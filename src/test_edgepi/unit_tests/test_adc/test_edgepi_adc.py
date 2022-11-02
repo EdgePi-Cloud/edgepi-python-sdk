@@ -310,6 +310,26 @@ def test_read_registers_to_map(mocker, adc):
             {"pos_ref_inp": REFMUX.POS_REF_INT_2P5, "neg_ref_inp": REFMUX.NEG_REF_INT_2P5},
             {ADCReg.REG_REFMUX.value: 0xC0},
         ),
+        (
+            {ADCReg.REG_REFMUX.value: 0x3F},
+            {"pos_ref_inp": REFMUX.POS_REF_EXT_AIN0, "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN1},
+            {ADCReg.REG_REFMUX.value: 0b00001001},
+        ),
+        (
+            {ADCReg.REG_REFMUX.value: 0x3F},
+            {"pos_ref_inp": REFMUX.POS_REF_EXT_AIN2, "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN3},
+            {ADCReg.REG_REFMUX.value: 0b00010010},
+        ),
+        (
+            {ADCReg.REG_REFMUX.value: 0x3F},
+            {"pos_ref_inp": REFMUX.POS_REF_EXT_AIN4, "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN5},
+            {ADCReg.REG_REFMUX.value: 0b00011011},
+        ),
+        (
+            {ADCReg.REG_REFMUX.value: 0x3F},
+            {"pos_ref_inp": REFMUX.POS_REF_INT_VAVDD, "neg_ref_inp": REFMUX.NEG_REF_INT_VAVDD},
+            {ADCReg.REG_REFMUX.value: 0b00100100},
+        ),
     ],
 )
 def test_config(mocker, reg_updates, args, update_vals, adc):
