@@ -742,6 +742,105 @@ def fixture_adc():
                 ADCReg.REG_IDACMUX.value: 0xBB,
             },
         ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_50,
+                "idac_2_mag": IDACMAG.IDAC2_50,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x11,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_100,
+                "idac_2_mag": IDACMAG.IDAC2_100,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x22,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_250,
+                "idac_2_mag": IDACMAG.IDAC2_250,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x33,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_500,
+                "idac_2_mag": IDACMAG.IDAC2_500,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x44,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_750,
+                "idac_2_mag": IDACMAG.IDAC2_750,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x55,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_1000,
+                "idac_2_mag": IDACMAG.IDAC2_1000,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x66,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_1500,
+                "idac_2_mag": IDACMAG.IDAC2_1500,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x77,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_2000,
+                "idac_2_mag": IDACMAG.IDAC2_2000,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x88,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_2500,
+                "idac_2_mag": IDACMAG.IDAC2_2500,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x99,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_3000,
+                "idac_2_mag": IDACMAG.IDAC2_3000,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0xAA,
+            },
+        ),
+        (
+            {
+                "idac_1_mag": IDACMAG.IDAC1_OFF,
+                "idac_2_mag": IDACMAG.IDAC2_OFF,
+            },
+            {
+                ADCReg.REG_IDACMAG.value: 0x0,
+            },
+        ),
     ],
 )
 def test_config(args, updated_vals, adc):
