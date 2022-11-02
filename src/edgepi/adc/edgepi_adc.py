@@ -483,7 +483,7 @@ class EdgePiADC(SPI):
             'idac_1_mag',
             'idac_2_mag',
             'pos_ref_inp',
-            'neg_reg_inp'
+            'neg_ref_inp'
         }
         is_rtd_on = self.__get_rtd_en_status()
         if not is_rtd_on:
@@ -492,7 +492,7 @@ class EdgePiADC(SPI):
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
-                    f"ADC property {update} cannot be updated while RTD is enabled"
+                    f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
 
     def __config(
