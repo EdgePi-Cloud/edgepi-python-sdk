@@ -228,6 +228,7 @@ class DiffMode(Enum):
     DIFF_2 = DifferentialPair(ADCChannel.AIN2, ADCChannel.AIN3)
     DIFF_3 = DifferentialPair(ADCChannel.AIN4, ADCChannel.AIN5)
     DIFF_4 = DifferentialPair(ADCChannel.AIN6, ADCChannel.AIN7)
+    # TODO: should this read FLOAT instead
     DIFF_OFF = DifferentialPair(ADCChannel.AIN0, ADCChannel.AINCOM)
 
 

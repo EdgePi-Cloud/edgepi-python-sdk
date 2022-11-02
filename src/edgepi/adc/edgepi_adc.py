@@ -50,6 +50,7 @@ class ADCState:
     def get_state(self, mode: ADCModes) -> int:
         """
         Get state of an ADC functional mode based on most recently updated register values.
+        Requires a call to __config() after ADC has been instantiated, before calling this. 
 
         This returns the op_code value used to set this functional mode.
         For example, ConvMode.PULSE uses an op_code value of `0x40`. If the current
@@ -61,7 +62,7 @@ class ADCState:
             `mode` (ADCModes): addx and mask used for this functional mode.
 
         Returns:
-            int: uint value of the bits corresponding to this functional mode. Compare
+            `int`: uint value of the bits corresponding to this functional mode. Compare
                 this to expected configuration's op_code.
         """
         if self.reg_map is None:
@@ -508,6 +509,12 @@ class EdgePiADC(SPI):
         checksum_mode: CheckMode = None,
         reset_clear: ADCPower = None,
         validate: bool = True,
+        idac_1_mux = None,
+        idac_2_mux = None,
+        idac_1_mag = None,
+        idac_2_mag = None,
+        pos_ref_inp = None,
+        neg_ref_inp = None 
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -529,6 +536,12 @@ class EdgePiADC(SPI):
             `checksum_mode` (CheckMode): set mode for CHECK byte
             `reset_clear` (ADCPower): set state of ADC RESET bit
             `validate` (bool): set to True to perform post-update validation
+            `idac_1_mux` (IDACMUX): set analog input pin to connect IDAC1
+            `idac_2_mux` (IDACMUX): set analog input pin to connect IDAC2
+            `idac_1_mag` (IDACMAG): set the current value for IDAC1
+            `idac_2_mag` (IDACMAG): set the current value for IDAC2
+            `pos_ref_inp` (REFMUX): set the positive reference input
+            `neg_ref_inp` (REFMUX): set the negative reference input
         """
         # pylint: disable=unused-argument
 
