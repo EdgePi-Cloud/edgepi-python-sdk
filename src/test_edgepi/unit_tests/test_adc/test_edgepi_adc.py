@@ -299,6 +299,17 @@ def test_read_registers_to_map(mocker, adc):
             {"idac_1_mag": IDACMAG.IDAC1_OFF, "idac_2_mag": IDACMAG.IDAC2_OFF},
             {ADCReg.REG_IDACMAG.value: 0x00},
         ),
+        # set pos_ref_inp and neg_ref_inp
+        (
+            {ADCReg.REG_REFMUX.value: 0x3F},
+            {"pos_ref_inp": REFMUX.POS_REF_INT_2P5, "neg_ref_inp": REFMUX.NEG_REF_INT_2P5},
+            {ADCReg.REG_REFMUX.value: 0x0},
+        ),
+        (
+            {ADCReg.REG_REFMUX.value: 0xFF},
+            {"pos_ref_inp": REFMUX.POS_REF_INT_2P5, "neg_ref_inp": REFMUX.NEG_REF_INT_2P5},
+            {ADCReg.REG_REFMUX.value: 0xC0},
+        ),
     ],
 )
 def test_config(mocker, reg_updates, args, update_vals, adc):
