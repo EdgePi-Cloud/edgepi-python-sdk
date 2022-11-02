@@ -268,7 +268,6 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
     reg_values = adc._EdgePiADC__config(**args)
 
     for addx, entry in reg_values.items():
-        print(addx, entry)
         if entry["is_changed"]:
             assert entry["value"] == update_vals[addx]
         else:
