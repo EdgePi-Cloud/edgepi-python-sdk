@@ -17,7 +17,9 @@ from edgepi.adc.adc_constants import (
     ADCReg,
     ADCChannel as CH,
     ADCReferenceSwitching,
-    ConvMode
+    ConvMode,
+    ADCNum,
+    DiffMode
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -630,3 +632,25 @@ def test_validate_no_rtd_conflict(mocker, updates, rtd_on, err, adc):
     )
     with err:
         adc._EdgePiADC__validate_no_rtd_conflict(updates)
+
+
+@pytest.mark.parametrize('adc_num, diff_mode, config_calls', 
+    [
+        (ADCNum.ADC_1, DiffMode.DIFF_1, {'adc_1_analog_in': CH.AIN0, 'adc_1_mux_n': CH.AIN1}),
+        (ADCNum.ADC_2, DiffMode.DIFF_1, {'adc_2_analog_in': CH.AIN0, 'adc_2_mux_n': CH.AIN1}),
+        (ADCNum.ADC_1, DiffMode.DIFF_2, {'adc_1_analog_in': CH.AIN2, 'adc_1_mux_n': CH.AIN3}),
+        (ADCNum.ADC_2, DiffMode.DIFF_2, {'adc_2_analog_in': CH.AIN2, 'adc_2_mux_n': CH.AIN3}),
+        (ADCNum.ADC_1, DiffMode.DIFF_3, {'adc_1_analog_in': CH.AIN4, 'adc_1_mux_n': CH.AIN5}),
+        (ADCNum.ADC_2, DiffMode.DIFF_3, {'adc_2_analog_in': CH.AIN4, 'adc_2_mux_n': CH.AIN5}),
+        (ADCNum.ADC_1, DiffMode.DIFF_4, {'adc_1_analog_in': CH.AIN6, 'adc_1_mux_n': CH.AIN7}),
+        (ADCNum.ADC_2, DiffMode.DIFF_4, {'adc_2_analog_in': CH.AIN6, 'adc_2_mux_n': CH.AIN7}),
+        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {'adc_1_analog_in': CH.AIN0, 'adc_1_mux_n': CH.AINCOM}),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {'adc_2_analog_in': CH.AIN0, 'adc_2_mux_n': CH.AINCOM}),
+    ]
+)
+def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
+    config = mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config"
+    )
+    adc.select_differential(adc_num, diff_mode)
+    config.assert_called_once_with(**config_calls)
