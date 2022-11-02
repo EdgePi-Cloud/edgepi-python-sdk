@@ -20,7 +20,8 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     ADCNum,
     DiffMode,
-    IDACMUX
+    IDACMUX,
+    IDACMAG
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -240,6 +241,57 @@ def test_read_registers_to_map(mocker, adc):
             {ADCReg.REG_IDACMUX.value: 0x00},
             {"idac_1_mux": IDACMUX.IDAC1_NO_CONNECT, "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT},
             {ADCReg.REG_IDACMUX.value: 0xBB},
+        ),
+        # set idac_1_mag and idac_2_mag
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_50, "idac_2_mag": IDACMAG.IDAC2_50},
+            {ADCReg.REG_IDACMAG.value: 0x11},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_100, "idac_2_mag": IDACMAG.IDAC2_100},
+            {ADCReg.REG_IDACMAG.value: 0x22},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_250, "idac_2_mag": IDACMAG.IDAC2_250},
+            {ADCReg.REG_IDACMAG.value: 0x33},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_500, "idac_2_mag": IDACMAG.IDAC2_500},
+            {ADCReg.REG_IDACMAG.value: 0x44},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_750, "idac_2_mag": IDACMAG.IDAC2_750},
+            {ADCReg.REG_IDACMAG.value: 0x55},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_1000, "idac_2_mag": IDACMAG.IDAC2_1000},
+            {ADCReg.REG_IDACMAG.value: 0x66},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_1500, "idac_2_mag": IDACMAG.IDAC2_1500},
+            {ADCReg.REG_IDACMAG.value: 0x77},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_2000, "idac_2_mag": IDACMAG.IDAC2_2000},
+            {ADCReg.REG_IDACMAG.value: 0x88},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_2500, "idac_2_mag": IDACMAG.IDAC2_2500},
+            {ADCReg.REG_IDACMAG.value: 0x99},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0x00},
+            {"idac_1_mag": IDACMAG.IDAC1_3000, "idac_2_mag": IDACMAG.IDAC2_3000},
+            {ADCReg.REG_IDACMAG.value: 0xAA},
         ),
     ],
 )
