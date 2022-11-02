@@ -384,9 +384,12 @@ class EdgePiADC(SPI):
         Returns:
             `bool`: RTD_EN pin is on/off
         """
+        _logger.debug("Checking RTD status")
         idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
         idac_1 = idac_mag[4:].uint
-        return idac_1 == 0x0
+        status = idac_1 != 0x0
+        _logger.debug(f"RTD enabled: {status}")
+        return status
 
     def __get_channel_assign_opcodes(
         self,
