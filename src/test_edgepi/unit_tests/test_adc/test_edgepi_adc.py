@@ -21,7 +21,8 @@ from edgepi.adc.adc_constants import (
     ADCNum,
     DiffMode,
     IDACMUX,
-    IDACMAG
+    IDACMAG,
+    REFMUX
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -292,6 +293,11 @@ def test_read_registers_to_map(mocker, adc):
             {ADCReg.REG_IDACMAG.value: 0x00},
             {"idac_1_mag": IDACMAG.IDAC1_3000, "idac_2_mag": IDACMAG.IDAC2_3000},
             {ADCReg.REG_IDACMAG.value: 0xAA},
+        ),
+        (
+            {ADCReg.REG_IDACMAG.value: 0xAA},
+            {"idac_1_mag": IDACMAG.IDAC1_OFF, "idac_2_mag": IDACMAG.IDAC2_OFF},
+            {ADCReg.REG_IDACMAG.value: 0x00},
         ),
     ],
 )

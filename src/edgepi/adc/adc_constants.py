@@ -293,7 +293,7 @@ class IDACMAG(Enum):
     IDAC1_2000 = OpCode(0x80, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
     IDAC1_2500 = OpCode(0x90, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
     IDAC1_3000 = OpCode(0xA0, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
-    IDAC2_OFF = OpCode(0xB0, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_OFF = OpCode(0x0, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
     IDAC2_50 = OpCode(0x1, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
     IDAC2_100 = OpCode(0x2, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
     IDAC2_250 = OpCode(0x3, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
