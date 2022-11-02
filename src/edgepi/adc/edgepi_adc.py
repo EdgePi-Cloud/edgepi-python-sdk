@@ -24,6 +24,7 @@ from edgepi.adc.adc_constants import (
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
     ADCModes,
+    DifferentialPair,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -87,6 +88,10 @@ class VoltageReadError(Exception):
 
 class ContinuousModeError(Exception):
     """Raised when `read_voltage` is called and ADC is not in CONTINUOUS conversion mode"""
+
+
+class RTDEnabledError(Exception):
+    """Riased when user attempts to set channel configuration that conflicts with RTD"""
 
 
 class EdgePiADC(SPI):
@@ -430,6 +435,12 @@ class EdgePiADC(SPI):
         }
 
         return generate_mux_opcodes(adc_mux_updates)
+
+    def select_differential(self, adc: ADCNum, diff_mode: DifferentialPair):
+        is_rtd_on = self.__get_rtd_en_status()
+
+        if is_rtd_on and adc == ADCNum.ADC_1:
+            raise RTDEnabledError("ADC1 is unavailable for differential mode ")
 
     def __config(
         self,

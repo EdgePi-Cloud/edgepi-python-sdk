@@ -312,6 +312,7 @@ def test_single_sample(tc):
     assert len(temps) == 2
     for temp in temps:
         assert isinstance(temp, float)
+        assert temp != 0
 
 
 @pytest.mark.parametrize(

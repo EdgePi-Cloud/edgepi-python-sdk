@@ -216,6 +216,22 @@ class StatusByte(Enum):
 
 
 @dataclass
+class DifferentialPair:
+    """ADC differential voltage reading channel pairs"""
+    mux_p: ADCChannel
+    mux_n: ADCChannel
+
+
+class DiffMode(Enum):
+    """ADC differential voltage reading modes"""
+    DIFF_1 = DifferentialPair(ADCChannel.AIN0, ADCChannel.AIN1)
+    DIFF_2 = DifferentialPair(ADCChannel.AIN2, ADCChannel.AIN3)
+    DIFF_3 = DifferentialPair(ADCChannel.AIN4, ADCChannel.AIN5)
+    DIFF_4 = DifferentialPair(ADCChannel.AIN6, ADCChannel.AIN7)
+    DIFF_OFF = DifferentialPair(ADCChannel.AIN0, ADCChannel.AINCOM)
+
+
+@dataclass
 class ADCMode:
     """Stores information about an ADC functional mode"""
     addx: int
