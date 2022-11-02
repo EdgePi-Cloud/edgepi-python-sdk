@@ -13,7 +13,10 @@ from edgepi.adc.adc_constants import (
     ADC2DataRate,
     FilterMode,
     CheckMode,
-    ADCPower
+    ADCPower,
+    IDACMUX,
+    IDACMAG,
+    REFMUX
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -629,6 +632,114 @@ def fixture_adc():
             },
             {
                 ADCReg.REG_INTERFACE.value: 0b00000110,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN0,
+                "idac_2_mux": IDACMUX.IDAC2_AIN0,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x00,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN1,
+                "idac_2_mux": IDACMUX.IDAC2_AIN1,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x11,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN2,
+                "idac_2_mux": IDACMUX.IDAC2_AIN2,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x22,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN3,
+                "idac_2_mux": IDACMUX.IDAC2_AIN3,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x33,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN4,
+                "idac_2_mux": IDACMUX.IDAC2_AIN4,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x44,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN5,
+                "idac_2_mux": IDACMUX.IDAC2_AIN5,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x55,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN6,
+                "idac_2_mux": IDACMUX.IDAC2_AIN6,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x66,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN7,
+                "idac_2_mux": IDACMUX.IDAC2_AIN7,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x77,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN8,
+                "idac_2_mux": IDACMUX.IDAC2_AIN8,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x88,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AIN9,
+                "idac_2_mux": IDACMUX.IDAC2_AIN9,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0x99,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_AINCOM,
+                "idac_2_mux": IDACMUX.IDAC2_AINCOM,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0xAA,
+            },
+        ),
+        (
+            {
+                "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
+                "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
+            },
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
             },
         ),
     ],
