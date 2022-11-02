@@ -516,6 +516,7 @@ class EdgePiADC(SPI):
         for addx, value in reg_values.items():
             observed_val = updated_reg_values[addx]["value"]
             if int(value) != int(updated_reg_values[addx]["value"]):
+                _logger.error("__config: failed to update register")
                 raise ADCRegisterUpdateError(
                     (
                         "Register failed to update: "
