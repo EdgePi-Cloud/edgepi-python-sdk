@@ -79,6 +79,7 @@ class ADCChannel(Enum):
     AIN5 = 5
     AIN6 = 6
     AIN7 = 7
+    AIN8 = 8
     AINCOM = 10
     FLOAT = 0xF
 
@@ -90,7 +91,7 @@ class ADCReadInfo:
 
     Attributes:
         `id_num` (int): the ADS1263 ID number of this ADC
-        `addx` (ADCChannel): addx of this ADC's mux register
+        `addx` (ADCReg): addx of this ADC's mux register
         `num_data_bytes` (int): number of data bytes for this ADC's reads
         `start_cmd` (ADCComs): command to trigger conversion(s) for this ADC
         `read_cmd` (ADCComs): command to read this ADC's data-holding register

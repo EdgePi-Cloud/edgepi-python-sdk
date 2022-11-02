@@ -145,7 +145,7 @@ class EdgePiADC(SPI):
 
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
         _logger.debug(f"ADC __read_register -> data in: {code}")
-        out = self.transfer(code)
+        out = self.spi.transfer(code)
         _logger.debug(f"ADC __read_register -> data out: {out}")
 
         # first 2 entries are null bytes
