@@ -173,6 +173,8 @@ class ADCMasks(Enum):
     FILTER_BITS = 0x1F  # overwrite bits 7:5 (0-indexed)
     CHECK_BITS = 0xFC   # overwrite bits 1:0
     ADC2_DR_BITS = 0x3F # overwrite bits 7:6
+    RMUXP_BITS = 0xC7 # overwrite bits 5:3
+    RMUXN_BITS = 0xF8 # overwrite bits 2:0
 
 
 class ADC2DataRate(Enum):
@@ -217,6 +219,23 @@ class StatusByte(Enum):
 
 
 @dataclass
+class DifferentialPair:
+    """ADC differential voltage reading channel pairs"""
+    mux_p: ADCChannel
+    mux_n: ADCChannel
+
+
+class DiffMode(Enum):
+    """ADC differential voltage reading modes"""
+    DIFF_1 = DifferentialPair(ADCChannel.AIN0, ADCChannel.AIN1)
+    DIFF_2 = DifferentialPair(ADCChannel.AIN2, ADCChannel.AIN3)
+    DIFF_3 = DifferentialPair(ADCChannel.AIN4, ADCChannel.AIN5)
+    DIFF_4 = DifferentialPair(ADCChannel.AIN6, ADCChannel.AIN7)
+    # TODO: should this read FLOAT instead
+    DIFF_OFF = DifferentialPair(ADCChannel.AIN0, ADCChannel.AINCOM)
+
+
+@dataclass
 class ADCMode:
     """Stores information about an ADC functional mode"""
     addx: int
@@ -231,3 +250,71 @@ class ADCModes(Enum):
     DATA_RATE_1 = ADCMode(ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
     DATA_RATE_2 = ADCMode(ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
     FILTER = ADCMode(ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+
+
+class IDACMUX(Enum):
+    """Settings for ADC IDACMUX register (output multiplexer mapping)"""
+    IDAC1_AIN0 = OpCode(0x0, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN1 = OpCode(0x10, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN2 = OpCode(0x20, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN3 = OpCode(0x30, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN4 = OpCode(0x40, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN5 = OpCode(0x50, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN6 = OpCode(0x60, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN7 = OpCode(0x70, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN8 = OpCode(0x80, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AIN9 = OpCode(0x90, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_AINCOM = OpCode(0xA0, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_NO_CONNECT = OpCode(0xB0, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
+    IDAC2_AIN0 = OpCode(0x0, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN1 = OpCode(0x1, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN2 = OpCode(0x2, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN3 = OpCode(0x3, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN4 = OpCode(0x4, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN5 = OpCode(0x5, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN6 = OpCode(0x6, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN7 = OpCode(0x7, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN8 = OpCode(0x8, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AIN9 = OpCode(0x9, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_AINCOM = OpCode(0xA, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_NO_CONNECT = OpCode(0xB, ADCReg.REG_IDACMUX.value, BitMask.LOW_NIBBLE.value)
+
+
+class IDACMAG(Enum):
+    """Settings for ADC IDACMAG register (IDAC current magnitude in µA)"""
+    IDAC1_OFF = OpCode(0x0, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_50 = OpCode(0x10, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_100 = OpCode(0x20, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_250 = OpCode(0x30, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_500 = OpCode(0x40, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_750 = OpCode(0x50, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_1000 = OpCode(0x60, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_1500 = OpCode(0x70, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_2000 = OpCode(0x80, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_2500 = OpCode(0x90, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC1_3000 = OpCode(0xA0, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
+    IDAC2_OFF = OpCode(0xB0, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_50 = OpCode(0x1, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_100 = OpCode(0x2, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_250 = OpCode(0x3, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_500 = OpCode(0x4, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_750 = OpCode(0x5, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_1000 = OpCode(0x6, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_1500 = OpCode(0x7, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_2000 = OpCode(0x8, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_2500 = OpCode(0x9, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+    IDAC2_3000 = OpCode(0xA, ADCReg.REG_IDACMAG.value, BitMask.LOW_NIBBLE.value)
+
+
+class REFMUX(Enum):
+    """Settings for ADC REFMUX register (Reference multiplexer mapping)"""
+    POS_REF_INT_2P5 = OpCode(0x0, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    POS_REF_EXT_AIN0 = OpCode(0x8, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    POS_REF_EXT_AIN1 = OpCode(0x10, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    POS_REF_EXT_AIN2 = OpCode(0x18, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    POS_REF_INT_VAVDD = OpCode(0x20, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    NEG_REF_INT_2P5 = OpCode(0x0, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    NEG_REF_EXT_AIN0 = OpCode(0x1, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    NEG_REF_EXT_AIN1 = OpCode(0x2, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    NEG_REF_EXT_AIN2 = OpCode(0x3, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
+    NEG_REF_INT_VAVDD = OpCode(0x4, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)

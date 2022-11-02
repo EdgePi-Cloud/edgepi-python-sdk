@@ -135,3 +135,6 @@ dmypy.json
 
 #Mac OS env file
 .DS_store
+
+# local test scripts
+src/edgepi/scripts
