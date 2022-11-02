@@ -25,6 +25,9 @@ from edgepi.adc.adc_constants import (
     CheckMode,
     ADCModes,
     DifferentialPair,
+    IDACMUX,
+    IDACMAG,
+    REFMUX
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -510,12 +513,12 @@ class EdgePiADC(SPI):
         checksum_mode: CheckMode = None,
         reset_clear: ADCPower = None,
         validate: bool = True,
-        idac_1_mux = None,
-        idac_2_mux = None,
-        idac_1_mag = None,
-        idac_2_mag = None,
-        pos_ref_inp = None,
-        neg_ref_inp = None 
+        idac_1_mux: IDACMUX = None,
+        idac_2_mux: IDACMUX = None,
+        idac_1_mag: IDACMAG = None,
+        idac_2_mag: IDACMAG = None,
+        pos_ref_inp: REFMUX = None,
+        neg_ref_inp: REFMUX = None 
     ):
         """
         Configure all ADC settings, either collectively or individually.
