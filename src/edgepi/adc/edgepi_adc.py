@@ -27,7 +27,9 @@ from edgepi.adc.adc_constants import (
     DifferentialPair,
     IDACMUX,
     IDACMAG,
-    REFMUX
+    REFMUX,
+    RTDModes,
+    AllowedChannels
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -44,6 +46,11 @@ from edgepi.adc.adc_status import get_adc_status
 _logger = logging.getLogger(__name__)
 
 
+# TODO: this is not safe, it can be out sync if another ADC object modifies config 
+# save state if caching is enabled (only safe for 1 instance), do spi reads if not
+# single private __get_state that uses ADCState caching if caching enabled,
+# otherwise use SPI to update ADCState (update every time if 'no caching')
+# disable caching by default
 @dataclass
 class ADCState:
     """Represents ADC register states"""
@@ -53,7 +60,7 @@ class ADCState:
     def get_state(self, mode: ADCModes) -> int:
         """
         Get state of an ADC functional mode based on most recently updated register values.
-        Requires a call to __config() after ADC has been instantiated, before calling this. 
+        Requires a call to __config() after ADC has been instantiated, before calling this.
 
         This returns the op_code value used to set this functional mode.
         For example, ConvMode.PULSE uses an op_code value of `0x40`. If the current
@@ -286,12 +293,14 @@ class EdgePiADC(SPI):
         adc = ADCNum.ADC_1
 
         # assert adc is in continuous mode (use ADCStatus)
+        # TODO: not essential, responsibility can be passed to user
         if self.__state.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
             )
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
+        # TODO: essential, these settings can change during reads
         data_rate = (
             self.__state.get_state(ADCModes.DATA_RATE_1)
             if adc == ADCNum.ADC_1
@@ -327,6 +336,7 @@ class EdgePiADC(SPI):
         to `CONTINUOUS` conversion mode: use `read_voltage` instead.
         """
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
+        # TODO: not essential
         if self.__state.get_state(ADCModes.CONV) != ConvMode.PULSE.value.op_code:
             self.__config(conversion_mode=ConvMode.PULSE)
 
@@ -499,6 +509,28 @@ class EdgePiADC(SPI):
                 raise RTDEnabledError(
                     f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
+
+    def rtd_mode(self, enable: bool):
+        """
+        Enable or disable RTD. Note, this will reconfigure input multiplexer mapping
+        for ADC2 if ADC2 is configured to read RTD pins AIN4-AIN7.
+
+        Args:
+            `enable` (bool): True to enable RTD, False to disable
+        """
+        updates = RTDModes.RTD_ON.value if enable else RTDModes.RTD_OFF.value
+
+        if enable:
+            # check if adc2 is reading RTD pins, remap channels if needed
+            adc2_mux = pack("uint8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
+            mux_p = adc2_mux[:4].uint
+            mux_n = adc2_mux[4:].uint
+            if any(ch.value in [mux_p, mux_n] for ch in AllowedChannels.RTD_ON.value):
+                # remap ADC2 channels
+                updates["adc_2_analog_in"] = CH.FLOAT
+                updates["adc_2_mux_n"] = CH.AINCOM
+
+        self.__config(**updates)
 
     def __config(
         self,
