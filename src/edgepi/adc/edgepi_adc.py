@@ -509,15 +509,16 @@ class EdgePiADC(SPI):
             `enable` (bool): True to enable RTD, False to disable
         """
         if enable:
-            updates = RTDModes.RTD_ON.value
-            # check if adc2 is reading RTD pins, remap channels if needed
-            adc2_mux = pack("uint8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
-            mux_p = adc2_mux[:4].uint
-            mux_n = adc2_mux[4:].uint
-            if any(ch.value in [mux_p, mux_n] for ch in AllowedChannels.RTD_ON.value):
-                # remap ADC2 channels
-                updates["adc_2_analog_in"] = CH.FLOAT
-                updates["adc_2_mux_n"] = CH.AINCOM
+            # check if adc_2 is reading RTD pins, remap channels if needed
+            adc2_mux = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
+            muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
+            if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
+                updates = RTDModes.RTD_ON.value | {
+                    "adc_2_analog_in": CH.FLOAT,
+                    "adc_2_mux_n": CH.AINCOM
+                }
+            else:
+                updates = RTDModes.RTD_ON.value
         else:
             updates = RTDModes.RTD_OFF.value
 

@@ -22,7 +22,8 @@ from edgepi.adc.adc_constants import (
     DiffMode,
     IDACMUX,
     IDACMAG,
-    REFMUX
+    REFMUX,
+    RTDModes,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 
@@ -63,10 +64,9 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False
-        )
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
     yield EdgePiADC()
+
 
 def test_read_registers_to_map(mocker, adc):
     mocker.patch(
@@ -723,12 +723,17 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err, adc):
     with err:
         assert adc._EdgePiADC__validate_updates(updated_regs)
 
-@pytest.mark.parametrize("reference_config, pin_name",
-                        [(ADCReferenceSwitching.GND_SW1.value, ["GNDSW_IN1", "GNDSW_IN2"]),
-                         (ADCReferenceSwitching.GND_SW2.value, ["GNDSW_IN2", "GNDSW_IN1"]),
-                         (ADCReferenceSwitching.GND_SW_BOTH.value, ["GNDSW_IN1", "GNDSW_IN2"]),
-                         (ADCReferenceSwitching.GND_SW_NONE.value, ["GNDSW_IN1", "GNDSW_IN2"])])
-def test_set_adc_reference(mocker,reference_config, pin_name, adc):
+
+@pytest.mark.parametrize(
+    "reference_config, pin_name",
+    [
+        (ADCReferenceSwitching.GND_SW1.value, ["GNDSW_IN1", "GNDSW_IN2"]),
+        (ADCReferenceSwitching.GND_SW2.value, ["GNDSW_IN2", "GNDSW_IN1"]),
+        (ADCReferenceSwitching.GND_SW_BOTH.value, ["GNDSW_IN1", "GNDSW_IN2"]),
+        (ADCReferenceSwitching.GND_SW_NONE.value, ["GNDSW_IN1", "GNDSW_IN2"]),
+    ],
+)
+def test_set_adc_reference(mocker, reference_config, pin_name, adc):
     set_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     adc.set_adc_reference(reference_config)
@@ -741,61 +746,114 @@ def test_set_adc_reference(mocker,reference_config, pin_name, adc):
         clear_pin.assert_has_calls([mock.call(pin_name[0]), mock.call(pin_name[1])])
 
 
-@pytest.mark.parametrize('updates, rtd_on, err',
+@pytest.mark.parametrize(
+    "updates, rtd_on, err",
     [
         # RTD related setting: RTD ON (note: values are irrelevant, only key matters)
-        ({'adc_1_analog_in': CH.AIN0}, True, pytest.raises(RTDEnabledError)),
-        ({'adc_1_mux_n': CH.AIN0}, True, pytest.raises(RTDEnabledError)),
-        ({'idac_1_mux': 0}, True, pytest.raises(RTDEnabledError)),
-        ({'idac_2_mux': 0}, True, pytest.raises(RTDEnabledError)),
-        ({'idac_1_mag': 0}, True, pytest.raises(RTDEnabledError)),
-        ({'idac_2_mag': 0}, True, pytest.raises(RTDEnabledError)),
-        ({'pos_ref_inp': 0}, True, pytest.raises(RTDEnabledError)),
-        ({'neg_ref_inp': 0}, True, pytest.raises(RTDEnabledError)),
+        ({"adc_1_analog_in": CH.AIN0}, True, pytest.raises(RTDEnabledError)),
+        ({"adc_1_mux_n": CH.AIN0}, True, pytest.raises(RTDEnabledError)),
+        ({"idac_1_mux": 0}, True, pytest.raises(RTDEnabledError)),
+        ({"idac_2_mux": 0}, True, pytest.raises(RTDEnabledError)),
+        ({"idac_1_mag": 0}, True, pytest.raises(RTDEnabledError)),
+        ({"idac_2_mag": 0}, True, pytest.raises(RTDEnabledError)),
+        ({"pos_ref_inp": 0}, True, pytest.raises(RTDEnabledError)),
+        ({"neg_ref_inp": 0}, True, pytest.raises(RTDEnabledError)),
         # RTD related setting: RTD OFF
-        ({'adc_1_analog_in': CH.AIN0}, False, does_not_raise()),
-        ({'adc_1_mux_n': CH.AIN0}, False, does_not_raise()),
-        ({'idac_1_mux': 0}, False, does_not_raise()),
-        ({'idac_2_mux': 0}, False, does_not_raise()),
-        ({'idac_1_mag': 0}, False, does_not_raise()),
-        ({'idac_2_mag': 0}, False, does_not_raise()),
-        ({'pos_ref_inp': 0}, False, does_not_raise()),
-        ({'neg_ref_inp': 0}, False, does_not_raise()),
+        ({"adc_1_analog_in": CH.AIN0}, False, does_not_raise()),
+        ({"adc_1_mux_n": CH.AIN0}, False, does_not_raise()),
+        ({"idac_1_mux": 0}, False, does_not_raise()),
+        ({"idac_2_mux": 0}, False, does_not_raise()),
+        ({"idac_1_mag": 0}, False, does_not_raise()),
+        ({"idac_2_mag": 0}, False, does_not_raise()),
+        ({"pos_ref_inp": 0}, False, does_not_raise()),
+        ({"neg_ref_inp": 0}, False, does_not_raise()),
         # non-RTD related setting: RTD ON
-        ({'adc_1_data_rate': ConvMode.PULSE}, True, does_not_raise()),
-        ({'adc_2_data_rate': 0}, True, does_not_raise()),
-        ({'conversion_mode': 0}, True, does_not_raise()),
+        ({"adc_1_data_rate": ConvMode.PULSE}, True, does_not_raise()),
+        ({"adc_2_data_rate": 0}, True, does_not_raise()),
+        ({"conversion_mode": 0}, True, does_not_raise()),
         # non-RTD related setting: RTD OFF
-        ({'adc_1_data_rate': ConvMode.PULSE}, False, does_not_raise()),
-        ({'adc_2_data_rate': 0}, True, does_not_raise()),
-        ({'conversion_mode': 0}, True, does_not_raise()),
-    ]
+        ({"adc_1_data_rate": ConvMode.PULSE}, False, does_not_raise()),
+        ({"adc_2_data_rate": 0}, True, does_not_raise()),
+        ({"conversion_mode": 0}, True, does_not_raise()),
+    ],
 )
 def test_validate_no_rtd_conflict(mocker, updates, rtd_on, err, adc):
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=rtd_on
-    )
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=rtd_on)
     with err:
         adc._EdgePiADC__validate_no_rtd_conflict(updates)
 
 
-@pytest.mark.parametrize('adc_num, diff_mode, config_calls', 
+@pytest.mark.parametrize(
+    "adc_num, diff_mode, config_calls",
     [
-        (ADCNum.ADC_1, DiffMode.DIFF_1, {'adc_1_analog_in': CH.AIN0, 'adc_1_mux_n': CH.AIN1}),
-        (ADCNum.ADC_2, DiffMode.DIFF_1, {'adc_2_analog_in': CH.AIN0, 'adc_2_mux_n': CH.AIN1}),
-        (ADCNum.ADC_1, DiffMode.DIFF_2, {'adc_1_analog_in': CH.AIN2, 'adc_1_mux_n': CH.AIN3}),
-        (ADCNum.ADC_2, DiffMode.DIFF_2, {'adc_2_analog_in': CH.AIN2, 'adc_2_mux_n': CH.AIN3}),
-        (ADCNum.ADC_1, DiffMode.DIFF_3, {'adc_1_analog_in': CH.AIN4, 'adc_1_mux_n': CH.AIN5}),
-        (ADCNum.ADC_2, DiffMode.DIFF_3, {'adc_2_analog_in': CH.AIN4, 'adc_2_mux_n': CH.AIN5}),
-        (ADCNum.ADC_1, DiffMode.DIFF_4, {'adc_1_analog_in': CH.AIN6, 'adc_1_mux_n': CH.AIN7}),
-        (ADCNum.ADC_2, DiffMode.DIFF_4, {'adc_2_analog_in': CH.AIN6, 'adc_2_mux_n': CH.AIN7}),
-        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {'adc_1_analog_in': CH.AIN0, 'adc_1_mux_n': CH.AINCOM}),
-        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {'adc_2_analog_in': CH.AIN0, 'adc_2_mux_n': CH.AINCOM}),
-    ]
+        (ADCNum.ADC_1, DiffMode.DIFF_1, {"adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AIN1}),
+        (ADCNum.ADC_2, DiffMode.DIFF_1, {"adc_2_analog_in": CH.AIN0, "adc_2_mux_n": CH.AIN1}),
+        (ADCNum.ADC_1, DiffMode.DIFF_2, {"adc_1_analog_in": CH.AIN2, "adc_1_mux_n": CH.AIN3}),
+        (ADCNum.ADC_2, DiffMode.DIFF_2, {"adc_2_analog_in": CH.AIN2, "adc_2_mux_n": CH.AIN3}),
+        (ADCNum.ADC_1, DiffMode.DIFF_3, {"adc_1_analog_in": CH.AIN4, "adc_1_mux_n": CH.AIN5}),
+        (ADCNum.ADC_2, DiffMode.DIFF_3, {"adc_2_analog_in": CH.AIN4, "adc_2_mux_n": CH.AIN5}),
+        (ADCNum.ADC_1, DiffMode.DIFF_4, {"adc_1_analog_in": CH.AIN6, "adc_1_mux_n": CH.AIN7}),
+        (ADCNum.ADC_2, DiffMode.DIFF_4, {"adc_2_analog_in": CH.AIN6, "adc_2_mux_n": CH.AIN7}),
+        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {"adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AINCOM}),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {"adc_2_analog_in": CH.AIN0, "adc_2_mux_n": CH.AINCOM}),
+    ],
 )
 def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
-    config = mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config"
-    )
+    config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
     adc.select_differential(adc_num, diff_mode)
+    config.assert_called_once_with(**config_calls)
+
+
+@pytest.mark.parametrize(
+    "enable, adc_2_mux, config_calls",
+    [
+        (False, 0x0, RTDModes.RTD_OFF.value),
+        (
+            True,
+            0x44,
+            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            0x55,
+            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            0x66,
+            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            0x77,
+            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            0x33,
+            RTDModes.RTD_ON.value,
+        ),
+        (
+            True,
+            0x22,
+            RTDModes.RTD_ON.value,
+        ),
+        (
+            True,
+            0x11,
+            RTDModes.RTD_ON.value,
+        ),
+        (
+            True,
+            0x00,
+            RTDModes.RTD_ON.value,
+        ),
+    ],
+)
+def test_rtd_mode(mocker, enable, adc_2_mux, config_calls, adc):
+    config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_2_mux]
+    )
+    adc.rtd_mode(enable=enable)
     config.assert_called_once_with(**config_calls)
