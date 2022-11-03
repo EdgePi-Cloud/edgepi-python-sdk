@@ -395,7 +395,7 @@ class EdgePiADC(SPI):
 
         return reg_dict
 
-    def __get_rtd_en_status(self):
+    def __is_rtd_on(self):
         """
         Get state of RTD_EN pin (on/off), to use for deciding which
         ADC channels are available for reading.
@@ -442,7 +442,7 @@ class EdgePiADC(SPI):
 
         # allowed channels depend on RTD_EN status
         channels = list(filter(lambda x: x is not None, args.values()))
-        rtd_enabled = self.__get_rtd_en_status()
+        rtd_enabled = self.__is_rtd_on()
         validate_channels_allowed(channels, rtd_enabled)
 
         adc_mux_updates = {
@@ -490,20 +490,10 @@ class EdgePiADC(SPI):
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
         # ADC2 channel setting conflicts with RTD handled during channel mapping
-        rtd_properties = {
-            'adc_1_analog_in',
-            'adc_1_mux_n',
-            'idac_1_mux',
-            'idac_2_mux',
-            'idac_1_mag',
-            'idac_2_mag',
-            'pos_ref_inp',
-            'neg_ref_inp'
-        }
-        is_rtd_on = self.__get_rtd_en_status()
-        if not is_rtd_on:
+        if not self.__is_rtd_on():
             return
 
+        rtd_properties = RTDModes.RTD_ON.value.keys()
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(

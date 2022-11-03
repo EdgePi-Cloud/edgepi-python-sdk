@@ -64,7 +64,7 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
     mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=False
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False
         )
     yield EdgePiADC()
 
@@ -337,11 +337,6 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
     adc_vals = deepcopy(adc_default_vals)
     for addx, reg_val in reg_updates.items():
         adc_vals[addx] = reg_val
-
-    # mock RTD_EN as off
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=False
-    )
 
     # mock each call to __read_register
     mocker.patch(
@@ -655,10 +650,6 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
 def test_get_channel_assign_opcodes(
     mocker, mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected, adc
 ):
-    # mock RTD_EN as off
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=False
-    )
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         side_effect=[[mux_map[0]], [mux_map[1]]],
@@ -782,7 +773,7 @@ def test_set_adc_reference(mocker,reference_config, pin_name, adc):
 )
 def test_validate_no_rtd_conflict(mocker, updates, rtd_on, err, adc):
     mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_en_status", return_value=rtd_on
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=rtd_on
     )
     with err:
         adc._EdgePiADC__validate_no_rtd_conflict(updates)
