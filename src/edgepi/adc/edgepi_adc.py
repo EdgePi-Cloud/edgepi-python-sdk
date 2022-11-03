@@ -46,7 +46,7 @@ from edgepi.adc.adc_status import get_adc_status
 _logger = logging.getLogger(__name__)
 
 
-# TODO: this is not safe, it can be out sync if another ADC object modifies config 
+# TODO: this is not safe, it can be out sync if another ADC object modifies config
 # save state if caching is enabled (only safe for 1 instance), do spi reads if not
 # single private __get_state that uses ADCState caching if caching enabled,
 # otherwise use SPI to update ADCState (update every time if 'no caching')
