@@ -947,3 +947,15 @@ def test_voltage_continuous(adc):
 def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
     adc.select_differential(adc_num, diff)
     assert adc._EdgePiADC__read_register(mux_reg) == [mux_reg_val]
+
+
+@pytest.mark.parametrize(
+    "enable",
+    [
+        (True),
+        (False)
+    ]
+)
+def test_rtd_mode(enable, adc):
+    # TODO: pass if no error raised for now, check RTD is on once get_state is implemented
+    adc.rtd_mode(enable=enable)

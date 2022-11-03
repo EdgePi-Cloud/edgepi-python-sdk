@@ -124,6 +124,8 @@ class EdgePiADC(SPI):
 
     def __set_power_on_configs(self):
         """Custom EdgePi ADC configuration for initialization/reset"""
+        # turn off RTD on reset to permit resetting RTD related settings to default
+        self.rtd_mode(enable=False)
         self.__config(
             # TODO: this is also problematic, chainging the state when another module is working
             adc_1_analog_in=CH.AIN0,
@@ -537,12 +539,13 @@ class EdgePiADC(SPI):
         checksum_mode: CheckMode = None,
         reset_clear: ADCPower = None,
         validate: bool = True,
+        rtd_mode_update: bool = False,
         idac_1_mux: IDACMUX = None,
         idac_2_mux: IDACMUX = None,
         idac_1_mag: IDACMAG = None,
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
-        neg_ref_inp: REFMUX = None 
+        neg_ref_inp: REFMUX = None
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -564,6 +567,7 @@ class EdgePiADC(SPI):
             `checksum_mode` (CheckMode): set mode for CHECK byte
             `reset_clear` (ADCPower): set state of ADC RESET bit
             `validate` (bool): set to True to perform post-update validation
+            `rtd_mode_update` (bool): turn off RTD property validation for updates
             `idac_1_mux` (IDACMUX): set analog input pin to connect IDAC1
             `idac_2_mux` (IDACMUX): set analog input pin to connect IDAC2
             `idac_1_mag` (IDACMAG): set the current value for IDAC1
@@ -575,7 +579,9 @@ class EdgePiADC(SPI):
 
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
-        self.__validate_no_rtd_conflict(args)
+        # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
+        if not rtd_mode_update:
+            self.__validate_no_rtd_conflict(args)
         args = list(args.values())
         _logger.debug(f"__config: args dict after filter:\n\n{args}\n\n")
 
