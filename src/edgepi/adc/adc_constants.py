@@ -8,8 +8,8 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_configs import ADCVoltageConfig
 
 
-ADC_NUM_REGS = 27           # number of ADC1263 registers
-ADC_VOLTAGE_READ_LEN = 6    # number of bytes per voltage read
+ADC_NUM_REGS = 27  # number of ADC1263 registers
+ADC_VOLTAGE_READ_LEN = 6  # number of bytes per voltage read
 
 
 @unique
@@ -151,6 +151,7 @@ class ConvMode(Enum):
 
 class ADC1DataRate(Enum):
     """ADS1263 data rates for ADC1"""
+
     SPS_2P5 = OpCode(0x0, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
     SPS_5 = OpCode(0x1, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
     SPS_10 = OpCode(0x2, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
@@ -171,15 +172,17 @@ class ADC1DataRate(Enum):
 
 class ADCMasks(Enum):
     """ADS1263 OpCode bit masks"""
+
     FILTER_BITS = 0x1F  # overwrite bits 7:5 (0-indexed)
-    CHECK_BITS = 0xFC   # overwrite bits 1:0
-    ADC2_DR_BITS = 0x3F # overwrite bits 7:6
-    RMUXP_BITS = 0xC7 # overwrite bits 5:3
-    RMUXN_BITS = 0xF8 # overwrite bits 2:0
+    CHECK_BITS = 0xFC  # overwrite bits 1:0
+    ADC2_DR_BITS = 0x3F  # overwrite bits 7:6
+    RMUXP_BITS = 0xC7  # overwrite bits 5:3
+    RMUXN_BITS = 0xF8  # overwrite bits 2:0
 
 
 class ADC2DataRate(Enum):
     """ADS1263 data rates for ADC2"""
+
     SPS_10 = OpCode(0x00, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
     SPS_100 = OpCode(0x40, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
     SPS_400 = OpCode(0x80, ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
@@ -188,26 +191,32 @@ class ADC2DataRate(Enum):
 
 class FilterMode(Enum):
     """ADC filter modes, for both ADC1 and ADC2"""
+
     SINC1 = OpCode(0x0, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
     SINC2 = OpCode(0x20, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
     SINC3 = OpCode(0x40, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
     SINC4 = OpCode(0x60, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
     FIR = OpCode(0x80, ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
 
+
 class ADCReferenceSwitching(Enum):
-    """ Each ADC Reference ground can be configured """
+    """Each ADC Reference ground can be configured"""
+
     GND_SW_NONE = 0
     GND_SW1 = 1
     GND_SW2 = 2
     GND_SW_BOTH = 3
 
+
 class ADCPower(Enum):
     """OpCodes for configuring the ADS1263 POWER register"""
+
     RESET_CLEAR = OpCode(0x0, ADCReg.REG_POWER.value, BitMask.BIT4.value)
 
 
 class CheckMode(Enum):
     """OpCodes for configuring ADS1263 voltage read check mode"""
+
     CHECK_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     CHECK_BYTE_CHK = OpCode(0x01, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     CHECK_BYTE_CRC = OpCode(0x02, ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
@@ -215,6 +224,7 @@ class CheckMode(Enum):
 
 class StatusByte(Enum):
     """OpCodes for configuring ADS1263 voltage read status byte"""
+
     STATUS_BYTE_ON = OpCode(0x04, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
     STATUS_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
 
@@ -222,12 +232,14 @@ class StatusByte(Enum):
 @dataclass
 class DifferentialPair:
     """ADC differential voltage reading channel pairs"""
+
     mux_p: ADCChannel
     mux_n: ADCChannel
 
 
 class DiffMode(Enum):
     """ADC differential voltage reading modes"""
+
     DIFF_1 = DifferentialPair(ADCChannel.AIN0, ADCChannel.AIN1)
     DIFF_2 = DifferentialPair(ADCChannel.AIN2, ADCChannel.AIN3)
     DIFF_3 = DifferentialPair(ADCChannel.AIN4, ADCChannel.AIN5)
@@ -239,12 +251,14 @@ class DiffMode(Enum):
 @dataclass
 class ADCMode:
     """Stores information about an ADC functional mode"""
+
     addx: int
     mask: int
 
 
 class ADCModes(Enum):
     """Address and mask values for ADC functional modes"""
+
     CONV = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
     CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
     STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
@@ -255,6 +269,7 @@ class ADCModes(Enum):
 
 class IDACMUX(Enum):
     """Settings for ADC IDACMUX register (output multiplexer mapping)"""
+
     IDAC2_AIN0 = OpCode(0x0, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
     IDAC2_AIN1 = OpCode(0x10, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
     IDAC2_AIN2 = OpCode(0x20, ADCReg.REG_IDACMUX.value, BitMask.HIGH_NIBBLE.value)
@@ -283,6 +298,7 @@ class IDACMUX(Enum):
 
 class IDACMAG(Enum):
     """Settings for ADC IDACMAG register (IDAC current magnitude in µA)"""
+
     IDAC2_OFF = OpCode(0x0, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
     IDAC2_50 = OpCode(0x10, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
     IDAC2_100 = OpCode(0x20, ADCReg.REG_IDACMAG.value, BitMask.HIGH_NIBBLE.value)
@@ -309,6 +325,7 @@ class IDACMAG(Enum):
 
 class REFMUX(Enum):
     """Settings for ADC REFMUX register (Reference multiplexer mapping)"""
+
     POS_REF_INT_2P5 = OpCode(0x0, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
     POS_REF_EXT_AIN0 = OpCode(0x8, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
     POS_REF_EXT_AIN2 = OpCode(0x10, ADCReg.REG_REFMUX.value, ADCMasks.RMUXP_BITS.value)
@@ -319,3 +336,51 @@ class REFMUX(Enum):
     NEG_REF_EXT_AIN3 = OpCode(0x2, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
     NEG_REF_EXT_AIN5 = OpCode(0x3, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
     NEG_REF_INT_VAVSS = OpCode(0x4, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
+
+
+class RTDModes(Enum):
+    "ADC.__config args for for turning RTD mode on/off"
+    RTD_ON = {
+        "adc_1_analog_in": ADCChannel.AIN5,
+        "adc_1_mux_n": ADCChannel.AIN6,
+        "idac_1_mux": IDACMUX.IDAC1_AIN8,
+        "idac_2_mux": IDACMUX.IDAC1_AIN9,
+        "idac_1_mag": IDACMAG.IDAC1_500,
+        "idac_2_mag": IDACMAG.IDAC2_500,
+        "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
+        "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
+    }
+    RTD_OFF = {
+        "adc_1_analog_in": ADCChannel.FLOAT,
+        "adc_1_mux_n": ADCChannel.AINCOM,
+        "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
+        "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
+        "idac_1_mag": IDACMAG.IDAC1_OFF,
+        "idac_2_mag": IDACMAG.IDAC2_OFF,
+        "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
+        "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
+    }
+
+
+class AllowedChannels(Enum):
+    """Available channels for reading depend on whether RTD is enabled or not"""
+    RTD_ON = [
+        ADCChannel.AIN0,
+        ADCChannel.AIN1,
+        ADCChannel.AIN2,
+        ADCChannel.AIN3,
+        ADCChannel.AINCOM,
+        ADCChannel.FLOAT,
+    ]
+    RTD_OFF = [
+        ADCChannel.AIN0,
+        ADCChannel.AIN1,
+        ADCChannel.AIN2,
+        ADCChannel.AIN3,
+        ADCChannel.AIN4,
+        ADCChannel.AIN5,
+        ADCChannel.AIN6,
+        ADCChannel.AIN7,
+        ADCChannel.AINCOM,
+        ADCChannel.FLOAT,
+    ]

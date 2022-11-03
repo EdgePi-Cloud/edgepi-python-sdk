@@ -4,7 +4,7 @@
 from bitstring import pack
 
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
-from edgepi.adc.adc_constants import ADCChannel as CH
+from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
 
 
 MUXS_PER_ADC = 2
@@ -91,12 +91,12 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
     # channels available depend on RTD_EN status
     allowed_channels = (
-        [CH.AIN0, CH.AIN1, CH.AIN2, CH.AIN3, CH.AINCOM, CH.FLOAT]
+        AllowedChannels.RTD_ON.value
         if rtd_enabled
-        else list(CH)
+        else AllowedChannels.RTD_OFF.value
     )
     for ch in channels:
         if ch not in allowed_channels:
             raise ChannelNotAvailableError(
-                f"Channel {ch.value} is currently not available. Disable RTD in order to use."
+                f"Channel 'AIN{ch.value}' is currently not available. Disable RTD in order to use."
             )
