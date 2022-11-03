@@ -411,7 +411,8 @@ class EdgePiADC(SPI):
         """
         Generates OpCodes for assigning positive and negative multiplexers
         of either ADC1 or ADC2 to an ADC input channel. This is needed to allow
-        users to assign multiplexers by input channel number.
+        users to assign multiplexers to both ADCs using the same input channel
+        number enums.
 
         Args:
             adc_1_mux_p: input channel to assign to MUXP of ADC1
