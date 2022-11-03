@@ -6,6 +6,7 @@ import pytest
 # TODO: commented out until RTD module added
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
+    ADCNum,
     ADCReg,
     ADCChannel as CH,
     ConvMode,
@@ -16,7 +17,8 @@ from edgepi.adc.adc_constants import (
     ADCPower,
     IDACMUX,
     IDACMAG,
-    REFMUX
+    REFMUX,
+    DiffMode
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -931,3 +933,17 @@ def test_voltage_continuous(adc):
             assert out != 0
     finally:
         adc.stop_conversions()
+
+
+@pytest.mark.parametrize('adc_num, diff, mux_reg, mux_reg_val',
+    [
+        (ADCNum.ADC_1, DiffMode.DIFF_1, ADCReg.REG_INPMUX, 0x01),
+        (ADCNum.ADC_1, DiffMode.DIFF_2, ADCReg.REG_INPMUX, 0x23),
+        (ADCNum.ADC_1, DiffMode.DIFF_3, ADCReg.REG_INPMUX, 0x45),
+        (ADCNum.ADC_1, DiffMode.DIFF_4, ADCReg.REG_INPMUX, 0x67),
+        (ADCNum.ADC_1, DiffMode.DIFF_OFF, ADCReg.REG_INPMUX, 0x0A),
+    ]
+)
+def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
+    adc.select_differential(adc_num, diff)
+    assert adc._EdgePiADC__read_register(mux_reg) == [mux_reg_val]
