@@ -80,6 +80,7 @@ class ADCChannel(Enum):
     AIN6 = 6
     AIN7 = 7
     AIN8 = 8
+    AIN9 = 9
     AINCOM = 10
     FLOAT = 0xF
 
@@ -99,7 +100,7 @@ class ADCReadInfo:
     """
 
     id_num: int
-    addx: ADCChannel
+    addx: ADCReg
     num_data_bytes: int
     voltage_config: ADCVoltageConfig
     start_cmd: ADCComs
