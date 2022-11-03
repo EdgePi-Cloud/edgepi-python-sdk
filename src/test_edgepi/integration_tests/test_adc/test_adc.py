@@ -873,7 +873,7 @@ def fixture_adc():
         (
             {
                 "pos_ref_inp": REFMUX.POS_REF_INT_VAVDD,
-                "neg_ref_inp": REFMUX.NEG_REF_INT_VAVDD,
+                "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
             },
             {
                 ADCReg.REG_REFMUX.value: 0b00100100,

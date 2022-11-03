@@ -327,7 +327,7 @@ def test_read_registers_to_map(mocker, adc):
         ),
         (
             {ADCReg.REG_REFMUX.value: 0x3F},
-            {"pos_ref_inp": REFMUX.POS_REF_INT_VAVDD, "neg_ref_inp": REFMUX.NEG_REF_INT_VAVDD},
+            {"pos_ref_inp": REFMUX.POS_REF_INT_VAVDD, "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS},
             {ADCReg.REG_REFMUX.value: 0b00100100},
         ),
     ],

@@ -318,4 +318,4 @@ class REFMUX(Enum):
     NEG_REF_EXT_AIN1 = OpCode(0x1, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
     NEG_REF_EXT_AIN3 = OpCode(0x2, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
     NEG_REF_EXT_AIN5 = OpCode(0x3, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
-    NEG_REF_INT_VAVDD = OpCode(0x4, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
+    NEG_REF_INT_VAVSS = OpCode(0x4, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
