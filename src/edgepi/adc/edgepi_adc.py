@@ -461,7 +461,7 @@ class EdgePiADC(SPI):
         Args:
             `adc` (ADCNum): identity of ADC to configure
 
-            `diff_mode` (DifferentialPair): a pair of input channels to sample, or off
+            `diff_mode` (DiffMode): a pair of input channels to sample, or off
 
         Raises:
             `KeyError`: if adc is not a valid ADCNum enum
