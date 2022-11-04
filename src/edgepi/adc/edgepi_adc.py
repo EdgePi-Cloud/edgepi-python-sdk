@@ -98,23 +98,19 @@ class EdgePiADC(SPI):
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # internal state
         self.__state = ADCState(reg_map=None)
-        # TODO: remove this from init(), rename to reset_config, after init call reset onfig to
-        # reset registers.
-        self.__set_power_on_configs()
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
 
-    def __set_power_on_configs(self):
-        """Custom EdgePi ADC configuration for initialization/reset"""
+    def __reapply_config(self):
+        """
+        Restore ADC to custom EdgePi configuration
+        """
         self.__config(
-            # TODO: this is also problematic, chainging the state when another module is working
             adc_1_analog_in=CH.AIN0,
             adc_1_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
-            # TODO: have a manual function to clear the reset bit.
-            reset_clear=ADCPower.RESET_CLEAR,
         )
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
@@ -231,8 +227,10 @@ class EdgePiADC(SPI):
 
     def clear_reset_bit(self):
         """
-        Clear the ADC RESET bit of POWER register, in order to enable detecting
-        new ADC resets through the STATUS byte of a voltage read.
+        Clear the ADC reset bit. This reset bits acts as a flag that is raised when the ADC
+        resets, which automatically happens during power on, or when a reset command is passed.
+        Clearing this bit allows subsequent non-standard resets to be detected (by reading the
+        STATUS byte of a voltage read).
         """
         self.__config(reset_clear=ADCPower.RESET_CLEAR)
 
@@ -347,10 +345,10 @@ class EdgePiADC(SPI):
         """
         Reset ADC register values to EdgePi ADC power-on state.
         Note this state differs from ADS1263 default power-on, due to
-        application of custom power-on configuration required by EdgePi.
+        application of custom power-on configurations required by EdgePi.
         """
         self.transfer(self.adc_ops.reset_adc())
-        self.__set_power_on_configs()
+        self.__reapply_config()
 
     def __is_data_ready(self):
         # pylint: disable=unused-private-member
