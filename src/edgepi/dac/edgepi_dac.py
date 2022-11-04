@@ -190,6 +190,20 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_ENABLED.value if gain_state else 1
         return self.dac_ops.code_to_voltage(dac_ch, code, dac_gain)
 
+    def enable_dac_gain(self, enable: bool = None):
+        """
+        Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
+        Args:
+            enable (bool): enable boolean to set or clear the gpio pin
+        Return:
+            gain_state (bool): state of the gain pin
+        """
+        # pylint: disable=expression-not-assigned
+        self.gpio.set_expander_pin(GainPin.DAC_GAIN.value) if enable else \
+        self.gpio.clear_expander_pin(GainPin.DAC_GAIN.value)
+        _, _, gain_state = self.get_state(gain=True)
+        return gain_state
+
     def get_state(self, analog_out: int = None,
                         code: bool = None,
                         voltage: bool = None,
@@ -214,4 +228,3 @@ class EdgePiDAC(spi):
         voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
         gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
         return code_val, voltage_val, gain_state
-        

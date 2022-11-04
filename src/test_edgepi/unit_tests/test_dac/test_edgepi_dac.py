@@ -221,6 +221,25 @@ def test_write_voltage(mocker,anaolog_out, voltage, mock_value, result, dac_mock
                   return_value = (mock_value[0], mock_value[1], mock_value[2]))
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
 
+@pytest.mark.parametrize("enable, result, mocker_values,",
+                        [(True, True, [None, None, True]),
+                         (False, False, [None, None, False])])
+def test_enable_dac_gain(mocker, enable, result, mocker_values):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.sequential_read",
+                  return_value = dummy_calib_param_list)
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
+                  return_value = (mocker_values[0], mocker_values[1], mocker_values[2]))
+    set_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
+    clear_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
+    dac = EdgePiDAC()
+    # pylint: disable=expression-not-assigned
+    assert dac.enable_dac_gain(enable) == result
+    set_dac_gain.assert_called_once_with("DAC_GAIN") if enable \
+        else clear_dac_gain.assert_called_once_with("DAC_GAIN")
+
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",
                          [([0xA1,0x69, 0xDF, True], 1, True, True, True, [27103, 2.116, True]),
                           ([0xA1,0x69, 0xDF, False], 2, True, True, True, [27103, 2.116, False]),
