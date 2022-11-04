@@ -27,17 +27,15 @@ class DACCommands:
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
-    def __voltage_to_float_code(self, ch: int, expected: float):
+    def __voltage_to_float_code(self, ch: int, expected: float, dac_gain: int = 1):
         """Convert a voltage to full precision binary code value"""
-        # TODO: apply proper calculation
-        float_code =(expected + self.dict_calib_param[ch].offset_1) * \
+        float_code =((expected / dac_gain) + self.dict_calib_param[ch].offset) * \
                     (CALIB_CONSTS.RANGE.value / \
-                    (CALIB_CONSTS.VOLTAGE_REF.value * self.dict_calib_param[ch].gain_1))
+                    (CALIB_CONSTS.V_RANGE.value * self.dict_calib_param[ch].gain))
         _logger.debug(f"Full code generated {float_code}")
         return float_code
 
-    # TODO: change the formula according to calibration if needed
-    def voltage_to_code(self, ch: int, expected: float) -> int:
+    def voltage_to_code(self, ch: int, expected: float, dac_gain: int = 1) -> int:
         """
         Convert a voltage to binary code value
 
@@ -46,12 +44,14 @@ class DACCommands:
 
             expected (float): the voltage input by the user
 
+            dac_gain (int): dac gain state, x1 or x2, when x2 voltage range extened to 10V from 5V
+
         Returns:
             int: 16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
         self.check_range(ch, 0, NUM_PINS - 1)
-        float_code = self.__voltage_to_float_code(ch, expected)
+        float_code = self.__voltage_to_float_code(ch, expected, dac_gain)
         _logger.debug(f"Int code generated {int(float_code)}")
         # DAC only accepts int values, round to nearest int
         return round(float_code)
@@ -80,14 +80,14 @@ class DACCommands:
         # DB19 to DB4 DAC register contents. B23 (MSB) is index 0 here.
         return bits[-16:].uint
 
-    def __code_to_float_voltage(self, ch: int, code: int) -> float:
+    def __code_to_float_voltage(self, ch: int, code: int, dac_gain: int = 1) -> float:
         """Convert a voltage to float voltage"""
-        voltage = (CALIB_CONSTS.VOLTAGE_REF.value /
-                   CALIB_CONSTS.RANGE.value * self.dict_calib_param[ch].gain_1) *\
-                  code - self.dict_calib_param[ch].offset_1
+        voltage = (CALIB_CONSTS.V_RANGE.value /
+                   CALIB_CONSTS.RANGE.value * self.dict_calib_param[ch].gain) *\
+                  (code*dac_gain) - self.dict_calib_param[ch].offset
         return voltage
 
-    def code_to_voltage(self, ch: int, code: int) -> float:
+    def code_to_voltage(self, ch: int, code: int, dac_gain: int = 1) -> float:
         """
         Convert a 16 bit binary code value to voltage
 
@@ -96,10 +96,12 @@ class DACCommands:
 
             code (int): 16 bit unsigned int value of a DAC register read
 
+            dac_gain (int): dac gain state, x1 or x2, when x2 voltage range extened to 10V from 5V
+
         Returns:
             float: voltage corresponding to 16 bit binary code
         """
-        voltage = self.__code_to_float_voltage(ch, code)
+        voltage = self.__code_to_float_voltage(ch, code, dac_gain)
         _logger.debug(f"code_to_voltage: code {hex(code)} = {voltage} V")
         return voltage
 

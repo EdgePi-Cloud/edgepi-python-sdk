@@ -5,10 +5,6 @@ Module for interacting with the EdgePi DAC via SPI.
 
 import logging
 from edgepi.dac.dac_commands import DACCommands
-from edgepi.dac.dac_calibration import (
-    DACcalibParam,
-    generate_dict_calibration
-    )
 from edgepi.dac.dac_constants import (
     NULL_BITS,
     NUM_PINS,
@@ -17,12 +13,16 @@ from edgepi.dac.dac_constants import (
     PowerMode,
     EdgePiDacChannel as CH,
     EdgePiDacCom as COM,
+    EdgePiDacCalibrationConstants as CalibConst,
     AOPins,
     GainPin
 )
 from edgepi.peripherals.spi import SpiDevice as spi
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.calibration.eeprom_constants import MemoryAddr,DACParamAddr, ModuleNames
+from edgepi.calibration.edgepi_calibration import EdgePiCalibration
 
 
 
@@ -54,22 +54,17 @@ class EdgePiDAC(spi):
         8: 7,
     }
 
-    # TODO: the calib parameter should be saved in an eeprom, and parameters should be read from the
-            # eeprom during the class isntantiation instead of this hardcoded value
-    __analog_out_calib_param = [[2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0],
-                                [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0],
-                                [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0],
-                                [2.5, 0, 5.0, 0], [2.5, 0, 5.0, 0]]
-
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing DAC Bus")
         super().__init__(bus_num=6, dev_id=3, mode=1, max_speed=1000000)
-        self.dac_ops = DACCommands(generate_dict_calibration(DACcalibParam,
-                                                             list(
-                                                             self.__analog_out_to_dac_ch.values()
-                                                             ),
-                                                             self.__analog_out_calib_param))
+
+        eeprom = EdgePiEEPROM()
+        calib = EdgePiCalibration(ModuleNames.DAC)
+        calib_param = eeprom.sequential_read(MemoryAddr.DAC.value, DACParamAddr.LEN.value)
+        calib_dict = calib.get_calibration_dict(calib_param)
+
+        self.dac_ops = DACCommands(calib_dict)
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
 
         self.__dac_power_state = {
@@ -111,7 +106,8 @@ class EdgePiDAC(spi):
         self.dac_ops.check_range(analog_out, 1, NUM_PINS)
         self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
         dac_ch = self.__analog_out_to_dac_ch[analog_out]
-        code = self.dac_ops.voltage_to_code(dac_ch, voltage)
+        dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
+        code = self.dac_ops.voltage_to_code(dac_ch, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
 
         if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out].value):
@@ -189,7 +185,32 @@ class EdgePiDAC(spi):
         """
         dac_ch = self.__analog_out_to_dac_ch[analog_out]
         code = self.channel_readback(analog_out)
-        return self.dac_ops.code_to_voltage(dac_ch, code)
+        dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
+        return self.dac_ops.code_to_voltage(dac_ch, code, dac_gain)
+
+    def enable_dac_gain(self, enable: bool = None):
+        """
+        Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
+        Args:
+            enable (bool): enable boolean to set or clear the gpio pin
+        Return:
+            gain_state (bool): state of the gain pin
+        """
+        # pylint: disable=expression-not-assigned
+        self.gpio.set_expander_pin(GainPin.DAC_GAIN.value) if enable else \
+        self.gpio.clear_expander_pin(GainPin.DAC_GAIN.value)
+        return self.__get_gain_state()
+
+    def __get_gain_state(self):
+        """
+        Retrieve the internal gain state by reading the expander pin
+        Args:
+            N/A
+        Return:
+            gain_state (bool): True - gain enalbed, False - gain disabled
+        """
+        _, _, gain_state = self.get_state(gain=True)
+        return gain_state
 
     def get_state(self, analog_out: int = None,
                         code: bool = None,
@@ -215,4 +236,3 @@ class EdgePiDAC(spi):
         voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
         gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
         return code_val, voltage_val, gain_state
-        
