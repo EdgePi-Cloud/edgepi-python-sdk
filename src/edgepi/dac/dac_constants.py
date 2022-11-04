@@ -52,7 +52,7 @@ class EdgePiDacCalibrationConstants(Enum):
 
     V_RANGE = 5.0000
     RANGE = 65535
-    DAC_GAIN_ENABLED = 2
+    DAC_GAIN_FACTOR = 2
 
 
 class PowerMode(Enum):
