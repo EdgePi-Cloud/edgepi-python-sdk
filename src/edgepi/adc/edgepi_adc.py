@@ -24,7 +24,7 @@ from edgepi.adc.adc_constants import (
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
     ADCModes,
-    DifferentialPair,
+    DiffMode,
     IDACMUX,
     IDACMAG,
     REFMUX,
@@ -454,7 +454,7 @@ class EdgePiADC(SPI):
 
         return generate_mux_opcodes(adc_mux_updates)
 
-    def select_differential(self, adc: ADCNum, diff_mode: DifferentialPair):
+    def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
         """
         Select a differential voltage sampling mode for either ADC1 or ADC2
 

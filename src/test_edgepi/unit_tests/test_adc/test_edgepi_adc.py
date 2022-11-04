@@ -794,8 +794,8 @@ def test_validate_no_rtd_conflict(mocker, updates, rtd_on, err, adc):
         (ADCNum.ADC_2, DiffMode.DIFF_3, {"adc_2_analog_in": CH.AIN4, "adc_2_mux_n": CH.AIN5}),
         (ADCNum.ADC_1, DiffMode.DIFF_4, {"adc_1_analog_in": CH.AIN6, "adc_1_mux_n": CH.AIN7}),
         (ADCNum.ADC_2, DiffMode.DIFF_4, {"adc_2_analog_in": CH.AIN6, "adc_2_mux_n": CH.AIN7}),
-        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {"adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AINCOM}),
-        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {"adc_2_analog_in": CH.AIN0, "adc_2_mux_n": CH.AINCOM}),
+        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM}),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM}),
     ],
 )
 def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
@@ -826,7 +826,7 @@ def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
         (
             True,
             0x77,
-            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+            RTDModes.RTD_ON.value,
         ),
         (
             True,
