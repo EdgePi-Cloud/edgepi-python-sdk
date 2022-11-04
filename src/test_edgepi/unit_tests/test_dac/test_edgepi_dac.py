@@ -20,16 +20,29 @@ from edgepi.dac.dac_constants import (
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
 
+dummy_calib_param_list = [0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0,
+                          0,202,154,59,0,0,0,0]
+
 @pytest.fixture(name="dac")
 def fixture_test_dac(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.sequential_read",
+                  return_value = dummy_calib_param_list)
     yield EdgePiDAC()
 
 @pytest.fixture(name="dac_mock_periph")
 def fixture_test_dac_write_voltage(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.sequential_read",
+                  return_value = dummy_calib_param_list)
     yield EdgePiDAC()
 
 
@@ -193,17 +206,19 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
         assert err.value == "voltage cannot be negative"
 
 
-@pytest.mark.parametrize("anaolog_out, voltage, result",
-                         [(1, 2.123, [27187]),
-                          (2, 2.123, [27187]),
-                          (3, 2.123, [27187]),
-                          (4, 2.123, [27187]),
-                          (5, 2.123, [27187]),
-                          (6, 2.123, [27187]),
-                          (7, 2.123, [27187]),
-                          (8, 2.123, [27187])
+@pytest.mark.parametrize("anaolog_out, voltage, mock_value, result",
+                         [(1, 2.123, [None, None, True], [13913]),
+                          (2, 2.123, [None, None, True], [13913]),
+                          (3, 2.123, [None, None, True], [13913]),
+                          (4, 2.123, [None, None, True], [13913]),
+                          (5, 2.123, [None, None, False], [27826]),
+                          (6, 2.123, [None, None, False], [27826]),
+                          (7, 2.123, [None, None, False], [27826]),
+                          (8, 2.123, [None, None, False], [27826])
                         ])
-def test_write_voltage(anaolog_out, voltage, result, dac_mock_periph):
+def test_write_voltage(mocker,anaolog_out, voltage, mock_value, result, dac_mock_periph):
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
+                  return_value = (mock_value[0], mock_value[1], mock_value[2]))
     assert result[0] == dac_mock_periph.write_voltage(anaolog_out, voltage)
 
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",

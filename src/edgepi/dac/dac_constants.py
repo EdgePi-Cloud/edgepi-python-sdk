@@ -50,8 +50,9 @@ NUM_PINS = len(EdgePiDacChannel)
 class EdgePiDacCalibrationConstants(Enum):
     """EdgePi DAC calibration constants"""
 
-    VOLTAGE_REF = 2.047
+    V_RANGE = 5.0000
     RANGE = 65535
+    DAC_GAIN_ENABLED = 2
 
 
 class PowerMode(Enum):
