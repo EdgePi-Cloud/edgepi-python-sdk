@@ -26,7 +26,7 @@ from edgepi.adc.edgepi_adc import EdgePiADC
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
     adc = EdgePiADC()
-    adc.reapply_config()
+    adc._EdgePiADC__reapply_config()
     yield adc
 
 

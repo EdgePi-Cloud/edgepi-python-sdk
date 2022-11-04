@@ -103,7 +103,7 @@ class EdgePiADC(SPI):
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
 
-    def reapply_config(self):
+    def __reapply_config(self):
         """
         Restore ADC to custom EdgePi configuration
         """
@@ -348,7 +348,7 @@ class EdgePiADC(SPI):
         application of custom power-on configurations required by EdgePi.
         """
         self.transfer(self.adc_ops.reset_adc())
-        self.reapply_config()
+        self.__reapply_config()
 
     def __is_data_ready(self):
         # pylint: disable=unused-private-member
