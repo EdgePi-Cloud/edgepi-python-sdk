@@ -114,6 +114,8 @@ class EdgePiADC(SPI):
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # internal state
         self.__state = ADCState(reg_map=None)
+        # ADC always needs to be in CRC check mode
+        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -123,9 +125,13 @@ class EdgePiADC(SPI):
         """
         Restore ADC to custom EdgePi configuration
         """
+        # turn RTD off to allow updates in case RTD is on
+        self.rtd_mode(enable=False)
         self.__config(
-            adc_1_analog_in=CH.AIN0,
+            adc_1_analog_in=CH.FLOAT,
+            adc_2_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
+            adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
         )
 
@@ -409,12 +415,16 @@ class EdgePiADC(SPI):
         _logger.debug(f"RTD enabled: {status}")
         return status
 
+    # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
+    # Case 1: user sets to adc_x read ch_x -> mux_n auto mapped to AINCOM
+    # Case 2: user sets RTD mode on or off -> mux_n passed in as arg
+    # Case 3: user sets any differential mode -> mux_n pass in as arg
     def __get_channel_assign_opcodes(
         self,
-        adc_1_mux_p: CH = None,
-        adc_2_mux_p: CH = None,
-        adc_1_mux_n: CH = None,
-        adc_2_mux_n: CH = None,
+        adc_1_mux_p: CH,
+        adc_2_mux_p: CH,
+        adc_1_mux_n: CH,
+        adc_2_mux_n: CH,
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
@@ -438,6 +448,21 @@ class EdgePiADC(SPI):
         if all(x is None for x in list(args.values())):
             return []
 
+        # default args don't work here because __config is always passing in args for each
+        # parameter, whether they are None or channel numbers
+        # TODO: private method
+        if adc_1_mux_p is None:
+            # only update mux_n if mux_p is updated
+            adc_1_mux_n = None
+        elif adc_1_mux_n is None:
+            # if only updating mux_p, set mux_n to AINCOM
+            adc_1_mux_n = CH.AINCOM
+
+        if adc_2_mux_p is None:
+            adc_2_mux_n = None
+        elif adc_2_mux_n is None:
+            adc_2_mux_n = CH.AINCOM
+
         # allowed channels depend on RTD_EN status
         channels = list(filter(lambda x: x is not None, args.values()))
         rtd_enabled = self.__is_rtd_on()
@@ -448,7 +473,9 @@ class EdgePiADC(SPI):
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
         }
 
-        return generate_mux_opcodes(adc_mux_updates)
+        opcodes = generate_mux_opcodes(adc_mux_updates)
+
+        return opcodes
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
         """
@@ -500,8 +527,8 @@ class EdgePiADC(SPI):
 
     def rtd_mode(self, enable: bool):
         """
-        Enable or disable RTD. Note, this will reconfigure input multiplexer mapping
-        for ADC2 if ADC2 is configured to read RTD pins AIN4-AIN7.
+        Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
+        if ADC2 is configured to read RTD pins AIN4-AIN7.
 
         Args:
             `enable` (bool): True to enable RTD, False to disable
@@ -599,19 +626,21 @@ class EdgePiADC(SPI):
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
-        apply_opcodes(reg_values, ops_list)
-        _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
+        if len(ops_list) > 0:
+            _logger.debug(f"opcodes = {ops_list}")
+            apply_opcodes(reg_values, ops_list)
+            _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
-        # write updated reg values to ADC using a single write.
-        data = [entry["value"] for entry in reg_values.values()]
-        self.__write_register(ADCReg.REG_ID, data)
+            # write updated reg values to ADC using a single write.
+            data = [entry["value"] for entry in reg_values.values()]
+            self.__write_register(ADCReg.REG_ID, data)
 
-        # validate updates were applied correctly
-        if validate:
-            self.__validate_updates(reg_values)
+            # validate updates were applied correctly
+            if validate:
+                self.__validate_updates(reg_values)
 
-        # update ADC state
-        self.__state.reg_map = reg_values
+            # update ADC state
+            self.__state.reg_map = reg_values
 
         return reg_values
 
