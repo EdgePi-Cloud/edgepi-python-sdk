@@ -30,10 +30,8 @@ def _format_mux_values(mux_p: CH, mux_n: CH):
 
 def generate_mux_opcodes(mux_updates: dict):
     """
-    Generates list of OpCodes for updating mux mapping. Only updates requested
-    multiplexer(s). For example, if user passes in update for mux_p, this
-    will be applied without overwriting the previous configuration for mux_n.
-    If a user updates both mux_p, and mux_n, both will be updated.
+    Generates list of OpCodes for updating input multiplexer mapping.
+    Updates both positive and negative multiplexers.
 
     Args:
         `mux_updates` (dict): values for updating multiplexer mapping.

@@ -442,15 +442,6 @@ class EdgePiADC(SPI):
             `list`: if not empty, contains OpCode(s) for updating multiplexer
                 channel assignment for ADC1, ADC2, or both.
         """
-        args = filter_dict(locals(), "self")
-
-        # no multiplexer config to update
-        if all(x is None for x in list(args.values())):
-            return []
-
-        # default args don't work here because __config is always passing in args for each
-        # parameter, whether they are None or channel numbers
-        # TODO: private method
         # only update mux_n if mux_p is updated
         if adc_1_mux_p is None:
             adc_1_mux_n = None
@@ -458,9 +449,13 @@ class EdgePiADC(SPI):
         if adc_2_mux_p is None:
             adc_2_mux_n = None
 
+        # no multiplexer config to update
+        args = filter_dict(locals(), "self", None)
+        if not args:
+            return []
+
         # allowed channels depend on RTD_EN status
-        channels = list(filter(lambda x: x is not None, args.values()))
-        # TODO: pass in as arg to avoid duplicate SPI reads
+        channels = list(args.values())
         rtd_enabled = self.__is_rtd_on()
         validate_channels_allowed(channels, rtd_enabled)
 
