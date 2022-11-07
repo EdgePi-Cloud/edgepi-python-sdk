@@ -291,20 +291,6 @@ def test_add_change_flags_adds_flags(reg_values):
 
 
 @pytest.mark.parametrize(
-    "reg_values, opcodes",
-    [
-        ({}, []),
-        ({0x0: {}}, []),
-        ({}, [AvgMode.AVG_1]),
-    ],
-)
-def test_apply_opcodes_raises(reg_values, opcodes):
-    with pytest.raises(Exception) as err:
-        apply_opcodes(reg_values, opcodes)
-    assert "register_values and opcodes args must both be non-empty" in str(err.value)
-
-
-@pytest.mark.parametrize(
     "reg_values, opcodes, out",
     [
         (
