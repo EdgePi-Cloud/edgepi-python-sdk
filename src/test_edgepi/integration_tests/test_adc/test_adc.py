@@ -3,7 +3,6 @@
 
 import pytest
 
-# TODO: commented out until RTD module added
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADCNum,
@@ -31,9 +30,6 @@ def fixture_adc():
     yield adc
 
 
-# TODO: these tests are passing but refactoring of RTD channel validation logic
-# is now resulting in eexceptions being raised. Commented out until RTD
-# enable/disable functionality is added.
 @pytest.mark.parametrize(
     "args, updated_vals",
     [
@@ -908,7 +904,6 @@ def test_config(args, updated_vals, adc):
             assert entry["value"] == original_regs[addx]
 
     # reset adc registers to pre-test values
-    # TODO: now resets mux_p = FLOAT, mux_n = AINCOM --> update test values
     adc.reset()
 
 
