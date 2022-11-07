@@ -120,7 +120,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_mux_n": CH.AIN0,
+                "adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AIN0,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x0,
@@ -131,7 +131,7 @@ def fixture_adc():
                 "adc_1_mux_n": CH.AIN1,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x01,
+                ADCReg.REG_INPMUX.value: 0x0A,
             },
         ),
         (
@@ -139,7 +139,7 @@ def fixture_adc():
                 "adc_1_mux_n": CH.AIN2,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x02,
+                ADCReg.REG_INPMUX.value: 0x0A,
             },
         ),
         (
@@ -147,7 +147,7 @@ def fixture_adc():
                 "adc_1_mux_n": CH.AIN3,
             },
             {
-                ADCReg.REG_INPMUX.value: 0x03,
+                ADCReg.REG_INPMUX.value: 0x0A,
             },
         ),
         (
@@ -204,7 +204,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN0,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x01,
+                ADCReg.REG_ADC2MUX.value: 0x0A,
             },
         ),
         (
@@ -212,7 +212,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN1,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x11,
+                ADCReg.REG_ADC2MUX.value: 0x1A,
             },
         ),
         (
@@ -220,7 +220,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN2,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x21,
+                ADCReg.REG_ADC2MUX.value: 0x2A,
             },
         ),
         (
@@ -228,7 +228,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN3,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x31,
+                ADCReg.REG_ADC2MUX.value: 0x3A,
             },
         ),
         (
@@ -236,7 +236,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN4,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x41,
+                ADCReg.REG_ADC2MUX.value: 0x4A,
             },
         ),
         (
@@ -244,7 +244,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN5,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x51,
+                ADCReg.REG_ADC2MUX.value: 0x5A,
             },
         ),
         (
@@ -252,7 +252,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN6,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x61,
+                ADCReg.REG_ADC2MUX.value: 0x6A,
             },
         ),
         (
@@ -260,7 +260,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN7,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x71,
+                ADCReg.REG_ADC2MUX.value: 0x7A,
             },
         ),
         (
@@ -268,7 +268,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AINCOM,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0xA1,
+                ADCReg.REG_ADC2MUX.value: 0xAA,
             },
         ),
         (
@@ -276,7 +276,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.FLOAT,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0xF1,
+                ADCReg.REG_ADC2MUX.value: 0xFA,
             },
         ),
         (
@@ -378,7 +378,7 @@ def fixture_adc():
             },
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
-                ADCReg.REG_ADC2MUX.value: 0x21,
+                ADCReg.REG_ADC2MUX.value: 0x2A,
             },
         ),
         (
@@ -898,6 +898,8 @@ def test_config(args, updated_vals, adc):
     updated_regs = adc._EdgePiADC__read_registers_to_map()
 
     for addx, entry in updates.items():
+        if not isinstance(entry, dict):
+            continue
         # assert update values used by __config() were written to registers
         assert entry["value"] == updated_regs[addx]
 
@@ -908,6 +910,7 @@ def test_config(args, updated_vals, adc):
             assert entry["value"] == original_regs[addx]
 
     # reset adc registers to pre-test values
+    # TODO: now resets mux_p = FLOAT, mux_n = AINCOM --> update test values
     adc.reset()
 
 

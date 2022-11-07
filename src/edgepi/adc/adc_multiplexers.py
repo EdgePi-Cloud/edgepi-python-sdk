@@ -1,11 +1,12 @@
 """ Helper methods for EdgePi ADC multiplexer mapping """
 
+import logging
 
 from bitstring import pack
-
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
 
+_logger = logging.getLogger(__name__)
 
 MUXS_PER_ADC = 2
 NUM_CHANNELS = 11
@@ -19,23 +20,10 @@ class ChannelNotAvailableError(ValueError):
 
 
 def _format_mux_values(mux_p: CH, mux_n: CH):
-    # updating mux_p bits only, mask mux_p bits
-    if mux_n is None:
-        mask = BitMask.HIGH_NIBBLE
-        # replace None with 0 for building bitstring
-        mux_n_val = 0
-        mux_p_val = mux_p.value
-    # updating mux_n bits only, mask mux_n bits
-    elif mux_p is None:
-        mask = BitMask.LOW_NIBBLE
-        # replace None with 0 for building bitstring
-        mux_p_val = 0
-        mux_n_val = mux_n.value
-    # updating both mux_n and mux_p
-    else:
-        mask = BitMask.BYTE
-        mux_p_val = mux_p.value
-        mux_n_val = mux_n.value
+    # all use cases will always update both mux_n and mux_p
+    mask = BitMask.BYTE
+    mux_p_val = mux_p.value
+    mux_n_val = mux_n.value
 
     return mux_p_val, mux_n_val, mask
 
@@ -61,6 +49,8 @@ def generate_mux_opcodes(mux_updates: dict):
     Returns:
         `list`: OpCodes for updated multiplexer mapping
     """
+    _logger.debug(f"mux updates = {mux_updates}")
+
     mux_opcodes = []
     # generate OpCodes for mux updates
     for addx, byte in mux_updates.items():
@@ -68,7 +58,7 @@ def generate_mux_opcodes(mux_updates: dict):
         mux_n = byte[1]
 
         # not updating mux's for this adc_num (no args passed)
-        if mux_p is None and mux_n is None:
+        if mux_p is None or mux_n is None:
             continue
 
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
@@ -76,6 +66,8 @@ def generate_mux_opcodes(mux_updates: dict):
         adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
 
         mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
+
+    _logger.debug(f"mux opcodes = {mux_opcodes}")
 
     return mux_opcodes
 
