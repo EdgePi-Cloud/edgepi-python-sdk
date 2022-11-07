@@ -5,19 +5,19 @@ import pytest
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
-from edgepi.dac.dac_calibration import DACcalibParam
+from edgepi.calibration.calibration_constants import CalibParam
 
 
 @pytest.fixture(name="dac_ops")
 def fixture_test_dac_ops():
-    dict_calibration_param = {0 : DACcalibParam(2.5, 0, 5.0, 0),
-                              1 : DACcalibParam(2.5, 0, 5.0, 0),
-                              2 : DACcalibParam(2.5, 0, 5.0, 0),
-                              3 : DACcalibParam(2.5, 0, 5.0, 0),
-                              4 : DACcalibParam(2.5, 0, 5.0, 0),
-                              5 : DACcalibParam(2.5, 0, 5.0, 0),
-                              6 : DACcalibParam(2.5, 0, 5.0, 0),
-                              7 : DACcalibParam(2.5, 0, 5.0, 0)}
+    dict_calibration_param = {0 : CalibParam(1.0, 0.0),
+                              1 : CalibParam(1.0, 0.0),
+                              2 : CalibParam(1.0, 0.0),
+                              3 : CalibParam(1.0, 0.0),
+                              4 : CalibParam(1.0, 0.0),
+                              5 : CalibParam(1.0, 0.0),
+                              6 : CalibParam(1.0, 0.0),
+                              7 : CalibParam(1.0, 0.0)}
     dac_ops = DACCommands(dict_calibration_param)
     return dac_ops
 
@@ -106,23 +106,22 @@ def test_dac_generate_write_and_update_command(a, b, c, dac_ops):
 # rounding up/down during conversion ?
 
 
-@pytest.mark.parametrize(
-    "ch, expected, result", [(1, 2.345, 30030), (0, 2.345, 30030), (3, 2.345, 30030)]
-)
-def test_dac_voltage_to_code(ch, expected, result, dac_ops):
-    assert dac_ops.voltage_to_code(ch, expected) == result
+@pytest.mark.parametrize("ch, expected, dac_gain, result",
+                        [(1, 2.345, 1, 30736), (0, 2.345, 2, 15368), (3, 2.345, 1, 30736)])
+def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
+    assert dac_ops.voltage_to_code(ch, expected, dac_gain) == result
 
 
 @pytest.mark.parametrize(
-    "ch, code, result",
+    "ch, code, dac_gain, result",
     [
-        (1, 33798, 2.639),
-        (0, 33798, 2.639),
-        (3, 33798, 2.639),
+        (1, 33798, 1, 2.578),
+        (0, 33798, 2, 5.158),
+        (3, 33798, 1, 2.579),
     ],
 )
-def test_dac_code_to_voltage(ch, code, result, dac_ops):
-    assert round(dac_ops.code_to_voltage(ch, code), 3) == round((result), 3)
+def test_dac_code_to_voltage(ch, code, dac_gain, result, dac_ops):
+    assert pytest.approx(dac_ops.code_to_voltage(ch, code, dac_gain), 0.001) == result
 
 
 @pytest.mark.parametrize(
@@ -245,5 +244,8 @@ def test_dac_voltage_precisions(dac_ops):
     i = 0
     step = 0.001
     while i < 5.0:
-        dac_ops.voltage_to_code(1, i)
+        dac_ops.voltage_to_code(1, i, 1)
+        i += step
+    while i < 10.0:
+        dac_ops.voltage_to_code(1, i, 2)
         i += step
