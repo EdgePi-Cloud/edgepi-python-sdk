@@ -4,7 +4,7 @@
 from bitstring import pack
 
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
-from edgepi.adc.adc_constants import ADCChannel as CH
+from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
 
 
 MUXS_PER_ADC = 2
@@ -40,9 +40,12 @@ def _format_mux_values(mux_p: CH, mux_n: CH):
     return mux_p_val, mux_n_val, mask
 
 
-def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
+def generate_mux_opcodes(mux_updates: dict):
     """
-    Generates list of OpCodes for updating mux mapping
+    Generates list of OpCodes for updating mux mapping. Only updates requested
+    multiplexer(s). For example, if user passes in update for mux_p, this
+    will be applied without overwriting the previous configuration for mux_n.
+    If a user updates both mux_p, and mux_n, both will be updated.
 
     Args:
         `mux_updates` (dict): values for updating multiplexer mapping.
@@ -70,14 +73,6 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
 
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
 
-        # update mux_register values for duplicate mapping validation, but only
-        # if these were updated
-        if not mux_p is None:
-            mux_values[addx][0] = mux_p_val
-
-        if not mux_n is None:
-            mux_values[addx][1] = mux_n_val
-
         adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
 
         mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
@@ -87,7 +82,8 @@ def generate_mux_opcodes(mux_updates: dict, mux_values: dict):
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
-    Checks if requested input channels to be mapped are available due to RTD_EN status
+    Checks if requested input channels to be mapped are available due to RTD_EN status,
+    i.e. in case ADC2 is being used while ADC1 is in RTD mode.
 
     Args:
         `channels` (list): list of ADCChannel objects representing input channel mapping
@@ -95,12 +91,12 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
     # channels available depend on RTD_EN status
     allowed_channels = (
-        [CH.AIN0, CH.AIN1, CH.AIN2, CH.AIN3, CH.AINCOM, CH.FLOAT]
+        AllowedChannels.RTD_ON.value
         if rtd_enabled
-        else list(CH)
+        else AllowedChannels.RTD_OFF.value
     )
     for ch in channels:
         if ch not in allowed_channels:
             raise ChannelNotAvailableError(
-                f"Channel {ch.value} is currently not available. Disable RTD in order to use."
+                f"Channel 'AIN{ch.value}' is currently not available. Disable RTD in order to use."
             )
