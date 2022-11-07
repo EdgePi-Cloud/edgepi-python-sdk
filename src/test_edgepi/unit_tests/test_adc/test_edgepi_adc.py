@@ -106,24 +106,6 @@ def test_read_registers_to_map(mocker, adc):
             {"adc_1_analog_in": CH.AIN7, "adc_2_analog_in": CH.AIN5},
             {ADCReg.REG_INPMUX.value: 0x7A, ADCReg.REG_ADC2MUX.value: 0x5A},
         ),
-        # set adc1 mux_n w/o mux_p
-        (
-            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_mux_n": CH.AINCOM},
-            {ADCReg.REG_INPMUX.value: 0x01},
-        ),
-        # set adc2 mux_n w/o mux_p
-        (
-            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_2_mux_n": CH.AIN5},
-            {ADCReg.REG_ADC2MUX.value: 0x23},
-        ),
-        # set both adc mux_n w/o mux_p
-        (
-            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_mux_n": CH.AIN7, "adc_2_mux_n": CH.AIN5},
-            {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-        ),
         # set all mux pins
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
@@ -350,6 +332,37 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
             assert entry["value"] == update_vals[addx]
         else:
             assert entry["value"] == adc_vals[addx]
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        # set adc1 mux_n w/o mux_p
+        (
+            {"adc_1_mux_n": CH.AINCOM}
+        ),
+        # set adc2 mux_n w/o mux_p
+        (
+            {"adc_2_mux_n": CH.AIN5}
+        ),
+        # set both adc mux_n w/o mux_p
+        (
+            {"adc_1_mux_n": CH.AIN7, "adc_2_mux_n": CH.AIN5}
+        ),
+    ]
+)
+def test_config_raises(mocker, args, adc):
+    adc_vals = deepcopy(adc_default_vals)
+    # mock each call to __read_register
+    mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
+        side_effect=[
+            adc_vals,
+        ],
+    )
+    with pytest.raises(ValueError):
+        print(args)
+        adc._EdgePiADC__config(**args)
 
 
 @pytest.mark.parametrize(
