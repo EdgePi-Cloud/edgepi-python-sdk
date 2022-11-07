@@ -94,9 +94,6 @@ def apply_opcodes(register_values: dict, opcodes: list):
         the updated values and change flags, formatted as:
 
             { reg_addx (int): {"value": int, "is_changed": bool} }
-
-    Raises:
-        ValueError: if either register_values or opcodes is empty
     """
     _format_register_map(register_values)
     if len(register_values) < 1 or len(opcodes) < 1:
