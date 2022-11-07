@@ -355,15 +355,23 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
 
 
 @pytest.mark.parametrize(
-    "mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected",
+    "mux_map, args, expected",
     [
-        ([0x12, 0x34], None, None, None, None, []),
         (
             [0x12, 0x34],
-            CH.AIN0,
-            None,
-            None,
-            None,
+            {
+                'adc_1_mux_p': None,
+                'adc_2_mux_p': None,
+                'adc_1_mux_n': None,
+                'adc_2_mux_n': None,
+            },
+            []
+        ),
+        (
+            [0x12, 0x34],
+            {
+                'adc_1_mux_p': CH.AIN0,
+            },
             [
                 OpCode(
                     op_code=0x0A,
@@ -374,27 +382,12 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            CH.AIN5,
-            None,
-            None,
-            None,
+            {
+                'adc_2_mux_p': CH.AIN0,
+            },
             [
                 OpCode(
-                    op_code=0x5A,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                )
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            None,
-            CH.AIN5,
-            None,
-            None,
-            [
-                OpCode(
-                    op_code=0x5A,
+                    op_code=0x0A,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.BYTE.value,
                 )
@@ -402,26 +395,24 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            None,
-            None,
-            CH.AIN6,
-            None,
+            {
+                'adc_1_mux_n': CH.AIN0,
+            },
             [],
         ),
         (
             [0x12, 0x34],
-            None,
-            None,
-            None,
-            CH.AINCOM,
+            {
+                'adc_2_mux_n': CH.AIN0,
+            },
             [],
         ),
         (
             [0x12, 0x34],
-            CH.AIN0,
-            CH.AIN1,
-            None,
-            None,
+            {
+                'adc_1_mux_p': CH.AIN0,
+                'adc_2_mux_p': CH.AIN1,
+            },
             [
                 OpCode(
                     op_code=0x0A,
@@ -437,18 +428,18 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            None,
-            None,
-            CH.AIN7,
-            CH.AIN6,
+            {
+                'adc_1_mux_n': CH.AIN0,
+                'adc_2_mux_n': CH.AIN1,
+            },
             [],
         ),
         (
             [0x12, 0x34],
-            CH.AIN6,
-            None,
-            CH.AIN7,
-            None,
+            {
+                'adc_1_mux_p': CH.AIN6,
+                'adc_1_mux_n': CH.AIN7,
+            },
             [
                 OpCode(
                     op_code=0x67,
@@ -459,13 +450,13 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            None,
-            CH.AIN4,
-            None,
-            CH.AIN3,
+            {
+                'adc_2_mux_p': CH.AIN6,
+                'adc_2_mux_n': CH.AIN7,
+            },
             [
                 OpCode(
-                    op_code=0x43,
+                    op_code=0x67,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
@@ -473,37 +464,20 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            CH.AIN0,
-            CH.AIN1,
-            CH.AIN2,
-            CH.AIN3,
+            {
+                'adc_1_mux_p': CH.AIN3,
+                'adc_1_mux_n': CH.AIN4,
+                'adc_2_mux_p': CH.AIN5,
+                'adc_2_mux_n': CH.AIN6,
+            },
             [
                 OpCode(
-                    op_code=0x02,
+                    op_code=0x34,
                     reg_address=ADCReg.REG_INPMUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
                 OpCode(
-                    op_code=0x13,
-                    reg_address=ADCReg.REG_ADC2MUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-            ],
-        ),
-        (
-            [0x02, 0x13],
-            CH.AIN0,
-            CH.AIN1,
-            CH.AIN2,
-            CH.AIN3,
-            [
-                OpCode(
-                    op_code=0x02,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-                OpCode(
-                    op_code=0x13,
+                    op_code=0x56,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
@@ -511,115 +485,44 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         ),
         (
             [0x12, 0x34],
-            CH.AIN5,
-            CH.AIN7,
-            CH.AIN6,
-            CH.AIN4,
+            {
+                'adc_1_mux_p': CH.AIN3,
+                'adc_1_mux_n': CH.AIN4,
+                'adc_2_mux_n': CH.AIN6,
+            },
+            [
+                OpCode(
+                    op_code=0x34,
+                    reg_address=ADCReg.REG_INPMUX.value,
+                    op_mask=BitMask.BYTE.value,
+                ),
+            ],
+        ),
+        (
+            [0x12, 0x34],
+            {
+                'adc_1_mux_n': CH.AIN4,
+                'adc_2_mux_p': CH.AIN5,
+                'adc_2_mux_n': CH.AIN6,
+            },
             [
                 OpCode(
                     op_code=0x56,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-                OpCode(
-                    op_code=0x74,
                     reg_address=ADCReg.REG_ADC2MUX.value,
                     op_mask=BitMask.BYTE.value,
                 ),
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            CH.AIN0,
-            None,
-            CH.AIN2,
-            CH.AIN7,
-            [
-                OpCode(
-                    op_code=0x02,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            None,
-            CH.AIN2,
-            CH.AIN3,
-            CH.AINCOM,
-            [
-                OpCode(
-                    op_code=0x2A,
-                    reg_address=ADCReg.REG_ADC2MUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            CH.AIN0,
-            CH.AIN1,
-            None,
-            CH.AIN3,
-            [
-                OpCode(
-                    op_code=0x0A,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-                OpCode(
-                    op_code=0x13,
-                    reg_address=ADCReg.REG_ADC2MUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            CH.AIN0,
-            CH.AIN1,
-            CH.AIN2,
-            None,
-            [
-                OpCode(
-                    op_code=0x02,
-                    reg_address=ADCReg.REG_INPMUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-                OpCode(
-                    op_code=0x1A,
-                    reg_address=ADCReg.REG_ADC2MUX.value,
-                    op_mask=BitMask.BYTE.value,
-                ),
-            ],
-        ),
-        (
-            [0x12, 0x34],
-            None,
-            CH.AIN4,
-            None,
-            CH.AIN3,
-            [
-                OpCode(
-                    op_code=0x43,
-                    reg_address=ADCReg.REG_ADC2MUX.value,
-                    op_mask=BitMask.BYTE.value,
-                )
             ],
         ),
     ],
 )
 def test_get_channel_assign_opcodes(
-    mocker, mux_map, adc_1_mux_p, adc_2_mux_p, adc_1_mux_n, adc_2_mux_n, expected, adc
+    mocker, mux_map, args, expected, adc
 ):
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         side_effect=[[mux_map[0]], [mux_map[1]]],
     )
-    out = adc._EdgePiADC__get_channel_assign_opcodes(
-        adc_1_mux_p=adc_1_mux_p, adc_2_mux_p=adc_2_mux_p, adc_1_mux_n=adc_1_mux_n, adc_2_mux_n=adc_2_mux_n
-    )
+    out = adc._EdgePiADC__get_channel_assign_opcodes(**args)
     assert out == expected
 
 
@@ -820,3 +723,85 @@ def test_rtd_mode(mocker, enable, adc_2_mux, config_calls, adc):
     )
     adc.rtd_mode(enable=enable)
     config.assert_called_once_with(**config_calls)
+
+
+@pytest.mark.parametrize(
+    "args, result",
+    [
+        (
+            {
+                'adc_1_analog_in': None,
+                'adc_2_analog_in': None,
+                'adc_1_mux_n': None,
+                'adc_2_mux_n': None,
+            },
+            {},
+        ),
+        (
+            {
+                'filter_mode': None,
+            },
+            {},
+        ),
+        (
+            {
+                'adc_1_analog_in': CH.AIN0,
+                'adc_2_analog_in': None,
+                'adc_1_mux_n': None,
+                'adc_2_mux_n': None,
+            },
+            {
+                'adc_1_mux_p': CH.AIN0,
+            },
+        ),
+        (
+            {
+                'adc_1_analog_in': None,
+                'adc_2_analog_in': CH.AIN0,
+                'adc_1_mux_n': None,
+                'adc_2_mux_n': None,
+            },
+            {
+                'adc_2_mux_p': CH.AIN0,
+            },
+        ),
+        (
+            {
+                'adc_1_analog_in': None,
+                'adc_2_analog_in': None,
+                'adc_1_mux_n': CH.AIN0,
+                'adc_2_mux_n': None,
+            },
+            {
+                'adc_1_mux_n': CH.AIN0,
+            },
+        ),
+        (
+            {
+                'adc_1_analog_in': None,
+                'adc_2_analog_in': None,
+                'adc_1_mux_n': None,
+                'adc_2_mux_n': CH.AIN0,
+            },
+            {
+                'adc_2_mux_n': CH.AIN0,
+            },
+        ),
+        (
+            {
+                'adc_1_analog_in': CH.AIN0,
+                'adc_2_analog_in': CH.AIN1,
+                'adc_1_mux_n': CH.AIN2,
+                'adc_2_mux_n': CH.AIN3,
+            },
+            {
+                'adc_1_mux_p': CH.AIN0,
+                'adc_2_mux_p': CH.AIN1,
+                'adc_1_mux_n': CH.AIN2,
+                'adc_2_mux_n': CH.AIN3,
+            },
+        ),
+    ]
+)
+def test_extract_mux_args(args, result, adc):
+    assert adc._EdgePiADC__extract_mux_args(args) == result

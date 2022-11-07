@@ -421,10 +421,10 @@ class EdgePiADC(SPI):
     # Case 3: user sets any differential mode -> mux_n pass in as arg
     def __get_channel_assign_opcodes(
         self,
-        adc_1_mux_p: CH,
-        adc_2_mux_p: CH,
-        adc_1_mux_n: CH,
-        adc_2_mux_n: CH,
+        adc_1_mux_p: CH = None,
+        adc_2_mux_p: CH = None,
+        adc_1_mux_n: CH = CH.AINCOM,
+        adc_2_mux_n: CH = CH.AINCOM,
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
@@ -451,20 +451,16 @@ class EdgePiADC(SPI):
         # default args don't work here because __config is always passing in args for each
         # parameter, whether they are None or channel numbers
         # TODO: private method
+        # only update mux_n if mux_p is updated
         if adc_1_mux_p is None:
-            # only update mux_n if mux_p is updated
             adc_1_mux_n = None
-        elif adc_1_mux_n is None:
-            # if only updating mux_p, set mux_n to AINCOM
-            adc_1_mux_n = CH.AINCOM
 
         if adc_2_mux_p is None:
             adc_2_mux_n = None
-        elif adc_2_mux_n is None:
-            adc_2_mux_n = CH.AINCOM
 
         # allowed channels depend on RTD_EN status
         channels = list(filter(lambda x: x is not None, args.values()))
+        # TODO: pass in as arg to avoid duplicate SPI reads
         rtd_enabled = self.__is_rtd_on()
         validate_channels_allowed(channels, rtd_enabled)
 
@@ -549,6 +545,29 @@ class EdgePiADC(SPI):
 
         self.__config(**updates)
 
+    @staticmethod
+    def __extract_mux_args(args: dict) -> dict:
+        """
+        Checks args dictionary for input multiplexer settings
+
+        Args:
+            `args` (dict): args formatted as {'arg_name': value}
+
+        Returns:
+            `dict`: input multiplexer args formatted as {'mux_name': value}
+        """
+        mux_arg_names = {
+            'adc_1_analog_in': 'adc_1_mux_p',
+            'adc_2_analog_in': 'adc_2_mux_p',
+            'adc_1_mux_n': 'adc_1_mux_n',
+            'adc_2_mux_n': 'adc_2_mux_n',
+        }
+        only_mux_args = {}
+        for arg, mux_name in mux_arg_names.items():
+            if args.get(arg) is not None:
+                only_mux_args[mux_name] = args[arg]
+        return only_mux_args
+
     def __config(
         self,
         adc_1_analog_in: CH = None,
@@ -602,45 +621,43 @@ class EdgePiADC(SPI):
 
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
+        _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
+
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
         if not rtd_mode_update:
             self.__validate_no_rtd_conflict(args)
-        args = list(args.values())
-        _logger.debug(f"__config: args dict after filter:\n\n{args}\n\n")
+
+        # get opcodes for mapping multiplexers
+        mux_args = self.__extract_mux_args(args)
+        ops_list = self.__get_channel_assign_opcodes(**mux_args)
 
         # extract OpCode type args, since args may contain non-OpCode args
-        ops_list = [
+        args = list(args.values())
+        ops_list += [
             entry.value
             for entry in args
             if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
         ]
-
-        # get opcodes for mapping multiplexers
-        mux_opcodes = self.__get_channel_assign_opcodes(
-            adc_1_analog_in, adc_2_analog_in, adc_1_mux_n, adc_2_mux_n
-        )
-        ops_list += mux_opcodes
 
         # get current register values
         reg_values = self.__read_registers_to_map()
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
-        if len(ops_list) > 0:
-            _logger.debug(f"opcodes = {ops_list}")
-            apply_opcodes(reg_values, ops_list)
-            _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"opcodes = {ops_list}")
+        apply_opcodes(reg_values, ops_list)
+        _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
-            # write updated reg values to ADC using a single write.
-            data = [entry["value"] for entry in reg_values.values()]
-            self.__write_register(ADCReg.REG_ID, data)
+        # write updated reg values to ADC using a single write.
+        data = [entry["value"] for entry in reg_values.values()]
+        self.__write_register(ADCReg.REG_ID, data)
 
-            # validate updates were applied correctly
-            if validate:
-                self.__validate_updates(reg_values)
+        # validate updates were applied correctly
+        if validate:
+            self.__validate_updates(reg_values)
 
-            # update ADC state
-            self.__state.reg_map = reg_values
+        # update ADC state
+        self.__state.reg_map = reg_values
 
         return reg_values
 
