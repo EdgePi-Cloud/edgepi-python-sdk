@@ -28,7 +28,7 @@ from edgepi.adc.adc_multiplexers import (
                 ADCReg.REG_INPMUX: (None, CH.AIN2),
                 ADCReg.REG_ADC2MUX: (None, None),
             },
-            [],
+            [OpCode(0x02, ADCReg.REG_INPMUX.value, BitMask.LOW_NIBBLE.value)],
         ),
         (
             {
@@ -42,28 +42,28 @@ from edgepi.adc.adc_multiplexers import (
                 ADCReg.REG_INPMUX: (CH.AIN7, None),
                 ADCReg.REG_ADC2MUX: (None, None),
             },
-            [],
+            [OpCode(0x70, ADCReg.REG_INPMUX.value, BitMask.HIGH_NIBBLE.value)],
         ),
         (
             {
                 ADCReg.REG_INPMUX: (None, CH.AIN5),
                 ADCReg.REG_ADC2MUX: (None, None),
             },
-            [],
+            [OpCode(0x05, ADCReg.REG_INPMUX.value, BitMask.LOW_NIBBLE.value)],
         ),
         (
             {
                 ADCReg.REG_INPMUX: (None, None),
                 ADCReg.REG_ADC2MUX: (CH.AIN5, None),
             },
-            [],
+            [OpCode(0x50, ADCReg.REG_ADC2MUX.value, BitMask.HIGH_NIBBLE.value)],
         ),
         (
             {
                 ADCReg.REG_INPMUX: (None, None),
                 ADCReg.REG_ADC2MUX: (None, CH.AIN6),
             },
-            [],
+            [OpCode(0x06, ADCReg.REG_ADC2MUX.value, BitMask.LOW_NIBBLE.value)],
         ),
         (
             {
@@ -77,21 +77,27 @@ from edgepi.adc.adc_multiplexers import (
                 ADCReg.REG_INPMUX: (CH.AIN1, None),
                 ADCReg.REG_ADC2MUX: (None, None),
             },
-            [],
+            [OpCode(0x10, ADCReg.REG_INPMUX.value, BitMask.HIGH_NIBBLE.value)],
         ),
         (
             {
                 ADCReg.REG_INPMUX: (CH.AIN5, None),
                 ADCReg.REG_ADC2MUX: (None, CH.AIN6),
             },
-            [],
+            [
+                OpCode(0x50, ADCReg.REG_INPMUX.value, BitMask.HIGH_NIBBLE.value),
+                OpCode(0x06, ADCReg.REG_ADC2MUX.value, BitMask.LOW_NIBBLE.value),
+            ],
         ),
         (
             {
                 ADCReg.REG_INPMUX: (None, CH.AIN5),
                 ADCReg.REG_ADC2MUX: (CH.AIN6, None),
             },
-            [],
+            [
+                OpCode(0x05, ADCReg.REG_INPMUX.value, BitMask.LOW_NIBBLE.value),
+                OpCode(0x60, ADCReg.REG_ADC2MUX.value, BitMask.HIGH_NIBBLE.value),
+            ],
         ),
         (
             {
