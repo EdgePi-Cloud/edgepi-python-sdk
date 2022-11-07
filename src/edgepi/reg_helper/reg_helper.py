@@ -100,7 +100,7 @@ def apply_opcodes(register_values: dict, opcodes: list):
         _logger.error(
             "empty values received for 'register_values' or 'opcodes' args, opcodes not applied"
         )
-        return
+        return register_values
 
     original_regs = deepcopy(register_values)
 
