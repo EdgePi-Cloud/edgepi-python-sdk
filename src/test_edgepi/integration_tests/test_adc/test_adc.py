@@ -898,8 +898,6 @@ def test_config(args, updated_vals, adc):
     updated_regs = adc._EdgePiADC__read_registers_to_map()
 
     for addx, entry in updates.items():
-        if not isinstance(entry, dict):
-            continue
         # assert update values used by __config() were written to registers
         assert entry["value"] == updated_regs[addx]
 
