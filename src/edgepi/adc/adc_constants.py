@@ -251,19 +251,86 @@ class DiffMode(Enum):
 class ADCMode:
     """Stores information about an ADC functional mode"""
 
+    name: str
     addx: int
     mask: int
+    values: dict[int, str]
 
 
 class ADCModes(Enum):
     """Address and mask values for ADC functional modes"""
 
-    CONV = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
-    CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
-    STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
-    DATA_RATE_1 = ADCMode(ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
-    DATA_RATE_2 = ADCMode(ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
-    FILTER = ADCMode(ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
+    CONV_MODE = ADCMode(
+        "conversion-mode",
+        ADCReg.REG_MODE0.value,
+        BitMask.BIT6.value,
+        {ConvMode.PULSE.value.op_code: "pulse", ConvMode.CONTINUOUS.value.op_code: "continuous"},
+    )
+    CHECK_MODE = ADCMode(
+        "checksum-byte-mode",
+        ADCReg.REG_INTERFACE.value,
+        ADCMasks.CHECK_BITS.value,
+        {
+            CheckMode.CHECK_BYTE_OFF.value.op_code: "off",
+            CheckMode.CHECK_BYTE_CHK.value.op_code: "checksum",
+            CheckMode.CHECK_BYTE_CRC.value.op_code: "crc",
+        },
+    )
+    STATUS_MODE = ADCMode(
+        "status-byte-mode",
+        ADCReg.REG_INTERFACE.value,
+        BitMask.BIT2.value,
+        {
+            StatusByte.STATUS_BYTE_OFF.value.op_code: "off",
+            StatusByte.STATUS_BYTE_ON.value.op_code: "on",
+        },
+    )
+    DATA_RATE_1 = ADCMode(
+        "data-rate-adc-1",
+        ADCReg.REG_MODE2.value,
+        BitMask.LOW_NIBBLE.value,
+        {
+            ADC1DataRate.SPS_2P5.value.op_code: "2.5-sps",
+            ADC1DataRate.SPS_5.value.op_code: "5-sps",
+            ADC1DataRate.SPS_10.value.op_code: "10-sps",
+            ADC1DataRate.SPS_16P6.value.op_code: "16.6-sps",
+            ADC1DataRate.SPS_20.value.op_code: "20-sps",
+            ADC1DataRate.SPS_50.value.op_code: "50-sps",
+            ADC1DataRate.SPS_60.value.op_code: "60-sps",
+            ADC1DataRate.SPS_100.value.op_code: "100-sps",
+            ADC1DataRate.SPS_400.value.op_code: "400-sps",
+            ADC1DataRate.SPS_1200.value.op_code: "1200-sps",
+            ADC1DataRate.SPS_2400.value.op_code: "2400-sps",
+            ADC1DataRate.SPS_4800.value.op_code: "4800-sps",
+            ADC1DataRate.SPS_7200.value.op_code: "7200-sps",
+            ADC1DataRate.SPS_14400.value.op_code: "14400-sps",
+            ADC1DataRate.SPS_19200.value.op_code: "19200-sps",
+            ADC1DataRate.SPS_38400.value.op_code: "38400-sps",
+        },
+    )
+    DATA_RATE_2 = ADCMode(
+        "data-rate-adc-2",
+        ADCReg.REG_ADC2CFG.value,
+        ADCMasks.ADC2_DR_BITS.value,
+        {
+            ADC2DataRate.SPS_10.value.op_code: "10-sps",
+            ADC2DataRate.SPS_100.value.op_code: "100-sps",
+            ADC2DataRate.SPS_400.value.op_code: "400-sps",
+            ADC2DataRate.SPS_800.value.op_code: "800-sps",
+        },
+    )
+    FILTER_MODE = ADCMode(
+        "filter-mode",
+        ADCReg.REG_MODE1.value,
+        ADCMasks.FILTER_BITS.value,
+        {
+            FilterMode.SINC1.value.op_code: "sinc-1",
+            FilterMode.SINC2.value.op_code: "sinc-2",
+            FilterMode.SINC3.value.op_code: "sinc-3",
+            FilterMode.SINC4.value.op_code: "sinc-4",
+            FilterMode.FIR.value.op_code: "fir",
+        },
+    )
 
 
 class IDACMUX(Enum):
@@ -365,6 +432,7 @@ class RTDModes(Enum):
 
 class AllowedChannels(Enum):
     """Available channels for reading depend on whether RTD is enabled or not"""
+
     RTD_ON = [
         ADCChannel.AIN0,
         ADCChannel.AIN1,
