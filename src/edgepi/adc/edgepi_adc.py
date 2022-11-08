@@ -53,36 +53,32 @@ _logger = logging.getLogger(__name__)
 # disable caching by default
 @dataclass
 class ADCState:
-    """Represents ADC register states"""
+    """Represents cached ADC state"""
 
-    reg_map: dict  # map of most recently updated register values
+    __reg_map: dict = None # map of most recently updated register values
 
-    def get_state(self, mode: ADCModes) -> int:
+    def get_map(self) -> dict:
         """
-        Get state of an ADC functional mode based on most recently updated register values.
-        Requires a call to __config() after ADC has been instantiated, before calling this.
-
-        This returns the op_code value used to set this functional mode.
-        For example, ConvMode.PULSE uses an op_code value of `0x40`. If the current
-        ADC state indicates conversion mode is ConvMode.PULSE and mode=ADCModes.CONV,
-        this will return `0x40`, which can then be compared to `ConvMode.PULSE.value.op_code`
-        to check if the ADC's conversion mode is set to `PULSE`.
-
-        Args:
-            `mode` (ADCModes): addx and mask used for this functional mode.
+        Get cached ADC state. Requires a call to __config() after ADC has been instantiated
+        before calling this.
 
         Returns:
-            `int`: uint value of the bits corresponding to this functional mode. Compare
-                this to expected configuration's op_code.
+            dict: register map formatted as {int: int}, the same format
+            as EdgePiADC.__read_registers_to_map
         """
-        if self.reg_map is None:
-            raise ADCStateMissingMap("ADCState has not been assigned a register map")
-        # register value at this addx
-        reg_value = self.reg_map[mode.value.addx]["value"]
-        # get op_code corresponding to this mode by letting through only "masked" bits
-        mode_bits = (~mode.value.mask) & reg_value
-        _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
-        return mode_bits
+        if self.__reg_map is None:
+            raise ADCStateMissingMap("No ADC state has been cached yet.")
+
+        return self.__reg_map
+
+    def set_map(self, reg_map: dict):
+        """
+        Assign ADC's cached state
+
+        Args:
+            `reg_map` (dict): register map formatted as {int: {"value": int}}
+        """
+        self.__reg_map = {addx: entry["value"] for (addx, entry) in reg_map.items()}
 
 
 class ADCStateMissingMap(Exception):
@@ -113,7 +109,7 @@ class EdgePiADC(SPI):
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # internal state
-        self.__state = ADCState(reg_map=None)
+        self.__state = ADCState()
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -220,13 +216,14 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1
 
         # get state for configs relevant to conversion delay
-        conv_mode = self.__state.get_state(ADCModes.CONV)
+        # TODO: fix to work with new get_state
+        conv_mode = self.get_state(set(ADCModes.CONV))
         data_rate = (
-            self.__state.get_state(ADCModes.DATA_RATE_1)
+            self.get_state(set(ADCModes.DATA_RATE_1))
             if adc_num == ADCNum.ADC_1
-            else self.__state.get_state(ADCModes.DATA_RATE_2)
+            else self.get_state(ADCModes.DATA_RATE_2)
         )
-        filter_mode = self.__state.get_state(ADCModes.FILTER)
+        filter_mode = self.get_state(set(ADCModes.FILTER))
 
         conv_delay = expected_initial_time_delay(adc_num, data_rate, filter_mode)
         _logger.debug(
@@ -292,17 +289,19 @@ class EdgePiADC(SPI):
 
         # assert adc is in continuous mode (use ADCStatus)
         # TODO: not essential, responsibility can be passed to user
-        if self.__state.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
+        # TODO: fix to work with new get_state
+        if self.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
             )
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         # TODO: essential, these settings can change during reads
+        # TODO: fix to work with new get_state
         data_rate = (
-            self.__state.get_state(ADCModes.DATA_RATE_1)
+            self.get_state(ADCModes.DATA_RATE_1)
             if adc == ADCNum.ADC_1
-            else self.__state.get_state(ADCModes.DATA_RATE_2)
+            else self.get_state(ADCModes.DATA_RATE_2)
         )
         delay = expected_continuous_time_delay(adc, data_rate)
         _logger.debug(
@@ -335,7 +334,7 @@ class EdgePiADC(SPI):
         """
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
         # TODO: not essential
-        if self.__state.get_state(ADCModes.CONV) != ConvMode.PULSE.value.op_code:
+        if self.get_state(ADCModes.CONV) != ConvMode.PULSE.value.op_code:
             self.__config(conversion_mode=ConvMode.PULSE)
 
         # only ADC1 can perform PULSE conversion
@@ -610,8 +609,8 @@ class EdgePiADC(SPI):
         if validate:
             self.__validate_updates(reg_values)
 
-        # update ADC state
-        self.__state.reg_map = reg_values
+        # update ADC state (for state caching)
+        self.__state.set_map(reg_values)
 
         return reg_values
 
@@ -662,3 +661,35 @@ class EdgePiADC(SPI):
 
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
+
+    def get_state(self, modes: set[ADCModes], use_caching: bool = False)-> dict[ADCModes, str]:
+        """
+        Read the current hardware state of configurable ADC properties
+
+        Args:
+            `modes` (set[ADCModes]): ADC properties whose state is to be read
+            `use_caching` (bool, optional): Read cached ADC state for increased performance.
+                Warning, caching is only safe to use if one EdgePiADC instance is in
+                existence at a time for an EdgePi. Do not use caching with multiple
+                EdgePiADC instances acting on the same EdgePi. Defaults to False.
+
+        Returns:
+            dict[ADCModes, any]: mapping of ADC properties to their current state
+        """
+
+        reg_values = self.__read_registers_to_map() if not use_caching else self.__state.get_map()
+
+        for mode in modes:
+
+            # value of this mode's register
+            reg_value = reg_values[mode.value.addx]
+
+            # get value of bits corresponding to this mode by letting through only the bits
+            # that were "masked" when setting this mode (clear all bits except the mode bits)
+            mode_bits = (~mode.value.mask) & reg_value
+            _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
+
+            # name of current value of this mode
+            mode_name = mode.value.values[mode_bits]
+
+            yield mode, mode_name
