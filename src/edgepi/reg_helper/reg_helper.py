@@ -17,6 +17,10 @@ Functions:
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+import logging
+
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -95,6 +99,9 @@ def apply_opcodes(register_values: dict, opcodes: list):
         ValueError: if either register_values or opcodes is empty
     """
     if len(register_values) < 1 or len(opcodes) < 1:
+        _logger.error(
+            "empty values received for 'register_values' or 'opcodes' args, opcodes not applied"
+        )
         raise ValueError("register_values and opcodes args must both be non-empty")
     _format_register_map(register_values)
 

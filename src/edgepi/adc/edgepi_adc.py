@@ -114,6 +114,8 @@ class EdgePiADC(SPI):
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # internal state
         self.__state = ADCState(reg_map=None)
+        # ADC always needs to be in CRC check mode
+        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -123,9 +125,13 @@ class EdgePiADC(SPI):
         """
         Restore ADC to custom EdgePi configuration
         """
+        # turn RTD off to allow updates in case RTD is on
+        self.rtd_mode(enable=False)
         self.__config(
-            adc_1_analog_in=CH.AIN0,
+            adc_1_analog_in=CH.FLOAT,
+            adc_2_analog_in=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
+            adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
         )
 
@@ -404,17 +410,20 @@ class EdgePiADC(SPI):
         _logger.debug("Checking RTD status")
         idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
         idac_1 = idac_mag[4:].uint
-        # TODO: this should be updated to check all RTD properties not just this one
         status = idac_1 != 0x0
         _logger.debug(f"RTD enabled: {status}")
         return status
 
+    # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
+    # Case 1: user sets to adc_x read ch_x -> mux_n auto mapped to AINCOM
+    # Case 2: user sets RTD mode on or off -> mux_n passed in as arg
+    # Case 3: user sets any differential mode -> mux_n pass in as arg
     def __get_channel_assign_opcodes(
         self,
         adc_1_mux_p: CH = None,
         adc_2_mux_p: CH = None,
-        adc_1_mux_n: CH = None,
-        adc_2_mux_n: CH = None,
+        adc_1_mux_n: CH = CH.AINCOM,
+        adc_2_mux_n: CH = CH.AINCOM,
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
@@ -432,14 +441,20 @@ class EdgePiADC(SPI):
             `list`: if not empty, contains OpCode(s) for updating multiplexer
                 channel assignment for ADC1, ADC2, or both.
         """
-        args = filter_dict(locals(), "self")
+        # only update mux_n if mux_p is updated
+        if adc_1_mux_p is None:
+            adc_1_mux_n = None
+
+        if adc_2_mux_p is None:
+            adc_2_mux_n = None
 
         # no multiplexer config to update
-        if all(x is None for x in list(args.values())):
+        args = filter_dict(locals(), "self", None)
+        if not args:
             return []
 
         # allowed channels depend on RTD_EN status
-        channels = list(filter(lambda x: x is not None, args.values()))
+        channels = list(args.values())
         rtd_enabled = self.__is_rtd_on()
         validate_channels_allowed(channels, rtd_enabled)
 
@@ -448,7 +463,9 @@ class EdgePiADC(SPI):
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
         }
 
-        return generate_mux_opcodes(adc_mux_updates)
+        opcodes = generate_mux_opcodes(adc_mux_updates)
+
+        return opcodes
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
         """
@@ -500,8 +517,8 @@ class EdgePiADC(SPI):
 
     def rtd_mode(self, enable: bool):
         """
-        Enable or disable RTD. Note, this will reconfigure input multiplexer mapping
-        for ADC2 if ADC2 is configured to read RTD pins AIN4-AIN7.
+        Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
+        if ADC2 is configured to read RTD pins AIN4-AIN7.
 
         Args:
             `enable` (bool): True to enable RTD, False to disable
@@ -521,6 +538,29 @@ class EdgePiADC(SPI):
             updates = RTDModes.RTD_OFF.value
 
         self.__config(**updates)
+
+    @staticmethod
+    def __extract_mux_args(args: dict) -> dict:
+        """
+        Checks args dictionary for input multiplexer settings
+
+        Args:
+            `args` (dict): args formatted as {'arg_name': value}
+
+        Returns:
+            `dict`: input multiplexer args formatted as {'mux_name': value}
+        """
+        mux_arg_names = {
+            'adc_1_analog_in': 'adc_1_mux_p',
+            'adc_2_analog_in': 'adc_2_mux_p',
+            'adc_1_mux_n': 'adc_1_mux_n',
+            'adc_2_mux_n': 'adc_2_mux_n',
+        }
+        only_mux_args = {}
+        for arg, mux_name in mux_arg_names.items():
+            if args.get(arg) is not None:
+                only_mux_args[mux_name] = args[arg]
+        return only_mux_args
 
     def __config(
         self,
@@ -575,30 +615,30 @@ class EdgePiADC(SPI):
 
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
+        _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
+
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
         if not rtd_mode_update:
             self.__validate_no_rtd_conflict(args)
-        args = list(args.values())
-        _logger.debug(f"__config: args dict after filter:\n\n{args}\n\n")
+
+        # get opcodes for mapping multiplexers
+        mux_args = self.__extract_mux_args(args)
+        ops_list = self.__get_channel_assign_opcodes(**mux_args)
 
         # extract OpCode type args, since args may contain non-OpCode args
-        ops_list = [
+        args = list(args.values())
+        ops_list += [
             entry.value
             for entry in args
             if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
         ]
-
-        # get opcodes for mapping multiplexers
-        mux_opcodes = self.__get_channel_assign_opcodes(
-            adc_1_analog_in, adc_2_analog_in, adc_1_mux_n, adc_2_mux_n
-        )
-        ops_list += mux_opcodes
 
         # get current register values
         reg_values = self.__read_registers_to_map()
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
+        _logger.debug(f"opcodes = {ops_list}")
         apply_opcodes(reg_values, ops_list)
         _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
