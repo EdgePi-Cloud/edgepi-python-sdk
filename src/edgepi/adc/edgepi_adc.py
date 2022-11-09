@@ -155,6 +155,7 @@ class EdgePiADC(SPI):
             `num_regs` (int, optional): number of registers to include in map,
                 starting from and including the register at `start_addx`.
                 Defaults to ADC_NUM_REGS.
+            `override_cache` (bool): force update cached state via SPI read
 
         Returns:
             dict: mapping of uint register addresses to uint register values
