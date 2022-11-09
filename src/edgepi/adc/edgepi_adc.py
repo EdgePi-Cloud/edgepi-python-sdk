@@ -106,19 +106,22 @@ class RTDEnabledError(Exception):
 class EdgePiADC(SPI):
     """EdgePi ADC device"""
 
+    # keep track of ADC register map
     __state: dict
 
-    def __init__(self):
+    def __init__(self, use_caching: bool = False):
         super().__init__(bus_num=6, dev_id=1)
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
-        # read initial internal hardware state
-        # ADC always needs to be in CRC check mode
+        # ADC always needs to be in CRC check mode. This also updates the internal __state.
+        # If this call to __config is removed, replace with a call to get_register_map to
+        # initialize __state.
         self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
+        self.use_caching = use_caching
 
     def __reapply_config(self):
         """
@@ -133,6 +136,31 @@ class EdgePiADC(SPI):
             adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
         )
+
+    def __get_register_map(
+        self, start_addx: ADCReg = ADCReg.REG_ID, num_regs: int = ADC_NUM_REGS
+    ) -> dict[int, int]:
+        """
+        Get a mapping of register addresses to register values, for the specified
+        number of registers. All ADC methods which require register reading should
+        call this method to get the register values.
+
+        Args:
+            `start_addx` (ADCReg, optional): address of register to start read at.
+                Defaults to ADCReg.REG_ID.
+            `num_regs` (int, optional): number of registers to include in map,
+                starting from and including the register at `start_addx`.
+                Defaults to ADC_NUM_REGS.
+
+        Returns:
+            dict: mapping of uint register addresses to uint register values
+        """
+        # if caching is disabled, read registers and update cached state
+        if not self.use_caching:
+            self.__state = self.__read_registers_to_map()
+
+        # return desired number of registers from cached state
+        return self.__state[start_addx.value:num_regs]
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -384,10 +412,6 @@ class EdgePiADC(SPI):
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
         return read_data[1] & 0b01000000
 
-    #new function get_register_map;  all methods call this to get register values
-    # 1. if caching is enabled don't update class var, just return it
-    # 2. if not caching, call below instead to update class var reg map and then return
-    # 3. by default return all registers, or specific num if arg received
     def __read_registers_to_map(self):
         """
         Reads value of all ADC registers to a dictionary
@@ -396,7 +420,7 @@ class EdgePiADC(SPI):
             `dict`: contains {register addx (int): register_value (int)} pairs
         """
         # get register values
-        # TODO: change all read_register calls to use this, 
+        # TODO: change all read_register calls to use get_register_map
         reg_values = self.__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
         addx = ADCReg.REG_ID.value
 
