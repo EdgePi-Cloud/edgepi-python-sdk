@@ -137,8 +137,12 @@ class EdgePiADC(SPI):
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
         )
 
+
     def __get_register_map(
-        self, start_addx: ADCReg = ADCReg.REG_ID, num_regs: int = ADC_NUM_REGS
+        self,
+        start_addx: ADCReg = ADCReg.REG_ID,
+        num_regs: int = ADC_NUM_REGS,
+        override_cache: bool = False
     ) -> dict[int, int]:
         """
         Get a mapping of register addresses to register values, for the specified
@@ -157,9 +161,12 @@ class EdgePiADC(SPI):
         """
         # if caching is disabled, read registers and update cached state
         if not self.use_caching:
+            reg_map = self.__read_registers_to_map()
+            self.__state = reg_map
+            return reg_map[start_addx.value:num_regs]
+        elif self.__state is None or override_cache:
             self.__state = self.__read_registers_to_map()
 
-        # return desired number of registers from cached state
         return self.__state[start_addx.value:num_regs]
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
@@ -683,8 +690,7 @@ class EdgePiADC(SPI):
             self.__validate_updates(reg_values)
 
         # update ADC state (for state caching)
-        # TODO: update the class var reg_map
-        self.__state.set_map(reg_values)
+        self.__state = reg_values
 
         return reg_values
 
@@ -736,8 +742,8 @@ class EdgePiADC(SPI):
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
 
-    # TODO: use_caching should be instance var to allow internal functions to switch
-    def get_state(self, modes: set[ADCModes], use_caching: bool = False)-> dict[ADCModes, str]:
+    # TODO: refactor this to return ADCState dataclass object, takes no args
+    def get_state(self, modes: set[ADCModes])-> dict[ADCModes, str]:
         """
         Read the current hardware state of configurable ADC properties
 
@@ -751,9 +757,7 @@ class EdgePiADC(SPI):
         Returns:
             dict[ADCModes, any]: mapping of ADC properties to their current state
         """
-        # TODO: call get_register_map for values
-
-        reg_values = self.__read_registers_to_map() if not use_caching else self.__state.get_map()
+        reg_values = self.__get_register_map()
 
         for mode in modes:
 
