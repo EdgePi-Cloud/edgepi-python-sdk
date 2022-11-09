@@ -429,7 +429,6 @@ class EdgePiADC(SPI):
             `dict`: contains {register addx (int): register_value (int)} pairs
         """
         # get register values
-        # TODO: change all read_register calls to use get_register_map
         reg_values = self.__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
         addx = ADCReg.REG_ID.value
 
@@ -448,7 +447,8 @@ class EdgePiADC(SPI):
             `bool`: True if RTD_EN pin is on, False otherwise
         """
         _logger.debug("Checking RTD status")
-        idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
+        idac_reg = self.__get_register_map(ADCReg.REG_IDACMAG, num_regs=1)
+        idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
         idac_1 = idac_mag[4:].uint
         status = idac_1 != 0x0
         _logger.debug(f"RTD enabled: {status}")
@@ -565,8 +565,8 @@ class EdgePiADC(SPI):
         """
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
-            # TODO: this should use internal ADCState
-            adc2_mux = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
+            mux_reg = self.__get_register_map(ADCReg.REG_ADC2MUX, num_regs=1)
+            adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
             muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
                 updates = RTDModes.RTD_ON.value | {
@@ -675,7 +675,7 @@ class EdgePiADC(SPI):
         ]
 
         # get current register values
-        reg_values = self.__read_registers_to_map()
+        reg_values = self.__get_register_map()
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
@@ -703,7 +703,7 @@ class EdgePiADC(SPI):
         Args:
             updated_reg_values (dict): register values that were applied in latest __config()
         """
-        reg_values = self.__read_registers_to_map()
+        reg_values = self.__get_register_map()
 
         # check updated value were applied
         for addx, value in reg_values.items():
