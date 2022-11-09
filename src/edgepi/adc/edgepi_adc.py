@@ -160,15 +160,16 @@ class EdgePiADC(SPI):
         Returns:
             dict: mapping of uint register addresses to uint register values
         """
-        # if caching is disabled, read registers and update cached state
-        if not self.use_caching:
+        if self.__state is None or override_cache:
+            self.__state = self.__read_registers_to_map()
+
+        if self.use_caching:
+            return self.__state[start_addx.value:num_regs]
+        else:
+            # if caching is disabled, don't use cached state for return
             reg_map = self.__read_registers_to_map()
             self.__state = reg_map
             return reg_map[start_addx.value:num_regs]
-        elif self.__state is None or override_cache:
-            self.__state = self.__read_registers_to_map()
-
-        return self.__state[start_addx.value:num_regs]
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
