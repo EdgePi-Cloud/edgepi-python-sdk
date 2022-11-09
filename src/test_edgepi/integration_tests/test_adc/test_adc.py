@@ -3,7 +3,6 @@
 
 import pytest
 
-# TODO: commented out until RTD module added
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADCNum,
@@ -31,9 +30,6 @@ def fixture_adc():
     yield adc
 
 
-# TODO: these tests are passing but refactoring of RTD channel validation logic
-# is now resulting in eexceptions being raised. Commented out until RTD
-# enable/disable functionality is added.
 @pytest.mark.parametrize(
     "args, updated_vals",
     [
@@ -120,82 +116,10 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_mux_n": CH.AIN0,
+                "adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AIN0,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x0,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN1,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x01,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN2,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x02,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN3,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x03,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN4,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x04,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN5,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x05,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN6,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x06,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AIN7,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x07,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.AINCOM,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x0A,
-            },
-        ),
-        (
-            {
-                "adc_1_mux_n": CH.FLOAT,
-            },
-            {
-                ADCReg.REG_INPMUX.value: 0x0F,
             },
         ),
         # EdgePI ADC defaults: adc_2_mux_p = AIN0, adc_2_mux_n = AIN1
@@ -204,7 +128,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN0,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x01,
+                ADCReg.REG_ADC2MUX.value: 0x0A,
             },
         ),
         (
@@ -212,7 +136,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN1,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x11,
+                ADCReg.REG_ADC2MUX.value: 0x1A,
             },
         ),
         (
@@ -220,7 +144,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN2,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x21,
+                ADCReg.REG_ADC2MUX.value: 0x2A,
             },
         ),
         (
@@ -228,7 +152,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN3,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x31,
+                ADCReg.REG_ADC2MUX.value: 0x3A,
             },
         ),
         (
@@ -236,7 +160,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN4,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x41,
+                ADCReg.REG_ADC2MUX.value: 0x4A,
             },
         ),
         (
@@ -244,7 +168,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN5,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x51,
+                ADCReg.REG_ADC2MUX.value: 0x5A,
             },
         ),
         (
@@ -252,7 +176,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN6,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x61,
+                ADCReg.REG_ADC2MUX.value: 0x6A,
             },
         ),
         (
@@ -260,7 +184,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AIN7,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0x71,
+                ADCReg.REG_ADC2MUX.value: 0x7A,
             },
         ),
         (
@@ -268,7 +192,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.AINCOM,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0xA1,
+                ADCReg.REG_ADC2MUX.value: 0xAA,
             },
         ),
         (
@@ -276,87 +200,7 @@ def fixture_adc():
                 "adc_2_analog_in": CH.FLOAT,
             },
             {
-                ADCReg.REG_ADC2MUX.value: 0xF1,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN0,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x0,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN1,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x01,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN2,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x02,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN3,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x03,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN4,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x04,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN5,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x05,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN6,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x06,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AIN7,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x07,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.AINCOM,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x0A,
-            },
-        ),
-        (
-            {
-                "adc_2_mux_n": CH.FLOAT,
-            },
-            {
-                ADCReg.REG_ADC2MUX.value: 0x0F,
+                ADCReg.REG_ADC2MUX.value: 0xFA,
             },
         ),
         (
@@ -378,7 +222,7 @@ def fixture_adc():
             },
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
-                ADCReg.REG_ADC2MUX.value: 0x21,
+                ADCReg.REG_ADC2MUX.value: 0x2A,
             },
         ),
         (
