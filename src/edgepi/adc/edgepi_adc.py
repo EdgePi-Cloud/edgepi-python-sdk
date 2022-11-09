@@ -51,11 +51,13 @@ _logger = logging.getLogger(__name__)
 # single private __get_state that uses ADCState caching if caching enabled,
 # otherwise use SPI to update ADCState (update every time if 'no caching')
 # disable caching by default
-@dataclass
+
 class ADCState:
     """Represents cached ADC state"""
 
     __reg_map: dict = None # map of most recently updated register values
+
+    # TODO: instance variables or nested dataclasses for the modes
 
     def get_map(self) -> dict:
         """
@@ -82,7 +84,7 @@ class ADCState:
 
 
 class ADCStateMissingMap(Exception):
-    """"Raised if ADCState.get_state() is called before ADCState.reg_map is assigned a value"""
+    """"Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
 
 
 class ADCRegisterUpdateError(Exception):
@@ -104,12 +106,13 @@ class RTDEnabledError(Exception):
 class EdgePiADC(SPI):
     """EdgePi ADC device"""
 
+    __state: dict
+
     def __init__(self):
         super().__init__(bus_num=6, dev_id=1)
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
-        # internal state
-        self.__state = ADCState()
+        # read internal hardware state
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -375,6 +378,10 @@ class EdgePiADC(SPI):
         read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
         return read_data[1] & 0b01000000
 
+    #new function get_register_map;  all methods call this to get register values
+    # 1. if caching is enabled don't update class var, just return it
+    # 2. if not caching, call below instead to update class var reg map and then return
+    # 3. by default return all registers, or specific num if arg received
     def __read_registers_to_map(self):
         """
         Reads value of all ADC registers to a dictionary
@@ -383,6 +390,7 @@ class EdgePiADC(SPI):
             `dict`: contains {register addx (int): register_value (int)} pairs
         """
         # get register values
+        # TODO: change all read_register calls to use this, 
         reg_values = self.__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
         addx = ADCReg.REG_ID.value
 
@@ -507,6 +515,7 @@ class EdgePiADC(SPI):
         """
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
+            # TODO: this should use internal ADCState
             adc2_mux = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
             muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
@@ -610,6 +619,7 @@ class EdgePiADC(SPI):
             self.__validate_updates(reg_values)
 
         # update ADC state (for state caching)
+        # TODO: update the class var reg_map
         self.__state.set_map(reg_values)
 
         return reg_values
@@ -662,6 +672,7 @@ class EdgePiADC(SPI):
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
 
+    # TODO: use_caching should be instance var to allow internal functions to switch
     def get_state(self, modes: set[ADCModes], use_caching: bool = False)-> dict[ADCModes, str]:
         """
         Read the current hardware state of configurable ADC properties
@@ -676,6 +687,7 @@ class EdgePiADC(SPI):
         Returns:
             dict[ADCModes, any]: mapping of ADC properties to their current state
         """
+        # TODO: call get_register_map for values
 
         reg_values = self.__read_registers_to_map() if not use_caching else self.__state.get_map()
 
