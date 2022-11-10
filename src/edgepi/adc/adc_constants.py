@@ -261,6 +261,11 @@ class ADCModeValue:
     value: Any
     code: Enum
 
+    def __repr__(self) -> str:
+        return (
+            f"value: {self.value}, code: {self.code}"
+        )
+
 
 @dataclass
 class ADCMode:
@@ -289,9 +294,11 @@ class ADCModes(Enum):
         ADCReg.REG_INTERFACE.value,
         ADCMasks.CHECK_BITS.value,
         {
-            CheckMode.CHECK_BYTE_OFF.value.op_code: "off",
-            CheckMode.CHECK_BYTE_CHK.value.op_code: "checksum",
-            CheckMode.CHECK_BYTE_CRC.value.op_code: "crc",
+            CheckMode.CHECK_BYTE_OFF.value.op_code: ADCModeValue("off", CheckMode.CHECK_BYTE_OFF),
+            CheckMode.CHECK_BYTE_CHK.value.op_code: ADCModeValue(
+                "checksum", CheckMode.CHECK_BYTE_CHK
+            ),
+            CheckMode.CHECK_BYTE_CRC.value.op_code: ADCModeValue("crc", CheckMode.CHECK_BYTE_CRC),
         },
     )
     STATUS_MODE = ADCMode(

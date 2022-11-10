@@ -3,9 +3,9 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union
 import logging
 import time
+
 
 from bitstring import pack
 from edgepi.peripherals.spi import SpiDevice as SPI
@@ -31,7 +31,7 @@ from edgepi.adc.adc_constants import (
     REFMUX,
     RTDModes,
     AllowedChannels,
-    ADCModeValue
+    ADCModeValue,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -60,6 +60,7 @@ class ADCReadFields:
     """
     ADC state properties specific to each of ADC1 and ADC2
     """
+
     conversion_mode: ADCModeValue
     data_rate: ADCModeValue
     mux_p: ADCModeValue
@@ -71,17 +72,17 @@ class ADCState:
 
     def __init__(self, reg_map: dict):
         self.__reg_map = reg_map
-        self.adc_1 : ADCReadFields = ADCReadFields(
+        self.adc_1: ADCReadFields = ADCReadFields(
             self.__get_state(ADCModes.CONV_MODE),
             self.__get_state(ADCModes.DATA_RATE_1),
             self.__get_state(ADCModes.ADC1_MUXP),
-            self.__get_state(ADCModes.ADC1_MUXN)
+            self.__get_state(ADCModes.ADC1_MUXN),
         )
-        self.adc_2 : ADCReadFields = ADCReadFields(
+        self.adc_2: ADCReadFields = ADCReadFields(
             ADCModes.CONV_MODE,
             self.__get_state(ADCModes.DATA_RATE_2),
             self.__get_state(ADCModes.ADC2_MUXP),
-            self.__get_state(ADCModes.ADC2_MUXN)
+            self.__get_state(ADCModes.ADC2_MUXN),
         )
         self.filter_mode: ADCModeValue = self.__get_state(ADCModes.FILTER_MODE)
         self.checksum_mode: ADCModeValue = self.__get_state(ADCModes.CHECK_MODE)
@@ -107,12 +108,18 @@ class ADCState:
 
         # name of current value of this mode
         mode_value = mode.value.values[mode_bits]
+        _logger.debug(
+            (
+                f"ADCState: query_mode='{mode}', mode_bits={hex(mode_bits)},"
+                f" mode_value='{mode_value}'"
+            )
+        )
 
         return mode_value
 
 
 class ADCStateMissingMap(Exception):
-    """"Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
+    """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
 
 
 class ADCRegisterUpdateError(Exception):
@@ -175,12 +182,11 @@ class EdgePiADC(SPI):
         """
         self.__state = {addx: entry["value"] for (addx, entry) in reg_map.items()}
 
-
     def __get_register_map(
         self,
         start_addx: ADCReg = ADCReg.REG_ID,
         num_regs: int = ADC_NUM_REGS,
-        override_cache: bool = False
+        override_cache: bool = False,
     ) -> dict[int, int]:
         """
         Get a mapping of register addresses to register values, for the specified
@@ -202,12 +208,12 @@ class EdgePiADC(SPI):
             self.__state = self.__read_registers_to_map()
 
         if self.use_caching:
-            return self.__state[start_addx.value:num_regs]
+            return self.__state[start_addx.value : num_regs]
         else:
             # if caching is disabled, don't use cached state for return
             reg_map = self.__read_registers_to_map()
             self.__state = reg_map
-            return reg_map[start_addx.value:num_regs]
+            return reg_map[start_addx.value : num_regs]
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
         """
@@ -303,9 +309,7 @@ class EdgePiADC(SPI):
         state = self.get_state()
         conv_mode = state.adc_1.conversion_mode.code
         data_rate = (
-            state.adc_1.data_rate.code
-            if adc_num == ADCNum.ADC_1
-            else state.adc_2.data_rate.code
+            state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
         filter_mode = state.filter_mode.code
 
@@ -382,9 +386,7 @@ class EdgePiADC(SPI):
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         data_rate = (
-            state.adc_1.data_rate.code
-            if adc == ADCNum.ADC_1
-            else state.adc_2.data_rate.code
+            state.adc_1.data_rate.code if adc == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
         delay = expected_continuous_time_delay(adc, data_rate)
         _logger.debug(
@@ -561,13 +563,13 @@ class EdgePiADC(SPI):
         mux_n = diff_mode.value.mux_n
         mux_properties = {
             ADCNum.ADC_1: {
-                'adc_1_analog_in': mux_p,
-                'adc_1_mux_n': mux_n,
+                "adc_1_analog_in": mux_p,
+                "adc_1_mux_n": mux_n,
             },
             ADCNum.ADC_2: {
-                'adc_2_analog_in': mux_p,
-                'adc_2_mux_n': mux_n,
-            }
+                "adc_2_analog_in": mux_p,
+                "adc_2_mux_n": mux_n,
+            },
         }
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
@@ -609,7 +611,7 @@ class EdgePiADC(SPI):
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
                 updates = RTDModes.RTD_ON.value | {
                     "adc_2_analog_in": CH.FLOAT,
-                    "adc_2_mux_n": CH.AINCOM
+                    "adc_2_mux_n": CH.AINCOM,
                 }
             else:
                 updates = RTDModes.RTD_ON.value
@@ -630,10 +632,10 @@ class EdgePiADC(SPI):
             `dict`: input multiplexer args formatted as {'mux_name': value}
         """
         mux_arg_names = {
-            'adc_1_analog_in': 'adc_1_mux_p',
-            'adc_2_analog_in': 'adc_2_mux_p',
-            'adc_1_mux_n': 'adc_1_mux_n',
-            'adc_2_mux_n': 'adc_2_mux_n',
+            "adc_1_analog_in": "adc_1_mux_p",
+            "adc_2_analog_in": "adc_2_mux_p",
+            "adc_1_mux_n": "adc_1_mux_n",
+            "adc_2_mux_n": "adc_2_mux_n",
         }
         only_mux_args = {}
         for arg, mux_name in mux_arg_names.items():
@@ -660,7 +662,7 @@ class EdgePiADC(SPI):
         idac_1_mag: IDACMAG = None,
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
-        neg_ref_inp: REFMUX = None
+        neg_ref_inp: REFMUX = None,
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -782,7 +784,7 @@ class EdgePiADC(SPI):
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
 
-    def get_state(self)-> ADCState:
+    def get_state(self) -> ADCState:
         """
         Read the current hardware state of configurable ADC properties
 
@@ -791,4 +793,3 @@ class EdgePiADC(SPI):
         """
         reg_values = self.__get_register_map()
         return ADCState(reg_values)
-        
