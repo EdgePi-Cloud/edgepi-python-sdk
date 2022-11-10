@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 import logging
 import time
 
@@ -29,7 +30,8 @@ from edgepi.adc.adc_constants import (
     IDACMAG,
     REFMUX,
     RTDModes,
-    AllowedChannels
+    AllowedChannels,
+    ADCModeValue
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -52,35 +54,61 @@ _logger = logging.getLogger(__name__)
 # otherwise use SPI to update ADCState (update every time if 'no caching')
 # disable caching by default
 
+
+@dataclass
+class ADCReadFields:
+    """
+    ADC state properties specific to each of ADC1 and ADC2
+    """
+    conversion_mode: ConvMode
+    data_rate: Union[ADC2DataRate, ADC1DataRate]
+    mux_p: CH
+    mux_n: CH
+
+
 class ADCState:
-    """Represents cached ADC state"""
+    """ADC state intended for reading by users"""
 
-    __reg_map: dict = None # map of most recently updated register values
+    def __init__(self, reg_map: dict):
+        self.__reg_map = reg_map
+        self.adc_1 : ADCReadFields = ADCReadFields(
+            self.__get_state(ADCModes.CONV_MODE),
+            self.__get_state(ADCModes.DATA_RATE_1),
+            self.__get_state(ADCModes.ADC1_MUXP),
+            self.__get_state(ADCModes.ADC1_MUXN)
+        )
+        self.adc_2 : ADCReadFields = ADCReadFields(
+            ADCModes.CONV_MODE,
+            self.__get_state(ADCModes.DATA_RATE_2),
+            self.__get_state(ADCModes.ADC2_MUXP),
+            self.__get_state(ADCModes.ADC2_MUXN)
+        )
+        self.filter_mode = self.__get_state(ADCModes.FILTER_MODE)
+        self.checksum_mode = self.__get_state(ADCModes.CHECK_MODE)
+        self.rtd_on = self.__get_state(ADCModes.RTD_MODE)
 
-    # TODO: instance variables or nested dataclasses for the modes
-
-    def get_map(self) -> dict:
+    def __get_state(self, mode: ADCModes) -> ADCModeValue:
         """
-        Get cached ADC state. Requires a call to __config() after ADC has been instantiated
-        before calling this.
-
-        Returns:
-            dict: register map formatted as {int: int}, the same format
-            as EdgePiADC.__read_registers_to_map
-        """
-        if self.__reg_map is None:
-            raise ADCStateMissingMap("No ADC state has been cached yet.")
-
-        return self.__reg_map
-
-    def set_map(self, reg_map: dict):
-        """
-        Assign ADC's cached state
+        Read the current state of configurable ADC properties
 
         Args:
-            `reg_map` (dict): register map formatted as {int: {"value": int}}
+            mode (ADCModes): ADC property whose state is to be read
+
+        Returns:
+            ADCModeValue: information about the current value of this mode
         """
-        self.__reg_map = {addx: entry["value"] for (addx, entry) in reg_map.items()}
+        # value of this mode's register
+        reg_value = self.__reg_map[mode.value.addx]
+
+        # get value of bits corresponding to this mode by letting through only the bits
+        # that were "masked" when setting this mode (clear all bits except the mode bits)
+        mode_bits = (~mode.value.mask) & reg_value
+        _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
+
+        # name of current value of this mode
+        mode_value = mode.value.values[mode_bits]
+
+        return mode_value
 
 
 class ADCStateMissingMap(Exception):
@@ -136,6 +164,16 @@ class EdgePiADC(SPI):
             adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
         )
+
+    def __update_cache_map(self, reg_map: dict):
+        """
+        Format a register map to the same format as `read_registers_to_map` and
+        assign to the internal ADC state.
+
+        Args:
+            `reg_map` (dict): register map formatted as {int: {"value": int}}
+        """
+        self.__state = {addx: entry["value"] for (addx, entry) in reg_map.items()}
 
 
     def __get_register_map(
@@ -692,7 +730,7 @@ class EdgePiADC(SPI):
             self.__validate_updates(reg_values)
 
         # update ADC state (for state caching)
-        self.__state = reg_values
+        self.__update_cache_map(reg_values)
 
         return reg_values
 
@@ -744,34 +782,13 @@ class EdgePiADC(SPI):
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
 
-    # TODO: refactor this to return ADCState dataclass object, takes no args
-    def get_state(self, modes: set[ADCModes])-> dict[ADCModes, str]:
+    def get_state(self)-> ADCState:
         """
         Read the current hardware state of configurable ADC properties
 
-        Args:
-            `modes` (set[ADCModes]): ADC properties whose state is to be read
-            `use_caching` (bool, optional): Read cached ADC state for increased performance.
-                Warning, caching is only safe to use if one EdgePiADC instance is in
-                existence at a time for an EdgePi. Do not use caching with multiple
-                EdgePiADC instances acting on the same EdgePi. Defaults to False.
-
         Returns:
-            dict[ADCModes, any]: mapping of ADC properties to their current state
+            ADCState: information about the current ADC hardware state
         """
         reg_values = self.__get_register_map()
-
-        for mode in modes:
-
-            # value of this mode's register
-            reg_value = reg_values[mode.value.addx]
-
-            # get value of bits corresponding to this mode by letting through only the bits
-            # that were "masked" when setting this mode (clear all bits except the mode bits)
-            mode_bits = (~mode.value.mask) & reg_value
-            _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
-
-            # name of current value of this mode
-            mode_name = mode.value.values[mode_bits]
-
-            yield mode, mode_name
+        return ADCState(reg_values)
+        

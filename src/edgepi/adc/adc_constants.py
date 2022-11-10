@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass
 from enum import Enum, unique
+from typing import Any
 
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_configs import ADCVoltageConfig
@@ -248,13 +249,27 @@ class DiffMode(Enum):
 
 
 @dataclass
+class ADCModeValue:
+    """
+    Stores information about a specific value of an ADC functional mode
+
+    Attributes
+        `value` (any): user-friendly description of this mode value
+        `code` (Enum): internal code used to set this mode value
+    """
+
+    value: Any
+    code: Enum
+
+
+@dataclass
 class ADCMode:
     """Stores information about an ADC functional mode"""
 
     name: str
     addx: int
     mask: int
-    values: dict[int, str]
+    values: dict[int, ADCModeValue]
 
 
 class ADCModes(Enum):
@@ -264,7 +279,10 @@ class ADCModes(Enum):
         "conversion-mode",
         ADCReg.REG_MODE0.value,
         BitMask.BIT6.value,
-        {ConvMode.PULSE.value.op_code: "pulse", ConvMode.CONTINUOUS.value.op_code: "continuous"},
+        {
+            ConvMode.PULSE.value.op_code: ADCModeValue("pulse", ConvMode.PULSE),
+            ConvMode.CONTINUOUS.value.op_code: ADCModeValue("continuous", ConvMode.CONTINUOUS),
+        },
     )
     CHECK_MODE = ADCMode(
         "checksum-byte-mode",
