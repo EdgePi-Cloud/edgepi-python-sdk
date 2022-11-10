@@ -40,7 +40,8 @@ class EdgePiCalibration():
 # TODO: to be used for prepare a value to be upkoaded to eeprom
 # pylint: disable=unused-private-member
     def __from_value_to_memory(self, param: float = None):
-        # TODO: Create range check for calibration param, unittest,change packing into float and chekc precision instead of int
+        # TODO: Create range check for calibration param, unittest,change packing into float and
+        #  chekc precision instead of int
         param = int(param*10**9)
         value = pack("i", param)
         return list(value)

@@ -2,11 +2,13 @@
 
 from enum import Enum
 
-class EEPROMAddress(Enum):
+class EEPROMInfo(Enum):
     """
     EEPROM device address for I2C addressing
     """
     DEV_ADDR = 0x50
+    PAGE_SIZE = 64
+    NUM_OF_PAGE = 512
 
 class ModuleNames(Enum):
     """
