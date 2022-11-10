@@ -71,7 +71,7 @@ class ADCState:
             self.__get_state(ADCModes.ADC1_MUXN),
         )
         self.adc_2: ADCReadFields = ADCReadFields(
-            ADCModes.CONV_MODE,
+            ADCModeValue("continuous", ADCModes.CONV_MODE),
             self.__get_state(ADCModes.DATA_RATE_2),
             self.__get_state(ADCModes.ADC2_MUXP),
             self.__get_state(ADCModes.ADC2_MUXN),
