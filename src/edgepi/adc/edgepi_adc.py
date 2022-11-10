@@ -136,7 +136,7 @@ class EdgePiADC(SPI):
     """
     EdgePi ADC device
 
-    Warning, this class will use caching by default to track the ADC's internal state.
+    Warning, this class uses caching by default to track the ADC's internal state.
     This makes EdgePiADC objects safe to use only in a single dev environment.
     Using multiple EdgePiADC objects, each within a different environment, will lead to
     the cached ADC state being out of sync with the actual hardware state. To avoid this,
