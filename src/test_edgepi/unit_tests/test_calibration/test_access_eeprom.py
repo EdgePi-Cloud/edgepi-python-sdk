@@ -22,6 +22,7 @@ def fixture_test_dac(mocker):
                          (511, 0, [0x7F, 0xC0])
                         ])
 def test__pack_mem_address(page_addr, byte_addr, result, eeprom):
+    # pylint: disable=protected-access
     address_message = eeprom._EdgePiEEPROM__pack_mem_address(page_addr, byte_addr)
     assert address_message == result
 
@@ -33,6 +34,7 @@ def test__pack_mem_address(page_addr, byte_addr, result, eeprom):
                          (32704, [511, 0])
                         ])
 def test__byte_address_generation(memory_address, result, eeprom):
+    # pylint: disable=protected-access
     page_addr, byte_addr = eeprom._EdgePiEEPROM__byte_address_generation(memory_address)
     assert page_addr == result[0]
     assert byte_addr == result[1]

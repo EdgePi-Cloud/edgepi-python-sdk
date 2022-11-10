@@ -6,7 +6,7 @@ import math
 from edgepi.calibration.eeprom_constants import EEPROMInfo
 from edgepi.peripherals.i2c import I2CDevice
 
-#TODO: Maybe use protobuff 
+#TODO: Maybe use protobuff
 #TODO: EEPROM should return structured data class of parameters to calibration class.
 class EdgePiEEPROM(I2CDevice):
     '''
