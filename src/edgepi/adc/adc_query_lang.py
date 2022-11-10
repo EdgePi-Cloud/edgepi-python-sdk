@@ -9,6 +9,7 @@ from enum import Enum
 from edgepi.adc.adc_constants import (
     IDACMAG,
     IDACMUX,
+    REFMUX,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel,
@@ -280,5 +281,49 @@ class ADCModes(Enum):
             IDACMAG.IDAC2_2000.value.op_code: ADCModeValue(2000, IDACMAG.IDAC2_OFF),
             IDACMAG.IDAC2_2500.value.op_code: ADCModeValue(2500, IDACMAG.IDAC2_OFF),
             IDACMAG.IDAC2_3000.value.op_code: ADCModeValue(3000, IDACMAG.IDAC2_OFF),
+        },
+    )
+    REFMUX_POS = ADCMode(
+        "ref-mux-positive",
+        ADCReg.REG_REFMUX.value,
+        ADCMasks.RMUXP_BITS.value,
+        {
+            REFMUX.POS_REF_INT_2P5.value.op_code: ADCModeValue(
+                "2.5 V internal", REFMUX.POS_REF_INT_2P5
+            ),
+            REFMUX.POS_REF_EXT_AIN0.value.op_code: ADCModeValue(
+                "channel 0 external", REFMUX.POS_REF_EXT_AIN0
+            ),
+            REFMUX.POS_REF_EXT_AIN2.value.op_code: ADCModeValue(
+                "channel 2 external", REFMUX.POS_REF_EXT_AIN2
+            ),
+            REFMUX.POS_REF_EXT_AIN4.value.op_code: ADCModeValue(
+                "channel 4 external", REFMUX.POS_REF_EXT_AIN4
+            ),
+            REFMUX.POS_REF_INT_VAVDD.value.op_code: ADCModeValue(
+                "VAVDD", REFMUX.POS_REF_INT_VAVDD
+            ),
+        },
+    )
+    REFMUX_NEG = ADCMode(
+        "ref-mux-negative",
+        ADCReg.REG_REFMUX.value,
+        ADCMasks.RMUXN_BITS.value,
+        {
+            REFMUX.NEG_REF_INT_2P5.value.op_code: ADCModeValue(
+                "2.5 V internal", REFMUX.NEG_REF_INT_2P5
+            ),
+            REFMUX.NEG_REF_EXT_AIN1.value.op_code: ADCModeValue(
+                "channel 1 external", REFMUX.NEG_REF_EXT_AIN1
+            ),
+            REFMUX.NEG_REF_EXT_AIN3.value.op_code: ADCModeValue(
+                "channel 3 external", REFMUX.NEG_REF_EXT_AIN3
+            ),
+            REFMUX.NEG_REF_EXT_AIN5.value.op_code: ADCModeValue(
+                "channel 5 external", REFMUX.NEG_REF_EXT_AIN5
+            ),
+            REFMUX.NEG_REF_INT_VAVSS.value.op_code: ADCModeValue(
+                "VAVSS", REFMUX.NEG_REF_INT_VAVSS
+            ),
         },
     )
