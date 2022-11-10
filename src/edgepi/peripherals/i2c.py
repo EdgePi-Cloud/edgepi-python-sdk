@@ -5,7 +5,7 @@ Classes:
     I2CDevice
 """
 
-
+from typing import Union
 from periphery import I2C
 
 class I2CDevice():
@@ -16,7 +16,7 @@ class I2CDevice():
         self.fd = fd
         self.i2cdev = I2C(fd)
 
-    def set_read_msg(self, addr:int|list = None, msg:list = None):
+    def set_read_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''
         set Read message to be sent through I2C.
         Attributes:
@@ -32,7 +32,7 @@ class I2CDevice():
                     self.i2cdev.Message(msg, read = True)]
         return list_msg
 
-    def set_write_msg(self, addr:int|list = None, msg:list = None):
+    def set_write_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''
         set Write message to be sent through I2C.
         Attributes:
