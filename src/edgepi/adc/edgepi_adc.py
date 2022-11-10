@@ -60,10 +60,10 @@ class ADCReadFields:
     """
     ADC state properties specific to each of ADC1 and ADC2
     """
-    conversion_mode: ConvMode
-    data_rate: Union[ADC2DataRate, ADC1DataRate]
-    mux_p: CH
-    mux_n: CH
+    conversion_mode: ADCModeValue
+    data_rate: ADCModeValue
+    mux_p: ADCModeValue
+    mux_n: ADCModeValue
 
 
 class ADCState:
@@ -83,9 +83,9 @@ class ADCState:
             self.__get_state(ADCModes.ADC2_MUXP),
             self.__get_state(ADCModes.ADC2_MUXN)
         )
-        self.filter_mode = self.__get_state(ADCModes.FILTER_MODE)
-        self.checksum_mode = self.__get_state(ADCModes.CHECK_MODE)
-        self.rtd_on = self.__get_state(ADCModes.RTD_MODE)
+        self.filter_mode: ADCModeValue = self.__get_state(ADCModes.FILTER_MODE)
+        self.checksum_mode: ADCModeValue = self.__get_state(ADCModes.CHECK_MODE)
+        self.rtd_on: ADCModeValue = self.__get_state(ADCModes.RTD_MODE)
 
     def __get_state(self, mode: ADCModes) -> ADCModeValue:
         """
@@ -300,14 +300,14 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1
 
         # get state for configs relevant to conversion delay
-        # TODO: fix to work with new get_state
-        conv_mode = self.get_state(set(ADCModes.CONV))
+        state = self.get_state()
+        conv_mode = state.adc_1.conversion_mode.code
         data_rate = (
-            self.get_state(set(ADCModes.DATA_RATE_1))
+            state.adc_1.data_rate.code
             if adc_num == ADCNum.ADC_1
-            else self.get_state(ADCModes.DATA_RATE_2)
+            else state.adc_2.data_rate.code
         )
-        filter_mode = self.get_state(set(ADCModes.FILTER))
+        filter_mode = state.filter_mode.code
 
         conv_delay = expected_initial_time_delay(adc_num, data_rate, filter_mode)
         _logger.debug(
@@ -374,18 +374,17 @@ class EdgePiADC(SPI):
         # assert adc is in continuous mode (use ADCStatus)
         # TODO: not essential, responsibility can be passed to user
         # TODO: fix to work with new get_state
-        if self.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
+        state = self.get_state()
+        if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
             )
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
-        # TODO: essential, these settings can change during reads
-        # TODO: fix to work with new get_state
         data_rate = (
-            self.get_state(ADCModes.DATA_RATE_1)
+            state.adc_1.data_rate.code
             if adc == ADCNum.ADC_1
-            else self.get_state(ADCModes.DATA_RATE_2)
+            else state.adc_2.data_rate.code
         )
         delay = expected_continuous_time_delay(adc, data_rate)
         _logger.debug(
@@ -417,8 +416,9 @@ class EdgePiADC(SPI):
         to `CONTINUOUS` conversion mode: use `read_voltage` instead.
         """
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
-        # TODO: not essential
-        if self.get_state(ADCModes.CONV) != ConvMode.PULSE.value.op_code:
+        state = self.get_state()
+
+        if state.adc_1.conversion_mode.code != ConvMode.PULSE:
             self.__config(conversion_mode=ConvMode.PULSE)
 
         # only ADC1 can perform PULSE conversion
