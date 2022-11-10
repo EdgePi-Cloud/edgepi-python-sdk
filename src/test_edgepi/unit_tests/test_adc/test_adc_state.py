@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from edgepi.adc.edgepi_adc import ADCState
 from edgepi.adc.adc_query_lang import ADCModes
-from edgepi.adc.adc_constants import ADCReg, CheckMode, ConvMode
+from edgepi.adc.adc_constants import ADCReg, CheckMode, ConvMode, StatusByte
 
 # to allow development on windows
 sys.modules["periphery"] = mock.MagicMock()
@@ -80,6 +80,17 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             {ADCReg.REG_MODE0.value: 0x00},
             "state.adc_1.conversion_mode",
             ADCModes.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
+        ),
+        # STATUS_MODE
+        (
+            {ADCReg.REG_INTERFACE.value: 0x0},
+            "state.status_byte",
+            ADCModes.STATUS_MODE.value.values[StatusByte.STATUS_BYTE_OFF.value.op_code],
+        ),
+        (
+            {ADCReg.REG_INTERFACE.value: 0x4},
+            "state.status_byte",
+            ADCModes.STATUS_MODE.value.values[StatusByte.STATUS_BYTE_ON.value.op_code],
         ),
     ],
 )

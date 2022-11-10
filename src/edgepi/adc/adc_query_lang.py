@@ -80,8 +80,10 @@ class ADCModes(Enum):
         ADCReg.REG_INTERFACE.value,
         BitMask.BIT2.value,
         {
-            StatusByte.STATUS_BYTE_OFF.value.op_code: "off",
-            StatusByte.STATUS_BYTE_ON.value.op_code: "on",
+            StatusByte.STATUS_BYTE_OFF.value.op_code: ADCModeValue(
+                "off", StatusByte.STATUS_BYTE_OFF
+            ),
+            StatusByte.STATUS_BYTE_ON.value.op_code: ADCModeValue("on", StatusByte.STATUS_BYTE_ON),
         },
     )
     DATA_RATE_1 = ADCMode(
@@ -301,9 +303,7 @@ class ADCModes(Enum):
             REFMUX.POS_REF_EXT_AIN4.value.op_code: ADCModeValue(
                 "channel 4 external", REFMUX.POS_REF_EXT_AIN4
             ),
-            REFMUX.POS_REF_INT_VAVDD.value.op_code: ADCModeValue(
-                "VAVDD", REFMUX.POS_REF_INT_VAVDD
-            ),
+            REFMUX.POS_REF_INT_VAVDD.value.op_code: ADCModeValue("VAVDD", REFMUX.POS_REF_INT_VAVDD),
         },
     )
     REFMUX_NEG = ADCMode(
@@ -323,9 +323,7 @@ class ADCModes(Enum):
             REFMUX.NEG_REF_EXT_AIN5.value.op_code: ADCModeValue(
                 "channel 5 external", REFMUX.NEG_REF_EXT_AIN5
             ),
-            REFMUX.NEG_REF_INT_VAVSS.value.op_code: ADCModeValue(
-                "VAVSS", REFMUX.NEG_REF_INT_VAVSS
-            ),
+            REFMUX.NEG_REF_INT_VAVSS.value.op_code: ADCModeValue("VAVSS", REFMUX.NEG_REF_INT_VAVSS),
         },
     )
 

@@ -77,6 +77,7 @@ class ADCState:
             self.__get_state(ADCModes.ADC2_MUXN),
         )
         self.filter_mode: ADCModeValue = self.__get_state(ADCModes.FILTER_MODE)
+        self.status_byte: ADCModeValue = self.__get_state(ADCModes.STATUS_MODE)
         self.checksum_mode: ADCModeValue = self.__get_state(ADCModes.CHECK_MODE)
         self.rtd_on: ADCModeValue = self.__get_rtd_state()
 
