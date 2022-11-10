@@ -203,3 +203,41 @@ class ADCModes(Enum):
             0xF: ADCModeValue("floating", ADCChannel.FLOAT),
         },
     )
+    IDAC1_MUX = ADCMode(
+        "idac-1-mux",
+        ADCReg.REG_IDACMUX.value,
+        BitMask.LOW_NIBBLE.value,
+        {
+            IDACMUX.IDAC1_AIN0.value.op_code: ADCModeValue(0, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN1.value.op_code: ADCModeValue(1, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN2.value.op_code: ADCModeValue(2, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN3.value.op_code: ADCModeValue(3, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN4.value.op_code: ADCModeValue(4, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN5.value.op_code: ADCModeValue(5, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN6.value.op_code: ADCModeValue(6, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN7.value.op_code: ADCModeValue(7, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN8.value.op_code: ADCModeValue(8, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN9.value.op_code: ADCModeValue(9, ADCChannel.AIN0),
+            IDACMUX.IDAC1_AINCOM.value.op_code: ADCModeValue("AINCOM", ADCChannel.AIN0),
+            IDACMUX.IDAC1_NO_CONNECT.value.op_code: ADCModeValue("no-connection", ADCChannel.AIN0),
+        },
+    )
+    IDAC2_MUX = ADCMode(
+        "idac-2-mux",
+        ADCReg.REG_IDACMUX.value,
+        BitMask.HIGH_NIBBLE.value,
+        {
+            IDACMUX.IDAC2_AIN0.value.op_code: ADCModeValue(0, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN1.value.op_code: ADCModeValue(1, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN2.value.op_code: ADCModeValue(2, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN3.value.op_code: ADCModeValue(3, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN4.value.op_code: ADCModeValue(4, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN5.value.op_code: ADCModeValue(5, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN6.value.op_code: ADCModeValue(6, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN7.value.op_code: ADCModeValue(7, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN8.value.op_code: ADCModeValue(8, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN9.value.op_code: ADCModeValue(9, ADCChannel.AIN0),
+            IDACMUX.IDAC2_AINCOM.value.op_code: ADCModeValue("AINCOM", ADCChannel.AIN0),
+            IDACMUX.IDAC2_NO_CONNECT.value.op_code: ADCModeValue("no-connection", ADCChannel.AIN0),
+        },
+    )
