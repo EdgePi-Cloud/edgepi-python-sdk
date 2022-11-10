@@ -145,7 +145,7 @@ class EdgePiADC(SPI):
     """
 
     # keep track of ADC register map state for state caching
-    __state: dict
+    __state: dict = None
 
     def __init__(self, use_caching: bool = False):
         super().__init__(bus_num=6, dev_id=1)
@@ -183,7 +183,7 @@ class EdgePiADC(SPI):
         Args:
             `reg_map` (dict): register map formatted as {int: {"value": int}}
         """
-        self.__state = {addx: entry["value"] for (addx, entry) in reg_map.items()}
+        EdgePiADC.__state = {addx: entry["value"] for (addx, entry) in reg_map.items()}
 
     def __get_register_map(
         self,
@@ -207,15 +207,15 @@ class EdgePiADC(SPI):
         Returns:
             dict: mapping of uint register addresses to uint register values
         """
-        if self.__state is None or override_cache:
-            self.__state = self.__read_registers_to_map()
+        if EdgePiADC.__state is None or override_cache:
+            EdgePiADC.__state = self.__read_registers_to_map()
 
         if self.use_caching:
-            return self.__state[start_addx.value : num_regs]
+            return EdgePiADC.__state[start_addx.value : num_regs]
         else:
             # if caching is disabled, don't use cached state for return
             reg_map = self.__read_registers_to_map()
-            self.__state = reg_map
+            EdgePiADC.__state = reg_map
             return reg_map[start_addx.value : num_regs]
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
