@@ -8,6 +8,7 @@ import time
 
 
 from bitstring import pack
+from edgepi.adc.adc_query_lang import ADCModeValue, ADCModes
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -24,14 +25,12 @@ from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
-    ADCModes,
     DiffMode,
     IDACMUX,
     IDACMAG,
     REFMUX,
     RTDModes,
     AllowedChannels,
-    ADCModeValue,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -86,7 +85,7 @@ class ADCState:
         )
         self.filter_mode: ADCModeValue = self.__get_state(ADCModes.FILTER_MODE)
         self.checksum_mode: ADCModeValue = self.__get_state(ADCModes.CHECK_MODE)
-        self.rtd_on: ADCModeValue = self.__get_state(ADCModes.RTD_MODE)
+        self.rtd_on: ADCModeValue = self.__get_rtd_state()
 
     def __get_state(self, mode: ADCModes) -> ADCModeValue:
         """
@@ -118,8 +117,23 @@ class ADCState:
         return mode_value
 
     def __get_rtd_state(self) -> bool:
-        pass
-
+        """
+        Get on/off state for RTD.
+        """
+        current_state = {
+            "adc_1_analog_in": self.adc_1.mux_p.code,
+            "adc_1_mux_n": self.adc_1.mux_n.code,
+            "idac_1_mux": self.__get_state(ADCModes.IDAC1_MUX),
+            "idac_2_mux": self.__get_state(ADCModes.IDAC2_MUX),
+            "idac_1_mag": self.__get_state(ADCModes.IDAC1_MAG),
+            "idac_2_mag": self.__get_state(ADCModes.IDAC2_MAG),
+            "pos_ref_inp": self.__get_state(ADCModes.REFMUX_POS),
+            "neg_ref_inp": self.__get_state(ADCModes.REFMUX_NEG),
+        }
+        if current_state | {"rtd_mode_update": True} == RTDModes.RTD_ON.value:
+            return ADCModeValue(True, current_state)
+        else:
+            return ADCModeValue(False, current_state)
 
 
 class ADCStateMissingMap(Exception):
