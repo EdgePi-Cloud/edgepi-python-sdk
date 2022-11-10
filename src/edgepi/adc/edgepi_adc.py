@@ -47,13 +47,6 @@ from edgepi.adc.adc_status import get_adc_status
 _logger = logging.getLogger(__name__)
 
 
-# TODO: this is not safe, it can be out sync if another ADC object modifies config
-# save state if caching is enabled (only safe for 1 instance), do spi reads if not
-# single private __get_state that uses ADCState caching if caching enabled,
-# otherwise use SPI to update ADCState (update every time if 'no caching')
-# disable caching by default
-
-
 @dataclass
 class ADCReadFields:
     """
@@ -140,9 +133,18 @@ class RTDEnabledError(Exception):
 
 
 class EdgePiADC(SPI):
-    """EdgePi ADC device"""
+    """
+    EdgePi ADC device
 
-    # keep track of ADC register map
+    Warning, this class will use caching by default to track the ADC's internal state.
+    This makes EdgePiADC objects safe to use only in a single dev environment.
+    Using multiple EdgePiADC objects, each within a different environment, will lead to
+    the cached ADC state being out of sync with the actual hardware state. To avoid this,
+    disable caching when creating the EdgePiADC object; the state of the ADC will be read
+    from hardware instead, at the cost of increased SPI reading load.
+    """
+
+    # keep track of ADC register map state for state caching
     __state: dict
 
     def __init__(self, use_caching: bool = False):
