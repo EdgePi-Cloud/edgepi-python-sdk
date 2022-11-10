@@ -7,6 +7,7 @@ from typing import Any
 from enum import Enum
 
 from edgepi.adc.adc_constants import (
+    IDACMAG,
     IDACMUX,
     ADC1DataRate,
     ADC2DataRate,
@@ -208,18 +209,20 @@ class ADCModes(Enum):
         ADCReg.REG_IDACMUX.value,
         BitMask.LOW_NIBBLE.value,
         {
-            IDACMUX.IDAC1_AIN0.value.op_code: ADCModeValue(0, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN1.value.op_code: ADCModeValue(1, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN2.value.op_code: ADCModeValue(2, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN3.value.op_code: ADCModeValue(3, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN4.value.op_code: ADCModeValue(4, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN5.value.op_code: ADCModeValue(5, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN6.value.op_code: ADCModeValue(6, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN7.value.op_code: ADCModeValue(7, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN8.value.op_code: ADCModeValue(8, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AIN9.value.op_code: ADCModeValue(9, ADCChannel.AIN0),
-            IDACMUX.IDAC1_AINCOM.value.op_code: ADCModeValue("AINCOM", ADCChannel.AIN0),
-            IDACMUX.IDAC1_NO_CONNECT.value.op_code: ADCModeValue("no-connection", ADCChannel.AIN0),
+            IDACMUX.IDAC1_AIN0.value.op_code: ADCModeValue(0, IDACMUX.IDAC1_AIN0),
+            IDACMUX.IDAC1_AIN1.value.op_code: ADCModeValue(1, IDACMUX.IDAC1_AIN1),
+            IDACMUX.IDAC1_AIN2.value.op_code: ADCModeValue(2, IDACMUX.IDAC1_AIN2),
+            IDACMUX.IDAC1_AIN3.value.op_code: ADCModeValue(3, IDACMUX.IDAC1_AIN3),
+            IDACMUX.IDAC1_AIN4.value.op_code: ADCModeValue(4, IDACMUX.IDAC1_AIN4),
+            IDACMUX.IDAC1_AIN5.value.op_code: ADCModeValue(5, IDACMUX.IDAC1_AIN5),
+            IDACMUX.IDAC1_AIN6.value.op_code: ADCModeValue(6, IDACMUX.IDAC1_AIN6),
+            IDACMUX.IDAC1_AIN7.value.op_code: ADCModeValue(7, IDACMUX.IDAC1_AIN7),
+            IDACMUX.IDAC1_AIN8.value.op_code: ADCModeValue(8, IDACMUX.IDAC1_AIN8),
+            IDACMUX.IDAC1_AIN9.value.op_code: ADCModeValue(9, IDACMUX.IDAC1_AIN9),
+            IDACMUX.IDAC1_AINCOM.value.op_code: ADCModeValue("AINCOM", IDACMUX.IDAC1_AINCOM),
+            IDACMUX.IDAC1_NO_CONNECT.value.op_code: ADCModeValue(
+                "no-connection", IDACMUX.IDAC1_NO_CONNECT
+            ),
         },
     )
     IDAC2_MUX = ADCMode(
@@ -227,17 +230,55 @@ class ADCModes(Enum):
         ADCReg.REG_IDACMUX.value,
         BitMask.HIGH_NIBBLE.value,
         {
-            IDACMUX.IDAC2_AIN0.value.op_code: ADCModeValue(0, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN1.value.op_code: ADCModeValue(1, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN2.value.op_code: ADCModeValue(2, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN3.value.op_code: ADCModeValue(3, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN4.value.op_code: ADCModeValue(4, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN5.value.op_code: ADCModeValue(5, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN6.value.op_code: ADCModeValue(6, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN7.value.op_code: ADCModeValue(7, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN8.value.op_code: ADCModeValue(8, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AIN9.value.op_code: ADCModeValue(9, ADCChannel.AIN0),
-            IDACMUX.IDAC2_AINCOM.value.op_code: ADCModeValue("AINCOM", ADCChannel.AIN0),
-            IDACMUX.IDAC2_NO_CONNECT.value.op_code: ADCModeValue("no-connection", ADCChannel.AIN0),
+            IDACMUX.IDAC2_AIN0.value.op_code: ADCModeValue(0, IDACMUX.IDAC2_AIN0),
+            IDACMUX.IDAC2_AIN1.value.op_code: ADCModeValue(1, IDACMUX.IDAC2_AIN1),
+            IDACMUX.IDAC2_AIN2.value.op_code: ADCModeValue(2, IDACMUX.IDAC2_AIN2),
+            IDACMUX.IDAC2_AIN3.value.op_code: ADCModeValue(3, IDACMUX.IDAC2_AIN3),
+            IDACMUX.IDAC2_AIN4.value.op_code: ADCModeValue(4, IDACMUX.IDAC2_AIN4),
+            IDACMUX.IDAC2_AIN5.value.op_code: ADCModeValue(5, IDACMUX.IDAC2_AIN5),
+            IDACMUX.IDAC2_AIN6.value.op_code: ADCModeValue(6, IDACMUX.IDAC2_AIN6),
+            IDACMUX.IDAC2_AIN7.value.op_code: ADCModeValue(7, IDACMUX.IDAC2_AIN7),
+            IDACMUX.IDAC2_AIN8.value.op_code: ADCModeValue(8, IDACMUX.IDAC2_AIN8),
+            IDACMUX.IDAC2_AIN9.value.op_code: ADCModeValue(9, IDACMUX.IDAC2_AIN9),
+            IDACMUX.IDAC2_AINCOM.value.op_code: ADCModeValue("AINCOM", IDACMUX.IDAC2_AINCOM),
+            IDACMUX.IDAC2_NO_CONNECT.value.op_code: ADCModeValue(
+                "no-connection", IDACMUX.IDAC2_NO_CONNECT
+            ),
+        },
+    )
+    IDAC1_MAG = ADCMode(
+        "idac-1-mag",
+        ADCReg.REG_IDACMAG.value,
+        BitMask.LOW_NIBBLE.value,
+        {
+            IDACMAG.IDAC1_OFF.value.op_code: ADCModeValue(0, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_50.value.op_code: ADCModeValue(50, IDACMAG.IDAC1_50),
+            IDACMAG.IDAC1_100.value.op_code: ADCModeValue(100, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_250.value.op_code: ADCModeValue(250, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_500.value.op_code: ADCModeValue(500, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_750.value.op_code: ADCModeValue(750, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_1000.value.op_code: ADCModeValue(1000, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_1500.value.op_code: ADCModeValue(1500, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_2000.value.op_code: ADCModeValue(2000, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_2500.value.op_code: ADCModeValue(2500, IDACMAG.IDAC1_OFF),
+            IDACMAG.IDAC1_3000.value.op_code: ADCModeValue(3000, IDACMAG.IDAC1_OFF),
+        },
+    )
+    IDAC2_MAG = ADCMode(
+        "idac-2-mag",
+        ADCReg.REG_IDACMAG.value,
+        BitMask.HIGH_NIBBLE.value,
+        {
+            IDACMAG.IDAC2_OFF.value.op_code: ADCModeValue(0, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_50.value.op_code: ADCModeValue(50, IDACMAG.IDAC2_50),
+            IDACMAG.IDAC2_100.value.op_code: ADCModeValue(100, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_250.value.op_code: ADCModeValue(250, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_500.value.op_code: ADCModeValue(500, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_750.value.op_code: ADCModeValue(750, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_1000.value.op_code: ADCModeValue(1000, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_1500.value.op_code: ADCModeValue(1500, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_2000.value.op_code: ADCModeValue(2000, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_2500.value.op_code: ADCModeValue(2500, IDACMAG.IDAC2_OFF),
+            IDACMAG.IDAC2_3000.value.op_code: ADCModeValue(3000, IDACMAG.IDAC2_OFF),
         },
     )
