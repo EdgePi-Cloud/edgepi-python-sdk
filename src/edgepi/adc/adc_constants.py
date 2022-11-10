@@ -356,6 +356,82 @@ class ADCModes(Enum):
             FilterMode.FIR.value.op_code: "fir",
         },
     )
+    ADC1_MUXP = ADCMode(
+        "adc-1-mux-p",
+        ADCReg.REG_INPMUX.value,
+        BitMask.HIGH_NIBBLE,
+        {
+            0x00: ADCModeValue(0, ADCChannel.AIN0),
+            0x10: ADCModeValue(1, ADCChannel.AIN1),
+            0x20: ADCModeValue(2, ADCChannel.AIN2),
+            0x30: ADCModeValue(3, ADCChannel.AIN3),
+            0x40: ADCModeValue(4, ADCChannel.AIN4),
+            0x50: ADCModeValue(5, ADCChannel.AIN5),
+            0x60: ADCModeValue(6, ADCChannel.AIN6),
+            0x70: ADCModeValue(7, ADCChannel.AIN7),
+            0x80: ADCModeValue(8, ADCChannel.AIN8),
+            0x90: ADCModeValue(9, ADCChannel.AIN9),
+            0xA0: ADCModeValue("AINCOM", ADCChannel.AINCOM),
+            0xF0: ADCModeValue("floating", ADCChannel.FLOAT),
+        }
+    )
+    ADC2_MUXP = ADCMode(
+        "adc-2-mux-p",
+        ADCReg.REG_ADC2MUX.value,
+        BitMask.HIGH_NIBBLE,
+        {
+            0x00: ADCModeValue(0, ADCChannel.AIN0),
+            0x10: ADCModeValue(1, ADCChannel.AIN1),
+            0x20: ADCModeValue(2, ADCChannel.AIN2),
+            0x30: ADCModeValue(3, ADCChannel.AIN3),
+            0x40: ADCModeValue(4, ADCChannel.AIN4),
+            0x50: ADCModeValue(5, ADCChannel.AIN5),
+            0x60: ADCModeValue(6, ADCChannel.AIN6),
+            0x70: ADCModeValue(7, ADCChannel.AIN7),
+            0x80: ADCModeValue(8, ADCChannel.AIN8),
+            0x90: ADCModeValue(9, ADCChannel.AIN9),
+            0xA0: ADCModeValue("AINCOM", ADCChannel.AINCOM),
+            0xF0: ADCModeValue("floating", ADCChannel.FLOAT),
+        }
+    )
+    ADC1_MUXN = ADCMode(
+        "adc-1-mux-n",
+        ADCReg.REG_INPMUX.value,
+        BitMask.LOW_NIBBLE,
+        {
+            0x0: ADCModeValue(0, ADCChannel.AIN0),
+            0x1: ADCModeValue(1, ADCChannel.AIN1),
+            0x2: ADCModeValue(2, ADCChannel.AIN2),
+            0x3: ADCModeValue(3, ADCChannel.AIN3),
+            0x4: ADCModeValue(4, ADCChannel.AIN4),
+            0x5: ADCModeValue(5, ADCChannel.AIN5),
+            0x6: ADCModeValue(6, ADCChannel.AIN6),
+            0x7: ADCModeValue(7, ADCChannel.AIN7),
+            0x8: ADCModeValue(8, ADCChannel.AIN8),
+            0x9: ADCModeValue(9, ADCChannel.AIN9),
+            0xA: ADCModeValue("AINCOM", ADCChannel.AINCOM),
+            0xF: ADCModeValue("floating", ADCChannel.FLOAT),
+        }
+    )
+    ADC2_MUXN = ADCMode(
+        "adc-2-mux-n",
+        ADCReg.REG_ADC2MUX.value,
+        BitMask.LOW_NIBBLE,
+        {
+            0x0: ADCModeValue(0, ADCChannel.AIN0),
+            0x1: ADCModeValue(1, ADCChannel.AIN1),
+            0x2: ADCModeValue(2, ADCChannel.AIN2),
+            0x3: ADCModeValue(3, ADCChannel.AIN3),
+            0x4: ADCModeValue(4, ADCChannel.AIN4),
+            0x5: ADCModeValue(5, ADCChannel.AIN5),
+            0x6: ADCModeValue(6, ADCChannel.AIN6),
+            0x7: ADCModeValue(7, ADCChannel.AIN7),
+            0x8: ADCModeValue(8, ADCChannel.AIN8),
+            0x9: ADCModeValue(9, ADCChannel.AIN9),
+            0xA: ADCModeValue("AINCOM", ADCChannel.AINCOM),
+            0xF: ADCModeValue("floating", ADCChannel.FLOAT),
+        }
+    )
 
 
 class IDACMUX(Enum):

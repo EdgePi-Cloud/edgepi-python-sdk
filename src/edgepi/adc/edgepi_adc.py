@@ -117,6 +117,10 @@ class ADCState:
 
         return mode_value
 
+    def __get_rtd_state(self) -> bool:
+        pass
+
+
 
 class ADCStateMissingMap(Exception):
     """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
