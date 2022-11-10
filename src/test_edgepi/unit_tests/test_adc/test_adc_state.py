@@ -1,9 +1,9 @@
 "Unit testing ADCState class"
 
-import sys
-import pytest
 from unittest import mock
 from copy import deepcopy
+import sys
+import pytest
 
 
 from edgepi.adc.edgepi_adc import ADCState
@@ -213,6 +213,128 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             {ADCReg.REG_INPMUX.value: 0xF},
             "state.adc_1.mux_n",
             ADCModes.ADC1_MUXN.value.values[ADCChannel.FLOAT.value],
+        ),
+        # ADC2_MUXP
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x00},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN0.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x10},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN1.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x20},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN2.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x30},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN3.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x40},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN4.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x50},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN5.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x60},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN6.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x70},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN7.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x80},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN8.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x90},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AIN9.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0xA0},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.AINCOM.value << 4],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0xF0},
+            "state.adc_2.mux_p",
+            ADCModes.ADC2_MUXP.value.values[ADCChannel.FLOAT.value << 4],
+        ),
+        # ADC2_MUXN
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x00},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN0.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x1},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN1.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x2},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN2.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x3},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN3.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x4},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN4.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x5},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN5.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x6},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN6.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x7},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN7.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x8},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN8.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0x9},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AIN9.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0xA},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.AINCOM.value],
+        ),
+        (
+            {ADCReg.REG_ADC2MUX.value: 0xF},
+            "state.adc_2.mux_n",
+            ADCModes.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
         ),
     ],
 )
