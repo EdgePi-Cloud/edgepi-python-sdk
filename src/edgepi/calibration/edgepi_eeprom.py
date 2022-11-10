@@ -57,8 +57,7 @@ class EdgePiEEPROM(I2CDevice):
         '''
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        # TODO: set_read_msg needs to be modified to take list of addresses instead of int
-        msg = self.set_read_msg(mem_addr, [0x00]*length)
+        msg = self.set_read_msg(mem_addr_list, [0x00]*length)
         self.log.debug(f'Reading Address {mem_addr}, {length} bytes, {msg[1].data}')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
         self.log.debug(f'Read data: {msg[1].data}')
@@ -76,7 +75,7 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_read_msg(mem_addr, [0x00])
-        self.log.debug(f'Reading Address {mem_addr}, {msg[1].data}')
+        self.log.debug(f'Reading Address {mem_addr_list}, {msg[1].data}')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
         self.log.debug(f'Read data: {msg[1].data}')
         return read_result
@@ -92,7 +91,7 @@ class EdgePiEEPROM(I2CDevice):
         '''
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        msg = self.set_write_msg(mem_addr, [data])
+        msg = self.set_write_msg(mem_addr_list, [data])
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
@@ -107,7 +106,6 @@ class EdgePiEEPROM(I2CDevice):
         '''
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        # TODO: add set_write_msg to take list of address
-        msg = self.set_write_msg(mem_addr, data)
+        msg = self.set_write_msg(mem_addr_list, data)
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
