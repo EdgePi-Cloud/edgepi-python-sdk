@@ -2,6 +2,7 @@
 For ADC state querying
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 from enum import Enum
@@ -327,3 +328,36 @@ class ADCModes(Enum):
             ),
         },
     )
+
+
+_logger = logging.getLogger(__name__)
+
+
+def query_state(mode: ADCModes, reg_map: dict[int, int]) -> ADCModeValue:
+    """
+    Read the current state of configurable ADC properties
+
+    Args:
+        `mode` (ADCModes): ADC property whose state is to be read
+        `reg_map`: register map formatted as {addx (int): value (int)}
+
+    Returns:
+        `ADCModeValue`: information about the current value of this mode
+    """
+    # value of this mode's register
+    reg_value = reg_map[mode.value.addx]
+
+    # get value of bits corresponding to this mode by letting through only the bits
+    # that were "masked" when setting this mode (clear all bits except the mode bits)
+    mode_bits = (~mode.value.mask) & reg_value
+
+    # name of current value of this mode
+    mode_value = mode.value.values[mode_bits]
+    _logger.debug(
+        (
+            f"query_state: query_mode='{mode}', mode_bits={hex(mode_bits)},"
+            f" mode_value='{mode_value}'"
+        )
+    )
+
+    return mode_value

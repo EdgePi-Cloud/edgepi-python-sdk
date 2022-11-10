@@ -8,7 +8,7 @@ import time
 
 
 from bitstring import pack
-from edgepi.adc.adc_query_lang import ADCModeValue, ADCModes
+from edgepi.adc.adc_query_lang import ADCModeValue, ADCModes, query_state
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -97,24 +97,7 @@ class ADCState:
         Returns:
             ADCModeValue: information about the current value of this mode
         """
-        # value of this mode's register
-        reg_value = self.__reg_map[mode.value.addx]
-
-        # get value of bits corresponding to this mode by letting through only the bits
-        # that were "masked" when setting this mode (clear all bits except the mode bits)
-        mode_bits = (~mode.value.mask) & reg_value
-        _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
-
-        # name of current value of this mode
-        mode_value = mode.value.values[mode_bits]
-        _logger.debug(
-            (
-                f"ADCState: query_mode='{mode}', mode_bits={hex(mode_bits)},"
-                f" mode_value='{mode_value}'"
-            )
-        )
-
-        return mode_value
+        return query_state(mode, self.__reg_map)
 
     def __get_rtd_state(self) -> bool:
         """
