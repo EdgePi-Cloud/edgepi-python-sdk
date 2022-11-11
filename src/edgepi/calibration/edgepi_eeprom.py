@@ -3,8 +3,10 @@
 import logging
 import math
 
-from edgepi.calibration.eeprom_constants import EEPROMInfo
+from edgepi.calibration.eeprom_constants import EEPROMInfo, OsensaMemoryInfo, MessageFieldNumber
+from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
+
 
 #TODO: Maybe use protobuff
 #TODO: EEPROM should return structured data class of parameters to calibration class.
@@ -16,6 +18,16 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
+        self.ROM_layout = EepromLayout()
+        self.message_dict = {MessageFieldNumber.DAC.value : self.ROM_layout.dac,
+                             MessageFieldNumber.ADC.value : self.ROM_layout.adc,
+                             MessageFieldNumber.RTD.value : self.ROM_layout.rtd,
+                             MessageFieldNumber.TC.value : self.ROM_layout.tc,
+                             MessageFieldNumber.CONFIGS_KEY.value : self.ROM_layout.config_key,
+                             MessageFieldNumber.DATA_KEY.value : self.ROM_layout.data_key,
+                             MessageFieldNumber.SERIAL.value : self.ROM_layout.serial_number,
+                             MessageFieldNumber.MODEL.value : self.ROM_layout.model,
+                             MessageFieldNumber.CLIENT_ID.value : self.ROM_layout.client_id}
         super().__init__(self.__dev_path)
 
     def __pack_mem_address(self, page_addr: int = None, byte_addr: int = None):
@@ -43,6 +55,44 @@ class EdgePiEEPROM(I2CDevice):
         byte_addr = memory_address%EEPROMInfo.PAGE_SIZE.value
         self.log.debug(f'Page address = {page_addr}, byte Address = {byte_addr}')
         return page_addr, byte_addr
+
+    def __allocated_memory(self):
+        '''
+        The first two bytes represenst the allocated memory in Osensa memory space. This function
+        returns the length of memory to read.
+        Args:
+            N/A
+        Return:
+            length (int): size of memory to read
+        '''
+        length = self.sequential_read(OsensaMemoryInfo.USED_SPACE.value, 2)
+        return (length[0]<<8)| length[1]
+
+    def __read_osensa_memory(self):
+        '''
+        Read osensa memory space to retreive parameters. This function will return byte strings,
+        that can be converted into protocol buffer message format
+        Args:
+            N/A
+        Return:
+            Byte_string (bytes): strings of bytes read from the eeprom
+        '''
+        mem_size = self.__allocated_memory()
+        buff_list = self.sequential_read(OsensaMemoryInfo.BUFF_START.value, mem_size)
+        return bytes(buff_list)
+
+    def get_message_of_interest(self, msg: MessageFieldNumber = None):
+        """
+        This function filters out the message according to the specified filed number passed as
+        parameter.
+        Args:
+            msg (MessageFieldNumber): protocol buffer message field number
+        Return:
+            pb message specified by the message field number. ex) if message field of DAC is passed,
+            the dac message will be returned 
+        """
+        self.ROM_layout.ParseFromString(self.__read_osensa_memory())
+        return self.message_dict[msg.value]
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
         '''

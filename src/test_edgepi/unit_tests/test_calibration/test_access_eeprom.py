@@ -54,3 +54,16 @@ def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
     read_result = eeprom.sequential_read( reg_addr, length)
     assert read_result == result
+
+@pytest.mark.parametrize("mock_value,result",
+                        [([0,123], 123),
+                         ([1,1], 257),
+                         ([63,255], 16383),
+                         ([63, 0], 16128)
+                        ])
+def test__allocated_memory(mocker,mock_value,result, eeprom):
+    # pylint: disable=protected-access
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.sequential_read",
+                return_value =mock_value)
+    length = eeprom._EdgePiEEPROM__allocated_memory()
+    assert length == result

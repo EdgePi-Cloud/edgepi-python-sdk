@@ -19,6 +19,7 @@ class ModuleNames(Enum):
     RTD = 0x2
     TC = 0x3
 
+# TODO: to be deleted once protobuf is implemented
 class DACParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
@@ -36,6 +37,7 @@ class DACParamAddr(Enum):
     CH7 = 0x238
     LEN = 63
 
+# TODO: to be deleted once protobuf is implemented
 class ADCParamAddr(Enum):
     """
     EdgePi DAC Calibration Parameter Addresses
@@ -55,6 +57,7 @@ class ADCParamAddr(Enum):
     DIFF3 =0x260
     DIFF4 =0x268
 
+# TODO: to be deleted once protobuf is implemented
 class MemoryAddr(Enum):
     """
     Memory offset values
@@ -66,3 +69,21 @@ class MemoryAddr(Enum):
     RTD = 0x2C0
     END = 0x3FF
     CH_OFFSET = 0x8
+
+class OsensaMemoryInfo(Enum):
+    """
+    Information regarding Osensa memory space
+    """
+    USED_SPACE = 0x00
+    BUFF_START = 0x02
+
+class MessageFieldNumber(Enum):
+    DAC=1
+    ADC=2
+    RTD=3
+    TC=4
+    CONFIGS_KEY=5
+    DATA_KEY=6
+    SERIAL=7
+    MODEL=8
+    CLIENT_ID=9
