@@ -78,6 +78,10 @@ class OsensaMemoryInfo(Enum):
     BUFF_START = 0x02
 
 class MessageFieldNumber(Enum):
+    """
+    MessageField index number to be used for ListFields() function. The function lists fields start
+    from index 0
+    """
     DAC=0
     ADC=1
     RTD=2

@@ -20,6 +20,7 @@ def fixture_test_dac(mocker):
     yield EdgePiEEPROM()
 
 def read_binfile():
+    """Read the dummy serializedFile and return byte string"""
     with open(PATH+"/serializedFile","rb") as fd:
         b_string = fd.read()
     return b_string
@@ -104,4 +105,3 @@ def test_get_message_of_interest(mocker, msg, eeprom):
     memory_contents.ParseFromString(read_binfile())
     msg_of_interest = eeprom.get_message_of_interest(msg)
     assert msg_of_interest == memory_contents.ListFields()[msg.value][1]
-    

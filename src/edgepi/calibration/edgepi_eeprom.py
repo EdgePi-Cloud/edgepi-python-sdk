@@ -18,7 +18,7 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
-        self.ROM_layout = EepromLayout()
+        self.eeprom_layout = EepromLayout()
         super().__init__(self.__dev_path)
 
     def __pack_mem_address(self, page_addr: int = None, byte_addr: int = None):
@@ -81,10 +81,10 @@ class EdgePiEEPROM(I2CDevice):
             function
         Return:
             pb message specified by the message field number. ex) if message field of DAC is passed,
-            the dac message will be returned 
+            the dac message will be returned
         """
-        self.ROM_layout.ParseFromString(self.__read_osensa_memory())
-        return self.ROM_layout.ListFields()[msg.value][1]
+        self.eeprom_layout.ParseFromString(self.__read_osensa_memory())
+        return self.eeprom_layout.ListFields()[msg.value][1]
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
         '''
