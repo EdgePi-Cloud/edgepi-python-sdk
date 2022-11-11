@@ -8,7 +8,7 @@ import pytest
 
 from edgepi.adc.edgepi_adc import ADCState
 from edgepi.adc.adc_query_lang import ADCModes
-from edgepi.adc.adc_constants import ADCChannel, ADCReg, CheckMode, ConvMode, StatusByte
+from edgepi.adc.adc_constants import ADCChannel, ADCReg, CheckMode, ConvMode, FilterMode, StatusByte
 
 # to allow development on windows
 sys.modules["periphery"] = mock.MagicMock()
@@ -335,6 +335,32 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             {ADCReg.REG_ADC2MUX.value: 0xF},
             "state.adc_2.mux_n",
             ADCModes.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
+        ),
+        # FILTER_MODE
+        (
+            {ADCReg.REG_MODE1.value: 0x0},
+            "state.filter_mode",
+            ADCModes.FILTER_MODE.value.values[FilterMode.SINC1.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE1.value: 0b00100000},
+            "state.filter_mode",
+            ADCModes.FILTER_MODE.value.values[FilterMode.SINC2.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE1.value: 0b01000000},
+            "state.filter_mode",
+            ADCModes.FILTER_MODE.value.values[FilterMode.SINC3.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE1.value: 0b01100000},
+            "state.filter_mode",
+            ADCModes.FILTER_MODE.value.values[FilterMode.SINC4.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE1.value: 0b10000000},
+            "state.filter_mode",
+            ADCModes.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
     ],
 )
