@@ -382,8 +382,6 @@ class EdgePiADC(SPI):
         adc = ADCNum.ADC_1
 
         # assert adc is in continuous mode (use ADCStatus)
-        # TODO: not essential, responsibility can be passed to user
-        # TODO: fix to work with new get_state
         state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
             raise ContinuousModeError(
