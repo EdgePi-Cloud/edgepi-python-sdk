@@ -19,15 +19,6 @@ class EdgePiEEPROM(I2CDevice):
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.ROM_layout = EepromLayout()
-        self.message_dict = {MessageFieldNumber.DAC.value : self.ROM_layout.dac,
-                             MessageFieldNumber.ADC.value : self.ROM_layout.adc,
-                             MessageFieldNumber.RTD.value : self.ROM_layout.rtd,
-                             MessageFieldNumber.TC.value : self.ROM_layout.tc,
-                             MessageFieldNumber.CONFIGS_KEY.value : self.ROM_layout.config_key,
-                             MessageFieldNumber.DATA_KEY.value : self.ROM_layout.data_key,
-                             MessageFieldNumber.SERIAL.value : self.ROM_layout.serial_number,
-                             MessageFieldNumber.MODEL.value : self.ROM_layout.model,
-                             MessageFieldNumber.CLIENT_ID.value : self.ROM_layout.client_id}
         super().__init__(self.__dev_path)
 
     def __pack_mem_address(self, page_addr: int = None, byte_addr: int = None):
@@ -86,13 +77,14 @@ class EdgePiEEPROM(I2CDevice):
         This function filters out the message according to the specified filed number passed as
         parameter.
         Args:
-            msg (MessageFieldNumber): protocol buffer message field number
+            msg (MessageFieldNumber): protocol buffer message field index number for ListFields()
+            function
         Return:
             pb message specified by the message field number. ex) if message field of DAC is passed,
             the dac message will be returned 
         """
         self.ROM_layout.ParseFromString(self.__read_osensa_memory())
-        return self.message_dict[msg.value]
+        return self.ROM_layout.ListFields()[msg.value][1]
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
         '''

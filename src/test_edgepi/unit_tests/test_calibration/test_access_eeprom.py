@@ -4,16 +4,25 @@
 
 
 from unittest import mock
+import os
+PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
+from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     yield EdgePiEEPROM()
+
+def read_binfile():
+    with open(PATH+"/serializedFile","rb") as fd:
+        b_string = fd.read()
+    return b_string
 
 @pytest.mark.parametrize("page_addr, byte_addr, result",
                         [(0, 8, [0x00, 0x08]),
@@ -67,3 +76,32 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
                 return_value =mock_value)
     length = eeprom._EdgePiEEPROM__allocated_memory()
     assert length == result
+
+def test__read_osensa_memory(mocker, eeprom):
+    # pylint: disable=protected-access
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory")
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.sequential_read",
+                return_value =list(read_binfile()))
+    byte_string = eeprom._EdgePiEEPROM__read_osensa_memory()
+    assert byte_string == read_binfile()
+
+@pytest.mark.parametrize("msg",
+                        [(MessageFieldNumber.DAC),
+                         (MessageFieldNumber.ADC),
+                         (MessageFieldNumber.RTD),
+                         (MessageFieldNumber.TC),
+                         (MessageFieldNumber.CONFIGS_KEY),
+                         (MessageFieldNumber.DATA_KEY),
+                         (MessageFieldNumber.SERIAL),
+                         (MessageFieldNumber.MODEL),
+                         (MessageFieldNumber.CLIENT_ID)
+                        ])
+def test_get_message_of_interest(mocker, msg, eeprom):
+    # pylint: disable=protected-access
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_osensa_memory",
+                 return_value = read_binfile())
+    memory_contents = EepromLayout()
+    memory_contents.ParseFromString(read_binfile())
+    msg_of_interest = eeprom.get_message_of_interest(msg)
+    assert msg_of_interest == memory_contents.ListFields()[msg.value][1]
+    

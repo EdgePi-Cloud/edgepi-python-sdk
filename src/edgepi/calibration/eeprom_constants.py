@@ -78,12 +78,12 @@ class OsensaMemoryInfo(Enum):
     BUFF_START = 0x02
 
 class MessageFieldNumber(Enum):
-    DAC=1
-    ADC=2
-    RTD=3
-    TC=4
-    CONFIGS_KEY=5
-    DATA_KEY=6
-    SERIAL=7
-    MODEL=8
-    CLIENT_ID=9
+    DAC=0
+    ADC=1
+    RTD=2
+    TC=3
+    CONFIGS_KEY=4
+    DATA_KEY=5
+    SERIAL=6
+    MODEL=7
+    CLIENT_ID=8
