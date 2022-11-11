@@ -8,8 +8,6 @@ from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
 
-#TODO: Maybe use protobuff
-#TODO: EEPROM should return structured data class of parameters to calibration class.
 class EdgePiEEPROM(I2CDevice):
     '''
     Helper class to read eeprom using I2C
