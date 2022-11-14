@@ -324,7 +324,7 @@ class RTDModes(Enum):
         "adc_1_analog_in": ADCChannel.AIN5,
         "adc_1_mux_n": ADCChannel.AIN6,
         "idac_1_mux": IDACMUX.IDAC1_AIN8,
-        "idac_2_mux": IDACMUX.IDAC1_AIN9,
+        "idac_2_mux": IDACMUX.IDAC2_AIN9,
         "idac_1_mag": IDACMAG.IDAC1_500,
         "idac_2_mag": IDACMAG.IDAC2_500,
         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,

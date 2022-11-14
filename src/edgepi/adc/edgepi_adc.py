@@ -100,18 +100,16 @@ class ADCState:
         current_state = {
             "adc_1_analog_in": self.adc_1.mux_p.code,
             "adc_1_mux_n": self.adc_1.mux_n.code,
-            "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX),
-            "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX),
-            "idac_1_mag": self.__get_state(ADCProperties.IDAC1_MAG),
-            "idac_2_mag": self.__get_state(ADCProperties.IDAC2_MAG),
-            "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS),
-            "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG),
+            "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
+            "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX).code,
+            "idac_1_mag": self.__get_state(ADCProperties.IDAC1_MAG).code,
+            "idac_2_mag": self.__get_state(ADCProperties.IDAC2_MAG).code,
+            "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS).code,
+            "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
         }
-        if current_state | {"rtd_mode_update": True} == RTDModes.RTD_ON.value:
-            return PropertyValue(True, current_state)
-        else:
-            return PropertyValue(False, current_state)
-
+        expected = RTDModes.RTD_ON.value
+        result = current_state | {"rtd_mode_update": True}
+        return result == expected
 
 class ADCStateMissingMap(Exception):
     """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""

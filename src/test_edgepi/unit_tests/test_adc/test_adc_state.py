@@ -362,26 +362,20 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.filter_mode",
             ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
-        # # RTD
-        # (
-        #     {ADCReg.REG_INPMUX.value: 0x56},
-        #     "state.rtd_on",
-        #     True,
-        # ),
+        # RTD
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0x56,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_REFMUX.value: 0b00011100,
+            },
+            "state.rtd_on",
+            True,
+        ),
     ],
 )
 
-# RTD_ON = {
-#         "adc_1_analog_in": ADCChannel.AIN5,
-#         "adc_1_mux_n": ADCChannel.AIN6,
-#         "idac_1_mux": IDACMUX.IDAC1_AIN8,
-#         "idac_2_mux": IDACMUX.IDAC1_AIN9,
-#         "idac_1_mag": IDACMAG.IDAC1_500,
-#         "idac_2_mag": IDACMAG.IDAC2_500,
-#         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
-#         "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
-#         "rtd_mode_update": True,
-#     }
 
 def test_adc_state_init(updates, state_property, expected):
     reg_map = deepcopy(ADC_REGS)
