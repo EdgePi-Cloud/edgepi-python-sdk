@@ -7,8 +7,18 @@ import pytest
 
 
 from edgepi.adc.edgepi_adc import ADCState
-from edgepi.adc.adc_query_lang import ADCProperties
-from edgepi.adc.adc_constants import ADCChannel, ADCReg, CheckMode, ConvMode, FilterMode, StatusByte
+from edgepi.adc.adc_query_lang import ADCProperties, PropertyValue
+from edgepi.adc.adc_constants import (
+    IDACMAG,
+    IDACMUX,
+    REFMUX,
+    ADCChannel,
+    ADCReg,
+    CheckMode,
+    ConvMode,
+    FilterMode,
+    StatusByte,
+)
 
 # to allow development on windows
 sys.modules["periphery"] = mock.MagicMock()
@@ -362,7 +372,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.filter_mode",
             ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
-        # RTD
+        # RTD on
         (
             {
                 ADCReg.REG_INPMUX.value: 0x56,
@@ -371,12 +381,68 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0b00011100,
             },
             "state.rtd_on",
-            True,
+            PropertyValue(
+                True,
+                {
+                    "adc_1_analog_in": ADCChannel.AIN5,
+                    "adc_1_mux_n": ADCChannel.AIN6,
+                    "idac_1_mux": IDACMUX.IDAC1_AIN8,
+                    "idac_2_mux": IDACMUX.IDAC2_AIN9,
+                    "idac_1_mag": IDACMAG.IDAC1_500,
+                    "idac_2_mag": IDACMAG.IDAC2_500,
+                    "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
+                    "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
+                },
+            ),
+        ),
+        # RTD off
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0xFA,
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x00,
+                ADCReg.REG_REFMUX.value: 0x00,
+            },
+            "state.rtd_on",
+            PropertyValue(
+                False,
+                {
+                    "adc_1_analog_in": ADCChannel.FLOAT,
+                    "adc_1_mux_n": ADCChannel.AINCOM,
+                    "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
+                    "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
+                    "idac_1_mag": IDACMAG.IDAC1_OFF,
+                    "idac_2_mag": IDACMAG.IDAC2_OFF,
+                    "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
+                    "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
+                },
+            ),
+        ),
+        # RTD improperly configured
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0x56,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x48,
+                ADCReg.REG_REFMUX.value: 0b00011100,
+            },
+            "state.rtd_on",
+            PropertyValue(
+                False,
+                {
+                    "adc_1_analog_in": ADCChannel.AIN5,
+                    "adc_1_mux_n": ADCChannel.AIN6,
+                    "idac_1_mux": IDACMUX.IDAC1_AIN8,
+                    "idac_2_mux": IDACMUX.IDAC2_AIN9,
+                    "idac_1_mag": IDACMAG.IDAC1_2000,
+                    "idac_2_mag": IDACMAG.IDAC2_500,
+                    "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
+                    "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
+                },
+            ),
         ),
     ],
 )
-
-
 def test_adc_state_init(updates, state_property, expected):
     reg_map = deepcopy(ADC_REGS)
     _apply_register_updates(reg_map, updates)

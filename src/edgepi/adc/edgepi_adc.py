@@ -109,7 +109,7 @@ class ADCState:
         }
         expected = RTDModes.RTD_ON.value
         result = current_state | {"rtd_mode_update": True}
-        return result == expected
+        return PropertyValue(result == expected, current_state)
 
 class ADCStateMissingMap(Exception):
     """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
