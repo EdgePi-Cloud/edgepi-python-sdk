@@ -267,6 +267,22 @@ def fixture_adc():
         "state.adc_2.mux_n",
         ADCProperties.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
     ),
+    # CHECK MODE
+    (
+        {"checksum_mode": CheckMode.CHECK_BYTE_CRC},
+        "state.checksum_mode",
+        ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_CRC.value.op_code],
+    ),
+    (
+        {"checksum_mode": CheckMode.CHECK_BYTE_CHK},
+        "state.checksum_mode",
+        ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_CHK.value.op_code],
+    ),
+    (
+        {"checksum_mode": CheckMode.CHECK_BYTE_OFF},
+        "state.checksum_mode",
+        ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_OFF.value.op_code],
+    ),
 ])
 def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     adc._EdgePiADC__config(**updates)
