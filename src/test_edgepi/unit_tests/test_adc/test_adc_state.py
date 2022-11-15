@@ -13,6 +13,7 @@ from edgepi.adc.adc_constants import (
     IDACMUX,
     REFMUX,
     ADC1DataRate,
+    ADC2DataRate,
     ADCChannel,
     ADCReg,
     CheckMode,
@@ -522,6 +523,27 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             {ADCReg.REG_MODE2.value: 0x0F},
             "state.adc_1.data_rate",
             ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_38400.value.op_code],
+        ),
+        # ADC2 Data Rate
+        (
+            {ADCReg.REG_ADC2CFG.value: 0x00},
+            "state.adc_2.data_rate",
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_10.value.op_code],
+        ),
+        (
+            {ADCReg.REG_ADC2CFG.value: 0x40},
+            "state.adc_2.data_rate",
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_100.value.op_code],
+        ),
+        (
+            {ADCReg.REG_ADC2CFG.value: 0x80},
+            "state.adc_2.data_rate",
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_400.value.op_code],
+        ),
+        (
+            {ADCReg.REG_ADC2CFG.value: 0xC0},
+            "state.adc_2.data_rate",
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
         ),
     ],
 )
