@@ -148,6 +148,7 @@ class EdgePiADC(SPI):
 
     def __init__(self, enable_cache: bool = False):
         super().__init__(bus_num=6, dev_id=1)
+        self.enable_cache = enable_cache
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
@@ -158,8 +159,8 @@ class EdgePiADC(SPI):
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
-        # TODO: enable_cache
-        self.enable_cache = enable_cache
+        # TODO: code below this is unreachable, figure out why
+        
 
     def __reapply_config(self):
         """
@@ -187,8 +188,6 @@ class EdgePiADC(SPI):
 
     def __get_register_map(
         self,
-        start_addx: ADCReg = ADCReg.REG_ID,
-        num_regs: int = ADC_NUM_REGS,
         override_cache: bool = False,
     ) -> dict[int, int]:
         """
@@ -197,11 +196,6 @@ class EdgePiADC(SPI):
         call this method to get the register values.
 
         Args:
-            `start_addx` (ADCReg, optional): address of register to start read at.
-                Defaults to ADCReg.REG_ID.
-            `num_regs` (int, optional): number of registers to include in map,
-                starting from and including the register at `start_addx`.
-                Defaults to ADC_NUM_REGS.
             `override_cache` (bool): force update cached state via SPI read
 
         Returns:
@@ -211,11 +205,10 @@ class EdgePiADC(SPI):
             EdgePiADC.__state = self.__read_registers_to_map()
 
         # if caching is disabled, don't use cached state for return (dict() deepcopies)
-        reg_map = EdgePiADC.__state[start_addx.value : num_regs]
         return (
-            reg_map
+            EdgePiADC.__state
             if self.enable_cache
-            else dict(reg_map)
+            else dict(EdgePiADC.__state)
         )
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
@@ -490,7 +483,7 @@ class EdgePiADC(SPI):
             `bool`: True if RTD_EN pin is on, False otherwise
         """
         _logger.debug("Checking RTD status")
-        idac_reg = self.__get_register_map(ADCReg.REG_IDACMAG, num_regs=1)
+        idac_reg = self.__get_register_map()
         idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
         idac_1 = idac_mag[4:].uint
         status = idac_1 != 0x0
@@ -608,7 +601,7 @@ class EdgePiADC(SPI):
         """
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
-            mux_reg = self.__get_register_map(ADCReg.REG_ADC2MUX, num_regs=1)
+            mux_reg = self.__get_register_map()
             adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
             muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):

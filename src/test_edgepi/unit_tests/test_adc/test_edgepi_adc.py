@@ -63,8 +63,10 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=deepcopy(adc_default_vals))
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
     yield EdgePiADC()
 
 
@@ -315,15 +317,7 @@ def test_config(mocker, reg_updates, args, update_vals, adc):
         adc_vals[addx] = reg_val
 
     # mock each call to __read_register
-    mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
-        side_effect=[
-            adc_vals,
-        ],
-    )
-
-    # need to mock since cannot actually check updated register values here
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=adc_vals)
 
     reg_values = adc._EdgePiADC__config(**args)
 
@@ -729,6 +723,7 @@ def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
 )
 def test_rtd_mode(mocker, enable, adc_2_mux, config_calls, adc):
     config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_register_map")
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_2_mux]
     )
