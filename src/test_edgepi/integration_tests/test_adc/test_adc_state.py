@@ -283,6 +283,17 @@ def fixture_adc():
         "state.checksum_mode",
         ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_OFF.value.op_code],
     ),
+    # CONV MODE
+    (
+        {"checksum_mode": ConvMode.PULSE},
+        "state.adc_1.conversion_mode",
+        ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
+    ),
+    (
+        {"checksum_mode": ConvMode.CONTINUOUS},
+        "state.adc_1.conversion_mode",
+        ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
+    ),
 ])
 def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     adc._EdgePiADC__config(**updates)
