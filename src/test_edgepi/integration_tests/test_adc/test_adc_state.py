@@ -6,6 +6,8 @@ from edgepi.adc.adc_constants import (
     IDACMAG,
     IDACMUX,
     REFMUX,
+    ADC1DataRate,
+    ADC2DataRate,
     ADCChannel,
     ADCReg,
     CheckMode,
@@ -293,6 +295,108 @@ def fixture_adc():
         {"checksum_mode": ConvMode.CONTINUOUS},
         "state.adc_1.conversion_mode",
         ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
+    ),
+    # ADC1 DATA RATE
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_2P5},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2P5.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_5},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_5.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_10},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_10.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_16P6},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_16P6.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_20},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_20.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_50},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_50.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_60},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_60.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_100},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_100.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_400},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_400.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_1200},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_1200.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_2400},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2400.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_4800},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_4800.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_7200},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_7200.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_14400},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_14400.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_19200},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_19200.value.op_code],
+    ),
+    (
+        {"adc_1_data_rate": ADC1DataRate.SPS_38400},
+        "state.adc_1.data_rate",
+        ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_38400.value.op_code],
+    ),
+    # ADC2 Data Rate
+    (
+        {"adc_2_data_rate": ADC2DataRate.SPS_10},
+        "state.adc_2.data_rate",
+        ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_10.value.op_code],
+    ),
+    (
+        {"adc_2_data_rate": ADC2DataRate.SPS_100},
+        "state.adc_2.data_rate",
+        ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_100.value.op_code],
+    ),
+    (
+        {"adc_2_data_rate": ADC2DataRate.SPS_400},
+        "state.adc_2.data_rate",
+        ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_400.value.op_code],
+    ),
+    (
+        {"adc_2_data_rate": ADC2DataRate.SPS_800},
+        "state.adc_2.data_rate",
+        ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
     ),
 ])
 def test_edgepi_state_no_cache(updates, state_property, expected, adc):
