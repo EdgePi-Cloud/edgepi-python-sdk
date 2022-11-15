@@ -398,6 +398,32 @@ def fixture_adc():
         "state.adc_2.data_rate",
         ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
     ),
+    # FILTER MODE
+    (
+        {"filter_mode": FilterMode.SINC1},
+        "state.filter_mode",
+        ADCProperties.FILTER_MODE.value.values[FilterMode.SINC1.value.op_code],
+    ),
+    (
+        {"filter_mode": FilterMode.SINC2},
+        "state.filter_mode",
+        ADCProperties.FILTER_MODE.value.values[FilterMode.SINC2.value.op_code],
+    ),
+    (
+        {"filter_mode": FilterMode.SINC3},
+        "state.filter_mode",
+        ADCProperties.FILTER_MODE.value.values[FilterMode.SINC3.value.op_code],
+    ),
+    (
+        {"filter_mode": FilterMode.SINC4},
+        "state.filter_mode",
+        ADCProperties.FILTER_MODE.value.values[FilterMode.SINC4.value.op_code],
+    ),
+    (
+        {"filter_mode": FilterMode.FIR},
+        "state.filter_mode",
+        ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
+    ),
 ])
 def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     adc._EdgePiADC__config(**updates)
