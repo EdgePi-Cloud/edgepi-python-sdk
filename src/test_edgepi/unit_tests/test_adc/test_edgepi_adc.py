@@ -586,7 +586,13 @@ def test_get_channel_assign_opcodes(
         ),
     ],
 )
-def test_validate_updates(mocker, updated_regs, actual_regs, err, adc):
+def test_validate_updates(mocker, updated_regs, actual_regs, err):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
+    # mock RTD as off by default, mock as on if needed
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    adc = EdgePiADC()
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_registers_to_map",
         return_value=actual_regs,
@@ -721,9 +727,15 @@ def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
         ),
     ],
 )
-def test_rtd_mode(mocker, enable, adc_2_mux, config_calls, adc):
+def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
+    # mock RTD as off by default, mock as on if needed
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    adc = EdgePiADC()
     config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_register_map")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_register_map", return_value={ADCReg.REG_ADC2MUX.value: adc_2_mux})
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_2_mux]
     )
