@@ -111,6 +111,7 @@ class ADCState:
         result = current_state | {"rtd_mode_update": True}
         return PropertyValue(result == expected, current_state)
 
+
 class ADCStateMissingMap(Exception):
     """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
 
@@ -148,6 +149,7 @@ class EdgePiADC(SPI):
 
     def __init__(self, enable_cache: bool = False):
         super().__init__(bus_num=6, dev_id=1)
+        # declare instance vars before config call below
         self.enable_cache = enable_cache
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
@@ -159,8 +161,6 @@ class EdgePiADC(SPI):
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
-        # TODO: code below this is unreachable, figure out why
-        
 
     def __reapply_config(self):
         """
