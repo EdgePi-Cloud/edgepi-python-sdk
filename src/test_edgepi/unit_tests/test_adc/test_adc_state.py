@@ -12,6 +12,7 @@ from edgepi.adc.adc_constants import (
     IDACMAG,
     IDACMUX,
     REFMUX,
+    ADC1DataRate,
     ADCChannel,
     ADCReg,
     CheckMode,
@@ -440,6 +441,87 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                     "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
                 },
             ),
+        ),
+        # ADC1 Data Rate
+        (
+            {ADCReg.REG_MODE2.value: 0x00},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2P5.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x01},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_5.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x02},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_10.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x03},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_16P6.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x04},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_20.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x05},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_50.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x06},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_60.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x07},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_100.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x08},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_400.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x09},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_1200.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0A},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2400.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0B},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_4800.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0C},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_7200.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0D},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_14400.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0E},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_19200.value.op_code],
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0F},
+            "state.adc_1.data_rate",
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_38400.value.op_code],
         ),
     ],
 )
