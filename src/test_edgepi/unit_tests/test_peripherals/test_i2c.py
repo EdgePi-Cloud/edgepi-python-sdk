@@ -28,7 +28,8 @@ if sys.platform != 'linux':
                             [( 30, [31, 32], [[30], False, [31, 32], True]),
                              ( 20, [21, 22], [[20], False, [21, 22], True]),
                              ( 10, [11, 12], [[10], False, [11, 12], True]),
-                             ( 0, [1, 2], [[0], False, [1, 2], True])
+                             ( 0, [1, 2], [[0], False, [1, 2], True]),
+                             ( [1,2], [3, 4], [[1,2], False, [3, 4], True])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_set_read_msg(i2c_mock, addrs, msg, result):
@@ -47,7 +48,8 @@ if sys.platform != 'linux':
                             [( 30, [31, 32], [[30, 31, 32], False]),
                              ( 20, [21, 22], [[20, 21, 22], False]),
                              ( 10, [11, 12], [[10, 11, 12], False]),
-                             ( 0, [1, 2], [[0, 1, 2], False])
+                             ( 0, [1, 2], [[0, 1, 2], False]),
+                             ( [3,4], [1, 2], [[3, 4, 1, 2], False])
                             ])
     @patch('edgepi.peripherals.i2c.I2C')
     def test_i2c_set_write_msg(i2c_mock, addrs, msg, result):
