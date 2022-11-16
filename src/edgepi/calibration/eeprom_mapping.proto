@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+message EepromLayout{
+  message ModuleCalibParams{
+    message ChannelCalib {
+      optional float gain = 1;
+      optional float offset = 2;
+    }
+    repeated ChannelCalib calibs = 1;
+  }
+  message AwsKey{
+    string private_key = 1;
+    string certificate = 2;
+  }
+  ModuleCalibParams dac = 1;
+  ModuleCalibParams adc = 2;
+  ModuleCalibParams rtd = 3;
+  ModuleCalibParams tc = 4;
+  AwsKey config_key = 5;
+  AwsKey data_key =6;
+  string serial_number = 7;
+  string model = 8;
+  string client_id = 9;
+}
