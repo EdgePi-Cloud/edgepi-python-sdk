@@ -5,8 +5,6 @@ from copy import deepcopy
 import sys
 import pytest
 
-sys.modules['periphery'] = mock.MagicMock()
-
 from edgepi.adc.edgepi_adc import ADCState
 from edgepi.adc.adc_query_lang import ADCProperties, PropertyValue
 from edgepi.adc.adc_constants import (
@@ -23,6 +21,7 @@ from edgepi.adc.adc_constants import (
     StatusByte,
 )
 
+sys.modules['periphery'] = mock.MagicMock()
 
 # mock default register values
 ADC_REGS = {
