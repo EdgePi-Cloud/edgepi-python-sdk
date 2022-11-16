@@ -78,12 +78,12 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
     length = eeprom._EdgePiEEPROM__allocated_memory()
     assert length == result
 
-def test__read_osensa_memory(mocker, eeprom):
+def test__read_edgepi_reserved_memory(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory")
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.sequential_read",
                 return_value =list(read_binfile()))
-    byte_string = eeprom._EdgePiEEPROM__read_osensa_memory()
+    byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == read_binfile()
 
 @pytest.mark.parametrize("msg",
@@ -99,9 +99,28 @@ def test__read_osensa_memory(mocker, eeprom):
                         ])
 def test_get_message_of_interest(mocker, msg, eeprom):
     # pylint: disable=protected-access
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_osensa_memory",
-                 return_value = read_binfile())
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
+        return_value = read_binfile())
     memory_contents = EepromLayout()
     memory_contents.ParseFromString(read_binfile())
     msg_of_interest = eeprom.get_message_of_interest(msg)
-    assert msg_of_interest == memory_contents.ListFields()[msg.value][1]
+    assert msg_of_interest == memory_contents.ListFields()[msg.value -1][1]
+
+def test_get_edgepi_reserved_data(mocker, eeprom):
+    # pylint: disable=protected-access
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
+        return_value = read_binfile())
+    memory_contents = EepromLayout()
+    memory_contents.ParseFromString(read_binfile())
+    edgepi_eeprom_dataclass = eeprom.get_edgepi_reserved_data()
+    assert edgepi_eeprom_dataclass.dac_list is not None
+    assert edgepi_eeprom_dataclass.adc_list is not None
+    assert edgepi_eeprom_dataclass.rtd_list is not None
+    assert edgepi_eeprom_dataclass.tc_list is not None
+    assert edgepi_eeprom_dataclass.config_key is not None
+    assert edgepi_eeprom_dataclass.data_key is not None
+    assert edgepi_eeprom_dataclass.serial is not None
+    assert edgepi_eeprom_dataclass.model is not None
+    assert edgepi_eeprom_dataclass.client_id is not None
