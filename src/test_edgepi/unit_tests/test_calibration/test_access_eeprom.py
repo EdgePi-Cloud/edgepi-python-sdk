@@ -115,10 +115,10 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
     memory_contents = EepromLayout()
     memory_contents.ParseFromString(read_binfile())
     edgepi_eeprom_dataclass = eeprom.get_edgepi_reserved_data()
-    assert edgepi_eeprom_dataclass.dac_list is not None
-    assert edgepi_eeprom_dataclass.adc_list is not None
-    assert edgepi_eeprom_dataclass.rtd_list is not None
-    assert edgepi_eeprom_dataclass.tc_list is not None
+    assert edgepi_eeprom_dataclass.dac_calib_parms is not None
+    assert edgepi_eeprom_dataclass.adc_calib_parms is not None
+    assert edgepi_eeprom_dataclass.rtd_calib_parms is not None
+    assert edgepi_eeprom_dataclass.tc_calib_parms is not None
     assert edgepi_eeprom_dataclass.config_key is not None
     assert edgepi_eeprom_dataclass.data_key is not None
     assert edgepi_eeprom_dataclass.serial is not None

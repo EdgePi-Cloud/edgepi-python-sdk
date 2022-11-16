@@ -113,10 +113,10 @@ class EdgePiEEPROMData:
     model (str)
     client_id (str)
     """
-    dac_list: list = None
-    adc_list: list = None
-    rtd_list: list = None
-    tc_list: list = None
+    dac_calib_parms: list = None
+    adc_calib_parms: list = None
+    rtd_calib_parms: list = None
+    tc_calib_parms: list = None
     config_key: Keys = None
     data_key: Keys = None
     serial: str = None

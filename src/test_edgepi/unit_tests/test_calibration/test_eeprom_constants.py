@@ -20,19 +20,19 @@ def test_edgepi_eeprom_data():
     memory_map = EepromLayout()
     memory_map.ParseFromString(read_binfile())
     eeprom_data = EdgePiEEPROMData()
-    eeprom_data.dac_list=eeprom_data.message_to_list(memory_map.dac)
-    eeprom_data.adc_list=eeprom_data.message_to_list(memory_map.adc)
-    eeprom_data.rtd_list=eeprom_data.message_to_list(memory_map.rtd)
-    eeprom_data.tc_list=eeprom_data.message_to_list(memory_map.tc)
+    eeprom_data.dac_calib_parms=eeprom_data.message_to_list(memory_map.dac)
+    eeprom_data.adc_calib_parms=eeprom_data.message_to_list(memory_map.adc)
+    eeprom_data.rtd_calib_parms=eeprom_data.message_to_list(memory_map.rtd)
+    eeprom_data.tc_calib_parms=eeprom_data.message_to_list(memory_map.tc)
     eeprom_data.config_key=eeprom_data.keys_to_str(memory_map.config_key)
     eeprom_data.data_key=eeprom_data.keys_to_str(memory_map.data_key)
     eeprom_data.serial=memory_map.serial_number
     eeprom_data.model=memory_map.model
     eeprom_data.client_id=memory_map.client_id
-    assert eeprom_data.dac_list == eeprom_data.message_to_list(memory_map.dac)
-    assert eeprom_data.adc_list==eeprom_data.message_to_list(memory_map.adc)
-    assert eeprom_data.rtd_list==eeprom_data.message_to_list(memory_map.rtd)
-    assert eeprom_data.tc_list==eeprom_data.message_to_list(memory_map.tc)
+    assert eeprom_data.dac_calib_parms == eeprom_data.message_to_list(memory_map.dac)
+    assert eeprom_data.adc_calib_parms==eeprom_data.message_to_list(memory_map.adc)
+    assert eeprom_data.rtd_calib_parms==eeprom_data.message_to_list(memory_map.rtd)
+    assert eeprom_data.tc_calib_parms==eeprom_data.message_to_list(memory_map.tc)
     assert eeprom_data.config_key.certificate == memory_map.config_key.certificate
     assert eeprom_data.config_key.private == memory_map.config_key.private_key
     assert eeprom_data.data_key.certificate == memory_map.data_key.certificate
