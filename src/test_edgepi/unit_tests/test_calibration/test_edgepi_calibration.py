@@ -51,7 +51,7 @@ def test_generate_calib_param_dict(mocker, module_name, msg_field_number):
     edge_eeprom = EdgePiEEPROM()
     edge_calib = EdgePiCalibration(module_name)
     edgepi_data = edge_eeprom.get_edgepi_reserved_data()
-    calib_dict = edge_calib.generate_calib_param_dict(edgepi_data.dac_calib_parms)
+    calib_dict = edge_calib.generate_calib_params_dict(edgepi_data.dac_calib_parms)
     for key, value in calib_dict.items():
         assert value.gain == module_param[key].gain
         assert value.offset == module_param[key].offset

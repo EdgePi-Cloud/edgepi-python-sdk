@@ -62,8 +62,8 @@ class EdgePiDAC(spi):
         # Read edgepi reserved data and generate calibration parameter dictionary
         eeprom = EdgePiEEPROM()
         calib = EdgePiCalibration(ModuleNames.DAC)
-        eeprom_data = eeprom.get_edgepi_reserved_data()
-        calib_dict = calib.generate_calib_param_dict(eeprom_data.dac_calib_parms)
+        eeprom_data  = eeprom.get_edgepi_reserved_data()
+        calib_dict = calib.generate_calib_params_dict(eeprom_data .dac_calib_parms)
 
         self.dac_ops = DACCommands(calib_dict)
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
