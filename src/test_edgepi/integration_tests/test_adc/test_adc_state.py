@@ -16,7 +16,7 @@ from edgepi.adc.adc_constants import (
     FilterMode,
 )
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, too-many-lines
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
     adc = EdgePiADC(enable_cache=False)
