@@ -2,7 +2,6 @@
 For ADC state querying
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Any
 from enum import Enum
@@ -330,37 +329,3 @@ class ADCProperties(Enum):
             ),
         },
     )
-
-
-_logger = logging.getLogger(__name__)
-
-
-def query_state(adc_property: ADCProperties, reg_map: dict[int, int]) -> PropertyValue:
-    """
-    Read the current state of configurable ADC properties
-
-    Args:
-        `adc_property` (ADCProperties): ADC property whose state is to be read
-        `reg_map`: register map formatted as {addx (int): value (int)}
-
-    Returns:
-        `PropertyValue`: information about the current value of this property
-    """
-    # value of this adc_property's register
-    reg_value = reg_map[adc_property.value.addx]
-
-    # get value of bits corresponding to this property by letting through only the bits
-    # that were "masked" when setting this property (clear all bits except the property bits)
-    adc_property_bits = (~adc_property.value.mask) & reg_value
-
-    # name of current value of this adc_property
-    adc_property_value = adc_property.value.values[adc_property_bits]
-    _logger.debug(
-        (
-            f"query_state: query_property='{adc_property}',"
-            " adc_property_bits={hex(adc_property_bits)},"
-            f" adc_property_value='{adc_property_value}'"
-        )
-    )
-
-    return adc_property_value

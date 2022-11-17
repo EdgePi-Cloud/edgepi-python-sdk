@@ -8,7 +8,7 @@ import time
 
 
 from bitstring import pack
-from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties, query_state
+from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -81,7 +81,38 @@ class ADCState:
         self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
         self.rtd_on: PropertyValue = self.__get_rtd_state()
 
-    def __get_state(self, mode: ADCProperties) -> PropertyValue:
+    @staticmethod
+    def __query_state(adc_property: ADCProperties, reg_map: dict[int, int]) -> PropertyValue:
+        """
+        Read the current state of configurable ADC properties
+
+        Args:
+            `adc_property` (ADCProperties): ADC property whose state is to be read
+            `reg_map`: register map formatted as {addx (int): value (int)}
+
+        Returns:
+            `PropertyValue`: information about the current value of this property
+        """
+        # value of this adc_property's register
+        reg_value = reg_map[adc_property.value.addx]
+
+        # get value of bits corresponding to this property by letting through only the bits
+        # that were "masked" when setting this property (clear all bits except the property bits)
+        adc_property_bits = (~adc_property.value.mask) & reg_value
+
+        # name of current value of this adc_property
+        adc_property_value = adc_property.value.values[adc_property_bits]
+        _logger.debug(
+            (
+                f"query_state: query_property='{adc_property}',"
+                " adc_property_bits={hex(adc_property_bits)},"
+                f" adc_property_value='{adc_property_value}'"
+            )
+        )
+
+        return adc_property_value
+
+    def __get_state(self, property: ADCProperties) -> PropertyValue:
         """
         Read the current state of configurable ADC properties
 
@@ -91,7 +122,7 @@ class ADCState:
         Returns:
             PropertyValue: information about the current value of this mode
         """
-        return query_state(mode, self.__reg_map)
+        return self.__query_state(property, self.__reg_map)
 
     def __get_rtd_state(self) -> bool:
         """
@@ -136,12 +167,12 @@ class EdgePiADC(SPI):
     """
     EdgePi ADC device
 
-    Warning, when caching is enabled to track the ADC's internal state.
-    This makes EdgePiADC objects safe to use only in a single dev environment.
-    Using multiple EdgePiADC objects, each within a different environment, will lead to
-    the cached ADC state being out of sync with the actual hardware state. To avoid this,
-    disable caching when creating the EdgePiADC object; the state of the ADC will be read
-    from hardware instead, at the cost of increased SPI reading load.
+    Warning, when caching is enabled to track the ADC's internal state, EdgePiADC objects are
+    safe to use only within a single dev environment. Using multiple EdgePiADC objects,
+    each within a different environment, will lead to the cached ADC state being out of sync
+    with the actual hardware state. To avoid this, disable caching when creating the
+    EdgePiADC object; the state of the ADC will be read from hardware instead, at the
+    cost of increased SPI reading load.
     """
 
     # keep track of ADC register map state for state caching
