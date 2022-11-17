@@ -761,7 +761,7 @@ class EdgePiADC(SPI):
         if validate:
             self.__validate_updates(updated_reg_values)
 
-        return reg_values
+        return updated_reg_values
 
     def __validate_updates(self, updated_reg_values: dict):
         """
