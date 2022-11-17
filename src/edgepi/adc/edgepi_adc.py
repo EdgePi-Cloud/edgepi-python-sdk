@@ -747,19 +747,19 @@ class EdgePiADC(SPI):
 
         # get codes to update register values
         _logger.debug(f"opcodes = {ops_list}")
-        apply_opcodes(reg_values, ops_list)
+        updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
         _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
         # write updated reg values to ADC using a single write.
-        data = [entry["value"] for entry in reg_values.values()]
+        data = [entry["value"] for entry in updated_reg_values.values()]
         self.__write_register(ADCReg.REG_ID, data)
+
+        # update ADC state (for state caching)
+        self.__update_cache_map(updated_reg_values)
 
         # validate updates were applied correctly
         if validate:
-            self.__validate_updates(reg_values)
-
-        # update ADC state (for state caching)
-        self.__update_cache_map(reg_values)
+            self.__validate_updates(updated_reg_values)
 
         return reg_values
 

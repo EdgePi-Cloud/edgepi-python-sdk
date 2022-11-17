@@ -498,16 +498,6 @@ def fixture_adc_cache():
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN7.value << 4],
         ),
         (
-            {"adc_1_analog_in": ADCChannel.AIN8},
-            "state.adc_1.mux_p",
-            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN8.value << 4],
-        ),
-        (
-            {"adc_1_analog_in": ADCChannel.AIN9},
-            "state.adc_1.mux_p",
-            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN9.value << 4],
-        ),
-        (
             {"adc_1_analog_in": ADCChannel.AINCOM},
             "state.adc_1.mux_p",
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.AINCOM.value << 4],
@@ -516,67 +506,6 @@ def fixture_adc_cache():
             {"adc_1_analog_in": ADCChannel.FLOAT},
             "state.adc_1.mux_p",
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.FLOAT.value << 4],
-        ),
-        # ADC1 MUX_N
-        (
-            {"adc_1_mux_n": ADCChannel.AIN0},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN0.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN1},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN1.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN2},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN2.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN3},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN3.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN4},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN4.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN5},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN5.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN6},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN6.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN7},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN7.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN8},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN8.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN9},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN9.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AINCOM},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AINCOM.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.FLOAT},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.FLOAT.value],
         ),
         # ADC2 MUX_P
         (
@@ -620,16 +549,6 @@ def fixture_adc_cache():
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN7.value << 4],
         ),
         (
-            {"adc_2_analog_in": ADCChannel.AIN8},
-            "state.adc_2.mux_p",
-            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN8.value << 4],
-        ),
-        (
-            {"adc_2_analog_in": ADCChannel.AIN9},
-            "state.adc_2.mux_p",
-            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN9.value << 4],
-        ),
-        (
             {"adc_2_analog_in": ADCChannel.AINCOM},
             "state.adc_2.mux_p",
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.AINCOM.value << 4],
@@ -638,67 +557,6 @@ def fixture_adc_cache():
             {"adc_2_analog_in": ADCChannel.FLOAT},
             "state.adc_2.mux_p",
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.FLOAT.value << 4],
-        ),
-        # ADC2 MUX_N
-        (
-            {"adc_2_mux_n": ADCChannel.AIN0},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN0.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN1},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN1.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN2},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN2.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN3},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN3.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN4},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN4.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN5},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN5.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN6},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN6.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN7},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN7.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN8},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN8.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN9},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN9.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AINCOM},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AINCOM.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.FLOAT},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
         ),
         # CHECK MODE
         (
