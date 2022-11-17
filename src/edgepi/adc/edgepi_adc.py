@@ -117,7 +117,7 @@ class ADCState:
         Read the current state of configurable ADC properties
 
         Args:
-            mode (ADCProperties): ADC property whose state is to be read
+            property (ADCProperties): ADC property whose state is to be read
 
         Returns:
             PropertyValue: information about the current value of this mode
