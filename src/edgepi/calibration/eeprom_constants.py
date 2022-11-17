@@ -3,6 +3,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from edgepi.calibration.calibration_constants import CalibParam
 
 class EEPROMInfo(Enum):
     """
@@ -76,7 +77,7 @@ class EdgePiEEPROMData:
     model: str = None
     client_id: str = None
 
-    def message_to_list(self, data_to_unpack: EepromLayout = None):
+    def message_to_dict(self, data_to_unpack: EepromLayout = None):
         """
         Function to unpack message to list
         Args:
@@ -84,11 +85,11 @@ class EdgePiEEPROMData:
         Returns:
             calib_list: 1-D array
         """
-        calib_list=[]
-        for ch in data_to_unpack.calibs:
-            calib_list.append(ch.gain)
-            calib_list.append(ch.offset)
-        return calib_list
+        calib_dict={}
+        for indx, ch in enumerate(data_to_unpack.calibs):
+            calib_dict[indx] = CalibParam(gain=ch.gain,
+                                        offset=ch.offset)
+        return calib_dict
 
     def keys_to_str(self, data_to_unpack: EepromLayout = None):
         """

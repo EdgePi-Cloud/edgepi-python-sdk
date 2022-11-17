@@ -11,9 +11,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.calibration.edgepi_calibration import EdgePiCalibration
-from edgepi.calibration.eeprom_constants import ModuleNames, MessageFieldNumber
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
-from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from edgepi.calibration.eeprom_constants import ModuleNames
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""
@@ -33,30 +31,6 @@ def test_init_class(module_name, result):
     edge_calib = EdgePiCalibration(module_name)
     assert edge_calib.module == result[0]
     assert edge_calib.num_of_ch == result[1]
-
-@pytest.mark.parametrize("module_name, msg_field_number",
-                        [(ModuleNames.DAC, MessageFieldNumber.DAC.value),
-                         (ModuleNames.ADC, MessageFieldNumber.ADC.value),
-                         (ModuleNames.RTD, MessageFieldNumber.RTD.value),
-                         (ModuleNames.TC, MessageFieldNumber.TC.value)])
-def test_generate_calib_param_dict(mocker, module_name, msg_field_number):
-    # pylint: disable=protected-access
-    mocker.patch("edgepi.peripherals.i2c.I2C")
-    mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
-        return_value = read_binfile())
-    protobuf_msg = EepromLayout()
-    protobuf_msg.ParseFromString(read_binfile())
-    module_param= protobuf_msg.ListFields()[msg_field_number - 1][1].calibs
-    edge_eeprom = EdgePiEEPROM()
-    edge_calib = EdgePiCalibration(module_name)
-    edgepi_data = edge_eeprom.get_edgepi_reserved_data()
-    calib_dict = edge_calib.generate_calib_params_dict(edgepi_data.dac_calib_parms)
-    for key, value in calib_dict.items():
-        assert value.gain == module_param[key].gain
-        assert value.offset == module_param[key].offset
-    dict_length = len(calib_dict.values())
-    assert dict_length == edge_calib.num_of_ch
 
 @pytest.mark.parametrize("module_name, num_of_points, result", [(ModuleNames.DAC, 10, 0),
                                                                 (ModuleNames.ADC, 5, 0),

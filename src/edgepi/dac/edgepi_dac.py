@@ -21,11 +21,6 @@ from edgepi.peripherals.spi import SpiDevice as spi
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
-from edgepi.calibration.eeprom_constants import ModuleNames
-from edgepi.calibration.edgepi_calibration import EdgePiCalibration
-
-
-
 
 class EdgePiDAC(spi):
     """A EdgePi DAC device"""
@@ -61,11 +56,10 @@ class EdgePiDAC(spi):
 
         # Read edgepi reserved data and generate calibration parameter dictionary
         eeprom = EdgePiEEPROM()
-        calib = EdgePiCalibration(ModuleNames.DAC)
         eeprom_data  = eeprom.get_edgepi_reserved_data()
-        calib_dict = calib.generate_calib_params_dict(eeprom_data .dac_calib_parms)
+        dac_calib_params = eeprom_data.dac_calib_parms
 
-        self.dac_ops = DACCommands(calib_dict)
+        self.dac_ops = DACCommands(dac_calib_params)
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
 
         self.__dac_power_state = {

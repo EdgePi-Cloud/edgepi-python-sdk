@@ -4,11 +4,7 @@ able to generate new calibration parameters using measurements tools.
 '''
 
 from edgepi.calibration.eeprom_constants import ModuleNames
-from edgepi.calibration.calibration_constants import(
-    NumOfCh,
-    CalibParam,
-    # ReferenceV
-)
+from edgepi.calibration.calibration_constants import NumOfCh
 
 
 class EdgePiCalibration():
@@ -28,28 +24,6 @@ class EdgePiCalibration():
         self.num_of_ch = NumOfCh[module.name].value
         self.full_scale_range = None
         self.full_scale_code = None
-
-    def generate_calib_params_dict(self, calib_parms: list = None):
-        '''
-        Function to generate dictionary of calibration parameters
-        Args:
-            calib_param (list): The list contains the calibration parameter of each channel packed
-                                in 1-D array. The gain and offset values are repeated increment of 2
-                                index number. Refer to the following example:
-                                [gain_ch1, offset_ch1, ... gain_ch_n, offset_ch_n]
-                                index: [0, 1, 2, 3, ... ,2*(n-1), 2*(n-1)+1], n = number of channel
-        Return:
-            ch_to_calib_dict (dict): dictionary mapped channel to CalibParam data class
-            ie) {1 : CalibParam(gain, offset)
-                 .
-                 .
-                 .
-                 nth_channel : CalibParam(gain, offset)}
-        '''
-        ch_to_calib_dict = {}
-        for ch in range(self.num_of_ch):
-            ch_to_calib_dict[ch] = CalibParam(gain=calib_parms[ch*2], offset=calib_parms[ch*2+1])
-        return ch_to_calib_dict
 
     def generate_measurements_dict(self, num_of_points: int = None):
         '''

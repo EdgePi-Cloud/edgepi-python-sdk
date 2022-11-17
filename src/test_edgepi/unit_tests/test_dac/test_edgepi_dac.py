@@ -20,22 +20,23 @@ from edgepi.dac.dac_constants import (
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.calibration.eeprom_constants import EdgePiEEPROMData
+from edgepi.calibration.calibration_constants import CalibParam
 
-dummy_calib_param_list = [1,0,
-                          1,0,
-                          1,0,
-                          1,0,
-                          1,0,
-                          1,0,
-                          1,0,
-                          1,0,]
+dummy_calib_param_dict = {0:CalibParam(gain=1,offset=0),
+                          1:CalibParam(gain=1,offset=0),
+                          2:CalibParam(gain=1,offset=0),
+                          3:CalibParam(gain=1,offset=0),
+                          4:CalibParam(gain=1,offset=0),
+                          5:CalibParam(gain=1,offset=0),
+                          6:CalibParam(gain=1,offset=0),
+                          7:CalibParam(gain=1,offset=0)}
 
 @pytest.fixture(name="dac")
 def fixture_test_dac(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
-                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_list))
+                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_dict))
     yield EdgePiDAC()
 
 @pytest.fixture(name="dac_mock_periph")
@@ -43,7 +44,7 @@ def fixture_test_dac_write_voltage(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
-                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_list))
+                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_dict))
     yield EdgePiDAC()
 
 
@@ -179,7 +180,7 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name)
     mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
-                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_list))
+                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_dict))
     dac = EdgePiDAC()
     dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
     # check correct clause is entered depending on voltage written
@@ -231,14 +232,12 @@ def test_enable_dac_gain(mocker, enable, result, mocker_values):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.sequential_read",
-                  return_value = dummy_calib_param_list)
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
                   return_value = (mocker_values[0], mocker_values[1], mocker_values[2]))
     set_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     clear_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
-                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_list))
+                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_dict))
     dac = EdgePiDAC()
     # pylint: disable=expression-not-assigned
     assert dac.enable_dac_gain(enable) == result
@@ -261,7 +260,7 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[3])
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val[0:3])
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
-                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_list))
+                  return_value = EdgePiEEPROMData(dac_calib_parms=dummy_calib_param_dict))
     dac = EdgePiDAC()
     code_val, voltage_val, gain_state = dac.get_state(analog_out, code, voltage, gain)
     assert code_val == result[0]
