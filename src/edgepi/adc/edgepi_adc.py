@@ -347,7 +347,8 @@ class EdgePiADC(SPI):
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
                 f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
-                f"data_rate={hex(data_rate.value.op_code)} filter_mode={hex(filter_mode.value.op_code)}\n"
+                f"data_rate={hex(data_rate.value.op_code)}"
+                f"filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
         self.__send_start_command(adc_num)
