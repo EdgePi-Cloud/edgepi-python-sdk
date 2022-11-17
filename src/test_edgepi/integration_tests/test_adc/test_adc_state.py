@@ -20,6 +20,8 @@ from edgepi.adc.adc_constants import (
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
     adc = EdgePiADC(enable_cache=False)
+    # turn off to allow configuring RTD properties
+    adc.rtd_mode(enable=False)
     yield adc
 
 
@@ -69,16 +71,6 @@ def fixture_adc():
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN7.value << 4],
         ),
         (
-            {"adc_1_analog_in": ADCChannel.AIN8},
-            "state.adc_1.mux_p",
-            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN8.value << 4],
-        ),
-        (
-            {"adc_1_analog_in": ADCChannel.AIN9},
-            "state.adc_1.mux_p",
-            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN9.value << 4],
-        ),
-        (
             {"adc_1_analog_in": ADCChannel.AINCOM},
             "state.adc_1.mux_p",
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.AINCOM.value << 4],
@@ -88,64 +80,54 @@ def fixture_adc():
             "state.adc_1.mux_p",
             ADCProperties.ADC1_MUXP.value.values[ADCChannel.FLOAT.value << 4],
         ),
-        # ADC1 MUX_N
+        # ADC1 MUX_N: need to set mux_p as well, otherwise updates only to mux_n fail
         (
-            {"adc_1_mux_n": ADCChannel.AIN0},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN0},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN0.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN1},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN1},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN1.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN2},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN2},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN2.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN3},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN3},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN3.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN4},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN4},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN4.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN5},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN5},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN5.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN6},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN6},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN6.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN7},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN7},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN7.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.AIN8},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN8.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AIN9},
-            "state.adc_1.mux_n",
-            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN9.value],
-        ),
-        (
-            {"adc_1_mux_n": ADCChannel.AINCOM},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AINCOM},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.AINCOM.value],
         ),
         (
-            {"adc_1_mux_n": ADCChannel.FLOAT},
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.FLOAT},
             "state.adc_1.mux_n",
             ADCProperties.ADC1_MUXN.value.values[ADCChannel.FLOAT.value],
         ),
@@ -191,16 +173,6 @@ def fixture_adc():
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN7.value << 4],
         ),
         (
-            {"adc_2_analog_in": ADCChannel.AIN8},
-            "state.adc_2.mux_p",
-            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN8.value << 4],
-        ),
-        (
-            {"adc_2_analog_in": ADCChannel.AIN9},
-            "state.adc_2.mux_p",
-            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN9.value << 4],
-        ),
-        (
             {"adc_2_analog_in": ADCChannel.AINCOM},
             "state.adc_2.mux_p",
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.AINCOM.value << 4],
@@ -212,62 +184,52 @@ def fixture_adc():
         ),
         # ADC2 MUX_N
         (
-            {"adc_2_mux_n": ADCChannel.AIN0},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN0},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN0.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN1},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN1},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN1.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN2},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN2},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN2.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN3},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN3},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN3.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN4},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN4},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN4.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN5},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN5},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN5.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN6},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN6},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN6.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN7},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN7},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN7.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.AIN8},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN8.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AIN9},
-            "state.adc_2.mux_n",
-            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN9.value],
-        ),
-        (
-            {"adc_2_mux_n": ADCChannel.AINCOM},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AINCOM},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.AINCOM.value],
         ),
         (
-            {"adc_2_mux_n": ADCChannel.FLOAT},
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.FLOAT},
             "state.adc_2.mux_n",
             ADCProperties.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
         ),
