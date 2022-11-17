@@ -3,11 +3,15 @@
 import logging
 import math
 
-from edgepi.calibration.eeprom_constants import EEPROMInfo
+from edgepi.calibration.eeprom_constants import (
+    EEPROMInfo,
+    EdgePiMemoryInfo,
+    MessageFieldNumber,
+    EdgePiEEPROMData)
+from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
-#TODO: Maybe use protobuff
-#TODO: EEPROM should return structured data class of parameters to calibration class.
+
 class EdgePiEEPROM(I2CDevice):
     '''
     Helper class to read eeprom using I2C
@@ -16,6 +20,7 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
+        self.eeprom_layout = EepromLayout()
         super().__init__(self.__dev_path)
 
     def __pack_mem_address(self, page_addr: int = None, byte_addr: int = None):
@@ -43,6 +48,67 @@ class EdgePiEEPROM(I2CDevice):
         byte_addr = memory_address%EEPROMInfo.PAGE_SIZE.value
         self.log.debug(f'Page address = {page_addr}, byte Address = {byte_addr}')
         return page_addr, byte_addr
+
+    def __allocated_memory(self):
+        '''
+        The first two bytes represenst the allocated memory in Edgepi reserved memory space. This
+        function returns the length of memory to read.
+        Args:
+            N/A
+        Return:
+            length (int): size of memory to read
+        '''
+        length = self.sequential_read(EdgePiMemoryInfo.USED_SPACE.value, 2)
+        return (length[0]<<8)| length[1]
+
+    def __read_edgepi_reserved_memory(self):
+        '''
+        Read Edgepi reserved memory space to retreive parameters. This function will return byte
+        strings, that can be converted into protocol buffer message format
+        Args:
+            N/A
+        Return:
+            Byte_string (bytes): strings of bytes read from the eeprom
+        '''
+        mem_size = self.__allocated_memory()
+        buff_list = self.sequential_read(EdgePiMemoryInfo.BUFF_START.value, mem_size)
+        return bytes(buff_list)
+
+    def get_message_of_interest(self, msg: MessageFieldNumber = None):
+        """
+        This function filters out the message according to the specified field number passed as
+        parameter.
+        Args:
+            msg (MessageFieldNumber): protocol buffer message field index number for ListFields()
+            function
+        Return:
+            pb message specified by the message field number. ex) if message field of DAC is passed,
+            the dac message will be returned
+        """
+        self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
+        return self.eeprom_layout.ListFields()[msg.value - 1][1]
+
+    def get_edgepi_reserved_data(self):
+        """
+        Read Edgepi reserved memory space and populate dataclass
+        Args:
+            N/A
+        Return:
+            eeprom_data (EdgePiEEPROMData): dataclass containing eeprom values
+        """
+        # pylint: disable=no-member
+        self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
+        eeprom_data = EdgePiEEPROMData()
+        eeprom_data.dac_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.dac)
+        eeprom_data.adc_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.adc)
+        eeprom_data.rtd_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.rtd)
+        eeprom_data.tc_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.tc)
+        eeprom_data.config_key=eeprom_data.keys_to_str(self.eeprom_layout.config_key)
+        eeprom_data.data_key=eeprom_data.keys_to_str(self.eeprom_layout.data_key)
+        eeprom_data.serial= self.eeprom_layout.serial_number
+        eeprom_data.model= self.eeprom_layout.model
+        eeprom_data.client_id= self.eeprom_layout.client_id
+        return eeprom_data
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
         '''
