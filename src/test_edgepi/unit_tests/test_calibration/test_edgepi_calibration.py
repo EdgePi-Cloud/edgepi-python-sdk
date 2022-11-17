@@ -4,13 +4,22 @@
 # pylint: disable=protected-access
 
 from unittest import mock
+import os
+PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.calibration.edgepi_calibration import EdgePiCalibration
-from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.calibration.eeprom_constants import ModuleNames
+from edgepi.calibration.eeprom_constants import ModuleNames, MessageFieldNumber
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+
+def read_binfile():
+    """Read the dummy serializedFile and return byte string"""
+    with open(PATH+"/serializedFile","rb") as fd:
+        b_string = fd.read()
+    return b_string
 
 # @pytest.fixture(name="calib")
 # def fixture_test_dac():
@@ -25,16 +34,27 @@ def test_init_class(module_name, result):
     assert edge_calib.module == result[0]
     assert edge_calib.num_of_ch == result[1]
 
-@pytest.mark.parametrize("module_name, result", [(ModuleNames.DAC, [1, 0]),
-                                                 (ModuleNames.ADC, [1, 0]),
-                                                 (ModuleNames.RTD, [1, 0]),
-                                                 (ModuleNames.TC, [1, 0])])
-def test_generate_calib_param_dict(module_name, result):
+@pytest.mark.parametrize("module_name, msg_field_number",
+                        [(ModuleNames.DAC, MessageFieldNumber.DAC.value),
+                         (ModuleNames.ADC, MessageFieldNumber.ADC.value),
+                         (ModuleNames.RTD, MessageFieldNumber.RTD.value),
+                         (ModuleNames.TC, MessageFieldNumber.TC.value)])
+def test_generate_calib_param_dict(mocker, module_name, msg_field_number):
+    # pylint: disable=protected-access
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
+        return_value = read_binfile())
+    protobuf_msg = EepromLayout()
+    protobuf_msg.ParseFromString(read_binfile())
+    module_param= protobuf_msg.ListFields()[msg_field_number - 1][1].calibs
+    edge_eeprom = EdgePiEEPROM()
     edge_calib = EdgePiCalibration(module_name)
-    calib_dict = edge_calib.generate_calib_param_dict()
-    for _, value in calib_dict.items():
-        assert value.gain == result[0]
-        assert value.offset == result[1]
+    edgepi_data = edge_eeprom.get_edgepi_reserved_data()
+    calib_dict = edge_calib.generate_calib_param_dict(edgepi_data.dac_calib_parms)
+    for key, value in calib_dict.items():
+        assert value.gain == module_param[key].gain
+        assert value.offset == module_param[key].offset
     dict_length = len(calib_dict.values())
     assert dict_length == edge_calib.num_of_ch
 
@@ -103,41 +123,3 @@ def test_record_measurements(module_name, num_of_points, values_to_record):
         assert value_dict['input_unit'] != 0
         assert value_dict['expected_out'] != 0
         assert value_dict['actual_out'] != 0
-
-@pytest.mark.parametrize("module_name, memory, result",
-                        [(ModuleNames.DAC,[105,60,232,254], -0.018334615)])
-def test_from_memory_to_value(module_name, memory, result):
-    edge_calib = EdgePiCalibration(module_name)
-    assert edge_calib._EdgePiCalibration__from_memory_to_value(memory) == result
-
-@pytest.mark.parametrize("module_name, value, result",
-                        [(ModuleNames.DAC, -0.018334615,[105,60,232,254]),
-                         (ModuleNames.DAC, -0.018334615234,[105,60,232,254]),
-                         (ModuleNames.DAC, -0.018334615999,[105,60,232,254]),
-                         (ModuleNames.DAC, 0.0,[0,0,0,0])])
-def test_from_value_to_memory(module_name, value, result):
-    edge_calib = EdgePiCalibration(module_name)
-    assert edge_calib._EdgePiCalibration__from_value_to_memory(value) == result
-
-@pytest.mark.parametrize("module_name, calib_param, result",
-                        [(ModuleNames.DAC,
-                            [0,225,245,5,0,225,245,5,
-                             0,194,235,11,0,194,235,11,
-                             0,163,225,17,0,163,225,17,
-                             0,132,215,23,0,132,215,23,
-                             0,101,205,29,0,101,205,29,
-                             0,70,195,35,0,70,195,35,
-                             0,39,185,41,0,39,185,41,
-                             0,8,175,47,0,8,175,47],
-                                {0:CalibParam(gain=0.1,offset=0.1),
-                                 1:CalibParam(gain=0.2,offset=0.2),
-                                 2:CalibParam(gain=0.3,offset=0.3),
-                                 3:CalibParam(gain=0.4,offset=0.4),
-                                 4:CalibParam(gain=0.5,offset=0.5),
-                                 5:CalibParam(gain=0.6,offset=0.6),
-                                 6:CalibParam(gain=0.7,offset=0.7),
-                                 7:CalibParam(gain=0.8,offset=0.8)})])
-def test_get_calibration_dict(module_name, calib_param, result):
-    edge_calib = EdgePiCalibration(module_name)
-    calib_dict = edge_calib.get_calibration_dict(calib_param)
-    assert calib_dict == result
