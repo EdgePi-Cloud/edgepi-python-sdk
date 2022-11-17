@@ -771,7 +771,7 @@ def test_rtd_mode_with_cache(enable_rtd, state_property, expected, adc_cache):
 
 
 @pytest.mark.parametrize(
-    "updates, state_property, expected", 
+    "updates, state_property, expected",
     [
         # ADC1 MUX_P
         (
@@ -792,7 +792,7 @@ def test_combined_cacheless_writes_caching_reads(
 
 
 @pytest.mark.parametrize(
-    "updates, state_property, expected", 
+    "updates, state_property, expected",
     [
         # ADC1 MUX_P
         (
