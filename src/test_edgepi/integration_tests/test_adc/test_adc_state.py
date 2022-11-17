@@ -768,3 +768,41 @@ def test_rtd_mode_with_cache(enable_rtd, state_property, expected, adc_cache):
     # using eval to access nested attributes of state with dot notation
     state = adc_cache.get_state()
     assert eval(state_property) == expected
+
+
+@pytest.mark.parametrize(
+    "updates, state_property, expected", 
+    [
+        # ADC1 MUX_P
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0},
+            "state.adc_1.mux_p",
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN0.value << 4],
+        ),
+    ]
+)
+def test_combined_cacheless_writes_caching_reads(updates, state_property, expected, adc, adc_cache):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc_cache.get_state()
+    assert eval(state_property) == expected
+
+
+@pytest.mark.parametrize(
+    "updates, state_property, expected", 
+    [
+        # ADC1 MUX_P
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0},
+            "state.adc_1.mux_p",
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN0.value << 4],
+        ),
+    ]
+)
+def test_combined_caching_writes_cacheless_reads(updates, state_property, expected, adc, adc_cache):
+    adc_cache._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert eval(state_property) == expected
