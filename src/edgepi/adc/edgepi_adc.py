@@ -117,10 +117,10 @@ class ADCState:
         Read the current state of configurable ADC properties
 
         Args:
-            property (ADCProperties): ADC property whose state is to be read
+            `adc_property` (ADCProperties): ADC property whose state is to be read
 
         Returns:
-            PropertyValue: information about the current value of this mode
+            `PropertyValue`: information about the current value of this mode
         """
         return self.__query_state(adc_property, self.__reg_map)
 
