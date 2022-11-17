@@ -112,7 +112,7 @@ class ADCState:
 
         return adc_property_value
 
-    def __get_state(self, property: ADCProperties) -> PropertyValue:
+    def __get_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
         Read the current state of configurable ADC properties
 
@@ -122,7 +122,7 @@ class ADCState:
         Returns:
             PropertyValue: information about the current value of this mode
         """
-        return self.__query_state(property, self.__reg_map)
+        return self.__query_state(adc_property, self.__reg_map)
 
     def __get_rtd_state(self) -> bool:
         """
