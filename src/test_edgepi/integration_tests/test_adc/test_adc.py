@@ -804,4 +804,4 @@ def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
 def test_rtd_mode(enable, adc):
     # TODO: pass if no error raised for now, check RTD is on once get_state is implemented
     adc.rtd_mode(enable=enable)
-    assert adc.get_state().rtd_on.value
+    assert adc.get_state().rtd_on.value == enable

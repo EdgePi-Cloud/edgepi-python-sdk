@@ -341,13 +341,13 @@ class EdgePiADC(SPI):
         filter_mode = state.filter_mode.code
 
         conv_delay = expected_initial_time_delay(
-            adc_num, data_rate.value.op_code, filter_mode.value.opcode
+            adc_num, data_rate.value.op_code, filter_mode.value.op_code
         )
         _logger.debug(
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc_num}, conv_mode={hex(conv_mode)}, "
-                f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}\n"
+                f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
+                f"data_rate={hex(data_rate.value.op_code)} filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
         self.__send_start_command(adc_num)
@@ -419,7 +419,7 @@ class EdgePiADC(SPI):
         _logger.debug(
             (
                 f"\nContinuous time delay = {delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc},  data_rate={hex(data_rate)}\n"
+                f"adc_num={adc},  data_rate={hex(data_rate.value.op_code)}\n"
             )
         )
         time.sleep(delay / 1000)
