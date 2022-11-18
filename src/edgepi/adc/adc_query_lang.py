@@ -51,7 +51,7 @@ class Property:
 
 
 class ADCProperties(Enum):
-    """Address and mask values for ADC functional adc_propertys"""
+    """Address and mask values for ADC properties"""
 
     CONV_MODE = Property(
         "conversion-adc_property",

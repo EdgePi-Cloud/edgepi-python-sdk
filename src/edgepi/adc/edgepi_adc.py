@@ -81,8 +81,7 @@ class ADCState:
         self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
         self.rtd_on: PropertyValue = self.__get_rtd_state()
 
-    @staticmethod
-    def __query_state(adc_property: ADCProperties, reg_map: dict[int, int]) -> PropertyValue:
+    def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
         Read the current state of configurable ADC properties
 
@@ -94,7 +93,7 @@ class ADCState:
             `PropertyValue`: information about the current value of this property
         """
         # value of this adc_property's register
-        reg_value = reg_map[adc_property.value.addx]
+        reg_value = self.__reg_map[adc_property.value.addx]
 
         # get value of bits corresponding to this property by letting through only the bits
         # that were "masked" when setting this property (clear all bits except the property bits)
@@ -122,13 +121,10 @@ class ADCState:
         Returns:
             `PropertyValue`: information about the current value of this mode
         """
-        return self.__query_state(adc_property, self.__reg_map)
+        return self.__query_state(adc_property)
 
-    def __get_rtd_state(self) -> bool:
-        """
-        Get on/off state for RTD.
-        """
-        current_state = {
+    def __get_current_rtd_state(self) -> dict[str, PropertyValue]:
+        return {
             "adc_1_analog_in": self.adc_1.mux_p.code,
             "adc_1_mux_n": self.adc_1.mux_n.code,
             "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
@@ -138,6 +134,12 @@ class ADCState:
             "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS).code,
             "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
         }
+
+    def __get_rtd_state(self) -> PropertyValue:
+        """
+        Get RTD state.
+        """
+        current_state = self.__get_current_rtd_state()
         expected = RTDModes.RTD_ON.value
         result = current_state | {"rtd_mode_update": True}
         return PropertyValue(result == expected, current_state)
