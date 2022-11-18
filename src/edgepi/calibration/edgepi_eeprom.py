@@ -99,10 +99,10 @@ class EdgePiEEPROM(I2CDevice):
         # pylint: disable=no-member
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EdgePiEEPROMData()
-        eeprom_data.dac_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.dac)
-        eeprom_data.adc_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.adc)
-        eeprom_data.rtd_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.rtd)
-        eeprom_data.tc_calib_parms=eeprom_data.message_to_list(self.eeprom_layout.tc)
+        eeprom_data.dac_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.dac)
+        eeprom_data.adc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.adc)
+        eeprom_data.rtd_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.rtd)
+        eeprom_data.tc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.tc)
         eeprom_data.config_key=eeprom_data.keys_to_str(self.eeprom_layout.config_key)
         eeprom_data.data_key=eeprom_data.keys_to_str(self.eeprom_layout.data_key)
         eeprom_data.serial= self.eeprom_layout.serial_number

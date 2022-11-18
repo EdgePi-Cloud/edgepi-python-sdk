@@ -3,20 +3,9 @@ Module for generating calibration parameter data structure for each module. This
 able to generate new calibration parameters using measurements tools.
 '''
 
-from struct import pack
+from edgepi.calibration.eeprom_constants import ModuleNames
+from edgepi.calibration.calibration_constants import NumOfCh
 
-from edgepi.calibration.eeprom_constants import (
-    ModuleNames,
-    MemoryAddr
-)
-from edgepi.calibration.calibration_constants import(
-    NumOfCh,
-    CalibParam,
-    # ReferenceV
-)
-
-
-# TODO: calibration class should only handle the calibration process and separate the data storage
 
 class EdgePiCalibration():
     '''
@@ -33,121 +22,8 @@ class EdgePiCalibration():
     def __init__(self, module: ModuleNames):
         self.module = module.value
         self.num_of_ch = NumOfCh[module.name].value
-        self.calib_dict_gen = {ModuleNames.DAC.value : self.__generat_dac_calib_dict}
         self.full_scale_range = None
         self.full_scale_code = None
-
-# TODO: to be used for prepare a value to be upkoaded to eeprom
-# pylint: disable=unused-private-member
-    def __from_value_to_memory(self, param: float = None):
-        # TODO: Create range check for calibration param, unittest,change packing into float and
-        #  chekc precision instead of int
-        param = int(param*10**9)
-        value = pack("i", param)
-        return list(value)
-
-    def __from_memory_to_value(self, memory: list = None) -> float:
-        # TODO: Create range check for calibration param, unittest
-        value = pack("BBBB", memory[0], memory[1], memory[2], memory[3])
-        value = int.from_bytes(value, "little", signed=True)
-        return float(format(value*10**-9, '.9f'))
-
-    def __generat_dac_calib_dict(self, calib_param: list = None) :
-        '''
-        Function to generate DAC calibration parameter dictionary based on the list of imported cal-
-        ibration parameter from DAC module.
-
-        Arg:
-            calib_param (list): list contains the parameter read from eeprom and passed from each mo
-            -dule
-        Return:
-            calib_dict (dict):
-        '''
-        calib_dict={}
-        for ch in range(self.num_of_ch):
-            offset = ch * MemoryAddr.CH_OFFSET.value
-            packed_gain = self.__from_memory_to_value(calib_param[offset:offset+4])
-            packed_offset = self.__from_memory_to_value(calib_param[offset+4:offset+8])
-            calib_dict[ch] = CalibParam(gain = packed_gain, offset=packed_offset)
-
-        return calib_dict
-
-# TODO: ADC Calib to be added
-    # def __generat_adc_calib_dict(self, calib_param: list = None) :
-    #     '''
-    #     Function to generate ADC calibration parameter dictionary based on the list of imported
-    #     calibration parameter from ADC module.
-
-    #     Arg:
-    #         calib_param (list): list contains the parameter read from eeprom and passed from each
-    #         module
-    #     Return:
-    #         calib_dict (dict):
-    #     '''
-
-    #     return 2
-
-# TODO: RTD Calib to be added
-    # def __generat_rtd_calib_dict(self, calib_param: list = None) :
-    #     '''
-    #     Function to generate RTD calibration parameter dictionary based on the list of imported
-    #     calibration parameter from RTD module.
-
-    #     Arg:
-    #         calib_param (list): list contains the parameter read from eeprom and passed from each
-    #         module
-    #     Return:
-    #         calib_dict (dict):
-    #     '''
-
-    #     return 3
-
-# TODO: TC Calib to be added
-    # def __generat_tc_calib_dict(self, calib_param: list = None) :
-    #     '''
-    #     Function to generate TC calibration parameter dictionary based on the list of imported
-    #     calibration parameter from TC module.
-
-    #     Arg:
-    #         calib_param (list): list contains the parameter read from eeprom and passed from each
-    #         module
-    #     Return:
-    #         calib_dict (dict):
-    #     '''
-
-    #     return 4
-
-    def get_calibration_dict(self, calib_param: list = None):
-        '''
-        Function to generate calibration parameter dictionary based on the list of imported
-        calibration parameter from each module.
-
-        Arg:
-            calib_param (list): list contains the parameter read from eeprom and passed from each
-            module
-        Return:
-            calib_dict (dict):
-        '''
-        gen_calib_dict = self.calib_dict_gen[self.module]
-        return gen_calib_dict(calib_param)
-
-    def generate_calib_param_dict(self):
-        '''
-        Function to generate dictionary of calibration parameters
-        Args:
-            N/A
-        Return:
-            ch_to_calib_dict (dict): dictionary mapped channel to CalibParam data class
-            ie) {1 : CalibParam(gain, offset)
-                 .
-                 .
-                 .
-                 nth_channel : CalibParam(gain, offset)}
-        '''
-        ch_to_calib_dict = {}
-        for ch in range(self.num_of_ch):
-            ch_to_calib_dict[ch] = CalibParam(gain=1, offset=0)
-        return ch_to_calib_dict
 
     def generate_measurements_dict(self, num_of_points: int = None):
         '''
