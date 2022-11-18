@@ -404,36 +404,12 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
         (
             True,
             "state.rtd_on",
-            PropertyValue(
-                True,
-                {
-                    "adc_1_analog_in": ADCChannel.AIN5,
-                    "adc_1_mux_n": ADCChannel.AIN6,
-                    "idac_1_mux": IDACMUX.IDAC1_AIN8,
-                    "idac_2_mux": IDACMUX.IDAC2_AIN9,
-                    "idac_1_mag": IDACMAG.IDAC1_500,
-                    "idac_2_mag": IDACMAG.IDAC2_500,
-                    "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
-                    "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
-                },
-            ),
+            True
         ),
         (
             False,
             "state.rtd_on",
-            PropertyValue(
-                False,
-                {
-                    "adc_1_analog_in": ADCChannel.FLOAT,
-                    "adc_1_mux_n": ADCChannel.AINCOM,
-                    "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
-                    "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
-                    "idac_1_mag": IDACMAG.IDAC1_OFF,
-                    "idac_2_mag": IDACMAG.IDAC2_OFF,
-                    "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
-                    "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
-                },
-            ),
+            False
         ),
     ],
 )
@@ -729,36 +705,12 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
         (
             True,
             "state.rtd_on",
-            PropertyValue(
-                True,
-                {
-                    "adc_1_analog_in": ADCChannel.AIN5,
-                    "adc_1_mux_n": ADCChannel.AIN6,
-                    "idac_1_mux": IDACMUX.IDAC1_AIN8,
-                    "idac_2_mux": IDACMUX.IDAC2_AIN9,
-                    "idac_1_mag": IDACMAG.IDAC1_500,
-                    "idac_2_mag": IDACMAG.IDAC2_500,
-                    "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
-                    "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
-                },
-            ),
+            True
         ),
         (
             False,
             "state.rtd_on",
-            PropertyValue(
-                False,
-                {
-                    "adc_1_analog_in": ADCChannel.FLOAT,
-                    "adc_1_mux_n": ADCChannel.AINCOM,
-                    "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
-                    "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
-                    "idac_1_mag": IDACMAG.IDAC1_OFF,
-                    "idac_2_mag": IDACMAG.IDAC2_OFF,
-                    "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
-                    "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
-                },
-            ),
+            False
         ),
     ],
 )

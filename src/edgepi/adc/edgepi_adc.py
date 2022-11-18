@@ -79,7 +79,7 @@ class ADCState:
         self.filter_mode: PropertyValue = self.__get_state(ADCProperties.FILTER_MODE)
         self.status_byte: PropertyValue = self.__get_state(ADCProperties.STATUS_MODE)
         self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
-        self.rtd_on: PropertyValue = self.__get_rtd_state()
+        self.rtd_on: bool = self.__get_rtd_state()
 
     def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
@@ -135,14 +135,11 @@ class ADCState:
             "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
         }
 
-    def __get_rtd_state(self) -> PropertyValue:
+    def __get_rtd_state(self) -> bool:
         """
-        Get RTD state.
+        Get on/off RTD state.
         """
-        current_state = self.__get_current_rtd_state()
-        expected = RTDModes.RTD_ON.value
-        result = current_state | {"rtd_mode_update": True}
-        return PropertyValue(result == expected, current_state)
+        return self.__get_current_rtd_state() == RTDModes.RTD_ON.value
 
 
 class ADCStateMissingMap(Exception):
@@ -648,7 +645,7 @@ class EdgePiADC(SPI):
         else:
             updates = RTDModes.RTD_OFF.value
 
-        self.__config(**updates)
+        self.__config(**updates, override_rtd_validation=True)
 
     @staticmethod
     def __extract_mux_args(args: dict) -> dict:
@@ -685,14 +682,14 @@ class EdgePiADC(SPI):
         conversion_mode: ConvMode = None,
         checksum_mode: CheckMode = None,
         reset_clear: ADCPower = None,
-        validate: bool = True,
-        rtd_mode_update: bool = False,
         idac_1_mux: IDACMUX = None,
         idac_2_mux: IDACMUX = None,
         idac_1_mag: IDACMAG = None,
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
         neg_ref_inp: REFMUX = None,
+        override_updates_validation: bool = False,
+        override_rtd_validation: bool = False,
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -713,14 +710,14 @@ class EdgePiADC(SPI):
                 Note, ADC2 runs only in continuous conversion mode.
             `checksum_mode` (CheckMode): set mode for CHECK byte
             `reset_clear` (ADCPower): set state of ADC RESET bit
-            `validate` (bool): set to True to perform post-update validation
-            `rtd_mode_update` (bool): turn off RTD property validation for updates
             `idac_1_mux` (IDACMUX): set analog input pin to connect IDAC1
             `idac_2_mux` (IDACMUX): set analog input pin to connect IDAC2
             `idac_1_mag` (IDACMAG): set the current value for IDAC1
             `idac_2_mag` (IDACMAG): set the current value for IDAC2
             `pos_ref_inp` (REFMUX): set the positive reference input
             `neg_ref_inp` (REFMUX): set the negative reference input
+            `override_updates_validation` (bool): set to True to override post-update validation
+            `override_rtd_validation` (bool): turn off RTD property validation for RTD mode updates
         """
         # pylint: disable=unused-argument
 
@@ -729,7 +726,7 @@ class EdgePiADC(SPI):
         _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
 
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
-        if not rtd_mode_update:
+        if not override_rtd_validation:
             self.__validate_no_rtd_conflict(args)
 
         # get opcodes for mapping multiplexers
@@ -761,7 +758,7 @@ class EdgePiADC(SPI):
         self.__update_cache_map(updated_reg_values)
 
         # validate updates were applied correctly
-        if validate:
+        if not override_updates_validation:
             self.__validate_updates(updated_reg_values)
 
         return updated_reg_values
@@ -795,7 +792,7 @@ class EdgePiADC(SPI):
         adc_1_data_rate: ADC1DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
-        validate: bool = True,
+        override_updates_validation: bool = False,
     ):
         """
         Configure user accessible ADC settings, either collectively or individually.
@@ -807,7 +804,7 @@ class EdgePiADC(SPI):
                 Note this affects data rate. Please refer to module documentation
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
-            `validate` (bool): set to False to skip update validation
+            `override_updates_validation` (bool): set to True to skip update validation
         """
         # pylint: disable=unused-argument
 

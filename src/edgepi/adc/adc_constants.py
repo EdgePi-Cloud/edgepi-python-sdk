@@ -329,7 +329,6 @@ class RTDModes(Enum):
         "idac_2_mag": IDACMAG.IDAC2_500,
         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
         "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
-        "rtd_mode_update": True,
     }
     RTD_OFF = {
         "adc_1_analog_in": ADCChannel.FLOAT,
@@ -340,7 +339,6 @@ class RTDModes(Enum):
         "idac_2_mag": IDACMAG.IDAC2_OFF,
         "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
         "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
-        "rtd_mode_update": True,
     }
 
 
