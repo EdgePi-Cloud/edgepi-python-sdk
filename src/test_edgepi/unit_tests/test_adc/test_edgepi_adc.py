@@ -4,7 +4,6 @@
 import sys
 from copy import deepcopy
 from unittest import mock
-from unittest.mock import call
 from contextlib import nullcontext as does_not_raise
 
 sys.modules["periphery"] = mock.MagicMock()
@@ -747,7 +746,6 @@ def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_2_mux]
     )
     adc.rtd_mode(enable=enable)
-    config_calls
     config.assert_called_once_with(**config_calls, override_rtd_validation=True)
 
 

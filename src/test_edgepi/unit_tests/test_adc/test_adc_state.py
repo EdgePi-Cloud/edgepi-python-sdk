@@ -10,11 +10,8 @@ sys.modules['periphery'] = mock.MagicMock()
 # pylint: disable=wrong-import-position
 # mocked periphery module needs to be placed above
 from edgepi.adc.edgepi_adc import ADCState
-from edgepi.adc.adc_query_lang import ADCProperties, PropertyValue
+from edgepi.adc.adc_query_lang import ADCProperties
 from edgepi.adc.adc_constants import (
-    IDACMAG,
-    IDACMUX,
-    REFMUX,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel,
