@@ -6,7 +6,9 @@ from enum import Enum
 import logging
 import time
 
+
 from bitstring import pack
+from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -23,13 +25,12 @@ from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADC_VOLTAGE_READ_LEN,
     CheckMode,
-    ADCModes,
     DiffMode,
     IDACMUX,
     IDACMAG,
     REFMUX,
     RTDModes,
-    AllowedChannels
+    AllowedChannels,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -46,47 +47,103 @@ from edgepi.adc.adc_status import get_adc_status
 _logger = logging.getLogger(__name__)
 
 
-# TODO: this is not safe, it can be out sync if another ADC object modifies config
-# save state if caching is enabled (only safe for 1 instance), do spi reads if not
-# single private __get_state that uses ADCState caching if caching enabled,
-# otherwise use SPI to update ADCState (update every time if 'no caching')
-# disable caching by default
 @dataclass
+class ADCReadFields:
+    """
+    ADC state properties specific to each of ADC1 and ADC2
+    """
+
+    conversion_mode: PropertyValue
+    data_rate: PropertyValue
+    mux_p: PropertyValue
+    mux_n: PropertyValue
+
+
 class ADCState:
-    """Represents ADC register states"""
+    """ADC state intended for reading by users"""
 
-    reg_map: dict  # map of most recently updated register values
+    def __init__(self, reg_map: dict):
+        self.__reg_map = reg_map
+        self.adc_1: ADCReadFields = ADCReadFields(
+            self.__get_state(ADCProperties.CONV_MODE),
+            self.__get_state(ADCProperties.DATA_RATE_1),
+            self.__get_state(ADCProperties.ADC1_MUXP),
+            self.__get_state(ADCProperties.ADC1_MUXN),
+        )
+        self.adc_2: ADCReadFields = ADCReadFields(
+            PropertyValue("continuous", ADCProperties.CONV_MODE),
+            self.__get_state(ADCProperties.DATA_RATE_2),
+            self.__get_state(ADCProperties.ADC2_MUXP),
+            self.__get_state(ADCProperties.ADC2_MUXN),
+        )
+        self.filter_mode: PropertyValue = self.__get_state(ADCProperties.FILTER_MODE)
+        self.status_byte: PropertyValue = self.__get_state(ADCProperties.STATUS_MODE)
+        self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
+        self.rtd_on: bool = self.__get_rtd_state()
 
-    def get_state(self, mode: ADCModes) -> int:
+    def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
-        Get state of an ADC functional mode based on most recently updated register values.
-        Requires a call to __config() after ADC has been instantiated, before calling this.
-
-        This returns the op_code value used to set this functional mode.
-        For example, ConvMode.PULSE uses an op_code value of `0x40`. If the current
-        ADC state indicates conversion mode is ConvMode.PULSE and mode=ADCModes.CONV,
-        this will return `0x40`, which can then be compared to `ConvMode.PULSE.value.op_code`
-        to check if the ADC's conversion mode is set to `PULSE`.
+        Read the current state of configurable ADC properties
 
         Args:
-            `mode` (ADCModes): addx and mask used for this functional mode.
+            `adc_property` (ADCProperties): ADC property whose state is to be read
+            `reg_map`: register map formatted as {addx (int): value (int)}
 
         Returns:
-            `int`: uint value of the bits corresponding to this functional mode. Compare
-                this to expected configuration's op_code.
+            `PropertyValue`: information about the current value of this property
         """
-        if self.reg_map is None:
-            raise ADCStateMissingMap("ADCState has not been assigned a register map")
-        # register value at this addx
-        reg_value = self.reg_map[mode.value.addx]["value"]
-        # get op_code corresponding to this mode by letting through only "masked" bits
-        mode_bits = (~mode.value.mask) & reg_value
-        _logger.debug(f"ADCMode={mode}, value of mode bits = {hex(mode_bits)}")
-        return mode_bits
+        # value of this adc_property's register
+        reg_value = self.__reg_map[adc_property.value.addx]
+
+        # get value of bits corresponding to this property by letting through only the bits
+        # that were "masked" when setting this property (clear all bits except the property bits)
+        adc_property_bits = (~adc_property.value.mask) & reg_value
+
+        # name of current value of this adc_property
+        adc_property_value = adc_property.value.values[adc_property_bits]
+        _logger.debug(
+            (
+                f"query_state: query_property='{adc_property}',"
+                " adc_property_bits={hex(adc_property_bits)},"
+                f" adc_property_value='{adc_property_value}'"
+            )
+        )
+
+        return adc_property_value
+
+    def __get_state(self, adc_property: ADCProperties) -> PropertyValue:
+        """
+        Read the current state of configurable ADC properties
+
+        Args:
+            `adc_property` (ADCProperties): ADC property whose state is to be read
+
+        Returns:
+            `PropertyValue`: information about the current value of this mode
+        """
+        return self.__query_state(adc_property)
+
+    def __get_current_rtd_state(self) -> dict[str, PropertyValue]:
+        return {
+            "adc_1_analog_in": self.adc_1.mux_p.code,
+            "adc_1_mux_n": self.adc_1.mux_n.code,
+            "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
+            "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX).code,
+            "idac_1_mag": self.__get_state(ADCProperties.IDAC1_MAG).code,
+            "idac_2_mag": self.__get_state(ADCProperties.IDAC2_MAG).code,
+            "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS).code,
+            "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
+        }
+
+    def __get_rtd_state(self) -> bool:
+        """
+        Get on/off RTD state.
+        """
+        return self.__get_current_rtd_state() == RTDModes.RTD_ON.value
 
 
 class ADCStateMissingMap(Exception):
-    """"Raised if ADCState.get_state() is called before ADCState.reg_map is assigned a value"""
+    """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
 
 
 class ADCRegisterUpdateError(Exception):
@@ -106,15 +163,29 @@ class RTDEnabledError(Exception):
 
 
 class EdgePiADC(SPI):
-    """EdgePi ADC device"""
+    """
+    EdgePi ADC device
 
-    def __init__(self):
+    Warning, when caching is enabled to track the ADC's internal state, EdgePiADC objects are
+    safe to use only within a single dev environment. Using multiple EdgePiADC objects,
+    each within a different environment, will lead to the cached ADC state being out of sync
+    with the actual hardware state. To avoid this, disable caching when creating the
+    EdgePiADC object; the state of the ADC will be read from hardware instead, at the
+    cost of increased SPI reading load.
+    """
+
+    # keep track of ADC register map state for state caching
+    __state: dict = {}
+
+    def __init__(self, enable_cache: bool = False):
         super().__init__(bus_num=6, dev_id=1)
+        # declare instance vars before config call below
+        self.enable_cache = enable_cache
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
-        # internal state
-        self.__state = ADCState(reg_map=None)
-        # ADC always needs to be in CRC check mode
+        # ADC always needs to be in CRC check mode. This also updates the internal __state.
+        # If this call to __config is removed, replace with a call to get_register_map to
+        # initialize __state.
         self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
@@ -133,6 +204,41 @@ class EdgePiADC(SPI):
             adc_1_mux_n=CH.AINCOM,
             adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
+        )
+
+    def __update_cache_map(self, reg_map: dict):
+        """
+        Format a register map to the same format as `read_registers_to_map` and
+        assign to the internal ADC state.
+
+        Args:
+            `reg_map` (dict): register map formatted as {int: {"value": int}}
+        """
+        EdgePiADC.__state = {addx: entry["value"] for (addx, entry) in reg_map.items()}
+
+    def __get_register_map(
+        self,
+        override_cache: bool = False,
+    ) -> dict[int, int]:
+        """
+        Get a mapping of register addresses to register values, for the specified
+        number of registers. All ADC methods which require register reading should
+        call this method to get the register values.
+
+        Args:
+            `override_cache` (bool): force update cached state via SPI read
+
+        Returns:
+            dict: mapping of uint register addresses to uint register values
+        """
+        if not EdgePiADC.__state or override_cache or not self.enable_cache:
+            EdgePiADC.__state = self.__read_registers_to_map()
+
+        # if caching is disabled, don't use cached state for return (dict() deepcopies)
+        return (
+            EdgePiADC.__state
+            if self.enable_cache
+            else dict(EdgePiADC.__state)
         )
 
     def __read_register(self, start_addx: ADCReg, num_regs: int = 1):
@@ -226,20 +332,22 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1
 
         # get state for configs relevant to conversion delay
-        conv_mode = self.__state.get_state(ADCModes.CONV)
+        state = self.get_state()
+        conv_mode = state.adc_1.conversion_mode.code
         data_rate = (
-            self.__state.get_state(ADCModes.DATA_RATE_1)
-            if adc_num == ADCNum.ADC_1
-            else self.__state.get_state(ADCModes.DATA_RATE_2)
+            state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
-        filter_mode = self.__state.get_state(ADCModes.FILTER)
+        filter_mode = state.filter_mode.code
 
-        conv_delay = expected_initial_time_delay(adc_num, data_rate, filter_mode)
+        conv_delay = expected_initial_time_delay(
+            adc_num, data_rate.value.op_code, filter_mode.value.op_code
+        )
         _logger.debug(
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc_num}, conv_mode={hex(conv_mode)}, "
-                f"data_rate={hex(data_rate)} filter_mode={hex(filter_mode)}\n"
+                f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
+                f"data_rate={hex(data_rate.value.op_code)}"
+                f"filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
         self.__send_start_command(adc_num)
@@ -297,24 +405,21 @@ class EdgePiADC(SPI):
         adc = ADCNum.ADC_1
 
         # assert adc is in continuous mode (use ADCStatus)
-        # TODO: not essential, responsibility can be passed to user
-        if self.__state.get_state(ADCModes.CONV) != ConvMode.CONTINUOUS.value.op_code:
+        state = self.get_state()
+        if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
             raise ContinuousModeError(
                 "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
             )
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
-        # TODO: essential, these settings can change during reads
         data_rate = (
-            self.__state.get_state(ADCModes.DATA_RATE_1)
-            if adc == ADCNum.ADC_1
-            else self.__state.get_state(ADCModes.DATA_RATE_2)
+            state.adc_1.data_rate.code if adc == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
-        delay = expected_continuous_time_delay(adc, data_rate)
+        delay = expected_continuous_time_delay(adc, data_rate.value.op_code)
         _logger.debug(
             (
                 f"\nContinuous time delay = {delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc},  data_rate={hex(data_rate)}\n"
+                f"adc_num={adc},  data_rate={hex(data_rate.value.op_code)}\n"
             )
         )
         time.sleep(delay / 1000)
@@ -340,8 +445,9 @@ class EdgePiADC(SPI):
         to `CONTINUOUS` conversion mode: use `read_voltage` instead.
         """
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
-        # TODO: not essential
-        if self.__state.get_state(ADCModes.CONV) != ConvMode.PULSE.value.op_code:
+        state = self.get_state()
+
+        if state.adc_1.conversion_mode.code != ConvMode.PULSE:
             self.__config(conversion_mode=ConvMode.PULSE)
 
         # only ADC1 can perform PULSE conversion
@@ -408,7 +514,8 @@ class EdgePiADC(SPI):
             `bool`: True if RTD_EN pin is on, False otherwise
         """
         _logger.debug("Checking RTD status")
-        idac_mag = pack("uint:8", self.__read_register(ADCReg.REG_IDACMAG)[0])
+        idac_reg = self.__get_register_map()
+        idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
         idac_1 = idac_mag[4:].uint
         status = idac_1 != 0x0
         _logger.debug(f"RTD enabled: {status}")
@@ -483,13 +590,13 @@ class EdgePiADC(SPI):
         mux_n = diff_mode.value.mux_n
         mux_properties = {
             ADCNum.ADC_1: {
-                'adc_1_analog_in': mux_p,
-                'adc_1_mux_n': mux_n,
+                "adc_1_analog_in": mux_p,
+                "adc_1_mux_n": mux_n,
             },
             ADCNum.ADC_2: {
-                'adc_2_analog_in': mux_p,
-                'adc_2_mux_n': mux_n,
-            }
+                "adc_2_analog_in": mux_p,
+                "adc_2_mux_n": mux_n,
+            },
         }
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
@@ -525,19 +632,20 @@ class EdgePiADC(SPI):
         """
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
-            adc2_mux = pack("uint:8", self.__read_register(ADCReg.REG_ADC2MUX)[0])
+            mux_reg = self.__get_register_map()
+            adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
             muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
                 updates = RTDModes.RTD_ON.value | {
                     "adc_2_analog_in": CH.FLOAT,
-                    "adc_2_mux_n": CH.AINCOM
+                    "adc_2_mux_n": CH.AINCOM,
                 }
             else:
                 updates = RTDModes.RTD_ON.value
         else:
             updates = RTDModes.RTD_OFF.value
 
-        self.__config(**updates)
+        self.__config(**updates, override_rtd_validation=True)
 
     @staticmethod
     def __extract_mux_args(args: dict) -> dict:
@@ -551,10 +659,10 @@ class EdgePiADC(SPI):
             `dict`: input multiplexer args formatted as {'mux_name': value}
         """
         mux_arg_names = {
-            'adc_1_analog_in': 'adc_1_mux_p',
-            'adc_2_analog_in': 'adc_2_mux_p',
-            'adc_1_mux_n': 'adc_1_mux_n',
-            'adc_2_mux_n': 'adc_2_mux_n',
+            "adc_1_analog_in": "adc_1_mux_p",
+            "adc_2_analog_in": "adc_2_mux_p",
+            "adc_1_mux_n": "adc_1_mux_n",
+            "adc_2_mux_n": "adc_2_mux_n",
         }
         only_mux_args = {}
         for arg, mux_name in mux_arg_names.items():
@@ -574,14 +682,14 @@ class EdgePiADC(SPI):
         conversion_mode: ConvMode = None,
         checksum_mode: CheckMode = None,
         reset_clear: ADCPower = None,
-        validate: bool = True,
-        rtd_mode_update: bool = False,
         idac_1_mux: IDACMUX = None,
         idac_2_mux: IDACMUX = None,
         idac_1_mag: IDACMAG = None,
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
-        neg_ref_inp: REFMUX = None
+        neg_ref_inp: REFMUX = None,
+        override_updates_validation: bool = False,
+        override_rtd_validation: bool = False,
     ):
         """
         Configure all ADC settings, either collectively or individually.
@@ -602,14 +710,14 @@ class EdgePiADC(SPI):
                 Note, ADC2 runs only in continuous conversion mode.
             `checksum_mode` (CheckMode): set mode for CHECK byte
             `reset_clear` (ADCPower): set state of ADC RESET bit
-            `validate` (bool): set to True to perform post-update validation
-            `rtd_mode_update` (bool): turn off RTD property validation for updates
             `idac_1_mux` (IDACMUX): set analog input pin to connect IDAC1
             `idac_2_mux` (IDACMUX): set analog input pin to connect IDAC2
             `idac_1_mag` (IDACMAG): set the current value for IDAC1
             `idac_2_mag` (IDACMAG): set the current value for IDAC2
             `pos_ref_inp` (REFMUX): set the positive reference input
             `neg_ref_inp` (REFMUX): set the negative reference input
+            `override_updates_validation` (bool): set to True to override post-update validation
+            `override_rtd_validation` (bool): turn off RTD property validation for RTD mode updates
         """
         # pylint: disable=unused-argument
 
@@ -618,7 +726,7 @@ class EdgePiADC(SPI):
         _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
 
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
-        if not rtd_mode_update:
+        if not override_rtd_validation:
             self.__validate_no_rtd_conflict(args)
 
         # get opcodes for mapping multiplexers
@@ -634,26 +742,26 @@ class EdgePiADC(SPI):
         ]
 
         # get current register values
-        reg_values = self.__read_registers_to_map()
+        reg_values = self.__get_register_map()
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
         _logger.debug(f"opcodes = {ops_list}")
-        apply_opcodes(reg_values, ops_list)
+        updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
         _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
         # write updated reg values to ADC using a single write.
-        data = [entry["value"] for entry in reg_values.values()]
+        data = [entry["value"] for entry in updated_reg_values.values()]
         self.__write_register(ADCReg.REG_ID, data)
 
+        # update ADC state (for state caching)
+        self.__update_cache_map(updated_reg_values)
+
         # validate updates were applied correctly
-        if validate:
-            self.__validate_updates(reg_values)
+        if not override_updates_validation:
+            self.__validate_updates(updated_reg_values)
 
-        # update ADC state
-        self.__state.reg_map = reg_values
-
-        return reg_values
+        return updated_reg_values
 
     def __validate_updates(self, updated_reg_values: dict):
         """
@@ -662,7 +770,7 @@ class EdgePiADC(SPI):
         Args:
             updated_reg_values (dict): register values that were applied in latest __config()
         """
-        reg_values = self.__read_registers_to_map()
+        reg_values = self.__get_register_map()
 
         # check updated value were applied
         for addx, value in reg_values.items():
@@ -684,7 +792,7 @@ class EdgePiADC(SPI):
         adc_1_data_rate: ADC1DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
-        validate: bool = True,
+        override_updates_validation: bool = False,
     ):
         """
         Configure user accessible ADC settings, either collectively or individually.
@@ -696,9 +804,19 @@ class EdgePiADC(SPI):
                 Note this affects data rate. Please refer to module documentation
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
-            `validate` (bool): set to False to skip update validation
+            `override_updates_validation` (bool): set to True to skip update validation
         """
         # pylint: disable=unused-argument
 
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
+
+    def get_state(self) -> ADCState:
+        """
+        Read the current hardware state of configurable ADC properties
+
+        Returns:
+            ADCState: information about the current ADC hardware state
+        """
+        reg_values = self.__get_register_map()
+        return ADCState(reg_values)

@@ -247,25 +247,6 @@ class DiffMode(Enum):
     DIFF_OFF = DifferentialPair(ADCChannel.FLOAT, ADCChannel.AINCOM)
 
 
-@dataclass
-class ADCMode:
-    """Stores information about an ADC functional mode"""
-
-    addx: int
-    mask: int
-
-
-class ADCModes(Enum):
-    """Address and mask values for ADC functional modes"""
-
-    CONV = ADCMode(ADCReg.REG_MODE0.value, BitMask.BIT6.value)
-    CHECK = ADCMode(ADCReg.REG_INTERFACE.value, ADCMasks.CHECK_BITS.value)
-    STATUS = ADCMode(ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
-    DATA_RATE_1 = ADCMode(ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
-    DATA_RATE_2 = ADCMode(ADCReg.REG_ADC2CFG.value, ADCMasks.ADC2_DR_BITS.value)
-    FILTER = ADCMode(ADCReg.REG_MODE1.value, ADCMasks.FILTER_BITS.value)
-
-
 class IDACMUX(Enum):
     """Settings for ADC IDACMUX register (output multiplexer mapping)"""
 
@@ -343,12 +324,11 @@ class RTDModes(Enum):
         "adc_1_analog_in": ADCChannel.AIN5,
         "adc_1_mux_n": ADCChannel.AIN6,
         "idac_1_mux": IDACMUX.IDAC1_AIN8,
-        "idac_2_mux": IDACMUX.IDAC1_AIN9,
+        "idac_2_mux": IDACMUX.IDAC2_AIN9,
         "idac_1_mag": IDACMAG.IDAC1_500,
         "idac_2_mag": IDACMAG.IDAC2_500,
         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
         "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
-        "rtd_mode_update": True,
     }
     RTD_OFF = {
         "adc_1_analog_in": ADCChannel.FLOAT,
@@ -359,12 +339,12 @@ class RTDModes(Enum):
         "idac_2_mag": IDACMAG.IDAC2_OFF,
         "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
         "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
-        "rtd_mode_update": True,
     }
 
 
 class AllowedChannels(Enum):
     """Available channels for reading depend on whether RTD is enabled or not"""
+
     RTD_ON = [
         ADCChannel.AIN0,
         ADCChannel.AIN1,
