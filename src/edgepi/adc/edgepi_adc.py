@@ -43,6 +43,7 @@ from edgepi.adc.adc_multiplexers import (
 )
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
 _logger = logging.getLogger(__name__)
 
@@ -181,6 +182,12 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
+
+        # Load eeprom data and generate dictionary of calibration dataclass
+        eeprom = EdgePiEEPROM()
+        eeprom_data  = eeprom.get_edgepi_reserved_data()
+        adc_calib_params = eeprom_data.adc_calib_parms
+
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
