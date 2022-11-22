@@ -3,12 +3,14 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from operator import attrgetter
 import logging
 import time
 
 
 from bitstring import pack
 from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
+from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
@@ -20,6 +22,7 @@ from edgepi.adc.adc_constants import (
     ADCPower,
     ConvMode,
     ADCReg,
+    DifferentialPair,
     FilterMode,
     ADCReferenceSwitching,
     ADC_NUM_REGS,
@@ -43,6 +46,7 @@ from edgepi.adc.adc_multiplexers import (
 )
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
 _logger = logging.getLogger(__name__)
 
@@ -162,6 +166,13 @@ class RTDEnabledError(Exception):
     """Raised when user attempts to set ADC configuration that conflicts with RTD mode"""
 
 
+class InvalidDifferentialPairError(Exception):
+    """
+    Raised when calibration values are attempted to be retrieved for an invalid Differential
+    read pair
+    """
+
+
 class EdgePiADC(SPI):
     """
     EdgePi ADC device
@@ -181,6 +192,12 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
+
+        # Load eeprom data and generate dictionary of calibration dataclass
+        eeprom = EdgePiEEPROM()
+        eeprom_data  = eeprom.get_edgepi_reserved_data()
+        self.adc_calib_params = eeprom_data.adc_calib_parms
+
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
@@ -388,6 +405,50 @@ class EdgePiADC(SPI):
 
         return status_code, voltage_code, check_code
 
+    @staticmethod
+    def __get_diff_id(mux_p: PropertyValue, mux_n: PropertyValue) -> int:
+        """
+        Get differential pair id number for retrieving differential pair calibration values
+        """
+        #  values are the keys from adc_calib_params
+        diff_ids = {
+                DiffMode.DIFF_1.value: 8,
+                DiffMode.DIFF_2.value: 9,
+                DiffMode.DIFF_3.value: 10,
+                DiffMode.DIFF_4.value: 11,
+            }
+        diff_pair = DifferentialPair(mux_p.code, mux_n.code)
+        diff_id = diff_ids.get(diff_pair)
+        if diff_id is None:
+            raise InvalidDifferentialPairError(
+                    f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
+                    )
+        return diff_id
+
+    def __get_calibration_values(self, adc_calibs: dict, adc_num: ADCNum) -> CalibParam:
+        """
+        Retrieve voltage reading calibration values based on currently configured
+        input multiplexer channels
+
+        Args:
+            `adc_calibs` (dict): eeprom adc calibration values
+            `adc_num` (ADCNum): adc number voltage is being read from
+
+        Returns:
+            `CalibParam`: gain and offset values for voltage reading calibration
+        """
+        state = self.get_state()
+        mux_p = attrgetter(f"adc_{adc_num.value.id_num}.mux_p")(state)
+        mux_n = attrgetter(f"adc_{adc_num.value.id_num}.mux_n")(state)
+
+        # assert neither mux is set to float mode
+        if CH.FLOAT in (mux_p.code, mux_n.code):
+            raise ValueError("Cannot retrieve calibration values for channel in float mode")
+
+        calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
+
+        return adc_calibs.get(calib_key)
+
     def read_voltage(self, adc_num: ADCNum):
         """
         Read voltage from the currently configured ADC analog input channel.
@@ -426,8 +487,10 @@ class EdgePiADC(SPI):
         # check CRC
         check_crc(voltage_code, check_code)
 
+        calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
+
         # convert voltage_bits from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value)
+        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
 
         return voltage
 
@@ -459,8 +522,10 @@ class EdgePiADC(SPI):
         # check CRC
         check_crc(voltage_code, check_code)
 
+        calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
+
         # convert read_data from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value)
+        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
 
         return voltage
 
