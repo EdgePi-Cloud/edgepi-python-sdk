@@ -505,7 +505,7 @@ class EdgePiADC(SPI):
         Returns:
             `bool`: True if RTD_EN pin is on, False otherwise
         """
-        # TODO: this should use self.get_state() instead 
+        # TODO: this should use self.get_state() instead
         _logger.debug("Checking RTD status")
         idac_reg = self.__get_register_map()
         idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
