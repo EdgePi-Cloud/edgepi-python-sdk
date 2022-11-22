@@ -13,6 +13,7 @@ from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 # TODO: retrieve these values from EEPROM once added
 STEP_DOWN_RESISTOR_1 = 19.1
 STEP_DOWN_RESISTOR_2 = 4.99
+STEP_UP_RESISTOR = 2.5 # reference voltage
 
 
 _logger = logging.getLogger(__name__)
@@ -69,9 +70,7 @@ def code_to_voltage(code: list, adc_info: ADCReadInfo, calibs: CalibParam):
     if _is_negative_voltage(code_bits):
         code_bits[0] = 0
 
-    v_ref = 2.5
-
-    v_in = _code_to_input_voltage(code_bits.uint, v_ref, num_bits)
+    v_in = _code_to_input_voltage(code_bits.uint, STEP_UP_RESISTOR, num_bits)
 
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
