@@ -4,6 +4,8 @@
 import logging
 
 from bitstring import BitArray
+from edgepi.adc.adc_constants import ADCReadInfo
+from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list
 from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 
@@ -11,6 +13,7 @@ from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 # TODO: retrieve these values from EEPROM once added
 STEP_DOWN_RESISTOR_1 = 19.1
 STEP_DOWN_RESISTOR_2 = 4.99
+REFERENCE_VOLTAGE = 2.5
 
 
 _logger = logging.getLogger(__name__)
@@ -49,7 +52,7 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     return v_in * step_up_ratio * gain - offset
 
 
-def code_to_voltage(code: list, adc_info):
+def code_to_voltage(code: list, adc_info: ADCReadInfo, calibs: CalibParam):
     """
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
@@ -57,18 +60,19 @@ def code_to_voltage(code: list, adc_info):
         `code` (BitArray): bitstring representation of digital code retrieved from ADC voltage read
 
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
+
+        `calibs` (CalibParam): voltage reading gain and offset calibration values
     """
     code_bits = bitstring_from_list(code)
     num_bits = adc_info.num_data_bytes * 8
-    config = adc_info.voltage_config
 
     # code is given in 2's complement, remove leading 1
     if _is_negative_voltage(code_bits):
         code_bits[0] = 0
 
-    v_in = _code_to_input_voltage(code_bits.uint, config.v_ref, num_bits)
+    v_in = _code_to_input_voltage(code_bits.uint, REFERENCE_VOLTAGE, num_bits)
 
-    v_out = _adc_voltage_to_input_voltage(v_in, config.gain, config.offset)
+    v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
 
