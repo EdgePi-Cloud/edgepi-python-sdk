@@ -225,7 +225,7 @@ class StatusByte(Enum):
     STATUS_BYTE_OFF = OpCode(0x00, ADCReg.REG_INTERFACE.value, BitMask.BIT2.value)
 
 
-@dataclass
+@dataclass(frozen=True)
 class DifferentialPair:
     """ADC differential voltage reading channel pairs"""
 
