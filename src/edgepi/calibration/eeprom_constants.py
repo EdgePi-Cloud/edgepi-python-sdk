@@ -57,20 +57,20 @@ class EdgePiEEPROMData:
     # pylint: disable=too-many-instance-attributes
     """
     Dataclass to store edgepi reserved values
-    dac_list (list): list of calibration parameters
-    adc_list (list): list of calibration parameters
-    rtd_list (list): list of calibration parameters
-    tc_list (list): list of calibration parameters
+    dac_calib_parms (dict): list of calibration parameters
+    adc_calib_parms (dict): list of calibration parameters
+    rtd_calib_parms (dict): list of calibration parameters
+    tc_calib_parms (dict): list of calibration parameters
     config_key (Keys): dataclass
     data_key (Keys): dataclass
     serial (str)
     model (str)
     client_id (str)
     """
-    dac_calib_parms: list = None
-    adc_calib_parms: list = None
-    rtd_calib_parms: list = None
-    tc_calib_parms: list = None
+    dac_calib_parms: dict = None
+    adc_calib_parms: dict = None
+    rtd_calib_parms: dict = None
+    tc_calib_parms: dict = None
     config_key: Keys = None
     data_key: Keys = None
     serial: str = None

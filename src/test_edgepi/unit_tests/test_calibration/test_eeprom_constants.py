@@ -7,7 +7,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
-from edgepi.calibration.eeprom_constants import EdgePiEEPROMData
+from edgepi.calibration.eeprom_constants import EdgePiEEPROMData, Keys
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
 def read_binfile():
@@ -29,6 +29,17 @@ def test_edgepi_eeprom_data():
     eeprom_data.serial=memory_map.serial_number
     eeprom_data.model=memory_map.model
     eeprom_data.client_id=memory_map.client_id
+    assert isinstance(eeprom_data.dac_calib_parms, dict)
+    assert isinstance(eeprom_data.adc_calib_parms, dict)
+    assert isinstance(eeprom_data.rtd_calib_parms, dict)
+    assert isinstance(eeprom_data.tc_calib_parms, dict)
+    assert isinstance(eeprom_data.config_key, Keys)
+    assert isinstance(eeprom_data.config_key, Keys)
+    assert isinstance(eeprom_data.data_key, Keys)
+    assert isinstance(eeprom_data.data_key, Keys)
+    assert isinstance(eeprom_data.serial, str)
+    assert isinstance(eeprom_data.model, str)
+    assert isinstance(eeprom_data.client_id, str)
     assert eeprom_data.dac_calib_parms == eeprom_data.message_to_dict(memory_map.dac)
     assert eeprom_data.adc_calib_parms==eeprom_data.message_to_dict(memory_map.adc)
     assert eeprom_data.rtd_calib_parms==eeprom_data.message_to_dict(memory_map.rtd)
