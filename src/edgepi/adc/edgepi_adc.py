@@ -408,7 +408,7 @@ class EdgePiADC(SPI):
         check_code = read_data[6]
 
         return status_code, voltage_code, check_code
-    
+
     @staticmethod
     def __get_diff_id(mux_p: PropertyValue, mux_n: PropertyValue) -> int:
         """
@@ -428,7 +428,7 @@ class EdgePiADC(SPI):
                     f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
                     )
         return diff_id
-    
+
     def __get_calibration_values(self, adc_calibs: dict, adc_num: ADCNum) -> CalibParam:
         """
         Retrieve voltage reading calibration values based on currently configured
@@ -446,16 +446,12 @@ class EdgePiADC(SPI):
         mux_n = attrgetter(f"adc_{adc_num.value.id_num}.mux_n")(state)
 
         # assert neither mux is set to float mode
-        if mux_p.code == CH.FLOAT or mux_n.code == CH.FLOAT:
+        if CH.FLOAT in (mux_p.code, mux_n.code):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
-        # individual channel reading, get calib for mux_p channel
-        if mux_n.code == CH.AINCOM:
-            return adc_calibs.get(mux_p.value)
-        # diff mode reading, get the diff_id by mux_p, mux_n value
-        else:
-            diff_id = self.__get_diff_id(mux_p, mux_n)
-            return adc_calibs.get(diff_id)
+        calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
+        
+        return adc_calibs.get(calib_key)
 
     def read_voltage(self):
         """
