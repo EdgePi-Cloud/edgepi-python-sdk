@@ -307,29 +307,25 @@ class EdgePiADC(SPI):
             self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
             self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
 
-    def stop_conversions(self):
+    def stop_conversions(self, adc_num: ADCNum):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        # TODO: convert adc_num to parameter when ADC2 added
-        adc = ADCNum.ADC_1
-        stop_cmd = self.adc_ops.stop_adc(adc_num=adc.value)
+        stop_cmd = self.adc_ops.stop_adc(adc_num=adc_num.value)
         self.transfer(stop_cmd)
 
-    def __send_start_command(self, adc_num):
+    def __send_start_command(self, adc_num: ADCNum):
         """Triggers ADC conversion(s)"""
         start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
         self.transfer(start_cmd)
 
-    def start_conversions(self):
+    def start_conversions(self, adc_num: ADCNum):
         """
         Start ADC voltage read conversions. If ADC is continuous conversion mode,
         this method must be called before performing reads. If ADC is in
         pulse conversion mode, this method does not need to be called before
         performing reads.
         """
-        # TODO: convert adc_num to parameter when ADC2 added
-        adc_num = ADCNum.ADC_1
 
         # get state for configs relevant to conversion delay
         state = self.get_state()
@@ -368,7 +364,7 @@ class EdgePiADC(SPI):
         """Sends command to ADC to get new voltage conversion data"""
         return self.transfer([adc.value.read_cmd] + [255] * data_size)
 
-    def __voltage_read(self, adc):
+    def __voltage_read(self, adc_num: ADCNum):
         """
         Performs ADC voltage read and formats output into status, voltage,
         and check bytes
@@ -377,7 +373,7 @@ class EdgePiADC(SPI):
             (int): uint values of representations of voltage read data ordered as
                 (status_byte, voltage_data_bytes, check_byte)
         """
-        read_data = self.__read_data(adc, ADC_VOLTAGE_READ_LEN)
+        read_data = self.__read_data(adc_num, ADC_VOLTAGE_READ_LEN)
 
         if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
             raise VoltageReadError(
@@ -386,13 +382,13 @@ class EdgePiADC(SPI):
 
         status_code = read_data[1]
 
-        voltage_code = read_data[2 : (2 + adc.value.num_data_bytes)]
+        voltage_code = read_data[2 : (2 + adc_num.value.num_data_bytes)]
 
         check_code = read_data[6]
 
         return status_code, voltage_code, check_code
 
-    def read_voltage(self):
+    def read_voltage(self, adc_num: ADCNum):
         """
         Read voltage from the currently configured ADC analog input channel.
         Use this method when ADC is configured to `CONTINUOUS` conversion mode.
@@ -401,9 +397,6 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage read from ADC
         """
-        # TODO: when ADC2 functionality is added, convert this to parameter.
-        adc = ADCNum.ADC_1
-
         # assert adc is in continuous mode (use ADCStatus)
         state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
@@ -413,18 +406,18 @@ class EdgePiADC(SPI):
 
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         data_rate = (
-            state.adc_1.data_rate.code if adc == ADCNum.ADC_1 else state.adc_2.data_rate.code
+            state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
-        delay = expected_continuous_time_delay(adc, data_rate.value.op_code)
+        delay = expected_continuous_time_delay(adc_num, data_rate.value.op_code)
         _logger.debug(
             (
-                f"\nContinuous time delay = {delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc},  data_rate={hex(data_rate.value.op_code)}\n"
+                f"Continuous time delay = {delay} (ms) with the following config opcodes:\n"
+                f"adc_num={adc_num},  data_rate={hex(data_rate.value.op_code)}\n"
             )
         )
         time.sleep(delay / 1000)
 
-        status_code, voltage_code, check_code = self.__voltage_read(adc)
+        status_code, voltage_code, check_code = self.__voltage_read(adc_num)
 
         # log STATUS byte
         status = get_adc_status(status_code)
@@ -434,7 +427,7 @@ class EdgePiADC(SPI):
         check_crc(voltage_code, check_code)
 
         # convert voltage_bits from code to voltage
-        voltage = code_to_voltage(voltage_code, adc.value)
+        voltage = code_to_voltage(voltage_code, adc_num.value)
 
         return voltage
 
@@ -451,14 +444,14 @@ class EdgePiADC(SPI):
             self.__config(conversion_mode=ConvMode.PULSE)
 
         # only ADC1 can perform PULSE conversion
-        adc = ADCNum.ADC_1
+        adc_num = ADCNum.ADC_1
 
         # send command to trigger conversion
         # TODO: pass in adc_num once ADC2 functionality is added
         self.start_conversions()
 
         # send command to read conversion data.
-        status_code, voltage_code, check_code = self.__voltage_read(adc)
+        status_code, voltage_code, check_code = self.__voltage_read(adc_num)
 
         # log STATUS byte
         status = get_adc_status(status_code)
@@ -468,7 +461,7 @@ class EdgePiADC(SPI):
         check_crc(voltage_code, check_code)
 
         # convert read_data from code to voltage
-        voltage = code_to_voltage(voltage_code, adc.value)
+        voltage = code_to_voltage(voltage_code, adc_num.value)
 
         return voltage
 
@@ -513,6 +506,7 @@ class EdgePiADC(SPI):
         Returns:
             `bool`: True if RTD_EN pin is on, False otherwise
         """
+        # TODO: this should use self.get_state() instead 
         _logger.debug("Checking RTD status")
         idac_reg = self.__get_register_map()
         idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
@@ -790,6 +784,8 @@ class EdgePiADC(SPI):
         self,
         adc_1_analog_in: CH = None,
         adc_1_data_rate: ADC1DataRate = None,
+        adc_2_analog_in: CH = None,
+        adc_2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         override_updates_validation: bool = False,
@@ -800,6 +796,8 @@ class EdgePiADC(SPI):
         Args:
             `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC1
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
+            `adc_2_analog_in` (ADCChannel): the input voltage channel to measure via ADC2
+            `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second
             `filter_mode` (FilterMode): filter mode for ADC1.
                 Note this affects data rate. Please refer to module documentation
                 for more information.
