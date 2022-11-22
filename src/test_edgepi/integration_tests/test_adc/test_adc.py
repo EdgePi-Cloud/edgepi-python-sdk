@@ -755,10 +755,23 @@ def test_config(args, updated_vals, adc):
     adc.reset()
 
 
-def test_voltage_individual(adc):
+@pytest.mark.parametrize(
+    "ch",
+    [
+        (CH.AIN0),
+        (CH.AIN1),
+        (CH.AIN2),
+        (CH.AIN3),
+        (CH.AIN4),
+        (CH.AIN5),
+        (CH.AIN6),
+        (CH.AIN7),
+    ]
+)
+def test_voltage_individual(ch, adc):
     adc._EdgePiADC__config(
         conversion_mode=ConvMode.PULSE,
-        adc_1_analog_in=CH.AIN3,
+        adc_1_analog_in=ch,
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()

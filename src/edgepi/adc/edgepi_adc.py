@@ -447,8 +447,7 @@ class EdgePiADC(SPI):
         adc_num = ADCNum.ADC_1
 
         # send command to trigger conversion
-        # TODO: pass in adc_num once ADC2 functionality is added
-        self.start_conversions()
+        self.start_conversions(adc_num)
 
         # send command to read conversion data.
         status_code, voltage_code, check_code = self.__voltage_read(adc_num)
