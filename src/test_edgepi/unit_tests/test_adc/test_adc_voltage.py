@@ -16,10 +16,10 @@ from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 
 # pylint: disable=too-many-lines
 
-
-V_REF = ADCNum.ADC_1.value.voltage_config.v_ref
-GAIN = ADCNum.ADC_1.value.voltage_config.gain
-OFFSET = ADCNum.ADC_1.value.voltage_config.offset
+# mock calib values
+V_REF = 2.5
+GAIN = 1
+OFFSET = 0
 
 
 @pytest.mark.parametrize(
