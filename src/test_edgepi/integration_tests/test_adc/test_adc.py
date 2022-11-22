@@ -755,29 +755,69 @@ def test_config(args, updated_vals, adc):
     adc.reset()
 
 
-def test_voltage_individual(adc):
+@pytest.mark.parametrize(
+    "ch",
+    [
+        (CH.AIN0),
+        (CH.AIN1),
+        (CH.AIN2),
+        (CH.AIN3),
+        (CH.AIN4),
+        (CH.AIN5),
+        (CH.AIN6),
+        (CH.AIN7),
+    ]
+)
+def test_voltage_individual(ch, adc):
     adc._EdgePiADC__config(
         conversion_mode=ConvMode.PULSE,
-        adc_1_analog_in=CH.AIN3,
+        adc_1_analog_in=ch,
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()
     assert out != 0
 
 
-def test_voltage_continuous(adc):
+@pytest.mark.parametrize(
+    "adc_num, ch",
+    [
+        (ADCNum.ADC_1, CH.AIN0),
+        (ADCNum.ADC_1, CH.AIN1),
+        (ADCNum.ADC_1, CH.AIN2),
+        (ADCNum.ADC_1, CH.AIN3),
+        (ADCNum.ADC_1, CH.AIN4),
+        (ADCNum.ADC_1, CH.AIN5),
+        (ADCNum.ADC_1, CH.AIN6),
+        (ADCNum.ADC_1, CH.AIN7),
+        (ADCNum.ADC_2, CH.AIN0),
+        (ADCNum.ADC_2, CH.AIN1),
+        (ADCNum.ADC_2, CH.AIN2),
+        (ADCNum.ADC_2, CH.AIN3),
+        (ADCNum.ADC_2, CH.AIN4),
+        (ADCNum.ADC_2, CH.AIN5),
+        (ADCNum.ADC_2, CH.AIN6),
+        (ADCNum.ADC_2, CH.AIN7),
+    ]
+)
+def test_voltage_continuous(adc_num, ch, adc):
     try:
-        adc._EdgePiADC__config(
-            conversion_mode=ConvMode.CONTINUOUS,
-            adc_1_analog_in=CH.AIN3,
-            adc_1_data_rate=ADC1DataRate.SPS_20,
-        )
-        adc.start_conversions()
+        if adc_num == ADCNum.ADC_1:
+            adc._EdgePiADC__config(
+                conversion_mode=ConvMode.CONTINUOUS,
+                adc_1_analog_in=ch,
+                adc_1_data_rate=ADC1DataRate.SPS_100
+            )
+        else:
+            adc._EdgePiADC__config(
+                adc_2_analog_in=ch,
+                adc_2_data_rate=ADC2DataRate.SPS_100
+            )
+        adc.start_conversions(adc_num)
         for _ in range(10):
-            out = adc.read_voltage()
+            out = adc.read_voltage(adc_num)
             assert out != 0
     finally:
-        adc.stop_conversions()
+        adc.stop_conversions(adc_num)
 
 
 @pytest.mark.parametrize('adc_num, diff, mux_reg, mux_reg_val',
@@ -787,6 +827,11 @@ def test_voltage_continuous(adc):
         (ADCNum.ADC_1, DiffMode.DIFF_3, ADCReg.REG_INPMUX, 0x45),
         (ADCNum.ADC_1, DiffMode.DIFF_4, ADCReg.REG_INPMUX, 0x67),
         (ADCNum.ADC_1, DiffMode.DIFF_OFF, ADCReg.REG_INPMUX, 0xFA),
+        (ADCNum.ADC_2, DiffMode.DIFF_1, ADCReg.REG_ADC2MUX, 0x01),
+        (ADCNum.ADC_2, DiffMode.DIFF_2, ADCReg.REG_ADC2MUX, 0x23),
+        (ADCNum.ADC_2, DiffMode.DIFF_3, ADCReg.REG_ADC2MUX, 0x45),
+        (ADCNum.ADC_2, DiffMode.DIFF_4, ADCReg.REG_ADC2MUX, 0x67),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, ADCReg.REG_ADC2MUX, 0xFA),
     ]
 )
 def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):

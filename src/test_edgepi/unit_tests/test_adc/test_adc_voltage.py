@@ -26,11 +26,17 @@ OFFSET = 0
     "code, voltage, num_bytes",
     [
         (0x00000000, 0, ADCNum.ADC_1.value.num_data_bytes),
+        (0x00000000, 0, ADCNum.ADC_2.value.num_data_bytes),
         # based on a reference voltage of 2.5 V
         (
             0xFFFFFFFF,
             5.0,
             ADCNum.ADC_1.value.num_data_bytes,
+        ),
+        (
+            0xFFFFFF,
+            5.0,
+            ADCNum.ADC_2.value.num_data_bytes,
         ),
     ],
 )
