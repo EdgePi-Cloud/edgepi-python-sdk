@@ -11,7 +11,12 @@ sys.modules["periphery"] = mock.MagicMock()
 # pylint: disable=wrong-import-position, protected-access
 
 import pytest
-from edgepi.adc.edgepi_adc import ADCRegisterUpdateError, EdgePiADC, RTDEnabledError
+from edgepi.adc.edgepi_adc import  (
+    ADCRegisterUpdateError,
+    EdgePiADC,
+    InvalidDifferentialPairError,
+    RTDEnabledError,
+)
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADCReg,
@@ -852,40 +857,47 @@ def _apply_register_updates(reg_map: list, updates: dict):
         reg_map[addx.value] = value
 
 @pytest.mark.parametrize(
-    "reg_updates, adc_num, expected",
+    "reg_updates, adc_num, expected, err",
     [
-        ({ADCReg.REG_INPMUX: 0x0A}, ADCNum.ADC_1, CalibParam(0, 0)),
-        ({ADCReg.REG_INPMUX: 0x1A}, ADCNum.ADC_1, CalibParam(1, 0)),
-        ({ADCReg.REG_INPMUX: 0x2A}, ADCNum.ADC_1, CalibParam(2, 0)),
-        ({ADCReg.REG_INPMUX: 0x3A}, ADCNum.ADC_1, CalibParam(3, 0)),
-        ({ADCReg.REG_INPMUX: 0x4A}, ADCNum.ADC_1, CalibParam(4, 0)),
-        ({ADCReg.REG_INPMUX: 0x5A}, ADCNum.ADC_1, CalibParam(5, 0)),
-        ({ADCReg.REG_INPMUX: 0x6A}, ADCNum.ADC_1, CalibParam(6, 0)),
-        ({ADCReg.REG_INPMUX: 0x7A}, ADCNum.ADC_1, CalibParam(7, 0)),
-        ({ADCReg.REG_INPMUX: 0x01}, ADCNum.ADC_1, CalibParam(8, 0)),
-        ({ADCReg.REG_INPMUX: 0x23}, ADCNum.ADC_1, CalibParam(9, 0)),
-        ({ADCReg.REG_INPMUX: 0x45}, ADCNum.ADC_1, CalibParam(10, 0)),
-        ({ADCReg.REG_INPMUX: 0x67}, ADCNum.ADC_1, CalibParam(11, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x0A}, ADCNum.ADC_2, CalibParam(0, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x1A}, ADCNum.ADC_2, CalibParam(1, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x2A}, ADCNum.ADC_2, CalibParam(2, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x3A}, ADCNum.ADC_2, CalibParam(3, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x4A}, ADCNum.ADC_2, CalibParam(4, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x5A}, ADCNum.ADC_2, CalibParam(5, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x6A}, ADCNum.ADC_2, CalibParam(6, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x7A}, ADCNum.ADC_2, CalibParam(7, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x01}, ADCNum.ADC_2, CalibParam(8, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x23}, ADCNum.ADC_2, CalibParam(9, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x45}, ADCNum.ADC_2, CalibParam(10, 0)),
-        ({ADCReg.REG_ADC2MUX: 0x67}, ADCNum.ADC_2, CalibParam(11, 0)),
+        ({ADCReg.REG_INPMUX: 0x0A}, ADCNum.ADC_1, CalibParam(0, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x1A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x2A}, ADCNum.ADC_1, CalibParam(2, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x3A}, ADCNum.ADC_1, CalibParam(3, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x4A}, ADCNum.ADC_1, CalibParam(4, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x5A}, ADCNum.ADC_1, CalibParam(5, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x6A}, ADCNum.ADC_1, CalibParam(6, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x7A}, ADCNum.ADC_1, CalibParam(7, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x01}, ADCNum.ADC_1, CalibParam(8, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x23}, ADCNum.ADC_1, CalibParam(9, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x45}, ADCNum.ADC_1, CalibParam(10, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x67}, ADCNum.ADC_1, CalibParam(11, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x0A}, ADCNum.ADC_2, CalibParam(0, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x1A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x2A}, ADCNum.ADC_2, CalibParam(2, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x3A}, ADCNum.ADC_2, CalibParam(3, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x4A}, ADCNum.ADC_2, CalibParam(4, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x5A}, ADCNum.ADC_2, CalibParam(5, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x6A}, ADCNum.ADC_2, CalibParam(6, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x7A}, ADCNum.ADC_2, CalibParam(7, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x01}, ADCNum.ADC_2, CalibParam(8, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x23}, ADCNum.ADC_2, CalibParam(9, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x45}, ADCNum.ADC_2, CalibParam(10, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x67}, ADCNum.ADC_2, CalibParam(11, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0xFA}, ADCNum.ADC_1, None, pytest.raises(ValueError)),
+        ({ADCReg.REG_INPMUX: 0x1F}, ADCNum.ADC_1, None, pytest.raises(ValueError)),
+        (
+            {ADCReg.REG_INPMUX: 0x47}, ADCNum.ADC_1, None,
+            pytest.raises(InvalidDifferentialPairError)
+        ),
     ]
 )
-def test_get_calibration_values(mocker, reg_updates, adc_num, expected, adc):
+def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc):
     # mock register values and adc state
     mock_regs = deepcopy(adc_default_vals)
     _apply_register_updates(mock_regs, reg_updates)
     mock_state = ADCState(mock_regs)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.get_state", return_value=mock_state)
 
-    out = adc._EdgePiADC__get_calibration_values(_mock_adc_calibs, adc_num)
-    assert out == expected
+    with err:
+        out = adc._EdgePiADC__get_calibration_values(_mock_adc_calibs, adc_num)
+        assert out == expected
