@@ -827,6 +827,11 @@ def test_voltage_continuous(adc_num, ch, adc):
         (ADCNum.ADC_1, DiffMode.DIFF_3, ADCReg.REG_INPMUX, 0x45),
         (ADCNum.ADC_1, DiffMode.DIFF_4, ADCReg.REG_INPMUX, 0x67),
         (ADCNum.ADC_1, DiffMode.DIFF_OFF, ADCReg.REG_INPMUX, 0xFA),
+        (ADCNum.ADC_2, DiffMode.DIFF_1, ADCReg.REG_ADC2MUX, 0x01),
+        (ADCNum.ADC_2, DiffMode.DIFF_2, ADCReg.REG_ADC2MUX, 0x23),
+        (ADCNum.ADC_2, DiffMode.DIFF_3, ADCReg.REG_ADC2MUX, 0x45),
+        (ADCNum.ADC_2, DiffMode.DIFF_4, ADCReg.REG_ADC2MUX, 0x67),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, ADCReg.REG_ADC2MUX, 0xFA),
     ]
 )
 def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
