@@ -450,7 +450,7 @@ class EdgePiADC(SPI):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
         calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
-        
+
         return adc_calibs.get(calib_key)
 
     def read_voltage(self):
