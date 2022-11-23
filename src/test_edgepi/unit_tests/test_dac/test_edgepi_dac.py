@@ -244,14 +244,14 @@ def test_enable_dac_gain(mocker, enable, result, mocker_values):
         else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",
-                         [([0xA1,0x69, 0xDF, True], CH.AOUT0, True, True, True, [27103, 2.116, True]),
-                          ([0xA1,0x69, 0xDF, False], CH.AOUT1, True, True, True, [27103, 2.116, False]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT2, True, True, False, [27103, 2.116, None]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT3, True, True, None, [27103, 2.116, None]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT4, True, False, True, [27103, None, True]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT5, True, None, True, [27103, None, True]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT6, False, True, True, [None, 2.116, True]),
-                          ([0xA1,0x69, 0xDF, True], CH.AOUT7, None, True, True, [None, 2.116, True])])
+    [([0xA1,0x69, 0xDF, True], CH.AOUT0, True, True, True, [27103, 2.116, True]),
+    ([0xA1,0x69, 0xDF, False], CH.AOUT1, True, True, True, [27103, 2.116, False]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT2, True, True, False, [27103, 2.116, None]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT3, True, True, None, [27103, 2.116, None]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT4, True, False, True, [27103, None, True]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT5, True, None, True, [27103, None, True]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT6, False, True, True, [None, 2.116, True]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT7, None, True, True, [None, 2.116, True])])
 def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")

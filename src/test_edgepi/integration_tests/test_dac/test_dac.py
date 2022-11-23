@@ -70,7 +70,9 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
         dac.write_voltage(analog_out, voltage)
         assert dac.compute_expected_voltage(analog_out) == pytest.approx(voltage, abs=FLOAT_ERROR)
         if voltage > 0:
-            assert dac.gpio.dict_pin[dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value].is_high
+            assert dac.gpio.dict_pin[
+                    dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
+                ].is_high
         else:
             assert not dac.gpio.dict_pin[
                 dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
