@@ -2,7 +2,7 @@
 
 
 import pytest
-from edgepi.dac.dac_constants import EdgePiDacChannel as CH
+from edgepi.dac.dac_constants import DACChannel as CH
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
 from edgepi.calibration.calibration_constants import CalibParam

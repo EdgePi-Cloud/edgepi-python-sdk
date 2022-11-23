@@ -5,7 +5,7 @@ from bitstring import Bits, pack
 from edgepi.dac.dac_constants import (
     NUM_PINS,
     READ_WRITE_SIZE,
-    EdgePiDacChannel as CH,
+    DACChannel as CH,
     EdgePiDacCom as COMMAND,
     EdgePiDacCalibrationConstants as CALIB_CONSTS,
 )

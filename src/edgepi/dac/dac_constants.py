@@ -31,20 +31,20 @@ class EdgePiDacCom(Enum):
     COM_UPDATE_ALL_DAC = 0x0B
 
 
-class EdgePiDacChannel(Enum):
+class DACChannel(Enum):
     """EdgePi DAC channel addresses"""
 
-    DAC0 = 0x0
-    DAC1 = 0x1
-    DAC2 = 0x2
-    DAC3 = 0x3
-    DAC4 = 0x4
-    DAC5 = 0x5
-    DAC6 = 0x6
-    DAC7 = 0x7
+    AOUT0 = 0x0
+    AOUT1 = 0x1
+    AOUT2 = 0x2
+    AOUT3 = 0x3
+    AOUT4 = 0x4
+    AOUT5 = 0x5
+    AOUT6 = 0x6
+    AOUT7 = 0x7
 
 
-NUM_PINS = len(EdgePiDacChannel)
+NUM_PINS = len(DACChannel)
 
 
 class EdgePiDacCalibrationConstants(Enum):

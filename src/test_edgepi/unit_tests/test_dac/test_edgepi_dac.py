@@ -15,7 +15,7 @@ from bitstring import pack
 from edgepi.dac.dac_constants import (
     AOPins,
     PowerMode,
-    EdgePiDacChannel as CH,
+    DACChannel as CH,
     EdgePiDacCom as COM,
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
@@ -49,50 +49,50 @@ def fixture_test_dac_write_voltage(mocker):
 
 
 _default_power_modes = {
-    CH.DAC7.value: PowerMode.NORMAL.value,
-    CH.DAC6.value: PowerMode.NORMAL.value,
-    CH.DAC5.value: PowerMode.NORMAL.value,
-    CH.DAC4.value: PowerMode.NORMAL.value,
-    CH.DAC3.value: PowerMode.NORMAL.value,
-    CH.DAC2.value: PowerMode.NORMAL.value,
-    CH.DAC1.value: PowerMode.NORMAL.value,
-    CH.DAC0.value: PowerMode.NORMAL.value,
+    CH.AOUT7.value: PowerMode.NORMAL.value,
+    CH.AOUT6.value: PowerMode.NORMAL.value,
+    CH.AOUT5.value: PowerMode.NORMAL.value,
+    CH.AOUT4.value: PowerMode.NORMAL.value,
+    CH.AOUT3.value: PowerMode.NORMAL.value,
+    CH.AOUT2.value: PowerMode.NORMAL.value,
+    CH.AOUT1.value: PowerMode.NORMAL.value,
+    CH.AOUT0.value: PowerMode.NORMAL.value,
 }
 
 
 @pytest.mark.parametrize(
     "power_modes, analog_out, mode, expected",
     [
-        (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
-        (deepcopy(_default_power_modes), 8, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
-        (deepcopy(_default_power_modes), 8, PowerMode.NORMAL, [64, 0, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.NORMAL, [64, 0, 0]),
         (
             {
-                CH.DAC7.value: PowerMode.POWER_DOWN_GROUND.value,
-                CH.DAC6.value: PowerMode.NORMAL.value,
-                CH.DAC5.value: PowerMode.NORMAL.value,
-                CH.DAC4.value: PowerMode.NORMAL.value,
-                CH.DAC3.value: PowerMode.NORMAL.value,
-                CH.DAC2.value: PowerMode.NORMAL.value,
-                CH.DAC1.value: PowerMode.NORMAL.value,
-                CH.DAC0.value: PowerMode.NORMAL.value,
+                CH.AOUT7.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT6.value: PowerMode.NORMAL.value,
+                CH.AOUT5.value: PowerMode.NORMAL.value,
+                CH.AOUT4.value: PowerMode.NORMAL.value,
+                CH.AOUT3.value: PowerMode.NORMAL.value,
+                CH.AOUT2.value: PowerMode.NORMAL.value,
+                CH.AOUT1.value: PowerMode.NORMAL.value,
+                CH.AOUT0.value: PowerMode.NORMAL.value,
             },
-            8,
+            CH.AOUT7,
             PowerMode.NORMAL,
             [64, 0, 0],
         ),
         (
             {
-                CH.DAC7.value: PowerMode.NORMAL.value,
-                CH.DAC6.value: PowerMode.NORMAL.value,
-                CH.DAC5.value: PowerMode.POWER_DOWN_GROUND.value,
-                CH.DAC4.value: PowerMode.NORMAL.value,
-                CH.DAC3.value: PowerMode.NORMAL.value,
-                CH.DAC2.value: PowerMode.NORMAL.value,
-                CH.DAC1.value: PowerMode.NORMAL.value,
-                CH.DAC0.value: PowerMode.NORMAL.value,
+                CH.AOUT7.value: PowerMode.NORMAL.value,
+                CH.AOUT6.value: PowerMode.NORMAL.value,
+                CH.AOUT5.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT4.value: PowerMode.NORMAL.value,
+                CH.AOUT3.value: PowerMode.NORMAL.value,
+                CH.AOUT2.value: PowerMode.NORMAL.value,
+                CH.AOUT1.value: PowerMode.NORMAL.value,
+                CH.AOUT0.value: PowerMode.NORMAL.value,
             },
-            6,
+            CH.AOUT5,
             PowerMode.NORMAL,
             [0x40, 0, 0],
         ),

@@ -11,7 +11,7 @@ from edgepi.dac.dac_constants import (
     SW_RESET,
     UPPER_LIMIT,
     PowerMode,
-    EdgePiDacChannel as CH,
+    DACChannel,
     EdgePiDacCom as COM,
     EdgePiDacCalibrationConstants as CalibConst,
     AOPins,
@@ -27,14 +27,14 @@ class EdgePiDAC(spi):
 
     # analog_out number to pin name
     __analog_out_pin_map = {
-        1: AOPins.AO_EN1,
-        2: AOPins.AO_EN2,
-        3: AOPins.AO_EN3,
-        4: AOPins.AO_EN4,
-        5: AOPins.AO_EN5,
-        6: AOPins.AO_EN6,
-        7: AOPins.AO_EN7,
-        8: AOPins.AO_EN8,
+        DACChannel.AOUT0.value: AOPins.AO_EN1,
+        DACChannel.AOUT1.value: AOPins.AO_EN2,
+        DACChannel.AOUT2.value: AOPins.AO_EN3,
+        DACChannel.AOUT3.value: AOPins.AO_EN4,
+        DACChannel.AOUT4.value: AOPins.AO_EN5,
+        DACChannel.AOUT5.value: AOPins.AO_EN6,
+        DACChannel.AOUT6.value: AOPins.AO_EN7,
+        DACChannel.AOUT7.value: AOPins.AO_EN8,
     }
 
     # analog_out pins numbered 1-8, DAC channels 0-7
@@ -63,14 +63,14 @@ class EdgePiDAC(spi):
         self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
 
         self.__dac_power_state = {
-            CH.DAC7.value: PowerMode.NORMAL.value,
-            CH.DAC6.value: PowerMode.NORMAL.value,
-            CH.DAC5.value: PowerMode.NORMAL.value,
-            CH.DAC4.value: PowerMode.NORMAL.value,
-            CH.DAC3.value: PowerMode.NORMAL.value,
-            CH.DAC2.value: PowerMode.NORMAL.value,
-            CH.DAC1.value: PowerMode.NORMAL.value,
-            CH.DAC0.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT7.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT6.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT5.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT4.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT3.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT2.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT1.value: PowerMode.NORMAL.value,
+            DACChannel.AOUT0.value: PowerMode.NORMAL.value,
         }
 
     def __send_to_gpio_pins(self, analog_out: int, voltage: float):
@@ -84,38 +84,36 @@ class EdgePiDAC(spi):
             raise ValueError("voltage cannot be negative")
 
     # TODO: Decimal instead of float for precision testing
-    def write_voltage(self, analog_out: int, voltage: float):
+    def write_voltage(self, analog_out: DACChannel, voltage: float):
         """
         Write a voltage value to an analog out pin. Voltage will be continuously
-        transmitted throught the analog out pin until a 0 V value is written to it.
+        transmitted to the analog out pin until a 0 V value is written to it.
 
         Args:
-            analog_out (int): A/D_OUT pin number to write a voltage value to.
-                For example, to write to A/D_OUT1, set this parameter to 1.
+            `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
 
-            voltage (float): the voltage value to write, in volts.
+            `voltage` (float): the voltage value to write, in volts.
 
         Raises:
-            ValueError: if voltage has more decimal places than DAC accuracy limit
+            `ValueError`: if voltage has more decimal places than DAC accuracy limit
         """
-        self.dac_ops.check_range(analog_out, 1, NUM_PINS)
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
         self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
-        dac_ch = self.__analog_out_to_dac_ch[analog_out]
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
-        code = self.dac_ops.voltage_to_code(dac_ch, voltage, dac_gain)
+        code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
 
-        if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out].value):
-            self.gpio.clear_expander_pin(self.__analog_out_pin_map[analog_out].value)
-            self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out].value)
+        if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out.value].value):
+            self.gpio.clear_expander_pin(self.__analog_out_pin_map[analog_out.value].value)
+            self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out.value].value)
 
         # update DAC register
-        self.transfer(self.dac_ops.generate_write_and_update_command(dac_ch, code))
+        self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
         # send voltage to analog out pin
-        self.__send_to_gpio_pins(analog_out, voltage)
+        self.__send_to_gpio_pins(analog_out.value, voltage)
         return code
 
-    def set_power_mode(self, analog_out: int, power_mode: PowerMode):
+    def set_power_mode(self, analog_out: DACChannel, power_mode: PowerMode):
         """
         Set power mode for individual DAC channels to either normal power consumption,
         or low power consumption modes.
@@ -123,13 +121,12 @@ class EdgePiDAC(spi):
         For example, this may be of use when no constant power source available.
 
         Args:
-            analog_out (int): the analog out pin whose power mode will be changed
+            `analog_out` (DACChannel): the analog out pin whose power mode will be changed
 
-            power_mode (PowerMode): a valid hex code for setting DAC channel power mode
+            `power_mode` (PowerMode): a valid hex code for setting DAC channel power mode
         """
-        self.dac_ops.check_range(analog_out, 1, NUM_PINS)
-        dac_ch = self.__analog_out_to_dac_ch[analog_out]
-        self.__dac_power_state[dac_ch] = power_mode.value
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
+        self.__dac_power_state[analog_out.value] = power_mode.value
         power_code = self.dac_ops.generate_power_code(self.__dac_power_state.values())
         cmd = self.dac_ops.combine_command(COM.COM_POWER_DOWN_OP.value, NULL_BITS, power_code)
         self.transfer(cmd)
@@ -142,20 +139,21 @@ class EdgePiDAC(spi):
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
         self.transfer(cmd)
 
-    def channel_readback(self, analog_out: int) -> int:
+    def channel_readback(self, analog_out: DACChannel) -> int:
         """
         Readback the input register of DAC.
 
         Args:
-            analog_out (int): the analog out pin number to read voltage from
+            `analog_out` (DACChannel): the analog out pin to read voltage from
         Return:
             (int): code value stored in the input register, can be used to calculate expected
             voltage
         """
-        self.dac_ops.check_range(analog_out, 1, NUM_PINS)
-        dac_ch = self.__analog_out_to_dac_ch[analog_out]
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
         # first transfer triggers read mode, second is needed to fetch data
-        cmd = self.dac_ops.combine_command(COM.COM_READBACK.value, CH(dac_ch).value, NULL_BITS)
+        cmd = self.dac_ops.combine_command(
+                COM.COM_READBACK.value, DACChannel(analog_out.value).value, NULL_BITS
+            )
         self.transfer(cmd)
         # all zero dummy command to trigger second transfer which
         # contains the DAC register contents.
@@ -164,7 +162,7 @@ class EdgePiDAC(spi):
         return self.dac_ops.extract_read_data(read_data)
 
 
-    def compute_expected_voltage(self, analog_out: int) -> float:
+    def compute_expected_voltage(self, analog_out: DACChannel) -> float:
         """
         Computes expected voltage from the DAC channel corresponding to analog out pin.
         This is not guaranteed to be the voltage of the analog_out pin at the terminal block,
@@ -172,16 +170,15 @@ class EdgePiDAC(spi):
         the contents of the DAC channel to a voltage value.
 
         Args:
-            analog_out (int): the analog out pin number to read voltage from
+            analog_out (DACChannel): the analog out pin to read voltage from
 
         Returns:
             float: the computed voltage value of the DAC channel corresponding
                 to the selected analog out pin.
         """
-        dac_ch = self.__analog_out_to_dac_ch[analog_out]
-        code = self.channel_readback(analog_out)
+        code = self.channel_readback(analog_out.value)
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
-        return self.dac_ops.code_to_voltage(dac_ch, code, dac_gain)
+        return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
     def enable_dac_gain(self, enable: bool = None):
         """
@@ -207,7 +204,7 @@ class EdgePiDAC(spi):
         _, _, gain_state = self.get_state(gain=True)
         return gain_state
 
-    def get_state(self, analog_out: int = None,
+    def get_state(self, analog_out: DACChannel = None,
                         code: bool = None,
                         voltage: bool = None,
                         gain: bool = None):
@@ -227,7 +224,7 @@ class EdgePiDAC(spi):
             gain_state (bool): true if dac gain is enabled or False disabled, None when not
                                requested
         """
-        code_val = self.channel_readback(analog_out) if code else None
-        voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
+        code_val = self.channel_readback(analog_out.value) if code else None
+        voltage_val = self.compute_expected_voltage(analog_out.value) if voltage else None
         gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
         return code_val, voltage_val, gain_state
