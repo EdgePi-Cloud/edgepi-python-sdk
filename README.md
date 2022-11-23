@@ -82,4 +82,4 @@ From project root directory run the following:
 2. `source venv_integration/bin/activate`
 3. `python3 -m pip install -r requirements_integration.txt`
 4. `python3 -m pytest ./tests/test_voltage_rw.py --html=<path-to-report> --log-level=INFO`
-    * A folder containing the html test report will be added at `<path-to-report-folder>`. Example path: `./tests/reports/report.html`
+    * A folder containing the html test report will be added at `<path-to-report>`. Example path: `./tests/reports/report.html`
