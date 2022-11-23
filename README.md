@@ -75,3 +75,11 @@ This SDK contains modules intended to represent each connected peripheral device
 * [Thermocouple](src/edgepi/tc)
 * [Digital to Analogue Converter](src/edgepi/dac)
 * [Analog to Digital Converter](src/edgepi/adc)
+---
+## Run Integration/Hardware Tests
+From project root directory run the following:
+1. `python3 -m venv venv_integration`
+2. `source venv_integration/bin/activate`
+3. `python3 -m pip install -r requirements_integration.txt`
+4. `python3 -m pytest ./tests/test_voltage_rw.py --html=<path-to-report> --log-level=INFO`
+    * A folder containing the html test report will be added at `<path-to-report-folder>`. Example path: `./tests/reports/report.html`
