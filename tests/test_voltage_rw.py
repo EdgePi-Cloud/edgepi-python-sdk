@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-from pytest_check import check
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCChannel, ADCNum
 from edgepi.dac.edgepi_dac import EdgePiDAC
