@@ -144,8 +144,7 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
     mock_transfer = mocker.patch(
         "edgepi.peripherals.spi.SpiDevice.transfer", return_value=read_data
     )
-    dac_ch = analog_out - 1
-    byte_1 = (COM.COM_READBACK.value << 4) + dac_ch
+    byte_1 = (COM.COM_READBACK.value << 4) + analog_out.value
     dac.compute_expected_voltage(analog_out)
     write_calls = [call([byte_1, 0, 0]), call([0, 0, 0])]
     mock_transfer.assert_has_calls(write_calls)

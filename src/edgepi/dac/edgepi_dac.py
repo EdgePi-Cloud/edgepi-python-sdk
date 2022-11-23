@@ -176,7 +176,7 @@ class EdgePiDAC(spi):
             float: the computed voltage value of the DAC channel corresponding
                 to the selected analog out pin.
         """
-        code = self.channel_readback(analog_out.value)
+        code = self.channel_readback(analog_out)
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
@@ -213,7 +213,7 @@ class EdgePiDAC(spi):
         DAC or GPIO expander to retrieve the current state.
 
         Args:
-            analog_out (int): channel number of interest
+            analog_out (DACChannel): channel number of interest
             code (bool): requesting the current code value written in the specified channel input
                          register
             voltage (bool): requesting the current expected voltage at the terminal block pin
@@ -224,7 +224,7 @@ class EdgePiDAC(spi):
             gain_state (bool): true if dac gain is enabled or False disabled, None when not
                                requested
         """
-        code_val = self.channel_readback(analog_out.value) if code else None
-        voltage_val = self.compute_expected_voltage(analog_out.value) if voltage else None
+        code_val = self.channel_readback(analog_out) if code else None
+        voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
         gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
         return code_val, voltage_val, gain_state
