@@ -8,13 +8,12 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
 _logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.error)
 
 NUM_CHANNELS = 8
-NUM_ADC_READS = 10
+NUM_ADC_READS = 1
 RW_ERROR = 1e-1
 MAX_VOLTAGE = 5.0
-VOLTAGE_STEP = 1.0
+VOLTAGE_STEP = 0.1
 
 _ch_map = {
     0: (ADCChannel.AIN0, DACChannel.AOUT0),
@@ -37,7 +36,7 @@ def fixture_dac():
     return EdgePiDAC()
     
 
-def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: int, write_voltage: float):
+def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
 
@@ -50,6 +49,7 @@ def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: int, write_voltage: floa
             _logger.error(
                     (
                         "voltage read-write error exceeds tolerance: "
+                        f"channel_number={dac_ch.value}, "
                         f"write_voltage={write_voltage} V, read_voltage={read_voltage} V\n{err}"
                     )
                 )
@@ -61,17 +61,25 @@ def test_voltage_rw_adc_1(adc, dac):
     # set ADC read channel
     adc.start_conversions(ADCNum.ADC_1)
 
+    _logger.info("starting voltage read-write test with ADC1")
+    _logger.info(
+            (
+                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
+                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {NUM_ADC_READS}"
+            )
+        )
+
     num_failed = 0
     for ch in range(NUM_CHANNELS):
         adc.set_config(adc_1_analog_in=_ch_map[ch][0])
 
         voltage = 0
         while voltage <= MAX_VOLTAGE:
-            print(ch, voltage)
             num_failed += _measure_voltage(adc, dac, ADCNum.ADC_1, _ch_map[ch][1], voltage)
             voltage += VOLTAGE_STEP
 
     adc.stop_conversions(ADCNum.ADC_1)
 
     if num_failed > 0:
-        raise AssertionError("voltage read-write test failed")
+        total_tests = NUM_CHANNELS * (MAX_VOLTAGE / VOLTAGE_STEP) * NUM_ADC_READS
+        raise AssertionError(f"voltage read-write test failed: {num_failed}/{int(total_tests)} tests failed")
