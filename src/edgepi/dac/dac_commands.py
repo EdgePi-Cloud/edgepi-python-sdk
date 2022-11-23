@@ -29,7 +29,7 @@ class DACCommands:
 
     def __voltage_to_float_code(self, ch: int, expected: float, dac_gain: int = 1):
         """Convert a voltage to full precision binary code value"""
-        float_code =((expected / dac_gain) + self.dict_calib_param[ch].offset) * \
+        float_code =((expected / dac_gain) - self.dict_calib_param[ch].offset) * \
                     (CALIB_CONSTS.RANGE.value / \
                     (CALIB_CONSTS.V_RANGE.value * self.dict_calib_param[ch].gain))
         _logger.debug(f"Full code generated {float_code}")
@@ -84,7 +84,7 @@ class DACCommands:
         """Convert a voltage to float voltage"""
         voltage = (CALIB_CONSTS.V_RANGE.value /
                    CALIB_CONSTS.RANGE.value * self.dict_calib_param[ch].gain) *\
-                  (code*dac_gain) - self.dict_calib_param[ch].offset
+                  (code*dac_gain) + self.dict_calib_param[ch].offset
         return voltage
 
     def code_to_voltage(self, ch: int, code: int, dac_gain: int = 1) -> float:
