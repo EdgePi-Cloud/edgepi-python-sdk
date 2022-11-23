@@ -37,18 +37,6 @@ class EdgePiDAC(spi):
         DACChannel.AOUT7.value: AOPins.AO_EN8,
     }
 
-    # analog_out pins numbered 1-8, DAC channels 0-7
-    __analog_out_to_dac_ch = {
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4,
-        6: 5,
-        7: 6,
-        8: 7,
-    }
-
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing DAC Bus")
