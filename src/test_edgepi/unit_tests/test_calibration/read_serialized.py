@@ -1,3 +1,4 @@
+"""helper module to read serialized byte string"""
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 

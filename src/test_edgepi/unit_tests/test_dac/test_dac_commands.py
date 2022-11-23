@@ -1,19 +1,17 @@
 """unit test for dac module"""
 
-
+# pylint: disable=C0413
 from unittest import mock
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
+
 from edgepi.dac.dac_constants import EdgePiDacChannel as CH
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
-from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
-from edgepi.calibration.eeprom_constants import EdgePiEEPROMData
 from test_edgepi.unit_tests.test_calibration.read_serialized import read_binfile
-
 
 @pytest.fixture(name="dac_ops")
 def fixture_test_dac_ops(mocker):
