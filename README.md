@@ -83,3 +83,9 @@ From project root directory run the following:
 3. `python3 -m pip install -r requirements_integration.txt`
 4. `python3 -m pytest ./tests/test_voltage_rw.py --html=<path-to-report> --log-level=INFO`
     * A folder containing the html test report will be added at `<path-to-report>`. Example path: `./tests/reports/report.html`
+
+To view html report:
+1. Copy report folder to machine with browser
+2. Change directory inside report folder
+3. Start a simple python webserver: on Windows `python http.server`
+4. In browser, navigate to `http://localhost:8000/`
