@@ -12,7 +12,7 @@ from copy import deepcopy
 
 import pytest
 from edgepi.gpio.gpio_configs import GpioConfigs, DACPins
-from edgepi.gpio.edgepi_gpio import EdgePiGPIO
+from edgepi.gpio.edgepi_gpio_expander import EdgePiGPIOExpander
 
 @pytest.fixture(name='mock_i2c')
 def fixture_mock_i2c_lib(mocker):
@@ -28,8 +28,7 @@ def fixture_mock_i2c_lib(mocker):
 def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c):
     mock_i2c.return_value = None
     mock_i2c_device.fd = mock_expect[0]
-    gpio_ctrl = EdgePiGPIO(config)
-    assert gpio_ctrl.config == result[0]
+    gpio_ctrl = EdgePiGPIOExpander(config)
     assert gpio_ctrl.pin_config_address == result[1]
     assert gpio_ctrl.pin_out_address == result[2]
 
@@ -39,15 +38,16 @@ def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c
                          (GpioConfigs.RTD.value,33, 255),
                          (GpioConfigs.LED.value,32, 255),
                         ])
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_read_msg')
-@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.transfer')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_read_msg')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
 def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out, mock_i2c):
     mock_i2c.return_value = None
     mock_msg.data = [255]
     mock_msg.return_value = (mock_msg ,mock_msg)
     mock_data.return_value = out
-    gpio_ctrl = EdgePiGPIO(config)
-    out_data = gpio_ctrl._EdgePiGPIO__read_register(gpio_ctrl.pin_config_address, dev_address)
+    gpio_ctrl = EdgePiGPIOExpander(config)
+    out_data = gpio_ctrl._EdgePiGPIOExpander__read_register(gpio_ctrl.pin_config_address,
+                                                            dev_address)
     assert out_data == out
 
 # TODO: these need to be refactored to work with new methods
@@ -69,9 +69,9 @@ def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out
                           (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
                           (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
 def test_read_expander_pin_state(mocker, config, pin_name, mock_value, result):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
                   return_value = mock_value)
-    gpio_ctrl = EdgePiGPIO(config)
+    gpio_ctrl = EdgePiGPIOExpander(config)
     assert gpio_ctrl.read_expander_pin_state(pin_name) == result
 
 @pytest.mark.parametrize("config, pin_name, mock_value, result",
@@ -92,18 +92,20 @@ def test_read_expander_pin_state(mocker, config, pin_name, mock_value, result):
                           (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
                           (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
 def test_get_pin_direction(mocker, config, pin_name, mock_value, result):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
                   return_value = mock_value)
-    gpio_ctrl = EdgePiGPIO(config)
+    gpio_ctrl = EdgePiGPIOExpander(config)
     assert gpio_ctrl.get_pin_direction(pin_name) == result
 
 @pytest.mark.parametrize("config, pin_name, mock_value",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
 def test_clear_expander_pin(mocker, config, pin_name, mock_value):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
-                  return_value = mock_value)
-    gpio_ctrl = EdgePiGPIO(config)
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__apply_code_to_register")
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
+        return_value = mock_value)
+    gpio_ctrl = EdgePiGPIOExpander(config)
     prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
     gpio_ctrl.clear_expander_pin(pin_name)
     assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
@@ -112,11 +114,13 @@ def test_clear_expander_pin(mocker, config, pin_name, mock_value):
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
 def test_set_expander_pin(mocker, config, pin_name, mock_value, mock_i2c):
     mock_i2c.return_value = None
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
-                  return_value = mock_value)
-    set_pin_dir = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_pin_direction_out")
-    gpio_ctrl = EdgePiGPIO(config)
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__apply_code_to_register")
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
+        return_value = mock_value)
+    set_pin_dir = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_pin_direction_out")
+    gpio_ctrl = EdgePiGPIOExpander(config)
     prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
     gpio_ctrl.set_expander_pin(pin_name)
     if set_pin_dir.call_count == 1:
@@ -127,11 +131,13 @@ def test_set_expander_pin(mocker, config, pin_name, mock_value, mock_i2c):
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
 def test_set_pin_direction_out(mocker, config, pin_name, mock_value, mock_i2c):
     mock_i2c.return_value = None
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
-                  return_value = mock_value)
-    clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
-    gpio_ctrl = EdgePiGPIO(config)
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__apply_code_to_register")
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
+        return_value = mock_value)
+    clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.clear_expander_pin")
+    gpio_ctrl = EdgePiGPIOExpander(config)
     prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
     gpio_ctrl.set_pin_direction_out(pin_name)
     if clear_pin.call_count == 1:
@@ -142,10 +148,12 @@ def test_set_pin_direction_out(mocker, config, pin_name, mock_value, mock_i2c):
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
 def test_set_pin_direction_in(mocker, config, pin_name, mock_value, mock_i2c):
     mock_i2c.return_value = None
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
-                  return_value = mock_value)
-    gpio_ctrl = EdgePiGPIO(config)
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__apply_code_to_register")
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
+        return_value = mock_value)
+    gpio_ctrl = EdgePiGPIOExpander(config)
     prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
     gpio_ctrl.set_pin_direction_in(pin_name)
     assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
@@ -168,9 +176,11 @@ def test_set_pin_direction_in(mocker, config, pin_name, mock_value, mock_i2c):
                           (GpioConfigs.DAC.value, DACPins.A0_EN7.value, 85, False),
                           (GpioConfigs.DAC.value, DACPins.A0_EN8.value, 85, True)])
 def test_toggle_expander_pin(mocker, config, pin_name, mock_value, result):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__apply_code_to_register")
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO._EdgePiGPIO__read_register",
-                 return_value = mock_value)
-    gpio_ctrl = EdgePiGPIO(config)
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__apply_code_to_register")
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
+        return_value = mock_value)
+    gpio_ctrl = EdgePiGPIOExpander(config)
     gpio_ctrl.toggle_expander_pin(pin_name)
     assert gpio_ctrl.dict_pin[pin_name] != result

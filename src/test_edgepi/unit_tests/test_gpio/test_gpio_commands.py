@@ -16,7 +16,7 @@ from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
                        [('dac', GpioConfigs.DAC.value),
                         ('adc', GpioConfigs.ADC.value),
                         ('rtd', GpioConfigs.RTD.value),
-                        ('din', None),
+                        ('din', GpioConfigs.DIN.value),
                         ('dout', None),
                         ('led', GpioConfigs.LED.value),
                         ( None, None)])

@@ -19,7 +19,7 @@ from edgepi.gpio.gpio_constants import (
 
 @dataclass(frozen=True)
 class GpioExpanderConfig:
-    """Represents peripheral information for GPIOs used DAC
+    """Represents peripheral information for GPIOs attached on the expander
 
     Attributes:
         name (str): name of config
@@ -41,6 +41,23 @@ class GpioExpanderConfig:
     address: Union[GpioExpanderAddress, int] = None
     dev_path: str = None
 
+@dataclass(frozen=True)
+class GpioChipConfig:
+    """
+    Represents peripheral information for GPIOs
+    Attributes:
+        name (str): name of config
+
+        device (str): peripheral device
+
+        num_pins (int): number of pins used for this configuration
+
+        dev_path (str): device path to the peripheral device file
+    """
+    name:str = None
+    device: str = None
+    num_pins: int = None
+    dev_path: str = None
 
 @unique
 class GpioConfigs(Enum):
@@ -73,6 +90,10 @@ class GpioConfigs(Enum):
                              port='B',
                              address=GpioExpanderAddress.EXP_ONE.value,
                              dev_path='/dev/i2c-10')
+    DIN = GpioChipConfig(name = 'din',
+                         device = 'gpiochip0',
+                         num_pins = 8,
+                         dev_path = "/dev/gpiochip0")
 
 @dataclass
 class I2cPinInfo:
@@ -95,6 +116,16 @@ class I2cPinInfo:
     is_high: bool = None
     is_out: bool = None
 
+@dataclass
+class GpioChipPinInfo:
+    """
+    Represents Gpiochip Pin information
+    Attributes:
+        dir (str): direction of the pin, high, low, in or out
+        bias (str): pull_up or pull_down
+    """
+    dir: str = None
+    bias: str = None
 
 class DACPins(Enum):
     "DAC GPIO Pin Names"
@@ -271,7 +302,19 @@ def _generate_RTD_pins(): #pylint: disable=C0103
                                                         GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
-def generate_pin_info(config:GpioExpanderConfig = None):
+def _generate_DIN_pins(): #pylint: disable=C0103
+    """
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    """
+    pin_dict = {}
+    for pin in _list_of_DIN_gpios:
+        pin_dict[pin] = GpioChipPinInfo(dir = "in", bias = "pull_down")
+    return pin_dict
+
+def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
     ''' Generates a dictionary of pin info dataclasses
         Args:
             config (GpioExpanderConfig): name of the module to configure the gpio pins fors
@@ -279,13 +322,15 @@ def generate_pin_info(config:GpioExpanderConfig = None):
             a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
 
-    if config.name == 'dac':
+    if config.name == GpioConfigs.DAC.value.name:
         pin_dict =  _generate_DAC_pins()
-    elif config.name == 'led':
+    elif config.name == GpioConfigs.LED.value.name:
         pin_dict =  _generate_LED_pins()
-    elif config.name == 'adc':
+    elif config.name == GpioConfigs.ADC.value.name:
         pin_dict =  _generate_ADC_pins()
-    elif config.name == 'rtd':
+    elif config.name == GpioConfigs.RTD.value.name:
         pin_dict =  _generate_RTD_pins()
+    elif config.name == GpioConfigs.DIN.value.name:
+        pin_dict = _generate_DIN_pins()
 
     return pin_dict
