@@ -1,4 +1,4 @@
-"""unit tests for edgepi_gpio module"""
+"""unit tests for edgepi_gpio_expander module"""
 
 # pylint: disable=protected-access
 # pylint: disable=C0413
@@ -25,7 +25,7 @@ def fixture_mock_i2c_lib(mocker):
                          (['/dev/i2c-10'],GpioConfigs.LED.value,[GpioConfigs.LED.value,6,2]),
                         ])
 @patch('edgepi.peripherals.i2c.I2CDevice')
-def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c):
+def test_edgepi_expander_init(mock_i2c_device, mock_expect, config, result, mock_i2c):
     mock_i2c.return_value = None
     mock_i2c_device.fd = mock_expect[0]
     gpio_ctrl = EdgePiGPIOExpander(config)
@@ -40,7 +40,7 @@ def test_edgepi_gpio_init(mock_i2c_device, mock_expect, config, result, mock_i2c
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_read_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
-def test_edgepi_gpio_read_register(mock_data, mock_msg, config, dev_address, out, mock_i2c):
+def test_edgepi_expander_read_register(mock_data, mock_msg, config, dev_address, out, mock_i2c):
     mock_i2c.return_value = None
     mock_msg.data = [255]
     mock_msg.return_value = (mock_msg ,mock_msg)

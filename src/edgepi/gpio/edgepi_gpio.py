@@ -5,12 +5,11 @@ Provides a class for interacting with the GPIO pins through I2C and GPIO periphe
 
 import logging
 from edgepi.gpio.edgepi_gpio_expander import EdgePiGPIOExpander
-from edgepi.gpio.edgpio_gpio_chip import EdgePiGPIOChip
+from edgepi.gpio.edgepi_gpio_chip import EdgePiGPIOChip
 from edgepi.gpio.gpio_configs import GpioConfigs
 
 _logger = logging.getLogger(__name__)
 
-# pylint: disable=logging-too-many-args
 class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
     '''
     A class used to represent the GPIO Expander configuration for an I2C Device.
