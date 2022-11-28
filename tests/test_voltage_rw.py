@@ -9,7 +9,7 @@ from edgepi.dac.dac_constants import DACChannel
 _logger = logging.getLogger(__name__)
 
 NUM_CHANNELS = 8
-NUM_ADC_READS = 1
+READS_PER_WRITE = 1
 RW_ERROR = 1e-1
 MAX_VOLTAGE = 5.0
 VOLTAGE_STEP = 0.1
@@ -33,17 +33,17 @@ def fixture_adc():
 @pytest.fixture(name="dac", scope="module")
 def fixture_dac():
     return EdgePiDAC()
-    
+
 
 def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
 
     num_failed = 0
-    for _ in range(NUM_ADC_READS):
+    for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         try:
-            assert write_voltage == pytest.approx(read_voltage, abs=RW_ERROR)
+            assert read_voltage == pytest.approx(write_voltage, abs=RW_ERROR)
         except AssertionError as err:
             _logger.error(
                     (
@@ -64,7 +64,7 @@ def test_voltage_rw_adc_1(adc, dac):
     _logger.info(
             (
                 f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
-                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {NUM_ADC_READS}"
+                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
             )
         )
 
@@ -80,5 +80,5 @@ def test_voltage_rw_adc_1(adc, dac):
     adc.stop_conversions(ADCNum.ADC_1)
 
     if num_failed > 0:
-        total_tests = NUM_CHANNELS * (MAX_VOLTAGE / VOLTAGE_STEP) * NUM_ADC_READS
+        total_tests = NUM_CHANNELS * (MAX_VOLTAGE / VOLTAGE_STEP) * READS_PER_WRITE
         raise AssertionError(f"voltage read-write test failed: {num_failed}/{int(total_tests)} tests failed")
