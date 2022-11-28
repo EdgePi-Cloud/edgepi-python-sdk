@@ -35,6 +35,11 @@ def fixture_dac():
     return EdgePiDAC()
 
 
+def _assert_approx(a, b, error):
+    """assert `b` is within +/- `error` of `a`"""
+    assert (a - error) <= b <= (a + error)
+        
+
 def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
@@ -43,13 +48,14 @@ def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltag
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         try:
-            assert read_voltage == pytest.approx(write_voltage, abs=RW_ERROR)
+            _assert_approx(write_voltage, read_voltage, RW_ERROR)
         except AssertionError as err:
             _logger.error(
                     (
                         "voltage read-write error exceeds tolerance: "
-                        f"channel_number={dac_ch.value}, "
+                        f"\nchannel_number={dac_ch.value}, "
                         f"write_voltage={write_voltage} V, read_voltage={read_voltage} V\n{err}"
+                        f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
                     )
                 )
             num_failed += 1
