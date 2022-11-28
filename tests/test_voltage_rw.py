@@ -35,9 +35,18 @@ def fixture_dac():
     return EdgePiDAC()
 
 
-def _assert_approx(a, b, error):
+def _assert_approx(a: float, b: float, error: float):
     """assert `b` is within +/- `error` of `a`"""
     assert (a - error) <= b <= (a + error)
+
+
+def _voltage_rw_msg(test_status: str, dac_ch: DACChannel, write_voltage: float, read_voltage: float) -> str:
+    return (
+        f"voltage read-write error {test_status} tolerance:"
+        f"\nchannel_number={dac_ch.value}, "
+        f"write_voltage={write_voltage} V, read_voltage={read_voltage} V"
+        f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
+    )
         
 
 def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
@@ -49,16 +58,15 @@ def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltag
         read_voltage = adc.read_voltage(adc_num)
         try:
             _assert_approx(write_voltage, read_voltage, RW_ERROR)
-        except AssertionError as err:
+        except AssertionError:
             _logger.error(
-                    (
-                        "voltage read-write error exceeds tolerance: "
-                        f"\nchannel_number={dac_ch.value}, "
-                        f"write_voltage={write_voltage} V, read_voltage={read_voltage} V\n{err}"
-                        f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
-                    )
+                    _voltage_rw_msg("exceeds", dac_ch, write_voltage, read_voltage)
                 )
             num_failed += 1
+        else:
+            _logger.info(
+                _voltage_rw_msg("meets", dac_ch, write_voltage, read_voltage)
+            )
 
     return num_failed
 
