@@ -4,18 +4,24 @@
 # pylint: disable=C0413
 
 from unittest import mock
-from unittest.mock import patch
 import sys
 if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
-from copy import deepcopy
 
 import pytest
-from edgepi.gpio.gpio_configs import GpioConfigs
-from edgepi.gpio.edgepi_gpio_expander import EdgePiGPIOExpander
-from edgepi.gpio.edgepi_gpio_chip import EdgePiGPIOChip
+from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
+from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
-@pytest.fixture(name='mock_perph')
-def fixture_mock_i2c_lib(mocker):
+# @pytest.fixture(name='gpio_mock')
+# def fixture_mock_i2c_lib(mocker):
+#     mocker.patch('edgepi.peripherals.i2c.I2C')
+#     mocker.patch('edgepi.peripherals.gpio.GPIO')
+
+@pytest.mark.parametrize("config",
+                        [(GpioConfigs.DAC)])
+def test_edgepi_gpio_init(mocker, config):
     mocker.patch('edgepi.peripherals.i2c.I2C')
-    mocker.patch('edgepi.peripherals.i2c.I2C')
+    mocker.patch('edgepi.peripherals.gpio.GPIO')
+    edgepi_gpio = EdgePiGPIO(config.value)
+    pin_dict = generate_pin_info(config.value)
+    assert edgepi_gpio.dict_pin == pin_dict
