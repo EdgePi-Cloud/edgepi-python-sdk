@@ -78,14 +78,14 @@ This SDK contains modules intended to represent each connected peripheral device
 ---
 ## Run Integration/Hardware Tests
 From project root directory run the following:
-1. `python3 -m venv venv_integration`
-2. `source venv_integration/bin/activate`
-3. `python3 -m pip install -r requirements_integration.txt`
-4. `python3 -m pytest ./tests/test_voltage_rw.py --html=<path-to-report> --log-level=INFO`
+1. Create virtual env: `python3 -m venv venv_integration`
+2. Activate virtual env: `source venv_integration/bin/activate`
+3. Install dependencies: `python3 -m pip install -r requirements_integration.txt`
+4. Run tests/generate report: `python3 -m pytest ./tests/test_voltage_rw.py --html=<path-to-report> --log-level=INFO`
     * A folder containing the html test report will be added at `<path-to-report>`. Example path: `./tests/reports/report.html`
+    * Include `--log-level=INFO` to add logs with helpful test details in report 
 
 To view html report:
-1. Copy report folder (including the `/assets` folder within) to machine with browser
-2. Change directory inside report folder
-3. Start a simple python webserver: on Windows `python http.server`
-4. In browser, navigate to `http://localhost:8000/`
+1. Change directory inside report folder: `cd <path-to-report>`
+2. Start a simple python webserver on edgepi: `python3 -m http.server`
+3. In machine with browser, navigate to `http://<edgepi-address>:8000/`
