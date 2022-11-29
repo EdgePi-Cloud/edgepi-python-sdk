@@ -8,6 +8,7 @@ from edgepi.dac.dac_constants import DACChannel
 
 
 _logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 NUM_CHANNELS = 8
