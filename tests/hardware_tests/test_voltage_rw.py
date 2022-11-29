@@ -125,15 +125,27 @@ def _measure_voltage_differential(adc, dac, adc_num: ADCNum, write_voltages: dic
         _assert_approx(0, read_voltage, RW_ERROR)
 
 
+_diff_ch_map = {
+    ADCChannel.AIN0: DACChannel.AOUT0,
+    ADCChannel.AIN1: DACChannel.AOUT1,
+    ADCChannel.AIN2: DACChannel.AOUT2,
+    ADCChannel.AIN3: DACChannel.AOUT3,
+    ADCChannel.AIN4: DACChannel.AOUT4,
+    ADCChannel.AIN5: DACChannel.AOUT5,
+    ADCChannel.AIN6: DACChannel.AOUT6,
+    ADCChannel.AIN7: DACChannel.AOUT7,
+}
+
+
 @pytest.mark.parametrize("diff, mux_p_volt, mux_n_volt", _generate_diff_test_cases())
 def test_differential_rw_adc_1(diff, mux_p_volt, mux_n_volt, adc_1, dac):
     adc_1.select_differential(ADCNum.ADC_1, diff)
     _logger.info(
-        f"voltage read/write diff pair: mux_p = {diff.value.mux_p}, mux_n = {diff.value.mux_p}"
+        f"voltage read/write diff pair: mux_p = {diff.value.mux_p}, mux_n = {diff.value.mux_n}"
         )
     _logger.info(f"mux_p_voltage = {mux_p_volt}, mux_n_voltage = {mux_n_volt}")
     write_voltages = {
-        diff.value.mux_p: mux_p_volt,
-        diff.value.mux_n: mux_n_volt,
+        _diff_ch_map[diff.value.mux_p]: mux_p_volt,
+        _diff_ch_map[diff.value.mux_n]: mux_n_volt,
     }
     _measure_voltage_differential(adc_1, dac, ADCNum.ADC_1, write_voltages)
