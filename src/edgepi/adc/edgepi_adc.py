@@ -453,6 +453,7 @@ class EdgePiADC(SPI):
 
         calibs = adc_calibs.get(calib_key)
         if calibs is None:
+            _logger.error("Failed to find ADC calibration values")
             raise CalibKeyMissingError(
                 (
                     "Failed to retrieve calibration values from eeprom dictionary: "
