@@ -94,6 +94,17 @@ class GpioConfigs(Enum):
                          device = 'gpiochip0',
                          num_pins = 8,
                          dev_path = "/dev/gpiochip0")
+    DOUT1 = GpioChipConfig(name = 'dout1',
+                          device = 'gpiochip0',
+                          num_pins = 2,
+                          dev_path = "/dev/gpiochip0")
+    DOUT2 = GpioExpanderConfig(name = 'dout2',
+                               device='i2c',
+                               num_pins=6,
+                               dir='out',
+                               port='A',
+                               address=GpioExpanderAddress.EXP_TWO.value,
+                               dev_path='/dev/i2c-10')
 
 @dataclass
 class I2cPinInfo:
@@ -216,12 +227,14 @@ class DOUTPins(Enum):
     DOUT8 = 'DOUT8'
 
 
-_list_of_DOUT_gpios =  [
-    DOUTPins.DOUT1.value, DOUTPins.DOUT2.value,
+_list_of_DOUT_cpu_gpios =  [
+    DOUTPins.DOUT1.value, DOUTPins.DOUT2.value
+]
+
+_list_of_DOUT_expander_gpios =[
     DOUTPins.DOUT3.value, DOUTPins.DOUT4.value,
     DOUTPins.DOUT5.value, DOUTPins.DOUT6.value,
-    DOUTPins.DOUT7.value, DOUTPins.DOUT8.value,
-]
+    DOUTPins.DOUT7.value, DOUTPins.DOUT8.value]
 
 
 def _generate_DAC_pins(): #pylint: disable=C0103
@@ -314,6 +327,40 @@ def _generate_DIN_pins(): #pylint: disable=C0103
         pin_dict[pin] = GpioChipPinInfo(dir = "in", bias = "pull_down")
     return pin_dict
 
+#TODO: Doubl check pinouts
+def _generate_DOUT_cpu_pins(): #pylint: disable=C0103
+    """
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    """
+    pin_dict = {}
+    for pin in _list_of_DOUT_cpu_gpios:
+        pin_dict[pin] = GpioChipPinInfo(dir = "out", bias = "pull_down")
+    return pin_dict
+
+#TODO: Doubl check pinouts
+def _generate_DOUT_expander_pins(): #pylint: disable=C0103
+    """
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    """
+    pin_dict = {}
+    for pin, set_code, clear_code, dir_out_code, dir_in_code in \
+    zip(_list_of_DOUT_expander_gpios,GpioAOutputSet,GpioAOutputClear,GpioAPinDirOut,GpioAPinDirIn):
+
+        pin_dict.update({pin : I2cPinInfo(set_code.value,
+                                          clear_code.value,
+                                          dir_out_code.value,
+                                          dir_in_code.value,
+                                          GpioExpanderAddress.EXP_TWO.value)})
+    return pin_dict
+
+
+# TODO: outdated config based generate pins, to be deleted when refactor completes
 def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
     ''' Generates a dictionary of pin info dataclasses
         Args:
@@ -332,5 +379,35 @@ def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
         pin_dict =  _generate_RTD_pins()
     elif config.name == GpioConfigs.DIN.value.name:
         pin_dict = _generate_DIN_pins()
+    elif config.name == GpioConfigs.DOUT1.value.name:
+        pin_dict = _generate_DOUT_cpu_pins()
+    elif config.name == GpioConfigs.DOUT2.value.name:
+        pin_dict = _generate_DOUT_expander_pins()
+    return pin_dict
 
+def generate_expander_pin_info():
+    ''' Generates a dictionary of pin info dataclasses
+        Args:
+            N/A
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    pin_dict.update(_generate_DAC_pins())
+    pin_dict.update(_generate_ADC_pins())
+    pin_dict.update(_generate_RTD_pins())
+    pin_dict.update(_generate_LED_pins())
+    pin_dict.update(_generate_DOUT_expander_pins())
+    return pin_dict
+
+def generate_gpiochip_pin_info():
+    ''' Generates a dictionary of pin info dataclasses
+        Args:
+            N/A
+        Returns:
+            a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    pin_dict.update(_generate_DIN_pins())
+    pin_dict.update(_generate_DOUT_cpu_pins())
     return pin_dict

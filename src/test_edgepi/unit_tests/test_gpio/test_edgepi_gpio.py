@@ -9,7 +9,7 @@ if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
-from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
+from edgepi.gpio.gpio_configs import GpioConfigs, generate_expander_pin_info
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 # @pytest.fixture(name='gpio_mock')
@@ -23,5 +23,5 @@ def test_edgepi_gpio_init(mocker, config):
     mocker.patch('edgepi.peripherals.i2c.I2C')
     mocker.patch('edgepi.peripherals.gpio.GPIO')
     edgepi_gpio = EdgePiGPIO(config.value)
-    pin_dict = generate_pin_info(config.value)
-    assert edgepi_gpio.dict_pin == pin_dict
+    expander_pin_dict = generate_expander_pin_info()
+    assert edgepi_gpio.expander_pin_dict == expander_pin_dict

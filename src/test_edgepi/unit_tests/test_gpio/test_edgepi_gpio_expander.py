@@ -106,9 +106,9 @@ def test_clear_expander_pin(mocker, config, pin_name, mock_value):
         "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
         return_value = mock_value)
     gpio_ctrl = EdgePiGPIOExpander(config)
-    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    prev_pin_config = deepcopy(gpio_ctrl.expander_pin_dict[pin_name])
     gpio_ctrl.clear_expander_pin(pin_name)
-    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+    assert prev_pin_config != gpio_ctrl.expander_pin_dict[pin_name]
 
 @pytest.mark.parametrize("config, pin_name, mock_value",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
@@ -121,11 +121,11 @@ def test_set_expander_pin(mocker, config, pin_name, mock_value, mock_i2c):
         return_value = mock_value)
     set_pin_dir = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_pin_direction_out")
     gpio_ctrl = EdgePiGPIOExpander(config)
-    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    prev_pin_config = deepcopy(gpio_ctrl.expander_pin_dict[pin_name])
     gpio_ctrl.set_expander_pin(pin_name)
     if set_pin_dir.call_count == 1:
-        gpio_ctrl.dict_pin[pin_name].is_out = True
-    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+        gpio_ctrl.expander_pin_dict[pin_name].is_out = True
+    assert prev_pin_config != gpio_ctrl.expander_pin_dict[pin_name]
 
 @pytest.mark.parametrize("config, pin_name, mock_value",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
@@ -138,11 +138,11 @@ def test_set_pin_direction_out(mocker, config, pin_name, mock_value, mock_i2c):
         return_value = mock_value)
     clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.clear_expander_pin")
     gpio_ctrl = EdgePiGPIOExpander(config)
-    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    prev_pin_config = deepcopy(gpio_ctrl.expander_pin_dict[pin_name])
     gpio_ctrl.set_pin_direction_out(pin_name)
     if clear_pin.call_count == 1:
-        gpio_ctrl.dict_pin[pin_name].is_high = False
-    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+        gpio_ctrl.expander_pin_dict[pin_name].is_high = False
+    assert prev_pin_config != gpio_ctrl.expander_pin_dict[pin_name]
 
 @pytest.mark.parametrize("config, pin_name, mock_value",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN4.value, 0)])
@@ -154,9 +154,9 @@ def test_set_pin_direction_in(mocker, config, pin_name, mock_value, mock_i2c):
         "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
         return_value = mock_value)
     gpio_ctrl = EdgePiGPIOExpander(config)
-    prev_pin_config = deepcopy(gpio_ctrl.dict_pin[pin_name])
+    prev_pin_config = deepcopy(gpio_ctrl.expander_pin_dict[pin_name])
     gpio_ctrl.set_pin_direction_in(pin_name)
-    assert prev_pin_config != gpio_ctrl.dict_pin[pin_name]
+    assert prev_pin_config != gpio_ctrl.expander_pin_dict[pin_name]
 
 @pytest.mark.parametrize("config, pin_name, mock_value, result",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN1.value, 170, True),
@@ -183,4 +183,4 @@ def test_toggle_expander_pin(mocker, config, pin_name, mock_value, result):
         return_value = mock_value)
     gpio_ctrl = EdgePiGPIOExpander(config)
     gpio_ctrl.toggle_expander_pin(pin_name)
-    assert gpio_ctrl.dict_pin[pin_name] != result
+    assert gpio_ctrl.expander_pin_dict[pin_name] != result

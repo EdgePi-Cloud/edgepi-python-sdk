@@ -13,6 +13,7 @@ class EdgePiGPIOChip(GpioDevice):
     A class to represent the GPIO peripheral using gpiochip device. This class will be imported to
     each module that requires GPIO manipulation.
     """
+    # dictionary mapping pin name to CPU gpio pin number
     __pin_name_dict = {DINPins.DIN1.value : 26,
                        DINPins.DIN2.value : 6,
                        DINPins.DIN3.value : 11,

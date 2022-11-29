@@ -77,6 +77,7 @@ def fixture_adc(mocker):
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
     yield EdgePiADC()
 
@@ -605,6 +606,7 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     adc = EdgePiADC()
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_registers_to_map",
@@ -748,6 +750,7 @@ def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     adc = EdgePiADC()
     config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
     mocker.patch(
