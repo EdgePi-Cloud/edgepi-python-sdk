@@ -70,7 +70,7 @@ def _generate_test_cases():
         )
     for channel in range(NUM_CHANNELS):
         voltage = 0
-        while voltage < MAX_VOLTAGE:
+        while voltage < MAX_VOLTAGE - VOLTAGE_STEP:
             voltage += VOLTAGE_STEP
             yield channel, voltage
 
@@ -79,3 +79,9 @@ def _generate_test_cases():
 def test_voltage_rw_adc_1(channel, write_voltage, adc, dac):
     adc.set_config(adc_1_analog_in=_ch_map[channel][0])
     _measure_voltage(adc, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
+
+
+@pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
+def test_voltage_rw_adc_2(channel, write_voltage, adc, dac):
+    adc.set_config(adc_2_analog_in=_ch_map[channel][0])
+    _measure_voltage(adc, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
