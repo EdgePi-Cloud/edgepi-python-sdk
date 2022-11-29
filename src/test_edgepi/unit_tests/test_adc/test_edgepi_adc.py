@@ -77,6 +77,7 @@ def fixture_adc(mocker):
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
     yield EdgePiADC()
 
 
@@ -599,6 +600,8 @@ def test_get_channel_assign_opcodes(
 def test_validate_updates(mocker, updated_regs, actual_regs, err):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.set_expander_pin")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
@@ -620,17 +623,17 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
         (ADCReferenceSwitching.GND_SW_NONE.value, ["GNDSW_IN1", "GNDSW_IN2"]),
     ],
 )
-def test_set_adc_reference(mocker, reference_config, pin_name, adc):
-    set_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
-    clear_pin = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
+def test_set_adc_reference(reference_config, pin_name, adc):
     adc.set_adc_reference(reference_config)
     if reference_config in [1, 2]:
-        set_pin.assert_called_once_with(pin_name[0])
-        clear_pin.assert_called_once_with(pin_name[1])
+        adc.gpio.set_expander_pin.assert_called_with(pin_name[0])
+        adc.gpio.clear_expander_pin.assert_called_with(pin_name[1])
     elif reference_config == 3:
-        set_pin.assert_has_calls([mock.call(pin_name[0]), mock.call(pin_name[1])])
+        adc.gpio.set_expander_pin.assert_has_calls([mock.call(pin_name[0]),
+                                                    mock.call(pin_name[1])])
     elif reference_config == 0:
-        clear_pin.assert_has_calls([mock.call(pin_name[0]), mock.call(pin_name[1])])
+        adc.gpio.clear_expander_pin.assert_has_calls([mock.call(pin_name[0]),
+                                                      mock.call(pin_name[1])])
 
 
 @pytest.mark.parametrize(
@@ -741,6 +744,8 @@ def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.set_expander_pin")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
     adc = EdgePiADC()

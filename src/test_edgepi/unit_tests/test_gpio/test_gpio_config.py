@@ -131,3 +131,10 @@ def test_generate_pin_info_adc(config = GpioConfigs.ADC.value):
     assert pin_list[pin_keys[1]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_3.value
     assert pin_list[pin_keys[1]].dir_out_code == GpioBPinDirOut.PIN3_DIR_OUT.value
     assert pin_list[pin_keys[1]].address == GpioExpanderAddress.EXP_TWO.value
+
+def test_generate_pin_info_din(config = GpioConfigs.DIN.value):
+    pin_dict = generate_pin_info(config)
+    pin_keys = list(pin_dict.keys())
+    for pin in pin_keys:
+        assert pin_dict[pin].dir == 'in'
+        assert pin_dict[pin].bias == 'pull_down'

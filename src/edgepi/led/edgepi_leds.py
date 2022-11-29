@@ -73,7 +73,7 @@ class EdgePiLED:
             `bool`: True if LED is on, False if LED is off
         """
         self.__validate_led_name(led_name)
-        state = self.gpio_ops.read_expander_pin_state(led_name.value)
+        state = self.gpio_ops.read_expander_pin(led_name.value)
         msg = "ON" if state else "OFF"
         self.log.info(f"LED with name {led_name.value} is currently {msg}")
         return state

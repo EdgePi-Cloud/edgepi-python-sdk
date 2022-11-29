@@ -175,7 +175,7 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name)
     # can't mock entire GPIO class here because need to access its methods
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
-    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     mock_set = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
@@ -222,6 +222,8 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
 def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_periph):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
                   return_value = (mock_value[0], mock_value[1], mock_value[2]))
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = False)
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     assert result[0] == dac_mock_periph.write_voltage(analog_out, voltage)
 
 @pytest.mark.parametrize("enable, result, mocker_values,",
@@ -230,7 +232,7 @@ def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_
 def test_enable_dac_gain(mocker, enable, result, mocker_values):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
-    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
                   return_value = (mocker_values[0], mocker_values[1], mocker_values[2]))
     set_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
@@ -255,7 +257,7 @@ def test_enable_dac_gain(mocker, enable, result, mocker_values):
 def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
-    mocker.patch("edgepi.gpio.edgepi_gpio.I2CDevice")
+    mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[3])
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val[0:3])
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
