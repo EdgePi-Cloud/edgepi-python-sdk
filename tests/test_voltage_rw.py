@@ -27,7 +27,16 @@ _ch_map = {
 
 @pytest.fixture(name="adc", scope="module")
 def fixture_adc():
-    return EdgePiADC()
+    adc = EdgePiADC()
+    adc.start_conversions(ADCNum.ADC_1)
+    _logger.info(
+            (
+                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
+                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
+            )
+        )
+    yield adc
+    adc.stop_conversions(ADCNum.ADC_1)
 
 
 @pytest.fixture(name="dac", scope="module")
@@ -53,46 +62,18 @@ def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltag
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
 
-    num_failed = 0
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
-        try:
-            _assert_approx(write_voltage, read_voltage, RW_ERROR)
-        except AssertionError:
-            _logger.error(
-                    _voltage_rw_msg("exceeds", dac_ch, write_voltage, read_voltage)
-                )
-            num_failed += 1
-        else:
-            _logger.info(
-                _voltage_rw_msg("meets", dac_ch, write_voltage, read_voltage)
-            )
+        _assert_approx(write_voltage, read_voltage, RW_ERROR)
 
-    return num_failed
 
-def test_voltage_rw_adc_1(adc, dac):
-    # set ADC read channel
-    adc.start_conversions(ADCNum.ADC_1)
+def _generate_test_cases():
+    for channel in range(NUM_CHANNELS):
+        for voltage in range(0, MAX_VOLTAGE, VOLTAGE_STEP):
+            yield channel, voltage
 
-    _logger.info("starting voltage read-write test with ADC1")
-    _logger.info(
-            (
-                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
-                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
-            )
-        )
 
-    num_failed = 0
-    for ch in range(NUM_CHANNELS):
-        adc.set_config(adc_1_analog_in=_ch_map[ch][0])
-
-        voltage = 0
-        while voltage <= MAX_VOLTAGE:
-            num_failed += _measure_voltage(adc, dac, ADCNum.ADC_1, _ch_map[ch][1], voltage)
-            voltage += VOLTAGE_STEP
-
-    adc.stop_conversions(ADCNum.ADC_1)
-
-    if num_failed > 0:
-        total_tests = NUM_CHANNELS * (MAX_VOLTAGE / VOLTAGE_STEP) * READS_PER_WRITE
-        raise AssertionError(f"voltage read-write test failed: {num_failed}/{int(total_tests)} tests failed")
+@pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
+def test_voltage_rw_adc_1(channel, write_voltage, adc, dac):
+    adc.set_config(adc_1_analog_in=_ch_map[channel][0])
+    _measure_voltage(adc, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
