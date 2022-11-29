@@ -69,7 +69,9 @@ def _generate_test_cases():
             )
         )
     for channel in range(NUM_CHANNELS):
-        for voltage in range(0, MAX_VOLTAGE, VOLTAGE_STEP):
+        voltage = 0
+        while voltage < MAX_VOLTAGE:
+            voltage += VOLTAGE_STEP
             yield channel, voltage
 
 
