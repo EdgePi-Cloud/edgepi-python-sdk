@@ -173,6 +173,10 @@ class InvalidDifferentialPairError(Exception):
     """
 
 
+class CalibKeyMissingError(Exception):
+    """Raised when calibration values are missing from EEPROM dictionary"""
+
+
 class EdgePiADC(SPI):
     """
     EdgePi ADC device
@@ -447,7 +451,17 @@ class EdgePiADC(SPI):
 
         calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
 
-        return adc_calibs.get(calib_key)
+        calibs = adc_calibs.get(calib_key)
+        if calibs is None:
+            raise CalibKeyMissingError(
+                (
+                    "Failed to retrieve calibration values from eeprom dictionary: "
+                    f"dict is missing key = {calib_key}"
+                    f"\neeprom_calibs = \n{adc_calibs}"
+                )
+            )
+
+        return calibs
 
     def read_voltage(self, adc_num: ADCNum):
         """

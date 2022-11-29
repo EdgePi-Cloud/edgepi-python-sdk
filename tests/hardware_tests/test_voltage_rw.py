@@ -143,7 +143,7 @@ def test_differential_rw_adc_1(diff, mux_p_volt, mux_n_volt, adc_1, dac):
     _logger.info(
         f"voltage read/write diff pair: mux_p = {diff.value.mux_p}, mux_n = {diff.value.mux_n}"
         )
-    _logger.info(f"mux_p_voltage = {mux_p_volt}, mux_n_voltage = {mux_n_volt}")
+    _logger.info(f"mux_p_write_voltage = {mux_p_volt}, mux_n_write_voltage = {mux_n_volt}")
     write_voltages = {
         _diff_ch_map[diff.value.mux_p]: mux_p_volt,
         _diff_ch_map[diff.value.mux_n]: mux_n_volt,
