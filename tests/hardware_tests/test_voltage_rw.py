@@ -2,7 +2,7 @@ import logging
 
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ADCNum
+from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
@@ -63,7 +63,7 @@ def _voltage_rw_msg(dac_ch: DACChannel, write_voltage: float, read_voltage: floa
     )
         
 
-def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
+def _measure_voltage_individual(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
 
@@ -90,10 +90,50 @@ def _generate_test_cases():
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
 def test_voltage_rw_adc_1(channel, write_voltage, adc_1, dac):
     adc_1.set_config(adc_1_analog_in=_ch_map[channel][0])
-    _measure_voltage(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
+    _measure_voltage_individual(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
 
 
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
 def test_voltage_rw_adc_2(channel, write_voltage, adc_2, dac):
     adc_2.set_config(adc_2_analog_in=_ch_map[channel][0])
-    _measure_voltage(adc_2, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
+    _measure_voltage_individual(adc_2, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
+
+#####################################
+
+def _generate_diff_test_cases():
+    _logger.info(
+            (
+                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
+                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
+            )
+        )
+    for diff in DiffMode:
+        voltage = 0
+        while voltage < MAX_VOLTAGE - VOLTAGE_STEP:
+            voltage += VOLTAGE_STEP
+            yield diff, voltage, voltage
+
+
+def _measure_voltage_differential(adc, dac, adc_num: ADCNum, write_voltages: dict[DACChannel, float]):
+    # write to DAC channel
+    for channel, write_voltage in write_voltages.items():
+        dac.write_voltage(channel, write_voltage)
+
+    for _ in range(READS_PER_WRITE):
+        read_voltage = adc.read_voltage(adc_num)
+        _logger.info(f"diff_read_voltage = {read_voltage}")
+        _assert_approx(0, read_voltage, RW_ERROR)
+
+
+@pytest.mark.parametrize("diff, mux_p_volt, mux_n_volt", _generate_diff_test_cases())
+def test_differential_rw_adc_1(diff, mux_p_volt, mux_n_volt, adc_1, dac):
+    adc_1.select_differential(ADCNum.ADC_1, diff)
+    _logger.info(
+        f"voltage read/write diff pair: mux_p = {diff.value.mux_p}, mux_n = {diff.value.mux_p}"
+        )
+    _logger.info(f"mux_p_voltage = {mux_p_volt}, mux_n_voltage = {mux_n_volt}")
+    write_voltages = {
+        diff.value.mux_p: mux_p_volt,
+        diff.value.mux_n: mux_n_volt,
+    }
+    _measure_voltage_differential(adc_1, dac, ADCNum.ADC_1, write_voltages)
