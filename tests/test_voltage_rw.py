@@ -29,12 +29,6 @@ _ch_map = {
 def fixture_adc():
     adc = EdgePiADC()
     adc.start_conversions(ADCNum.ADC_1)
-    _logger.info(
-            (
-                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
-                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
-            )
-        )
     yield adc
     adc.stop_conversions(ADCNum.ADC_1)
 
@@ -49,9 +43,8 @@ def _assert_approx(a: float, b: float, error: float):
     assert (a - error) <= b <= (a + error)
 
 
-def _voltage_rw_msg(test_status: str, dac_ch: DACChannel, write_voltage: float, read_voltage: float) -> str:
+def _voltage_rw_msg(dac_ch: DACChannel, write_voltage: float, read_voltage: float) -> str:
     return (
-        f"voltage read-write error {test_status} tolerance:"
         f"\nchannel_number={dac_ch.value}, "
         f"write_voltage={write_voltage} V, read_voltage={read_voltage} V"
         f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
@@ -64,10 +57,17 @@ def _measure_voltage(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltag
 
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
+        _logger.info(_voltage_rw_msg(dac_ch, write_voltage, read_voltage))
         _assert_approx(write_voltage, read_voltage, RW_ERROR)
 
 
 def _generate_test_cases():
+    _logger.info(
+            (
+                f"voltage_range: 0-{MAX_VOLTAGE} V, voltage_step: {VOLTAGE_STEP} V, "
+                f"read_write_error_tolerance: +/- {RW_ERROR} V, num_read_trials: {READS_PER_WRITE}"
+            )
+        )
     for channel in range(NUM_CHANNELS):
         for voltage in range(0, MAX_VOLTAGE, VOLTAGE_STEP):
             yield channel, voltage
