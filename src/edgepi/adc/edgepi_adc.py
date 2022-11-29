@@ -452,7 +452,7 @@ class EdgePiADC(SPI):
         calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
 
         calibs = adc_calibs.get(calib_key)
-        _logger.error(calibs)
+
         if calibs is None:
             _logger.error("Failed to find ADC calibration values")
             raise CalibKeyMissingError(
