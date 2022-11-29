@@ -67,3 +67,33 @@ This section introduces ADC functionality available to users.
         * ADC sampling data rate (samples per second)
 5. Read ADC Alarms
     - When voltage reads are triggered, the ADC passes along information about the status of several possible faults.
+---
+## Reading Single Channel Voltage
+In order to read voltage from a single input channel, the following parameters need to be provided:
+1. Conversion Mode
+2. ADC Number
+    * When using continuous conversion mode, the ADC number must be provided to identify which ADC to start and read conversions for.
+3. Input Channel
+
+### Single Channel - Pulse Mode
+```
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample input pin 4 (the input pins are 0-indexed)
+edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.PULSE)
+
+# trigger sampling event
+out = edgepi_adc.single_sample()
+```
+
+### Single Channel - Continuous Mode
+```
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample input pin 4 (the input pins are 0-indexed)
+edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.CONTINUOUS)
+
+# trigger sampling events
+edgepi_adc.start_conversions(ADCNum.ADC_1)
+out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+```
