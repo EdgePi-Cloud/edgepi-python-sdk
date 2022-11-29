@@ -6,13 +6,16 @@ from edgepi.adc.adc_constants import ADCChannel, ADCNum
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
+
 _logger = logging.getLogger(__name__)
+
 
 NUM_CHANNELS = 8
 READS_PER_WRITE = 1
 RW_ERROR = 1e-1 # TODO: change to mV
 MAX_VOLTAGE = 5.0
 VOLTAGE_STEP = 0.1
+
 
 _ch_map = {
     0: (ADCChannel.AIN0, DACChannel.AOUT0),
@@ -25,12 +28,21 @@ _ch_map = {
     7: (ADCChannel.AIN7, DACChannel.AOUT7),
 }
 
-@pytest.fixture(name="adc", scope="module")
-def fixture_adc():
+
+@pytest.fixture(name="adc_1", scope="module")
+def fixture_adc_1():
     adc = EdgePiADC()
     adc.start_conversions(ADCNum.ADC_1)
     yield adc
     adc.stop_conversions(ADCNum.ADC_1)
+
+
+@pytest.fixture(name="adc_2", scope="module")
+def fixture_adc_2():
+    adc = EdgePiADC()
+    adc.start_conversions(ADCNum.ADC_2)
+    yield adc
+    adc.stop_conversions(ADCNum.ADC_2)
 
 
 @pytest.fixture(name="dac", scope="module")
@@ -76,12 +88,12 @@ def _generate_test_cases():
 
 
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
-def test_voltage_rw_adc_1(channel, write_voltage, adc, dac):
-    adc.set_config(adc_1_analog_in=_ch_map[channel][0])
-    _measure_voltage(adc, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
+def test_voltage_rw_adc_1(channel, write_voltage, adc_1, dac):
+    adc_1.set_config(adc_1_analog_in=_ch_map[channel][0])
+    _measure_voltage(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
 
 
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
-def test_voltage_rw_adc_2(channel, write_voltage, adc, dac):
-    adc.set_config(adc_2_analog_in=_ch_map[channel][0])
-    _measure_voltage(adc, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
+def test_voltage_rw_adc_2(channel, write_voltage, adc_2, dac):
+    adc_2.set_config(adc_2_analog_in=_ch_map[channel][0])
+    _measure_voltage(adc_2, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
