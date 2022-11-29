@@ -60,7 +60,7 @@ class EdgePiGPIOExpander(I2CDevice):
                 _logger.debug(f'Write Message Content {msg_write[0]}')
                 self.transfer(dev_address, msg_write)
 
-    def read_expander_pin_state(self, pin_name: str) -> bool:
+    def read_expander_pin(self, pin_name: str) -> bool:
         '''
         Get the current state of a GPIO expander pin (low or high).
 
@@ -77,7 +77,7 @@ class EdgePiGPIOExpander(I2CDevice):
         # read register at reg_addx
         reg_val = self.__read_register(reg_addx, dev_address)
         pin_state = is_bit_set(reg_val, pin_mask)
-        _logger.debug(":read_expander_pin_state: pin '%s' = '%s'", pin_name,  pin_state)
+        _logger.debug(":read_expander_pin: pin '%s' = '%s'", pin_name,  pin_state)
 
         return pin_state
 

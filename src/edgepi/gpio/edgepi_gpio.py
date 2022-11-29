@@ -22,5 +22,5 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         _logger.debug(f'{config.name} Configuration Selected: {config}')
         if config is not None and 'i2c' in config.dev_path:
             EdgePiGPIOExpander.__init__(self, config=config)
-        if config is not None and 'gpiochip0'in config.dev_path:
+        if 'gpiochip0'in config.dev_path:
             EdgePiGPIOChip.__init__(self, config=config)

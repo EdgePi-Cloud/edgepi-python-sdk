@@ -38,7 +38,7 @@ class GpioExpanderConfig:
     num_pins: int = None
     dir: str = None
     port: str = None
-    address: Union[GpioExpanderAddress, int] = None
+    address: int = None
     dev_path: str = None
 
 @dataclass(frozen=True)

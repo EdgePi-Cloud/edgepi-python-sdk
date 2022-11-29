@@ -72,7 +72,7 @@ def test_read_expander_pin_state(mocker, config, pin_name, mock_value, result):
     mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
                   return_value = mock_value)
     gpio_ctrl = EdgePiGPIOExpander(config)
-    assert gpio_ctrl.read_expander_pin_state(pin_name) == result
+    assert gpio_ctrl.read_expander_pin(pin_name) == result
 
 @pytest.mark.parametrize("config, pin_name, mock_value, result",
                          [(GpioConfigs.DAC.value, DACPins.A0_EN1.value, 170, True),
