@@ -721,6 +721,7 @@ class EdgePiADC(SPI):
         Args:
             `enable` (bool): True to enable RTD, False to disable
         """
+        # TODO: enable RTD_EN switching pin
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
             mux_reg = self.__get_register_map()
