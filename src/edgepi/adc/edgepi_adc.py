@@ -209,6 +209,8 @@ class EdgePiADC(SPI):
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
         # TODO: get gain, offset, ref configs from the config module
 
+        # TODO: set rtd calibration parameters: hardware constants
+
     def __reapply_config(self):
         """
         Restore ADC to custom EdgePi configuration
@@ -449,14 +451,20 @@ class EdgePiADC(SPI):
 
         return adc_calibs.get(calib_key)
 
-    def read_voltage(self, adc_num: ADCNum):
+    def read_adc(self, adc_num: ADCNum):
         """
-        Read voltage from the currently configured ADC analog input channel.
-        Use this method when ADC is configured to `CONTINUOUS` conversion mode.
-        For `PULSE` conversion mode, use `single_sample()` instead.
+        Read input to either ADC1 or ADC2. If performing single channel reading or differential
+        reading, an input voltage value will be returned. If RTD mode is enabled, and ADC1
+        is being read, the input voltage to ADC1 will be converted to temperature.
+        For ADC1 reading, only use this method when ADC1 is configured to `CONTINUOUS`
+        conversion mode. For `PULSE` conversion mode, use `single_sample` instead.
+
+        Args:
+            adc_num (ADCNum): the ADC to be read
 
         Returns:
-            `float`: input voltage read from ADC
+            `float`: input voltage (V) read from the indicated ADC, or temperature (°C) if
+                RTD mode is enabled and ADC1 is being read.
         """
         # assert adc is in continuous mode (use ADCStatus)
         state = self.get_state()
@@ -496,9 +504,16 @@ class EdgePiADC(SPI):
 
     def single_sample(self):
         """
-        Perform a single `ADC1` voltage read in `PULSE` conversion mode.
+        Read input to ADC1. If performing single channel reading or differential
+        reading, an input voltage value will be returned. If RTD mode is enabled, and ADC1
+        is being read, the input voltage to ADC1 will be converted to temperature.
+        This performs a single voltage read while ADC1 is in `PULSE` conversion mode.
         Do not call this method for voltage reading if ADC is configured
         to `CONTINUOUS` conversion mode: use `read_voltage` instead.
+
+        Returns:
+            `float`: input voltage (V) read from the indicated ADC, or temperature (°C) if
+                RTD mode is enabled and ADC1 is being read.
         """
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
         state = self.get_state()
@@ -683,7 +698,9 @@ class EdgePiADC(SPI):
     def rtd_mode(self, enable: bool):
         """
         Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
-        if ADC2 is configured to read RTD pins AIN4-AIN7.
+        if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
+        RTD mode here, call either `read_voltage` or `single_sample`, depending on which
+        conversion mode ADC1 is currently configured to.
 
         Args:
             `enable` (bool): True to enable RTD, False to disable

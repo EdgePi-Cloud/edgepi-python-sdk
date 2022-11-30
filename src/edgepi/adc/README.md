@@ -40,7 +40,7 @@ edgepi_adc.start_conversions()
 
 # perform 10 voltage reads
 for _ in range(10):
-  out = edgepi_adc.read_voltage()
+  out = edgepi_adc.read_adc()
   print(out)
   
 # stop automatic conversions

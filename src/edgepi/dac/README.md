@@ -16,7 +16,7 @@ edgepi_dac = EdgePiDAC()
 edgepi_dac.write_voltage(1, 3.3)
 
 # read last voltage written to pin number 1
-edgepi_dac.read_voltage(1)
+edgepi_dac.read_adc(1)
 ```
 ---
 ## Using DAC Module
