@@ -112,3 +112,22 @@ edgepi_adc.set_config(adc_2_analog_in=ADCChannel.AIN3)
 edgepi_adc.start_conversions(ADCNum.ADC_2)
 out = edgepi_adc.read_voltage(ADCNum.ADC_2)
 ```
+---
+## Reading Differential Voltage
+In order to read differential voltage, the following parameters need to be provided:
+1. ADC Number
+    * Either ADC may be used for differential voltage reading.
+3. Differential Pair
+   * It is only possible to use predefined pairs of channels for differential voltage reading. These are available via the `DiffMode` enum.
+
+### Differential Voltage Reading (with Continuous Voltage Reading)
+```
+edgepi_adc = EdgePiADC()
+
+# configure ADC to read Differential Pair 1 (AIN0, AIN1)
+edgepi_adc.select_differential(ADCNum.ADC_1, DiffMode.DIFF_1)
+
+# trigger sampling events
+edgepi_adc.start_conversions(ADCNum.ADC_1)
+out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+```
