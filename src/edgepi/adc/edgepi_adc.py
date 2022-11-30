@@ -199,7 +199,7 @@ class EdgePiADC(SPI):
     def __init__(
         self, enable_cache: bool = False, rtd_offset: float = None, rtd_conv_constant: float = None
         ):
-        
+
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
@@ -514,8 +514,8 @@ class EdgePiADC(SPI):
         # convert voltage_bits from code to voltage
         if self.get_state().rtd_on and adc_num == ADCNum.ADC_1:
             return code_to_temperature(voltage_code, self.r_ref, self.rtd_offset, self.rtd_const)
-        else:
-            return code_to_voltage(voltage_code, adc_num.value, calibs)
+
+        return code_to_voltage(voltage_code, adc_num.value, calibs)
 
     def single_sample(self):
         """
@@ -557,8 +557,8 @@ class EdgePiADC(SPI):
         # convert read_data from code to voltage
         if self.get_state().rtd_on:
             return code_to_temperature(voltage_code, self.r_ref, self.rtd_offset, self.rtd_const)
-        else:
-            return code_to_voltage(voltage_code, adc_num.value, calibs)
+
+        return code_to_voltage(voltage_code, adc_num.value, calibs)
 
     def reset(self):
         """

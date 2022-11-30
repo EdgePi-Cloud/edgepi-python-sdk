@@ -62,7 +62,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
 
         `calibs` (CalibParam): voltage reading gain and offset calibration values
-    
+
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
@@ -94,7 +94,7 @@ def code_to_temperature(
        `temp_offset` (float): RTD model-dependent temperature offset (Ohms)
 
        `rtd_conv_constant` (float): RTD model-dependent conversion constant (Ohms/°C)
-    
+
     Returns:
         `float`: temperature value (°C) corresponding to `code`
     """
