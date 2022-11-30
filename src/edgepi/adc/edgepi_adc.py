@@ -35,7 +35,7 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     AllowedChannels,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, check_crc
+from edgepi.adc.adc_voltage import code_to_voltage, check_crc, code_to_temperature
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs, ADCPins
 from edgepi.utilities.utilities import filter_dict
@@ -188,7 +188,18 @@ class EdgePiADC(SPI):
     # keep track of ADC register map state for state caching
     __state: dict = {}
 
-    def __init__(self, enable_cache: bool = False):
+    # RTD model-dependent hardware constants
+    rtd_offset = 100
+    rtd_const = 0.385
+
+    # TODO: this should be part of eeprom_data. Retrieve from eeprom_data in calling
+    # functions when available
+    r_ref = 1326.20
+
+    def __init__(
+        self, enable_cache: bool = False, rtd_offset: float = None, rtd_conv_constant: float = None
+        ):
+        
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
@@ -207,9 +218,12 @@ class EdgePiADC(SPI):
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
-        # TODO: get gain, offset, ref configs from the config module
 
-        # TODO: set rtd calibration parameters: hardware constants
+        # user updated rtd hardware constants
+        if rtd_offset is not None:
+            EdgePiADC.rtd_offset = rtd_offset
+        if rtd_conv_constant is not None:
+            EdgePiADC.rtd_const = rtd_conv_constant
 
     def __reapply_config(self):
         """
@@ -389,7 +403,7 @@ class EdgePiADC(SPI):
         and check bytes
 
         Returns:
-            (int): uint values of representations of voltage read data ordered as
+            int, list[int], int: uint values of representations of voltage read data ordered as
                 (status_byte, voltage_data_bytes, check_byte)
         """
         read_data = self.__read_data(adc_num, ADC_VOLTAGE_READ_LEN)
@@ -498,9 +512,10 @@ class EdgePiADC(SPI):
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
 
         # convert voltage_bits from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
-
-        return voltage
+        if self.get_state().rtd_on and adc_num == ADCNum.ADC_1:
+            return code_to_temperature(voltage_code, self.r_ref, self.rtd_offset, self.rtd_const)
+        else:
+            return code_to_voltage(voltage_code, adc_num.value, calibs)
 
     def single_sample(self):
         """
@@ -540,9 +555,10 @@ class EdgePiADC(SPI):
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
 
         # convert read_data from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
-
-        return voltage
+        if self.get_state().rtd_on:
+            return code_to_temperature(voltage_code, self.r_ref, self.rtd_offset, self.rtd_const)
+        else:
+            return code_to_voltage(voltage_code, adc_num.value, calibs)
 
     def reset(self):
         """
