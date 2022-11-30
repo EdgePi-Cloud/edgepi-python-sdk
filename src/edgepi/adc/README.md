@@ -71,9 +71,11 @@ This section introduces ADC functionality available to users.
 ## Reading Single Channel Voltage
 In order to read voltage from a single input channel, the following parameters need to be provided:
 1. Conversion Mode
-2. ADC Number
+    * ADC1 features two conversion modes. By default it will operate in continuous conversion mode, but can also be configured to use pulse conversions.
+3. ADC Number
     * When using continuous conversion mode, the ADC number must be provided to identify which ADC to start and read conversions for.
-3. Input Channel
+4. Input Channel
+    * Select one of eight input channels to read voltage from.
 
 ### Single Channel - Pulse Mode
 ```
@@ -86,7 +88,7 @@ edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.
 out = edgepi_adc.single_sample()
 ```
 
-### Single Channel - Continuous Mode
+### Single Channel - Continuous Mode: ADC1
 ```
 edgepi_adc = EdgePiADC()
 
@@ -96,4 +98,17 @@ edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.
 # trigger sampling events
 edgepi_adc.start_conversions(ADCNum.ADC_1)
 out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+```
+
+### Single Channel - Continuous Mode: ADC2
+```
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample input pin 4 (the input pins are 0-indexed)
+# conversion mode doesn't need to be specified for ADC2, as it can only operate in continuous conversion mode
+edgepi_adc.set_config(adc_2_analog_in=ADCChannel.AIN3)
+
+# trigger sampling events
+edgepi_adc.start_conversions(ADCNum.ADC_2)
+out = edgepi_adc.read_voltage(ADCNum.ADC_2)
 ```
