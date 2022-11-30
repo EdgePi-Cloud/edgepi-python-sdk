@@ -28,6 +28,7 @@ class EdgePiMemoryInfo(Enum):
     """
     USED_SPACE = 0x00
     BUFF_START = 0x02
+    # TODO: add usersapce starting memory 
 
 class MessageFieldNumber(Enum):
     """
@@ -77,6 +78,7 @@ class EdgePiEEPROMData:
     model: str = None
     client_id: str = None
 
+# TODO: update the doc string, static method, use a class and put these method to constructor
     def message_to_dict(self, data_to_unpack: EepromLayout = None):
         """
         Function to unpack message to list
@@ -90,7 +92,7 @@ class EdgePiEEPROMData:
             calib_dict[indx] = CalibParam(gain=ch.gain,
                                         offset=ch.offset)
         return calib_dict
-
+# TODO: update the doc string 
     def keys_to_str(self, data_to_unpack: EepromLayout = None):
         """
         Function to unpack message to string

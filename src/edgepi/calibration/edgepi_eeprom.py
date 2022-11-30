@@ -126,7 +126,7 @@ class EdgePiEEPROM(I2CDevice):
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
         self.log.debug(f'Reading Address {mem_addr}, {length} bytes, {msg[1].data}')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {msg[1].data}')
+        # self.log.debug(f'Read data: {msg[1].data}') TODO: log number of bytes
         return read_result
 
 

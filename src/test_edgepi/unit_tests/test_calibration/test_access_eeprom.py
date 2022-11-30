@@ -107,6 +107,7 @@ def test_get_message_of_interest(mocker, msg, eeprom):
     msg_of_interest = eeprom.get_message_of_interest(msg)
     assert msg_of_interest == memory_contents.ListFields()[msg.value -1][1]
 
+# TODO: should populate the dictionary with value to compare
 def test_get_edgepi_reserved_data(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
