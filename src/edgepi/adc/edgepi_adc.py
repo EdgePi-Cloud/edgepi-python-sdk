@@ -690,6 +690,7 @@ class EdgePiADC(SPI):
         adc_2_mux_p: CH = None,
         adc_1_mux_n: CH = CH.AINCOM,
         adc_2_mux_n: CH = CH.AINCOM,
+        override_rtd_validation: bool = False
     ):
         """
         Generates OpCodes for assigning positive and negative multiplexers
@@ -715,14 +716,17 @@ class EdgePiADC(SPI):
             adc_2_mux_n = None
 
         # no multiplexer config to update
+        # TODO: refactor filter_dict to take list arg
         args = filter_dict(locals(), "self", None)
+        args = filter_dict(args, "override_rtd_validation")
         if not args:
             return []
 
         # allowed channels depend on RTD_EN status
-        channels = list(args.values())
-        rtd_enabled = self.__is_rtd_on()
-        validate_channels_allowed(channels, rtd_enabled)
+        if not override_rtd_validation:
+            channels = list(args.values())
+            rtd_enabled = self.__is_rtd_on()
+            validate_channels_allowed(channels, rtd_enabled)
 
         adc_mux_updates = {
             ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
@@ -893,7 +897,9 @@ class EdgePiADC(SPI):
 
         # get opcodes for mapping multiplexers
         mux_args = self.__extract_mux_args(args)
-        ops_list = self.__get_channel_assign_opcodes(**mux_args)
+        ops_list = self.__get_channel_assign_opcodes(
+            **mux_args, override_rtd_validation=override_rtd_validation
+        )
 
         # extract OpCode type args, since args may contain non-OpCode args
         args = list(args.values())
