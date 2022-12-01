@@ -1,6 +1,6 @@
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCNum
+from edgepi.adc.adc_constants import ADCNum, ConvMode
 
 
 # This has to be manually set with temperature machine. Use this value for testing.
@@ -20,6 +20,7 @@ def test_single_sample_rtd(rtd):
 
 
 def test_read_rtd_temperature(rtd):
+    rtd.set_config(conversion_mode=ConvMode.CONTINUOUS)
     rtd.start_conversions(ADCNum.ADC_1)
     for _ in range(10):
         out = rtd.read_rtd_temperature()
