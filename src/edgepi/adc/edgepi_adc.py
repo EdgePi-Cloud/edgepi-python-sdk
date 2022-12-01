@@ -189,21 +189,24 @@ class EdgePiADC(SPI):
     __state: dict = {}
 
     # RTD model-dependent hardware constants
-    RTD_OFFSET = 100
-    RTD_CONST = 0.385
+    RTD_RESISTANCE = 100 # RTD material-dependent resistance value (Ohms)
+    RTD_RESISTANCE_VARIATION = 0.385 # RTD model-dependent resistance variation (Ohms/°C)
 
     # TODO: this should be part of eeprom_data. Retrieve from eeprom_data in calling
     # functions when available
     r_ref = 1326.20
 
     def __init__(
-        self, enable_cache: bool = False, rtd_offset: float = None, rtd_conv_constant: float = None
+        self,
+        enable_cache: bool = False,
+        rtd_resistance: float = None,
+        rtd_resistance_variation: float = None
         ):
         """
         Args:
             `enable_cache` (bool): set to True to enable state-caching
-            `rtd_offset` (float): set RTD model-dependent temperature offset (Ohms)
-            `rtd_conv_constant` (float): set RTD model-dependent conversion constant (Ohms/°C)
+            `rtd_resistance` (float): set RTD material-dependent resistance value (Ohms)
+            `rtd_resistance_variation` (float): set RTD model-dependent resistance variation (Ohms/°C)
         """
 
         super().__init__(bus_num=6, dev_id=1)
@@ -226,10 +229,10 @@ class EdgePiADC(SPI):
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
 
         # user updated rtd hardware constants
-        if rtd_offset is not None:
-            EdgePiADC.RTD_OFFSET= rtd_offset
-        if rtd_conv_constant is not None:
-            EdgePiADC.RTD_CONST = rtd_conv_constant
+        if rtd_resistance is not None:
+            EdgePiADC.RTD_RESISTANCE = rtd_resistance
+        if rtd_resistance_variation is not None:
+            EdgePiADC.RTD_RESISTANCE_VARIATION = rtd_resistance_variation
 
     def __reapply_config(self):
         """
@@ -536,7 +539,7 @@ class EdgePiADC(SPI):
         _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
 
         # TODO: get RTD calibs from eeprom once added
-        return code_to_temperature(voltage_code, self.r_ref, self.RTD_OFFSET, self.RTD_CONST)
+        return code_to_temperature(voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION)
 
     def __enforce_pulse_mode(self):
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
@@ -589,7 +592,7 @@ class EdgePiADC(SPI):
         _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
 
         # TODO: get RTD calibs from eeprom once added
-        return code_to_temperature(voltage_code, self.r_ref, self.RTD_OFFSET, self.RTD_CONST)
+        return code_to_temperature(voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION)
 
     def reset(self):
         """
