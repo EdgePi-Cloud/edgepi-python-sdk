@@ -35,7 +35,7 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     AllowedChannels,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, check_crc
+from edgepi.adc.adc_voltage import code_to_voltage, check_crc, code_to_temperature
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import GpioConfigs, ADCPins
 from edgepi.utilities.utilities import filter_dict
@@ -192,7 +192,30 @@ class EdgePiADC(SPI):
     # keep track of ADC register map state for state caching
     __state: dict = {}
 
-    def __init__(self, enable_cache: bool = False):
+    # default RTD model-dependent hardware constants
+    RTD_SENSOR_RESISTANCE = 100 # RTD sensor resistance value (Ohms)
+    RTD_SENSOR_RESISTANCE_VARIATION = 0.385 # RTD sensor resistance variation (Ohms/°C)
+
+    # TODO: this should be part of eeprom_data. Retrieve from eeprom_data in calling
+    # functions when available
+    r_ref = 1326.20
+
+    def __init__(
+        self,
+        enable_cache: bool = False,
+        rtd_sensor_resistance: float = None,
+        rtd_sensor_resistance_variation: float = None
+        ):
+        """
+        Args:
+            `enable_cache` (bool): set to True to enable state-caching
+
+            `rtd_sensor_resistance` (float): set RTD material-dependent resistance value (Ohms)
+
+            `rtd_sensor_resistance_variation` (float): set RTD model-dependent resistance
+                variation (Ohms/°C)
+        """
+
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
@@ -211,7 +234,19 @@ class EdgePiADC(SPI):
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
-        # TODO: get gain, offset, ref configs from the config module
+
+        # user updated rtd hardware constants
+        self.rtd_sensor_resistance = (
+            rtd_sensor_resistance
+            if rtd_sensor_resistance is not None
+            else EdgePiADC.RTD_SENSOR_RESISTANCE
+        )
+
+        self.rtd_sensor_resistance_variation = (
+            rtd_sensor_resistance_variation
+            if rtd_sensor_resistance_variation is not None
+            else EdgePiADC.RTD_SENSOR_RESISTANCE_VARIATION
+        )
 
     def __reapply_config(self):
         """
@@ -391,7 +426,7 @@ class EdgePiADC(SPI):
         and check bytes
 
         Returns:
-            (int): uint values of representations of voltage read data ordered as
+            int, list[int], int: uint values of representations of voltage read data ordered as
                 (status_byte, voltage_data_bytes, check_byte)
         """
         read_data = self.__read_data(adc_num, ADC_VOLTAGE_READ_LEN)
@@ -406,6 +441,8 @@ class EdgePiADC(SPI):
         voltage_code = read_data[2 : (2 + adc_num.value.num_data_bytes)]
 
         check_code = read_data[6]
+
+        check_crc(voltage_code, check_code)
 
         return status_code, voltage_code, check_code
 
@@ -465,85 +502,133 @@ class EdgePiADC(SPI):
 
         return calibs
 
-    def read_voltage(self, adc_num: ADCNum):
-        """
-        Read voltage from the currently configured ADC analog input channel.
-        Use this method when ADC is configured to `CONTINUOUS` conversion mode.
-        For `PULSE` conversion mode, use `single_sample()` instead.
-
-        Returns:
-            `float`: input voltage read from ADC
-        """
-        # assert adc is in continuous mode (use ADCStatus)
+    def __continuous_time_delay(self, adc_num: ADCNum):
+        """Compute and enforce continuous conversion time delay"""
         state = self.get_state()
-        if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
-            raise ContinuousModeError(
-                "ADC must be in CONTINUOUS conversion mode in order to call `read_voltage`."
-            )
-
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         data_rate = (
             state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
         delay = expected_continuous_time_delay(adc_num, data_rate.value.op_code)
-        _logger.debug(
-            (
-                f"Continuous time delay = {delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc_num},  data_rate={hex(data_rate.value.op_code)}\n"
-            )
-        )
+
         time.sleep(delay / 1000)
 
-        status_code, voltage_code, check_code = self.__voltage_read(adc_num)
+    def __check_adc_1_conv_mode(self):
+        # assert adc is in continuous mode
+        state = self.get_state()
+        if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
+            raise ContinuousModeError(
+                "ADC1 must be in CONTINUOUS conversion mode in order to call this method."
+            )
+
+    def read_voltage(self, adc_num: ADCNum):
+        """
+        Read voltage input to either ADC1 or ADC2, when performing single channel reading
+        or differential reading. For ADC1 reading, only use this method when ADC1 is configured
+        to `CONTINUOUS` conversion mode. For `PULSE` conversion mode, use `single_sample` instead.
+
+        Args:
+            `adc_num` (ADCNum): the ADC to be read
+
+        Returns:
+            `float`: input voltage (V) read from the indicated ADC
+        """
+        self.__check_adc_1_conv_mode()
+
+        self.__continuous_time_delay(adc_num)
+
+        status_code, voltage_code, _ = self.__voltage_read(adc_num)
 
         # log STATUS byte
         status = get_adc_status(status_code)
         _logger.debug(f"Logging STATUS byte:\n{status}")
 
-        # check CRC
-        check_crc(voltage_code, check_code)
-
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
 
-        # convert voltage_bits from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
+        # convert from code to voltage
+        return code_to_voltage(voltage_code, adc_num.value, calibs)
 
-        return voltage
 
-    def single_sample(self):
+    def read_rtd_temperature(self):
         """
-        Perform a single `ADC1` voltage read in `PULSE` conversion mode.
-        Do not call this method for voltage reading if ADC is configured
-        to `CONTINUOUS` conversion mode: use `read_voltage` instead.
+        Read RTD temperature continuously. Note, to obtain valid temperature values,
+        RTD mode must first be enabled by calling `rtd_mode`. ADC1 must also be configured
+        to `CONTINUOUS` conversion mode via `set_config`, before calling this method.
+
+        Returns:
+            `float`: RTD measured temperature (°C)
         """
+        self.__check_adc_1_conv_mode()
+
+        self.__continuous_time_delay(ADCNum.ADC_1)
+
+        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+
+        # TODO: get RTD calibs from eeprom once added
+        return code_to_temperature(
+            voltage_code,
+            self.r_ref,
+            self.rtd_sensor_resistance,
+            self.rtd_sensor_resistance_variation
+        )
+
+    def __enforce_pulse_mode(self):
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
         state = self.get_state()
-
         if state.adc_1.conversion_mode.code != ConvMode.PULSE:
             self.__config(conversion_mode=ConvMode.PULSE)
 
-        # only ADC1 can perform PULSE conversion
-        adc_num = ADCNum.ADC_1
+    def single_sample(self):
+        """
+        Trigger a single ADC1 voltage sampling event, when performing single channel reading or
+        differential reading. ADC1 must be in `PULSE` conversion mode before calling this method.
+        Do not call this method for voltage reading if ADC is configured to `CONTINUOUS`
+        conversion mode: use `read_voltage` instead.
+
+        Returns:
+            `float`: input voltage (V) read from ADC1
+        """
+        self.__enforce_pulse_mode()
 
         # send command to trigger conversion
-        self.start_conversions(adc_num)
+        self.start_conversions(ADCNum.ADC_1)
 
         # send command to read conversion data.
-        status_code, voltage_code, check_code = self.__voltage_read(adc_num)
+        status_code, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
 
         # log STATUS byte
         status = get_adc_status(status_code)
         _logger.debug(f"Logging STATUS byte:\n{status}")
 
-        # check CRC
-        check_crc(voltage_code, check_code)
+        calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
 
-        calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
+        # convert from code to voltage
+        return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
-        # convert read_data from code to voltage
-        voltage = code_to_voltage(voltage_code, adc_num.value, calibs)
+    def single_sample_rtd(self):
+        """
+        Trigger a single RTD temperature sampling event. Note, to obtain valid temperature values,
+        RTD mode must first be enabled by calling `rtd_mode`. ADC1 must also be configured
+        to `PULSE` conversion mode via `set_config`, before calling this method.
 
-        return voltage
+        Returns:
+            `float`: RTD measured temperature (°C)
+        """
+        self.__enforce_pulse_mode()
+
+        # send command to trigger conversion
+        self.start_conversions(ADCNum.ADC_1)
+
+        # send command to read conversion data.
+        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+
+        # TODO: get RTD calibs from eeprom once added
+        return code_to_temperature(
+            voltage_code,
+            self.r_ref,
+            self.rtd_sensor_resistance,
+            self.rtd_sensor_resistance_variation
+        )
 
     def reset(self):
         """
@@ -699,11 +784,14 @@ class EdgePiADC(SPI):
     def rtd_mode(self, enable: bool):
         """
         Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
-        if ADC2 is configured to read RTD pins AIN4-AIN7.
+        if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
+        RTD mode here, call either `read_voltage` or `single_sample`, depending on which
+        conversion mode ADC1 is currently configured to.
 
         Args:
             `enable` (bool): True to enable RTD, False to disable
         """
+        # TODO: enable RTD_EN switching pin
         if enable:
             # check if adc_2 is reading RTD pins, remap channels if needed
             mux_reg = self.__get_register_map()
@@ -773,8 +861,8 @@ class EdgePiADC(SPI):
         Args:
             `adc_1_analog_in` (ADCChannel): input voltage channel to map to ADC1 mux_p
             `adc_2_analog_in` (ADCChannel): input voltage channel to map to ADC2 mux_p
-            'adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
-            'adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            `adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            `adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
             `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.

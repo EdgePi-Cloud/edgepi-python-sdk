@@ -18,12 +18,12 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 ])
 def test_read_expander_pin(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
-    gpio.read_expander_pin_state(pin_name)
+    gpio.read_expander_pin(pin_name)
     gpio.clear_expander_pin(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
+    pin_val = gpio.read_expander_pin(pin_name)
     assert pin_val is False
     gpio.set_expander_pin(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
+    pin_val = gpio.read_expander_pin(pin_name)
     assert pin_val is True
 
 
@@ -75,7 +75,7 @@ def test_set_pin_direction_out(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
     gpio.set_pin_direction_out(pin_name)
     pin_dir = gpio.get_pin_direction(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
+    pin_val = gpio.read_expander_pin(pin_name)
     assert pin_dir is False
     assert pin_val is False
 
@@ -94,7 +94,7 @@ def test_set_expander_pin(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
     # TODO: setting pins 5-8 to high causes crash
     gpio.set_expander_pin(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
+    pin_val = gpio.read_expander_pin(pin_name)
     assert pin_val is True
 
 
@@ -110,9 +110,9 @@ def test_set_expander_pin(gpio_config, pin_name):
 ])
 def test_toggle_expander_pin(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
-    pin_val_1 = gpio.read_expander_pin_state(pin_name)
+    pin_val_1 = gpio.read_expander_pin(pin_name)
     gpio.toggle_expander_pin(pin_name)
-    pin_val_2 = gpio.read_expander_pin_state(pin_name)
+    pin_val_2 = gpio.read_expander_pin(pin_name)
     assert pin_val_2 is not pin_val_1
 
 
@@ -129,5 +129,5 @@ def test_toggle_expander_pin(gpio_config, pin_name):
 def test_clear_expander_pin(gpio_config, pin_name):
     gpio = EdgePiGPIO(gpio_config.value)
     gpio.clear_expander_pin(pin_name)
-    pin_val = gpio.read_expander_pin_state(pin_name)
+    pin_val = gpio.read_expander_pin(pin_name)
     assert pin_val is False

@@ -18,6 +18,26 @@ class GpioDevice:
         self.pin_bias = pin_bias
         self.gpio = GPIO(self.fd, self.pin_num, self.pin_dir, bias=self.pin_bias)
 
+    def read_state(self):
+        """
+        Read the GPIO pin state
+        Args:
+            N/A
+        Return:
+            bool: True if high else False
+        """
+        return self.gpio.read()
+
+    def write_state(self, state: bool = None):
+        """
+        Write state to GPIO pin
+        Args:
+            state (bool): High if True else LOW
+        Return:
+            N/A
+        """
+        self.gpio.write(state)
+
     def close(self):
         """Close GPIO connection"""
         self.gpio.close()
