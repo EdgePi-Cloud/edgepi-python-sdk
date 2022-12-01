@@ -237,7 +237,7 @@ class EdgePiADC(SPI):
             if rtd_sensor_resistance is not None
             else EdgePiADC.RTD_SENSOR_RESISTANCE
         )
-        
+
         self.rtd_sensor_resistance_variation = (
             rtd_sensor_resistance_variation
             if rtd_sensor_resistance_variation is not None
