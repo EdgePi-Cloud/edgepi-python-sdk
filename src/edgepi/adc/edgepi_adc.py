@@ -199,6 +199,12 @@ class EdgePiADC(SPI):
     def __init__(
         self, enable_cache: bool = False, rtd_offset: float = None, rtd_conv_constant: float = None
         ):
+        """
+        Args:
+            `enable_cache` (bool): set to True to enable state-caching
+            `rtd_offset` (float): set RTD model-dependent temperature offset (Ohms)
+            `rtd_conv_constant` (float): set RTD model-dependent conversion constant (Ohms/°C)
+        """
 
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
