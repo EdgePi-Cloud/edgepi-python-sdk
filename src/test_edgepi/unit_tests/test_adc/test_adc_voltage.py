@@ -10,6 +10,7 @@ from edgepi.adc.adc_voltage import (
     CRCCheckError,
     _code_to_input_voltage,
     generate_crc_8_table,
+    code_to_temperature,
     CRC_8_ATM_GEN
 )
 from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
@@ -68,3 +69,16 @@ def test_crc_8_atm_adc_1(voltage_bytes, crc_code, err):
 
 def test_generate_crc_8_table():
     assert generate_crc_8_table(CRC_8_ATM_GEN) == CRC_8_ATM_LUT
+
+
+@pytest.mark.parametrize(
+    "code, ref_resistance, temp_offset, rtd_conv_constant",
+    [
+        ([51, 16, 126, 166], 1326.20, 100, 0.385),
+        ([0x8, 0x43, 0x1C, 0x45], 1326.20, 100, 0.385),
+    ]
+)
+def test_code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant):
+    # TODO: add check for expected value later if any values are known. No errors raised
+    # is good enough for now.
+    code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant)
