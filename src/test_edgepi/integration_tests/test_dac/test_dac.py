@@ -30,6 +30,7 @@ def fixture_test_edgepi_dac():
 
 def test_dac_init(dac):
     for ch in CH:
+        # pylint: disable=line-too-long
         assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
 
 
@@ -94,4 +95,5 @@ def test_dac_reset(dac):
 
     for ch in CH:
         assert dac.compute_expected_voltage(ch) == pytest.approx(0, abs=FLOAT_ERROR)
+        # pylint: disable=line-too-long
         assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high

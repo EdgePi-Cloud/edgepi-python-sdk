@@ -31,9 +31,9 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         return
             state (bool): True/False depending on High/Low
         """
-        if pin_name in self.expander_pin_dict.items():
+        if pin_name in self.expander_pin_dict:
             return self.read_expander_pin(pin_name)
-        if pin_name in self.gpiochip_pins_dict.items():
+        if pin_name in self.gpiochip_pins_dict:
             return self.read_gpio_pin_state(pin_name)
         _logger.error("pin_name doesn't exists")
         return None
