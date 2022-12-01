@@ -10,7 +10,7 @@ ERROR = 1
 
 @pytest.fixture(name="rtd")
 def fixture_rtd():
-    adc = EdgePiADC
+    adc = EdgePiADC()
     adc.rtd_mode(True)
 
 def test_single_sample_rtd(rtd):
