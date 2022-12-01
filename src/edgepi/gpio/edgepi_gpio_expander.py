@@ -4,11 +4,9 @@ Provides a class for interacting with the GPIO pins through I2C and GPIO periphe
 
 
 import logging
-from edgepi.gpio.gpio_configs import generate_pin_info, GpioConfigs, generate_expander_pin_info
+from edgepi.gpio.gpio_configs import generate_expander_pin_info
+from edgepi.gpio.gpio_constants import GpioDevPaths
 from edgepi.peripherals.i2c import I2CDevice
-from edgepi.gpio.gpio_commands import (
-    get_pin_config_address,
-    )
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, is_bit_set
 
 _logger = logging.getLogger(__name__)
@@ -20,10 +18,8 @@ class EdgePiGPIOExpander(I2CDevice):
     This class will be imported to each module that requires GPIO manipulation.
     It is not intended for users.
     '''
-    def __init__(self, config: GpioConfigs = None):
-        super().__init__(config.dev_path)
-        # get expander configuration port and output port addxs for this device
-        self.pin_config_address, self.pin_out_address = get_pin_config_address(config)
+    def __init__(self):
+        super().__init__(GpioDevPaths.I2C_DEV_PATH.value)
         # get this device's expander pin names and opcodes for set, clear, direction ops
         self.expander_pin_dict = generate_expander_pin_info()
 

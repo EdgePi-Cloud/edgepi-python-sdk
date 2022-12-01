@@ -160,5 +160,3 @@ def test_generate_gpiochip_pin_info():
     result_dict.update(generate_pin_info(GpioConfigs.DIN.value))
     result_dict.update(generate_pin_info(GpioConfigs.DOUT1.value))
     assert pin_dict == result_dict
-    
-                       

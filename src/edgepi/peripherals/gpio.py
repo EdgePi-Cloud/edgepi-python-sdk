@@ -9,14 +9,19 @@ from periphery import GPIO
 class GpioDevice:
     """Class for representing a GPIO device"""
 
-    _dev_path = "/dev/gpiochip0"
+    def __init__(self, dev_path: str = None):
+        self.fd = dev_path
+        self.gpio = None
 
-    def __init__(self, pin_num: int = None, pin_dir: str = None, pin_bias: str = None):
-        self.fd = GpioDevice._dev_path
-        self.pin_num = pin_num
-        self.pin_dir = pin_dir
-        self.pin_bias = pin_bias
-        self.gpio = GPIO(self.fd, self.pin_num, self.pin_dir, bias=self.pin_bias)
+    def open_gpio(self, pin_num: int = None, pin_dir: str = None, pin_bias: str = None):
+        """
+        Instantiate GPIO device object for reading and writing.
+        Args:
+            pin_num (int): pin number to instantiate the object with
+            pin_dir (str): pin direction
+            pin_bias (str): bias direction
+        """
+        self.gpio = GPIO(self.fd, pin_num, pin_dir, bias=pin_bias)
 
     def read_state(self):
         """

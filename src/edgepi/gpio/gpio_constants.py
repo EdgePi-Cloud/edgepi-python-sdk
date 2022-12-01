@@ -148,3 +148,11 @@ class GpioBPinDirIn(Enum):
     PIN7_DIR_IN = OpCode(0x40, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT6.value)
     PIN8_DIR_IN = OpCode(0x80, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BIT7.value)
     ALL_DIR_IN = OpCode(0xFF, GPIOAddresses.CONFIGURATION_PORT_0.value, BitMask.BYTE.value)
+
+@unique
+class GpioDevPaths(Enum):
+    """
+    GPIO device paths
+    """
+    I2C_DEV_PATH = '/dev/i2c-10'
+    GPIO_CIHP_DEV_PATH = '/dev//dev/gpiochip0'

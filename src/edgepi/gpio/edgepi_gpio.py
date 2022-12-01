@@ -6,7 +6,6 @@ Provides a class for interacting with the GPIO pins through I2C and GPIO periphe
 import logging
 from edgepi.gpio.edgepi_gpio_expander import EdgePiGPIOExpander
 from edgepi.gpio.edgepi_gpio_chip import EdgePiGPIOChip
-from edgepi.gpio.gpio_configs import GpioConfigs
 
 _logger = logging.getLogger(__name__)
 
@@ -16,11 +15,25 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
     This class will be imported to each module that requires GPIO manipulation.
     It is not intended for users.
     '''
-    def __init__(self, config: GpioConfigs = None):
-        if config is None:
-            raise ValueError(f'Missing Config {config}')
-        _logger.debug(f'{config.name} Configuration Selected: {config}')
-        if config is not None and 'i2c' in config.dev_path:
-            EdgePiGPIOExpander.__init__(self, config=config)
-        if 'gpiochip0'in config.dev_path:
-            EdgePiGPIOChip.__init__(self, config=config)
+    def __init__(self):
+        _logger.info("GPIO initializing")
+        EdgePiGPIOExpander.__init__(self)
+        EdgePiGPIOChip.__init__(self)
+
+# TODO: add generic functions read, write, set, clear methods. depending on the pin name,
+# the proper methods will get called
+
+    def read_pin_state(self, pin_name: str = None):
+        """
+        Read corresponding pin state
+        Args:
+            pin_name (str): name of the pin will be passed as Enum
+        return
+            state (bool): True/False depending on High/Low
+        """
+        if pin_name in self.expander_pin_dict.items():
+            return self.read_expander_pin(pin_name)
+        if pin_name in self.gpiochip_pins_dict.items():
+            return self.read_gpio_pin_state(pin_name)
+        _logger.error("pin_name doesn't exists")
+        return None
