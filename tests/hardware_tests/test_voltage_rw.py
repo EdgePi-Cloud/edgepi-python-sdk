@@ -149,3 +149,17 @@ def test_differential_rw_adc_1(diff, mux_p_volt, mux_n_volt, adc_1, dac):
         _diff_ch_map[diff.value.mux_n]: mux_n_volt,
     }
     _measure_voltage_differential(adc_1, dac, ADCNum.ADC_1, write_voltages)
+
+
+@pytest.mark.parametrize("diff, mux_p_volt, mux_n_volt", _generate_diff_test_cases())
+def test_differential_rw_adc_2(diff, mux_p_volt, mux_n_volt, adc_2, dac):
+    adc_2.select_differential(ADCNum.ADC_2, diff)
+    _logger.info(
+        f"voltage read/write diff pair: mux_p = {diff.value.mux_p}, mux_n = {diff.value.mux_n}"
+        )
+    _logger.info(f"mux_p_write_voltage = {mux_p_volt}, mux_n_write_voltage = {mux_n_volt}")
+    write_voltages = {
+        _diff_ch_map[diff.value.mux_p]: mux_p_volt,
+        _diff_ch_map[diff.value.mux_n]: mux_n_volt,
+    }
+    _measure_voltage_differential(adc_2, dac, ADCNum.ADC_2, write_voltages)
