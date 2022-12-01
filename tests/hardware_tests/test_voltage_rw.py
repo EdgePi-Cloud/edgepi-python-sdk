@@ -61,7 +61,7 @@ def _voltage_rw_msg(dac_ch: DACChannel, write_voltage: float, read_voltage: floa
         f"write_voltage={write_voltage} V, read_voltage={read_voltage} V"
         f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
     )
-        
+
 
 def _measure_voltage_individual(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
     # write to DAC channel
