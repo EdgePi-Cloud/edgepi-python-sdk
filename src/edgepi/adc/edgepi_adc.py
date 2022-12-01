@@ -188,7 +188,7 @@ class EdgePiADC(SPI):
     # keep track of ADC register map state for state caching
     __state: dict = {}
 
-    # RTD model-dependent hardware constants
+    # default RTD model-dependent hardware constants
     RTD_SENSOR_RESISTANCE = 100 # RTD sensor resistance value (Ohms)
     RTD_SENSOR_RESISTANCE_VARIATION = 0.385 # RTD sensor resistance variation (Ohms/°C)
 
@@ -205,7 +205,9 @@ class EdgePiADC(SPI):
         """
         Args:
             `enable_cache` (bool): set to True to enable state-caching
+
             `rtd_sensor_resistance` (float): set RTD material-dependent resistance value (Ohms)
+
             `rtd_sensor_resistance_variation` (float): set RTD model-dependent resistance
                 variation (Ohms/°C)
         """
@@ -230,10 +232,17 @@ class EdgePiADC(SPI):
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
 
         # user updated rtd hardware constants
-        if rtd_sensor_resistance is not None:
-            EdgePiADC.RTD_SENSOR_RESISTANCE = rtd_sensor_resistance
-        if rtd_sensor_resistance_variation is not None:
-            EdgePiADC.RTD_SENSOR_RESISTANCE_VARIATION = rtd_sensor_resistance_variation
+        self.rtd_sensor_resistance = (
+            rtd_sensor_resistance
+            if rtd_sensor_resistance is not None
+            else EdgePiADC.RTD_SENSOR_RESISTANCE
+        )
+        
+        self.rtd_sensor_resistance_variation = (
+            rtd_sensor_resistance_variation
+            if rtd_sensor_resistance_variation is not None
+            else EdgePiADC.RTD_SENSOR_RESISTANCE_VARIATION
+        )
 
     def __reapply_config(self):
         """
@@ -543,8 +552,8 @@ class EdgePiADC(SPI):
         return code_to_temperature(
             voltage_code,
             self.r_ref,
-            self.RTD_SENSOR_RESISTANCE,
-            self.RTD_SENSOR_RESISTANCE_VARIATION
+            self.rtd_sensor_resistance,
+            self.rtd_sensor_resistance_variation
         )
 
     def __enforce_pulse_mode(self):
@@ -601,8 +610,8 @@ class EdgePiADC(SPI):
         return code_to_temperature(
             voltage_code,
             self.r_ref,
-            self.RTD_SENSOR_RESISTANCE,
-            self.RTD_SENSOR_RESISTANCE_VARIATION
+            self.rtd_sensor_resistance,
+            self.rtd_sensor_resistance_variation
         )
 
     def reset(self):
