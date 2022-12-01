@@ -419,7 +419,6 @@ class EdgePiADC(SPI):
 
         check_code = read_data[6]
 
-        # check CRC
         check_crc(voltage_code, check_code)
 
         return status_code, voltage_code, check_code
@@ -476,7 +475,7 @@ class EdgePiADC(SPI):
             state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
         )
         delay = expected_continuous_time_delay(adc_num, data_rate.value.op_code)
-        
+
         time.sleep(delay / 1000)
 
     def __check_adc_1_conv_mode(self):
@@ -565,7 +564,7 @@ class EdgePiADC(SPI):
 
         # convert from code to voltage
         return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
-    
+
     def single_sample_rtd(self):
         """
         Trigger a single RTD temperature sampling event. Note, to obtain valid temperature values,
@@ -817,8 +816,8 @@ class EdgePiADC(SPI):
         Args:
             `adc_1_analog_in` (ADCChannel): input voltage channel to map to ADC1 mux_p
             `adc_2_analog_in` (ADCChannel): input voltage channel to map to ADC2 mux_p
-            'adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
-            'adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            `adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
+            `adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
             `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
