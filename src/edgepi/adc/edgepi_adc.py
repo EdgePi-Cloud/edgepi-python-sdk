@@ -206,7 +206,8 @@ class EdgePiADC(SPI):
         Args:
             `enable_cache` (bool): set to True to enable state-caching
             `rtd_resistance` (float): set RTD material-dependent resistance value (Ohms)
-            `rtd_resistance_variation` (float): set RTD model-dependent resistance variation (Ohms/°C)
+            `rtd_resistance_variation` (float): set RTD model-dependent resistance
+                variation (Ohms/°C)
         """
 
         super().__init__(bus_num=6, dev_id=1)
@@ -539,7 +540,9 @@ class EdgePiADC(SPI):
         _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
 
         # TODO: get RTD calibs from eeprom once added
-        return code_to_temperature(voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION)
+        return code_to_temperature(
+            voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION
+        )
 
     def __enforce_pulse_mode(self):
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
@@ -592,7 +595,9 @@ class EdgePiADC(SPI):
         _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
 
         # TODO: get RTD calibs from eeprom once added
-        return code_to_temperature(voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION)
+        return code_to_temperature(
+            voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION
+        )
 
     def reset(self):
         """
