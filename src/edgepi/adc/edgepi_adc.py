@@ -189,8 +189,8 @@ class EdgePiADC(SPI):
     __state: dict = {}
 
     # RTD model-dependent hardware constants
-    RTD_RESISTANCE = 100 # RTD material-dependent resistance value (Ohms)
-    RTD_RESISTANCE_VARIATION = 0.385 # RTD model-dependent resistance variation (Ohms/°C)
+    RTD_SENSOR_RESISTANCE = 100 # RTD sensor resistance value (Ohms)
+    RTD_SENSOR_RESISTANCE_VARIATION = 0.385 # RTD sensor resistance variation (Ohms/°C)
 
     # TODO: this should be part of eeprom_data. Retrieve from eeprom_data in calling
     # functions when available
@@ -199,14 +199,14 @@ class EdgePiADC(SPI):
     def __init__(
         self,
         enable_cache: bool = False,
-        rtd_resistance: float = None,
-        rtd_resistance_variation: float = None
+        rtd_sensor_resistance: float = None,
+        rtd_sensor_resistance_variation: float = None
         ):
         """
         Args:
             `enable_cache` (bool): set to True to enable state-caching
-            `rtd_resistance` (float): set RTD material-dependent resistance value (Ohms)
-            `rtd_resistance_variation` (float): set RTD model-dependent resistance
+            `rtd_sensor_resistance` (float): set RTD material-dependent resistance value (Ohms)
+            `rtd_sensor_resistance_variation` (float): set RTD model-dependent resistance
                 variation (Ohms/°C)
         """
 
@@ -230,10 +230,10 @@ class EdgePiADC(SPI):
         self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
 
         # user updated rtd hardware constants
-        if rtd_resistance is not None:
-            EdgePiADC.RTD_RESISTANCE = rtd_resistance
-        if rtd_resistance_variation is not None:
-            EdgePiADC.RTD_RESISTANCE_VARIATION = rtd_resistance_variation
+        if rtd_sensor_resistance is not None:
+            EdgePiADC.RTD_SENSOR_RESISTANCE = rtd_sensor_resistance
+        if rtd_sensor_resistance_variation is not None:
+            EdgePiADC.RTD_SENSOR_RESISTANCE_VARIATION = rtd_sensor_resistance_variation
 
     def __reapply_config(self):
         """
@@ -541,7 +541,10 @@ class EdgePiADC(SPI):
 
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
-            voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION
+            voltage_code,
+            self.r_ref,
+            self.RTD_SENSOR_RESISTANCE,
+            self.RTD_SENSOR_RESISTANCE_VARIATION
         )
 
     def __enforce_pulse_mode(self):
@@ -596,7 +599,10 @@ class EdgePiADC(SPI):
 
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
-            voltage_code, self.r_ref, self.RTD_RESISTANCE, self.RTD_RESISTANCE_VARIATION
+            voltage_code,
+            self.r_ref,
+            self.RTD_SENSOR_RESISTANCE,
+            self.RTD_SENSOR_RESISTANCE_VARIATION
         )
 
     def reset(self):

@@ -81,7 +81,10 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
 
 
 def code_to_temperature(
-    code: list[int], ref_resistance: float, rtd_resistance: float, rtd_resistance_variation: float
+    code: list[int],
+    ref_resistance: float,
+    rtd_sensor_resistance: float,
+    rtd_sensor_resistance_variation: float
     ) -> float:
     """
     Converts ADC voltage read digital code to temperature. Intended for use in RTD sampling.
@@ -91,9 +94,9 @@ def code_to_temperature(
 
        `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
 
-       `rtd_resistance` (float): RTD material-dependent resistance value (Ohms)
+       `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
 
-       `rtd_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
+       `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
 
     Returns:
         `float`: temperature value (°C) corresponding to `code`
@@ -103,7 +106,7 @@ def code_to_temperature(
     # refer to https://github.com/osensa/edgepi-python-sdk/issues/159 for computation details
     r_rtd = code_bits.uint / (2 << 30) * ref_resistance
 
-    temperature = (r_rtd - rtd_resistance) / rtd_resistance_variation
+    temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
     _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")
 
     return temperature
