@@ -30,7 +30,7 @@ def fixture_test_edgepi_dac():
 
 def test_dac_init(dac):
     for ch in CH:
-        assert not dac.gpio.dict_pin[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
+        assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
 
 
 @pytest.mark.parametrize(
@@ -70,11 +70,11 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
         dac.write_voltage(analog_out, voltage)
         assert dac.compute_expected_voltage(analog_out) == pytest.approx(voltage, abs=FLOAT_ERROR)
         if voltage > 0:
-            assert dac.gpio.dict_pin[
+            assert dac.gpio.expander_pin_dict[
                     dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
                 ].is_high
         else:
-            assert not dac.gpio.dict_pin[
+            assert not dac.gpio.expander_pin_dict[
                 dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
             ].is_high
 
@@ -94,4 +94,4 @@ def test_dac_reset(dac):
 
     for ch in CH:
         assert dac.compute_expected_voltage(ch) == pytest.approx(0, abs=FLOAT_ERROR)
-        assert not dac.gpio.dict_pin[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
+        assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
