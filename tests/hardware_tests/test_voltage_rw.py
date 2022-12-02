@@ -1,3 +1,5 @@
+"""Hardware tests for EdgePi voltage reading/writing accuracy using DAC and ADC"""
+
 import logging
 
 import pytest
@@ -52,6 +54,7 @@ def fixture_dac():
 
 def _assert_approx(a: float, b: float, error: float):
     """assert `b` is within +/- `error` of `a`"""
+    # pylint: disable=invalid-name
     assert (a - error) <= b <= (a + error)
 
 
@@ -63,7 +66,9 @@ def _voltage_rw_msg(dac_ch: DACChannel, write_voltage: float, read_voltage: floa
     )
 
 
-def _measure_voltage_individual(adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float):
+def _measure_voltage_individual(
+    adc, dac, adc_num: ADCNum, dac_ch: DACChannel, write_voltage: float
+    ):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
 
@@ -114,7 +119,9 @@ def _generate_diff_test_cases():
             yield diff, voltage, voltage
 
 
-def _measure_voltage_differential(adc, dac, adc_num: ADCNum, write_voltages: dict[DACChannel, float]):
+def _measure_voltage_differential(
+    adc, dac, adc_num: ADCNum, write_voltages: dict[DACChannel, float]
+    ):
     # write to DAC channel
     for channel, write_voltage in write_voltages.items():
         dac.write_voltage(channel, write_voltage)

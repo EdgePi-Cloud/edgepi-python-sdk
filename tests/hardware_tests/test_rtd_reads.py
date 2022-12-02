@@ -1,3 +1,5 @@
+"""Hardware tests for RTD temperature reading accuracy"""
+
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCNum, ConvMode
