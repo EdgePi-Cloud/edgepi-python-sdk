@@ -75,3 +75,18 @@ This SDK contains modules intended to represent each connected peripheral device
 * [Thermocouple](src/edgepi/tc)
 * [Digital to Analogue Converter](src/edgepi/dac)
 * [Analog to Digital Converter](src/edgepi/adc)
+---
+## Run Integration/Hardware Tests
+From project root directory run the following:
+1. Create virtual env: `python3 -m venv venv_integration`
+2. Activate virtual env: `source venv_integration/bin/activate`
+3. Install dependencies: `python3 -m pip install -r requirements_integration.txt`
+4. Run tests/generate report: `python3 -m pytest ./tests/<test_path> --html=<path-to-report> --log-level=INFO`
+    * `<test_path>` can be left blank to run all integration and hardware tests, or a filepath to run a specific test module
+    * A folder containing the html test report will be added at `<path-to-report>`. Example path: `./tests/reports/report.html`
+    * Include `--log-level=INFO` to add logs with helpful test details in report 
+
+To view html report:
+1. Change directory inside report folder: `cd <path-to-report>`
+2. Start a simple python webserver on edgepi: `python3 -m http.server`
+3. In machine with browser, navigate to `http://<edgepi-address>:8000/`

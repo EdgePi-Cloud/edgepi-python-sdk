@@ -138,3 +138,6 @@ dmypy.json
 
 # local test scripts
 src/edgepi/scripts
+
+# hardware test reports
+tests/reports
