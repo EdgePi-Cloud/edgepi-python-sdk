@@ -17,7 +17,8 @@ from edgepi.gpio.gpio_configs import GpioConfigs, generate_pin_info
                         ('adc', GpioConfigs.ADC.value),
                         ('rtd', GpioConfigs.RTD.value),
                         ('din', GpioConfigs.DIN.value),
-                        ('dout', None),
+                        ('dout1', GpioConfigs.DOUT1.value),
+                        ('dout2', GpioConfigs.DOUT2.value),
                         ('led', GpioConfigs.LED.value),
                         ( None, None)])
 def test_get_periph_config(config, result):

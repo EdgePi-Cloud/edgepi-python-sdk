@@ -4,7 +4,8 @@ Provides a class for interacting with the GPIO pins through GPIO peripheral
 
 import logging
 from edgepi.peripherals.gpio import GpioDevice
-from edgepi.gpio.gpio_configs import DOUTPins, DINPins, generate_pin_info, GpioConfigs
+from edgepi.gpio.gpio_constants import GpioDevPaths
+from edgepi.gpio.gpio_configs import DOUTPins, DINPins, generate_gpiochip_pin_info
 
 _logger = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ class EdgePiGPIOChip(GpioDevice):
     A class to represent the GPIO peripheral using gpiochip device. This class will be imported to
     each module that requires GPIO manipulation.
     """
+    # dictionary mapping pin name to CPU gpio pin number
     __pin_name_dict = {DINPins.DIN1.value : 26,
                        DINPins.DIN2.value : 6,
                        DINPins.DIN3.value : 11,
@@ -24,9 +26,10 @@ class EdgePiGPIOChip(GpioDevice):
                        DOUTPins.DOUT1.value : 13,
                        DOUTPins.DOUT2.value : 12}
 
-    def __init__(self, config: GpioConfigs = None):
+    def __init__(self):
         #pylint: disable=super-init-not-called
-        self.dict_gpiochip_pins = generate_pin_info(config)
+        super().__init__(GpioDevPaths.GPIO_CIHP_DEV_PATH.value)
+        self.gpiochip_pins_dict = generate_gpiochip_pin_info()
 
     def read_gpio_pin_state(self, pin_name: str = None):
         """
@@ -38,9 +41,9 @@ class EdgePiGPIOChip(GpioDevice):
         Returns:
             `bool`: True if state is high, False if state is low
         """
-        super().__init__(pin_num=self.__pin_name_dict[pin_name],
-                         pin_dir=self.dict_gpiochip_pins[pin_name].dir,
-                         pin_bias=self.dict_gpiochip_pins[pin_name].bias)
+        self.open_gpio(pin_num=self.__pin_name_dict[pin_name],
+                         pin_dir=self.gpiochip_pins_dict[pin_name].dir,
+                         pin_bias=self.gpiochip_pins_dict[pin_name].bias)
         state = self.read_state()
         self.close()
         return state

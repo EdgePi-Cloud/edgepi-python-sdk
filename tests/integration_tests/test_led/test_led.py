@@ -2,7 +2,7 @@
 
 import pytest
 
-from edgepi.gpio.gpio_configs import LEDPins, GpioConfigs
+from edgepi.gpio.gpio_configs import LEDPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.led.edgepi_leds import EdgePiLED
 
@@ -12,7 +12,7 @@ def fixture_led():
 
 @pytest.fixture(name='gpio')
 def fixture_gpio():
-    return EdgePiGPIO(GpioConfigs.LED.value)
+    return EdgePiGPIO()
 
 @pytest.mark.parametrize('led_name', [
     (LEDPins.LED_OVR1),

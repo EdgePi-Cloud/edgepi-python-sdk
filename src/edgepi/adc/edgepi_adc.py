@@ -37,7 +37,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.adc_voltage import code_to_voltage, check_crc, code_to_temperature
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import GpioConfigs, ADCPins
+from edgepi.gpio.gpio_configs import ADCPins
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
@@ -226,7 +226,7 @@ class EdgePiADC(SPI):
         self.adc_calib_params = eeprom_data.adc_calib_parms
 
         self.adc_ops = ADCCommands()
-        self.gpio = EdgePiGPIO(GpioConfigs.ADC.value)
+        self.gpio = EdgePiGPIO()
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
         # If this call to __config is removed, replace with a call to get_register_map to
         # initialize __state.

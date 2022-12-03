@@ -4,11 +4,9 @@ Provides a class for interacting with the GPIO pins through I2C and GPIO periphe
 
 
 import logging
-from edgepi.gpio.gpio_configs import generate_pin_info, GpioConfigs
+from edgepi.gpio.gpio_configs import generate_expander_pin_info
+from edgepi.gpio.gpio_constants import GpioDevPaths
 from edgepi.peripherals.i2c import I2CDevice
-from edgepi.gpio.gpio_commands import (
-    get_pin_config_address,
-    )
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, is_bit_set
 
 _logger = logging.getLogger(__name__)
@@ -20,12 +18,10 @@ class EdgePiGPIOExpander(I2CDevice):
     This class will be imported to each module that requires GPIO manipulation.
     It is not intended for users.
     '''
-    def __init__(self, config: GpioConfigs = None):
-        super().__init__(config.dev_path)
-        # get expander configuration port and output port addxs for this device
-        self.pin_config_address, self.pin_out_address = get_pin_config_address(config)
+    def __init__(self):
+        super().__init__(GpioDevPaths.I2C_DEV_PATH.value)
         # get this device's expander pin names and opcodes for set, clear, direction ops
-        self.dict_pin = generate_pin_info(config)
+        self.expander_pin_dict = generate_expander_pin_info()
 
     def __read_register(self, reg_address: int, dev_address: int) -> int:
         '''
@@ -70,9 +66,9 @@ class EdgePiGPIOExpander(I2CDevice):
         Returns:
             `bool`: True if state is high, False if state is low
         '''
-        dev_address = self.dict_pin[pin_name].address
-        reg_addx = self.dict_pin[pin_name].set_code.reg_address
-        pin_mask = self.dict_pin[pin_name].set_code.op_mask
+        dev_address = self.expander_pin_dict[pin_name].address
+        reg_addx = self.expander_pin_dict[pin_name].set_code.reg_address
+        pin_mask = self.expander_pin_dict[pin_name].set_code.op_mask
 
         # read register at reg_addx
         reg_val = self.__read_register(reg_addx, dev_address)
@@ -91,10 +87,10 @@ class EdgePiGPIOExpander(I2CDevice):
         Returns:
             `bool`: True if direction is input, False if direction is output
         '''
-        dev_address = self.dict_pin[pin_name].address
+        dev_address = self.expander_pin_dict[pin_name].address
         # dir_out_code and dir_in_code have the same addx and mask, doesn't matter which
-        reg_addx = self.dict_pin[pin_name].dir_out_code.reg_address
-        pin_mask = self.dict_pin[pin_name].dir_out_code.op_mask
+        reg_addx = self.expander_pin_dict[pin_name].dir_out_code.reg_address
+        pin_mask = self.expander_pin_dict[pin_name].dir_out_code.op_mask
 
         # read register at reg_addx
         reg_val = self.__read_register(reg_addx, dev_address)
@@ -111,8 +107,8 @@ class EdgePiGPIOExpander(I2CDevice):
         Args:
             `pin_name` (str): name of the pin whose direction to set
         '''
-        dev_address = self.dict_pin[pin_name].address
-        dir_out_code = self.dict_pin[pin_name].dir_out_code
+        dev_address = self.expander_pin_dict[pin_name].address
+        dir_out_code = self.expander_pin_dict[pin_name].dir_out_code
         reg_addx = dir_out_code.reg_address
 
         # get register value of port this pin belongs to
@@ -125,7 +121,7 @@ class EdgePiGPIOExpander(I2CDevice):
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_out_code)
         _logger.debug(":set_pin_direction_out: pin '%s' set to output", pin_name)
 
-        self.dict_pin[pin_name].is_out = True
+        self.expander_pin_dict[pin_name].is_out = True
 
     def set_pin_direction_in(self, pin_name: str):
         '''
@@ -134,8 +130,8 @@ class EdgePiGPIOExpander(I2CDevice):
         Args:
             `pin_name` (str): name of the pin whose direction to set
         '''
-        dev_address = self.dict_pin[pin_name].address
-        dir_in_code = self.dict_pin[pin_name].dir_in_code
+        dev_address = self.expander_pin_dict[pin_name].address
+        dir_in_code = self.expander_pin_dict[pin_name].dir_in_code
         reg_addx = dir_in_code.reg_address
 
         # get register value of port this pin belongs to
@@ -145,7 +141,7 @@ class EdgePiGPIOExpander(I2CDevice):
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_in_code)
         _logger.debug(":set_pin_direction_in: pin '%s' set to output", pin_name)
 
-        self.dict_pin[pin_name].is_out = False
+        self.expander_pin_dict[pin_name].is_out = False
 
     def set_expander_pin(self, pin_name: str):
         '''
@@ -154,8 +150,8 @@ class EdgePiGPIOExpander(I2CDevice):
         Args:
             `pin_name` (str): name of the pin to set
         '''
-        dev_address = self.dict_pin[pin_name].address
-        set_code = self.dict_pin[pin_name].set_code
+        dev_address = self.expander_pin_dict[pin_name].address
+        set_code = self.expander_pin_dict[pin_name].set_code
         reg_addx = set_code.reg_address
 
         # get register value of port this pin belongs to
@@ -168,7 +164,7 @@ class EdgePiGPIOExpander(I2CDevice):
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, set_code)
         _logger.debug(":set_expander_pin: pin '%s' = set to high", pin_name)
 
-        self.dict_pin[pin_name].is_high = True
+        self.expander_pin_dict[pin_name].is_high = True
 
     def __apply_code_to_register(self, dev_addx: int, reg_addx: int, reg_val: int, opcode: OpCode):
         """
@@ -199,8 +195,8 @@ class EdgePiGPIOExpander(I2CDevice):
         In:
             `pin_name` (str): name of the pin to set
         '''
-        dev_address = self.dict_pin[pin_name].address
-        clear_code = self.dict_pin[pin_name].clear_code
+        dev_address = self.expander_pin_dict[pin_name].address
+        clear_code = self.expander_pin_dict[pin_name].clear_code
         reg_addx = clear_code.reg_address
 
         # get register value of port this pin belongs to
@@ -210,7 +206,7 @@ class EdgePiGPIOExpander(I2CDevice):
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, clear_code)
         _logger.debug(":set_expander_pin: pin '%s' = set to low", pin_name)
 
-        self.dict_pin[pin_name].is_high = False
+        self.expander_pin_dict[pin_name].is_high = False
 
     def toggle_expander_pin(self, pin_name: str):
         '''
@@ -222,9 +218,9 @@ class EdgePiGPIOExpander(I2CDevice):
         Args:
             `pin_name` (str): name of the pin to toggle
         '''
-        dev_address = self.dict_pin[pin_name].address
+        dev_address = self.expander_pin_dict[pin_name].address
         # set and clear codes for a pin have same reg_addx and mask
-        code = self.dict_pin[pin_name].clear_code
+        code = self.expander_pin_dict[pin_name].clear_code
         reg_addx = code.reg_address
         pin_mask = code.op_mask
 

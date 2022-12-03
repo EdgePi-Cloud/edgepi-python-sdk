@@ -13,8 +13,13 @@ from edgepi.gpio.gpio_constants import (
     GpioAPinDirOut,
     GpioBPinDirOut
 )
-from edgepi.gpio.gpio_configs import GpioConfigs, I2cPinInfo, generate_pin_info
-
+from edgepi.gpio.gpio_configs import (
+    GpioConfigs,
+    I2cPinInfo,
+    generate_pin_info,
+    generate_expander_pin_info,
+    generate_gpiochip_pin_info
+)
 
 @pytest.mark.parametrize('config, result',
                         [(GpioConfigs.DAC.value,
@@ -138,3 +143,20 @@ def test_generate_pin_info_din(config = GpioConfigs.DIN.value):
     for pin in pin_keys:
         assert pin_dict[pin].dir == 'in'
         assert pin_dict[pin].bias == 'pull_down'
+
+def test_generate_expander_pin_info():
+    pin_dict = generate_expander_pin_info()
+    result_dict = {}
+    result_dict.update(generate_pin_info(GpioConfigs.DAC.value))
+    result_dict.update(generate_pin_info(GpioConfigs.ADC.value))
+    result_dict.update(generate_pin_info(GpioConfigs.RTD.value))
+    result_dict.update(generate_pin_info(GpioConfigs.LED.value))
+    result_dict.update(generate_pin_info(GpioConfigs.DOUT2.value))
+    assert pin_dict == result_dict
+
+def test_generate_gpiochip_pin_info():
+    pin_dict = generate_gpiochip_pin_info()
+    result_dict = {}
+    result_dict.update(generate_pin_info(GpioConfigs.DIN.value))
+    result_dict.update(generate_pin_info(GpioConfigs.DOUT1.value))
+    assert pin_dict == result_dict

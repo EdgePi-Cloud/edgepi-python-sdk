@@ -19,7 +19,6 @@ from edgepi.dac.dac_constants import (
 )
 from edgepi.peripherals.spi import SpiDevice as spi
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import GpioConfigs
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
 class EdgePiDAC(spi):
@@ -48,7 +47,7 @@ class EdgePiDAC(spi):
         dac_calib_params = eeprom_data.dac_calib_parms
 
         self.dac_ops = DACCommands(dac_calib_params)
-        self.gpio = EdgePiGPIO(GpioConfigs.DAC.value)
+        self.gpio = EdgePiGPIO()
 
         self.__dac_power_state = {
             DACChannel.AOUT7.value: PowerMode.NORMAL.value,
