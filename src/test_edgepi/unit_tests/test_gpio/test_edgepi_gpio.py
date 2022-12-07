@@ -24,8 +24,8 @@ def test_edgepi_gpio_init(mocker):
     assert edgepi_gpio.gpiochip_pins_dict == gpiochip_pin_dict
 
 @pytest.mark.parametrize("pin_name, mock_value, result, error", 
-                        [(GpioPins.AO_EN1,[True, None], True, does_not_raise()),
-                         (GpioPins.DIN1,[None, True], True, does_not_raise()),
+                        [(GpioPins.AO_EN1.value,[True, None], True, does_not_raise()),
+                         (GpioPins.DIN1.value,[None, True], True, does_not_raise()),
                          (None, [None, None], None, pytest.raises(PinNameError))])
 def test_edgepi_gpio_read_pin_state(mocker, pin_name, mock_value, result, error):
     mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.read_gpio_pin_state',
@@ -38,7 +38,7 @@ def test_edgepi_gpio_read_pin_state(mocker, pin_name, mock_value, result, error)
         assert state == result
 
 @pytest.mark.parametrize("pin_name, mock_value, error", 
-                        [(GpioPins.DIN1,[None, True], does_not_raise()),
+                        [(GpioPins.DIN1.value,[None, True], does_not_raise()),
                          (None, [None, None], pytest.raises(PinNameError))])
 def test_edgepi_gpio_set_pin_state(mocker, pin_name, mock_value, error):
     mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.write_gpio_pin_state',
@@ -50,7 +50,7 @@ def test_edgepi_gpio_set_pin_state(mocker, pin_name, mock_value, error):
         edgepi_gpio.set_pin_state(pin_name)
 
 @pytest.mark.parametrize("pin_name, mock_value, error", 
-                        [(GpioPins.DIN1,[None, True], does_not_raise()),
+                        [(GpioPins.DIN1.value,[None, True], does_not_raise()),
                          (None, [None, None], pytest.raises(PinNameError))])
 def test_edgepi_gpio_clear_pin_state(mocker, pin_name, mock_value, error):
     mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.write_gpio_pin_state',
