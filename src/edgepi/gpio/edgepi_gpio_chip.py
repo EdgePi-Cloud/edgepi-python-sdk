@@ -47,3 +47,18 @@ class EdgePiGPIOChip(GpioDevice):
         state = self.read_state()
         self.close()
         return state
+
+    def write_gpio_pin_state(self, pin_name: str = None, state: bool = None):
+        """
+        write pin state
+        Args:
+            pin_name (str): name of the pin to write state to
+            state (bool): state to write, True = High, False = Low
+        Return:
+            state (bool): state of the pin
+        """
+        self.open_gpio(pin_num=self.__pin_name_dict[pin_name],
+                         pin_dir=self.gpiochip_pins_dict[pin_name].dir,
+                         pin_bias=self.gpiochip_pins_dict[pin_name].bias)
+        self.write_state(state)
+        self.close()
