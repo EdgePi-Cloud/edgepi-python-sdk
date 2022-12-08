@@ -59,7 +59,7 @@ class EdgePiLED:
             `led_name` (LEDPins): name of LED to toggle
         """
         self.__validate_led_name(led_name)
-        self.gpio_ops.toggle_expander_pin(led_name.value)
+        self.gpio_ops.toggle_pin(led_name.value)
         self.log.info(f"LED with name {led_name.value} has been toggled to opposite state")
 
     def get_led_state(self, led_name: LEDPins) -> bool:

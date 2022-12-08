@@ -120,3 +120,18 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
             self.set_expander_pin_direction_out(pin_name)
         if pin_name in self.gpiochip_pins_dict:
             self.set_gpio_pin_dir(pin_name, False)
+
+    def toggle_pin(self, pin_name: str = None):
+        """
+        Toggle GPIO pin
+        Args:
+            pin_name (str): name of the pin
+        Return:
+            N/A
+        """
+        if pin_name is None:
+            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        if pin_name in self.expander_pin_dict:
+            self.toggle_expander_pin(pin_name)
+        if pin_name in self.gpiochip_pins_dict:
+            self.toggle_gpio_pin_state(pin_name, False)

@@ -110,7 +110,7 @@ def test_set_pin_state(pin_name):
 def test_toggle_expander_pin(pin_name):
     gpio = EdgePiGPIO()
     pin_val_1 = gpio.read_pin_state(pin_name)
-    gpio.toggle_expander_pin(pin_name)
+    gpio.toggle_pin(pin_name)
     pin_val_2 = gpio.read_pin_state(pin_name)
     assert pin_val_2 is not pin_val_1
 
