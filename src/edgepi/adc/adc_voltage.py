@@ -52,16 +52,19 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     return v_in * step_up_ratio * gain - offset
 
 
-def code_to_voltage(code: list, adc_info: ADCReadInfo, calibs: CalibParam):
+def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
     """
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
     Args:
-        `code` (BitArray): bitstring representation of digital code retrieved from ADC voltage read
+        `code` (list[int]): code bytes retrieved from ADC voltage read
 
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
 
         `calibs` (CalibParam): voltage reading gain and offset calibration values
+
+    Returns:
+        `float`: voltage value (V) corresponding to `code`
     """
     code_bits = bitstring_from_list(code)
     num_bits = adc_info.num_data_bytes * 8
@@ -75,6 +78,38 @@ def code_to_voltage(code: list, adc_info: ADCReadInfo, calibs: CalibParam):
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
+
+
+def code_to_temperature(
+    code: list[int],
+    ref_resistance: float,
+    rtd_sensor_resistance: float,
+    rtd_sensor_resistance_variation: float
+    ) -> float:
+    """
+    Converts ADC voltage read digital code to temperature. Intended for use in RTD sampling.
+
+    Args:
+        `code` (list[int]): code bytes retrieved from ADC voltage read
+
+       `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
+
+       `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
+
+       `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
+
+    Returns:
+        `float`: temperature value (°C) corresponding to `code`
+    """
+    code_bits = bitstring_from_list(code)
+
+    # refer to https://github.com/osensa/edgepi-python-sdk/issues/159 for computation details
+    r_rtd = code_bits.uint / (2 ** 30) * ref_resistance
+
+    temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
+    _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")
+
+    return temperature
 
 
 class CRCCheckError(Exception):

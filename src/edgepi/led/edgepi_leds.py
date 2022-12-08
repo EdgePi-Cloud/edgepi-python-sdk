@@ -4,7 +4,7 @@
 import logging
 
 
-from edgepi.gpio.gpio_configs import LEDPins, GpioConfigs
+from edgepi.gpio.gpio_configs import LEDPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 
@@ -18,7 +18,7 @@ class EdgePiLED:
     """Interact with the EdgePi LED Array"""
 
     def __init__(self):
-        self.gpio_ops = EdgePiGPIO(GpioConfigs.LED.value)
+        self.gpio_ops = EdgePiGPIO()
         self.log = logging.getLogger(__name__)
 
     @staticmethod
@@ -37,7 +37,7 @@ class EdgePiLED:
             `led_name` (LEDPins): name of LED to turn on
         """
         self.__validate_led_name(led_name)
-        self.gpio_ops.set_expander_pin(led_name.value)
+        self.gpio_ops.set_pin_state(led_name.value)
         self.log.info(f"LED with name {led_name.value} has been turned on")
 
     def turn_led_off(self, led_name: LEDPins):
@@ -48,7 +48,7 @@ class EdgePiLED:
             `led_name` (LEDPins): name of LED to turn off
         """
         self.__validate_led_name(led_name)
-        self.gpio_ops.clear_expander_pin(led_name.value)
+        self.gpio_ops.clear_pin_state(led_name.value)
         self.log.info(f"LED with name {led_name.value} has been turned off")
 
     def toggle_led(self, led_name: LEDPins):
@@ -59,7 +59,7 @@ class EdgePiLED:
             `led_name` (LEDPins): name of LED to toggle
         """
         self.__validate_led_name(led_name)
-        self.gpio_ops.toggle_expander_pin(led_name.value)
+        self.gpio_ops.toggle_pin(led_name.value)
         self.log.info(f"LED with name {led_name.value} has been toggled to opposite state")
 
     def get_led_state(self, led_name: LEDPins) -> bool:
@@ -73,7 +73,7 @@ class EdgePiLED:
             `bool`: True if LED is on, False if LED is off
         """
         self.__validate_led_name(led_name)
-        state = self.gpio_ops.read_expander_pin(led_name.value)
+        state = self.gpio_ops.read_pin_state(led_name.value)
         msg = "ON" if state else "OFF"
         self.log.info(f"LED with name {led_name.value} is currently {msg}")
         return state

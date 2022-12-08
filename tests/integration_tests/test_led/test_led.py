@@ -2,7 +2,7 @@
 
 import pytest
 
-from edgepi.gpio.gpio_configs import LEDPins, GpioConfigs
+from edgepi.gpio.gpio_configs import LEDPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.led.edgepi_leds import EdgePiLED
 
@@ -12,7 +12,7 @@ def fixture_led():
 
 @pytest.fixture(name='gpio')
 def fixture_gpio():
-    return EdgePiGPIO(GpioConfigs.LED.value)
+    return EdgePiGPIO()
 
 @pytest.mark.parametrize('led_name', [
     (LEDPins.LED_OVR1),
@@ -26,7 +26,7 @@ def fixture_gpio():
 ])
 def test_turn_led_on(led_name, led, gpio):
     led.turn_led_on(led_name)
-    state = gpio.read_expander_pin(led_name.value)
+    state = gpio.read_pin_sate(led_name.value)
     assert state is True
 
 
@@ -42,7 +42,7 @@ def test_turn_led_on(led_name, led, gpio):
 ])
 def test_turn_led_off(led_name, led, gpio):
     led.turn_led_off(led_name)
-    state = gpio.read_expander_pin(led_name.value)
+    state = gpio.read_pin_sate(led_name.value)
     assert state is False
 
 
