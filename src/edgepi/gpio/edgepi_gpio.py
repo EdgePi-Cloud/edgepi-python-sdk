@@ -58,7 +58,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
             self.set_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
             self.write_gpio_pin_state(pin_name, True)
-    
+
     def clear_pin_state(self, pin_name: str = None):
         """
         Clearcorresponding pin state to high
@@ -73,7 +73,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
             self.clear_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
             self.write_gpio_pin_state(pin_name, False)
-    
+
     def get_pin_direction(self, pin_name: str = None):
         """
         Get GPIO pin direction
@@ -87,8 +87,10 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         if pin_name in self.expander_pin_dict:
             return self.get_expander_pin_direction(pin_name)
         if pin_name in self.gpiochip_pins_dict:
-            return True if self.gpiochip_pins_dict[pin_name].dir == "in" else False
-    
+            return bool(self.gpiochip_pins_dict[pin_name].dir == "in")
+
+        raise PinNameError(f'The following pin name: {pin_name} is not found')
+
     def set_pin_direction_in(self, pin_name: str = None):
         """
         Set GPIO pin direction to input

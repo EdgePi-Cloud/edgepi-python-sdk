@@ -63,15 +63,15 @@ class EdgePiGPIOChip(GpioDevice):
         read_back = self.read_state()
         self.close()
         return read_back
-    
-    def set_gpio_pin_dir(self, pin_name: str = None, dir: bool = None):
+
+    def set_gpio_pin_dir(self, pin_name: str = None, direction: bool = None):
         """
         Set gpio pin direction
         Args:
             pin_name (str): name of the pin
-            dir (bool): direction to write, True = Input, False = Output
+            direction (bool): direction to write, True = Input, False = Output
         """
         self.open_gpio(pin_num=self.__pin_name_dict[pin_name],
-                       pin_dir="in" if dir else "out",
+                       pin_dir="in" if direction else "out",
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias)
         self.close()

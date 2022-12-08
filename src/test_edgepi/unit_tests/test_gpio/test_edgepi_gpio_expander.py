@@ -116,7 +116,8 @@ def test_set_expander_pin(mocker, pin_name, mock_value, mock_i2c):
     mocker.patch(
         "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander._EdgePiGPIOExpander__read_register",
         return_value = mock_value)
-    set_pin_dir = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_expander_pin_direction_out")
+    set_pin_dir = mocker.patch(
+                        "edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_expander_pin_direction_out")
     gpio_ctrl = EdgePiGPIOExpander()
     prev_pin_config = deepcopy(gpio_ctrl.expander_pin_dict[pin_name])
     gpio_ctrl.set_expander_pin(pin_name)
