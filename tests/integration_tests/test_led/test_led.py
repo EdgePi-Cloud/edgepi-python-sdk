@@ -26,7 +26,7 @@ def fixture_gpio():
 ])
 def test_turn_led_on(led_name, led, gpio):
     led.turn_led_on(led_name)
-    state = gpio.read_pin_sate(led_name.value)
+    state = gpio.read_pin_state(led_name.value)
     assert state is True
 
 
@@ -42,7 +42,7 @@ def test_turn_led_on(led_name, led, gpio):
 ])
 def test_turn_led_off(led_name, led, gpio):
     led.turn_led_off(led_name)
-    state = gpio.read_pin_sate(led_name.value)
+    state = gpio.read_pin_state(led_name.value)
     assert state is False
 
 
