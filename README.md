@@ -90,3 +90,15 @@ To view html report:
 1. Change directory inside report folder: `cd <path-to-report>`
 2. Start a simple python webserver on edgepi: `python3 -m http.server`
 3. In machine with browser, navigate to `http://<edgepi-address>:8000/`
+---
+## Configure Self-hosted GitHub Actions Test Runner
+The integration tests can be run as part of GitHub Actions workflows, but this requires setting up an EdgePi unit as a self-hosted test runner.
+To do so, follow the steps below (as of Dec 2022):
+1. Visit https://github.com/osensa/edgepi-python-sdk/settings/actions/runners/
+2. Select `New self-hosted runner`
+3. Choose OS and architecture -> `Linux` -> `ARM64`
+4. Follow all steps under `Download`
+5. Run `./config.sh --url https://github.com/osensa/edgepi-python-sdk --token ASOUQD4NPYCC6WLFDXIMRNTDSI7BO`
+6. Run the actions runner as a service: https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service
+    * `sudo ./svc.sh install`
+    * `sudo ./svc.sh start`
