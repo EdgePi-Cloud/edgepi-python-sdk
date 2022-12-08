@@ -134,4 +134,4 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         if pin_name in self.expander_pin_dict:
             self.toggle_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
-            self.toggle_gpio_pin_state(pin_name, False)
+            self.toggle_gpio_pin_state(pin_name)

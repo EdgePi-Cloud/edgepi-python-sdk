@@ -88,5 +88,8 @@ class EdgePiGPIOChip(GpioDevice):
                        pin_dir=self.gpiochip_pins_dict[pin_name].dir,
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias)
         state = self.read_state()
-        self.write_state(False) if state else self.write_state(True)
+        if state:
+            self.write_state(False)
+        else:
+            self.write_state(True)
         self.close()

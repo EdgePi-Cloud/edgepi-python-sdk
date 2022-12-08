@@ -327,7 +327,6 @@ def _generate_DIN_pins(): #pylint: disable=C0103
         pin_dict[pin] = GpioChipPinInfo(dir = "in", bias = "pull_down")
     return pin_dict
 
-#TODO: Doubl check pinouts
 def _generate_DOUT_cpu_pins(): #pylint: disable=C0103
     """
         Args:
@@ -360,7 +359,7 @@ def _generate_DOUT_expander_pins(): #pylint: disable=C0103
     return pin_dict
 
 
-# TODO: outdated config based generate pins, to be deleted when refactor completes
+# This function is used inside unit testing
 def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
     ''' Generates a dictionary of pin info dataclasses
         Args:
