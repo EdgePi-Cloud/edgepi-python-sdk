@@ -628,13 +628,13 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
 def test_set_adc_reference(reference_config, pin_name, adc):
     adc.set_adc_reference(reference_config)
     if reference_config in [1, 2]:
-        adc.gpio.set_expander_pin.assert_called_with(pin_name[0])
-        adc.gpio.clear_expander_pin.assert_called_with(pin_name[1])
+        adc.gpio.set_pin_state.assert_called_with(pin_name[0])
+        adc.gpio.clear_pin_state.assert_called_with(pin_name[1])
     elif reference_config == 3:
-        adc.gpio.set_expander_pin.assert_has_calls([mock.call(pin_name[0]),
+        adc.gpio.set_pin_state.assert_has_calls([mock.call(pin_name[0]),
                                                     mock.call(pin_name[1])])
     elif reference_config == 0:
-        adc.gpio.clear_expander_pin.assert_has_calls([mock.call(pin_name[0]),
+        adc.gpio.clear_pin_state.assert_has_calls([mock.call(pin_name[0]),
                                                       mock.call(pin_name[1])])
 
 

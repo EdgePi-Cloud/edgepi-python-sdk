@@ -77,7 +77,7 @@ class EdgePiGPIOExpander(I2CDevice):
 
         return pin_state
 
-    def get_pin_direction(self, pin_name: str) -> bool:
+    def get_expander_pin_direction(self, pin_name: str) -> bool:
         '''
         Get the current direction of a GPIO expander pin (low or high).
 
@@ -95,11 +95,11 @@ class EdgePiGPIOExpander(I2CDevice):
         # read register at reg_addx
         reg_val = self.__read_register(reg_addx, dev_address)
         pin_state = is_bit_set(reg_val, pin_mask)
-        _logger.debug(":get_pin_direction: pin '%s' = '%s'", pin_name,  pin_state)
+        _logger.debug(":get_expander_pin_direction: pin '%s' = '%s'", pin_name,  pin_state)
 
         return pin_state
 
-    def set_pin_direction_out(self, pin_name: str):
+    def set_expander_pin_direction_out(self, pin_name: str):
         '''
         Set the direction of a GPIO expander pin to output. Note this will
         set pin to low before setting to output for safety reasons.
@@ -119,11 +119,11 @@ class EdgePiGPIOExpander(I2CDevice):
 
         # set pin direction to out
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_out_code)
-        _logger.debug(":set_pin_direction_out: pin '%s' set to output", pin_name)
+        _logger.debug(":set_expander_pin_direction_out: pin '%s' set to output", pin_name)
 
         self.expander_pin_dict[pin_name].is_out = True
 
-    def set_pin_direction_in(self, pin_name: str):
+    def set_expander_pin_direction_in(self, pin_name: str):
         '''
         Set the direction of a GPIO expander pin to high impedance input.
 
@@ -139,7 +139,7 @@ class EdgePiGPIOExpander(I2CDevice):
 
         # set pin direction to input
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_in_code)
-        _logger.debug(":set_pin_direction_in: pin '%s' set to output", pin_name)
+        _logger.debug(":set_expander_pin_direction_in: pin '%s' set to output", pin_name)
 
         self.expander_pin_dict[pin_name].is_out = False
 
@@ -158,7 +158,7 @@ class EdgePiGPIOExpander(I2CDevice):
         reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin direction to output (also sets to low)
-        self.set_pin_direction_out(pin_name)
+        self.set_expander_pin_direction_out(pin_name)
 
         # set pin state to high
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, set_code)

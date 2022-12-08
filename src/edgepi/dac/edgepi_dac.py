@@ -64,9 +64,9 @@ class EdgePiDAC(spi):
         ao_pin = self.__analog_out_pin_map[analog_out].value
 
         if voltage > 0:
-            self.gpio.set_expander_pin(ao_pin)
+            self.gpio.set_pin_state(ao_pin)
         elif voltage == 0:
-            self.gpio.clear_expander_pin(ao_pin)
+            self.gpio.clear_pin_state(ao_pin)
         else:
             raise ValueError("voltage cannot be negative")
 
@@ -91,7 +91,7 @@ class EdgePiDAC(spi):
         self.log.debug(f'Code: {code}')
 
         if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out.value].value):
-            self.gpio.clear_expander_pin(self.__analog_out_pin_map[analog_out.value].value)
+            self.gpio.clear_pin_state(self.__analog_out_pin_map[analog_out.value].value)
             self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out.value].value)
 
         # update DAC register
@@ -176,8 +176,8 @@ class EdgePiDAC(spi):
             gain_state (bool): state of the gain pin
         """
         # pylint: disable=expression-not-assigned
-        self.gpio.set_expander_pin(GainPin.DAC_GAIN.value) if enable else \
-        self.gpio.clear_expander_pin(GainPin.DAC_GAIN.value)
+        self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if enable else \
+        self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
         return self.__get_gain_state()
 
     def __get_gain_state(self):

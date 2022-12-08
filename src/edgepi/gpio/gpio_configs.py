@@ -140,21 +140,21 @@ class GpioChipPinInfo:
 
 class DACPins(Enum):
     "DAC GPIO Pin Names"
-    A0_EN1 = 'AO_EN1'
-    A0_EN2 = 'AO_EN2'
-    A0_EN3 = 'AO_EN3'
-    A0_EN4 = 'AO_EN4'
-    A0_EN5 = 'AO_EN5'
-    A0_EN6 = 'AO_EN6'
-    A0_EN7 = 'AO_EN7'
-    A0_EN8 = 'AO_EN8'
+    AO_EN1 = 'AO_EN1'
+    AO_EN2 = 'AO_EN2'
+    AO_EN3 = 'AO_EN3'
+    AO_EN4 = 'AO_EN4'
+    AO_EN5 = 'AO_EN5'
+    AO_EN6 = 'AO_EN6'
+    AO_EN7 = 'AO_EN7'
+    AO_EN8 = 'AO_EN8'
     DAC_GAIN = 'DAC_GAIN'
 
 
 _list_of_DAC_gpios = [
-    DACPins.A0_EN8.value, DACPins.A0_EN7.value, DACPins.A0_EN6.value,
-    DACPins.A0_EN5.value, DACPins.A0_EN2.value, DACPins.A0_EN3.value,
-    DACPins.A0_EN4.value, DACPins.A0_EN1.value, DACPins.DAC_GAIN.value,
+    DACPins.AO_EN8.value, DACPins.AO_EN7.value, DACPins.AO_EN6.value,
+    DACPins.AO_EN5.value, DACPins.AO_EN2.value, DACPins.AO_EN3.value,
+    DACPins.AO_EN4.value, DACPins.AO_EN1.value, DACPins.DAC_GAIN.value,
     ]
 
 
@@ -327,7 +327,6 @@ def _generate_DIN_pins(): #pylint: disable=C0103
         pin_dict[pin] = GpioChipPinInfo(dir = "in", bias = "pull_down")
     return pin_dict
 
-#TODO: Doubl check pinouts
 def _generate_DOUT_cpu_pins(): #pylint: disable=C0103
     """
         Args:
@@ -360,7 +359,7 @@ def _generate_DOUT_expander_pins(): #pylint: disable=C0103
     return pin_dict
 
 
-# TODO: outdated config based generate pins, to be deleted when refactor completes
+# This function is used inside unit testing
 def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
     ''' Generates a dictionary of pin info dataclasses
         Args:
