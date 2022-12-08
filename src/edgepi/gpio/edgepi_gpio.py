@@ -9,11 +9,12 @@ from edgepi.gpio.edgepi_gpio_chip import EdgePiGPIOChip
 
 _logger = logging.getLogger(__name__)
 
-class PinNameError(Exception):
-    """Raised when
-        1. pin name doesn't exists
-        2. pin name not passeds
-    """
+class PinNameNoneError(Exception):
+    """Raised when None is passed"""
+
+class PinNameNotFound(Exception):
+    """"Raised when name doesn't exist"""
+
 
 class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
     '''
@@ -26,6 +27,12 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         EdgePiGPIOExpander.__init__(self)
         EdgePiGPIOChip.__init__(self)
 
+    def __pin_name_check(self, pin_name: str = None):
+        if pin_name is None:
+            raise PinNameNoneError(f'Missing Pin name: {pin_name}')
+        if pin_name not in self.expander_pin_dict and pin_name not in self.gpiochip_pins_dict:
+            raise PinNameNotFound(f'The following pin name: {pin_name} is not found')
+
     def read_pin_state(self, pin_name: str = None):
         """
         Read corresponding pin state
@@ -34,14 +41,13 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         return
             state (bool): True/False depending on High/Low
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        state = None
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
-            return self.read_expander_pin(pin_name)
+            state = self.read_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
-            return self.read_gpio_pin_state(pin_name)
-
-        raise PinNameError(f'The following pin name: {pin_name} is not found')
+            state = self.read_gpio_pin_state(pin_name)
+        return state
 
 
     def set_pin_state(self, pin_name: str = None):
@@ -52,8 +58,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         return:
             N/A
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
             self.set_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
@@ -67,8 +72,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         return:
             N/A
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
             self.clear_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
@@ -82,14 +86,13 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         Return:
             direction (bool): True if direction is input, False if direction is output
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        direction = None
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
-            return self.get_expander_pin_direction(pin_name)
+            direction = self.get_expander_pin_direction(pin_name)
         if pin_name in self.gpiochip_pins_dict:
-            return bool(self.gpiochip_pins_dict[pin_name].dir == "in")
-
-        raise PinNameError(f'The following pin name: {pin_name} is not found')
+            direction = bool(self.gpiochip_pins_dict[pin_name].dir == "in")
+        return direction
 
     def set_pin_direction_in(self, pin_name: str = None):
         """
@@ -99,8 +102,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         Return:
             N/A
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
             self.set_expander_pin_direction_in(pin_name)
         if pin_name in self.gpiochip_pins_dict:
@@ -114,8 +116,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         Return:
             N/A
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
             self.set_expander_pin_direction_out(pin_name)
         if pin_name in self.gpiochip_pins_dict:
@@ -129,8 +130,7 @@ class EdgePiGPIO(EdgePiGPIOExpander, EdgePiGPIOChip):
         Return:
             N/A
         """
-        if pin_name is None:
-            raise PinNameError(f'The following pin name: {pin_name} is not found')
+        self.__pin_name_check(pin_name)
         if pin_name in self.expander_pin_dict:
             self.toggle_expander_pin(pin_name)
         if pin_name in self.gpiochip_pins_dict:
