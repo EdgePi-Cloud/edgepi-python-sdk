@@ -19,7 +19,7 @@ from edgepi.dac.dac_constants import (
     EdgePiDacCom as COM,
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
-from edgepi.calibration.eeprom_constants import EdgePiEEPROMData
+from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
 
 dummy_calib_param_dict = {0:CalibParam(gain=1,offset=0),

@@ -6,8 +6,9 @@ import math
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    MessageFieldNumber,
-    EdgePiEEPROMData)
+    MessageFieldNumber
+    )
+from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
@@ -98,16 +99,7 @@ class EdgePiEEPROM(I2CDevice):
         """
         # pylint: disable=no-member
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
-        eeprom_data = EdgePiEEPROMData()
-        eeprom_data.dac_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.dac)
-        eeprom_data.adc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.adc)
-        eeprom_data.rtd_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.rtd)
-        eeprom_data.tc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.tc)
-        eeprom_data.config_key=eeprom_data.keys_to_str(self.eeprom_layout.config_key)
-        eeprom_data.data_key=eeprom_data.keys_to_str(self.eeprom_layout.data_key)
-        eeprom_data.serial= self.eeprom_layout.serial_number
-        eeprom_data.model= self.eeprom_layout.model
-        eeprom_data.client_id= self.eeprom_layout.client_id
+        eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
