@@ -73,7 +73,7 @@ EDGEPI-PYTHON-SDK
 ## EdgePi-Python-SDK Modules
 This SDK contains modules intended to represent each connected peripheral device on the EdgePi. Below is a directory of the available modules.
 * [Thermocouple](src/edgepi/tc)
-* [Digital to Analogue Converter](src/edgepi/dac)
+* [Digital to Analog Converter](src/edgepi/dac)
 * [Analog to Digital Converter](src/edgepi/adc)
 ---
 ## Run Integration/Hardware Tests
