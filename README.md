@@ -98,7 +98,7 @@ To do so, follow the steps below (as of Dec 2022):
 2. Select `New self-hosted runner`
 3. Choose OS and architecture -> `Linux` -> `ARM64`
 4. Follow all steps under `Download`
-5. Run `./config.sh --url https://github.com/osensa/edgepi-python-sdk --token ASOUQD4NPYCC6WLFDXIMRNTDSI7BO`
+5. Run `./config.sh --url https://github.com/osensa/edgepi-python-sdk --token <token>`
 6. Run the actions runner as a service: https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service
     * `sudo ./svc.sh install`
     * `sudo ./svc.sh start`
