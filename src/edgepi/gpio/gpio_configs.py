@@ -232,9 +232,9 @@ _list_of_DOUT_cpu_gpios =  [
 ]
 
 _list_of_DOUT_expander_gpios =[
-    DOUTPins.DOUT3.value, DOUTPins.DOUT4.value,
-    DOUTPins.DOUT5.value, DOUTPins.DOUT6.value,
-    DOUTPins.DOUT7.value, DOUTPins.DOUT8.value]
+    DOUTPins.DOUT8.value, DOUTPins.DOUT7.value,
+    DOUTPins.DOUT6.value, DOUTPins.DOUT5.value,
+    DOUTPins.DOUT4.value, DOUTPins.DOUT3.value]
 
 
 def _generate_DAC_pins(): #pylint: disable=C0103
@@ -339,7 +339,6 @@ def _generate_DOUT_cpu_pins(): #pylint: disable=C0103
         pin_dict[pin] = GpioChipPinInfo(dir = "out", bias = "pull_down")
     return pin_dict
 
-#TODO: Doubl check pinouts
 def _generate_DOUT_expander_pins(): #pylint: disable=C0103
     """
         Args:
