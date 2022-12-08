@@ -351,17 +351,17 @@ class EdgePiADC(SPI):
             reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
         """
         if reference_config == ADCReferenceSwitching.GND_SW1.value:
-            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
-            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
         elif reference_config == ADCReferenceSwitching.GND_SW2.value:
-            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
-            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
         elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
-            self.gpio.set_expander_pin(ADCPins.GNDSW_IN1.value)
-            self.gpio.set_expander_pin(ADCPins.GNDSW_IN2.value)
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
         elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
-            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN1.value)
-            self.gpio.clear_expander_pin(ADCPins.GNDSW_IN2.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
 
     def stop_conversions(self, adc_num: ADCNum):
         """
