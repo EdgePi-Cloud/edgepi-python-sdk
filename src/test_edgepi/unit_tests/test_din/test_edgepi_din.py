@@ -20,7 +20,20 @@ def fixture_test_dac(mocker):
 @pytest.mark.parametrize("pin_name, mock_value, result",
                         [(GpioPins.DIN1, True, True),
                          (GpioPins.DIN2, True, True),
-                         (GpioPins.DIN3, True, True)])
+                         (GpioPins.DIN3, True, True),
+                         (GpioPins.DIN4, True, True),
+                         (GpioPins.DIN5, True, True),
+                         (GpioPins.DIN6, True, True),
+                         (GpioPins.DIN7, True, True),
+                         (GpioPins.DIN8, True, True),
+                         (GpioPins.DIN1, False, False),
+                         (GpioPins.DIN2, False, False),
+                         (GpioPins.DIN3, False, False),
+                         (GpioPins.DIN4, False, False),
+                         (GpioPins.DIN5, False, False),
+                         (GpioPins.DIN6, False, False),
+                         (GpioPins.DIN7, False, False),
+                         (GpioPins.DIN8, False, False)])
 def test_edgepi_digital_input_state(mocker, pin_name, mock_value, result, din):
     mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.read_gpio_pin_state",
                  return_value = mock_value)
