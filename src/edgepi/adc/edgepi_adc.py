@@ -513,7 +513,7 @@ class EdgePiADC(SPI):
 
         time.sleep(delay / 1000)
 
-    def __check_adc_1_conv_mode(self):
+    def __check_adc_1_conv_mode(self, adc_num):
         # assert adc is in continuous mode
         state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
@@ -533,7 +533,8 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from the indicated ADC
         """
-        self.__check_adc_1_conv_mode()
+        if adc_num == ADCNum.ADC_1:
+            self.__check_adc_1_conv_mode(adc_num)
 
         self.__continuous_time_delay(adc_num)
 
