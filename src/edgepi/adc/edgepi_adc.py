@@ -987,6 +987,9 @@ class EdgePiADC(SPI):
         """
         Read the current hardware state of configurable ADC properties
 
+        Args:
+            `override_cache` (bool): force SPI read to get hardware state
+
         Returns:
             ADCState: information about the current ADC hardware state
         """
