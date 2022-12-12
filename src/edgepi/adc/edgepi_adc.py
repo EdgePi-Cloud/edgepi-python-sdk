@@ -983,12 +983,15 @@ class EdgePiADC(SPI):
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
 
-    def get_state(self) -> ADCState:
+    def get_state(self, override_cache: bool = False) -> ADCState:
         """
         Read the current hardware state of configurable ADC properties
+
+        Args:
+            `override_cache` (bool): force SPI read to get hardware state
 
         Returns:
             ADCState: information about the current ADC hardware state
         """
-        reg_values = self.__get_register_map()
+        reg_values = self.__get_register_map(override_cache)
         return ADCState(reg_values)
