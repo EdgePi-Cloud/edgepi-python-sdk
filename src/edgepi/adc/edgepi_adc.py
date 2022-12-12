@@ -534,7 +534,7 @@ class EdgePiADC(SPI):
             `float`: input voltage (V) read from the indicated ADC
         """
         if adc_num == ADCNum.ADC_1:
-            self.__check_adc_1_conv_mode(adc_num)
+            self.__check_adc_1_conv_mode()
 
         self.__continuous_time_delay(adc_num)
 
