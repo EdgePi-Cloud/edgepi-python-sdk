@@ -32,7 +32,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.adc.edgepi_adc import ADCState,  ContinuousModeError
+from edgepi.adc.edgepi_adc import ADCState
 
 adc_default_vals = [
     0,
