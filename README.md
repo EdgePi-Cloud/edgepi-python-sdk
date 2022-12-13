@@ -11,7 +11,7 @@ Use our user-friendly Python SDK to control the EdgePi hardware with just a few 
 ![Image](https://user-images.githubusercontent.com/3793563/207419171-c6d4ad94-edca-4daa-ad78-689c16ade4a7.png)
 # How to Use EdgePi SDK
 ## How to Install
-The latest stable release of the EdgePi SDK will be available for download via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
+The latest stable release of the EdgePi SDK will be available to be installed via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
 
 ```
 $ python3 -m pip install EdgePi-Python-SDK
