@@ -64,8 +64,6 @@ To install the SDK via HTTPS from GitHub:
 ```
 $ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
 ```
-## Dev Environment
- 
 
 # Packaging
 To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
