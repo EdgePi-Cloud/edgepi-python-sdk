@@ -2,8 +2,8 @@
 
 EdgePi is a DIN rail-mounted, Raspberry Pi 4 industrial PC with the features of a Programmable Logic Controller (PLC), and Internet of Things (IoT) cloud edge device. Visit [edgepi.com](https://www.edgepi.com) for more information.
 
-![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-unit-test.yml/badge.svg)
-![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-lint.yml/badge.svg)
+![](https://github.com/EdgePi-Cloud/edgepi-python-sdk/actions/workflows/python-unit-test.yml/badge.svg)
+![](https://github.com/EdgePi-Cloud/edgepi-python-sdk/actions/workflows/python-lint.yml/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/blob/main/LICENSE)
 ---
 # EdgePi SDK
@@ -62,7 +62,7 @@ Please refer to [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/) for
 ## Installing from GitHub
 To install the SDK via HTTPS from GitHub:
 ```
-$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
+$ python3 -m pip install git+https://github.com/EdgePi-Cloud/edgepi-python-sdk.git@<branch-name>
 ```
 
 # Packaging
@@ -174,11 +174,11 @@ $ python3 -m http.server
 ### Configure Self-hosted GitHub Actions Test Runner
 The integration tests can be run as part of GitHub Actions workflows, but this requires setting up an EdgePi unit as a self-hosted test runner.
 To do so, follow the steps below (working as of Dec 2022):
-1. Visit https://github.com/osensa/edgepi-python-sdk/settings/actions/runners/
+1. Visit https://github.com/EdgePi-Cloud/edgepi-python-sdk/settings/actions/runners/
 2. Select `New self-hosted runner`
 3. Choose OS and architecture -> `Linux` -> `ARM64`
 4. Follow all steps under `Download`
-5. Run `$ ./config.sh --url https://github.com/osensa/edgepi-python-sdk --token <token>`
+5. Run `$ ./config.sh --url https://github.com/EdgePi-Cloud/edgepi-python-sdk --token <token>`
     * `<token>` here denotes your personal GitHub access token
 6. Run the actions runner [as a service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service):
 ```
