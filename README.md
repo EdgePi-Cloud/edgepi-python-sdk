@@ -48,7 +48,7 @@ The EdgePi SDK contains modules intended to represent each connected peripheral 
 * [Analog to Digital Converter (ADC)](src/edgepi/adc)
 * [LED Array](src/edgepi/led)
 # Development
-Active development SDK versions active can be accessed from the following resources:
+Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi
 To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/):
 ```
