@@ -123,12 +123,12 @@ To view the HTML report:
 ```
 $ cd <path-to-report>
 ```
-3. Start a simple python webserver on edgepi:
+2. Start a simple python webserver on edgepi:
 ```
 $ python3 -m http.server
 ```
-5. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
-6. The HTML test report folder should be visible.
+3. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
+4. The HTML test report folder should be visible.
 
 ## SDK packaging
 
