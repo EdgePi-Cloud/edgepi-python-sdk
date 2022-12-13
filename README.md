@@ -116,9 +116,7 @@ $ python3 -m pytest ./tests/<test_path> --html=<path-to-report> --log-level=INFO
 ```
 $ python3 -m pytest ../tests/<test_path> --html=<path-to-report> --log-level=INFO
 ```
-`<test_path>` can be left blank to run all integration and hardware tests, or set to a filepath to run a specific test module under `tests/`
-A folder containing the html test report will be added at `<path-to-report>`. An example path is: `./tests/reports/report.html`
-Include the `--log-level=INFO` tag to add logs with helpful test details in report (recommended).
+The `<test_path>` can be left blank to run all integration and hardware tests, or set to a filepath to run a specific test module under `tests/`. A folder containing the HTML test report will be added at `<path-to-report>`. An example path is: `./tests/reports/report.html`. Include the `--log-level=INFO` tag to add logs with helpful test details in report (recommended).
 
 To view the HTML report:
 1. Change directory to report folder:
