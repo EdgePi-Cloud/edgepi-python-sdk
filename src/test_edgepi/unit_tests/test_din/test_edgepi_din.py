@@ -10,12 +10,12 @@ if sys.platform != 'linux':
 from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.din.edgepi_din import EdgePiDIN, InvalidPinName
+from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput, InvalidPinName
 
 @pytest.fixture(name="din")
 def fixture_test_dac(mocker):
     mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO')
-    yield EdgePiDIN()
+    yield EdgePiDigitalInput()
 
 @pytest.mark.parametrize("pin_name, mock_value, result, error",
                         [(GpioPins.DIN1, True, True, does_not_raise()),
