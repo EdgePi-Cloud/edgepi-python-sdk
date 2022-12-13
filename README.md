@@ -187,3 +187,13 @@ To do so, follow the steps below (working as of Dec 2022):
 $ sudo ./svc.sh install
 $ sudo ./svc.sh start
 ```
+# Bug Reports / Feature Requests
+Use [GitHub Issues Page](https://github.com/EdgePi-Cloud/edgepi-python-sdk/issues) to report any issues or feature requests.
+
+# Get involved
+Follow [@edgepi_cloud on Twitter](https://twitter.com/edgepi_cloud/).
+Read and subscribe to the [EdgePi blog](https://www.edgepi.com/blog).
+If you have a specific question, please check out our [discussion forums](https://www.edgepi.com/forums).
+
+# License
+EdgePi SDK is distributed under [MIT License](https://github.com/EdgePi-Cloud/edgepi-python-sdk/blob/main/LICENSE). 
