@@ -16,7 +16,7 @@ The latest stable release of the EdgePi SDK will be available for download via T
 ```
 $ python3 -m pip install EdgePi-Python-SDK
 ```
-## Sample Code
+## Example Code
 The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
 
 ```
@@ -40,7 +40,7 @@ for _ in range(10):
 # stop continuous conversions
 edgepi_adc.stop_conversions(ADCNum.ADC_1)
 ```
-For more sample code, please refer to each module's documentation by following the links provided in the 'Implemented Modules' section below.
+For further details on this and other modules, please refer to each module's documentation by following the links provided in the `Implemented Modules` section below.
 # Implemented Modules
 The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currently available modules.
 * [Thermocouple](src/edgepi/tc)
@@ -106,7 +106,7 @@ $ cd ./src
 ```
 $ python3 -m pytest ../tests/<test_path>
 ```
-#### Generate Test Report
+### Generate Test Report
 If you wish to generate an HTML test report, choose a virtual environment from above, and replace the "Run tests" step with either of the following commands:
 * SDK as a package:
 ```
@@ -130,64 +130,40 @@ $ python3 -m http.server
 3. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
 4. The HTML test report folder should be visible.
 
-## SDK packaging
+# Packaging
+To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
+```
+$ cd edgepi-python-sdk
 
-- Use setup.py file to edit meta-data when building/created new package
-- run ```python -m build``` command in root directory of the SDK create distribution
-- run ```py -m twine upload --repository testpypi dist/* --verbose``` command to upload the distribution to TestPyPi
+$ python3 -m venv venv_build
 
-__NOTE__ when package structure name, such as folder or module src file name, changes, delete '.egg-info' file and rebuild. This will ensure the file name in compiled package is changed.
+$ source venv_build/bin/activate 
 
-Change in capitalization in file/folder names are recognized by git
+$ python3 -m pip install -r requirements_build.txt
+```
+With the build environment configured and activated, a new distribution can be built as follows:
+```
+$ python3 -m build
+```
+Note, when the package structure changes, such as after renaming the `src` module or other folders, delete the `.egg-info` file from `/src` and rebuild. This will ensure the file names in the compiled package are updated. Also note that changes in file/folder name capitalization are recognized by git. To disable this:
 ```
 git config --global core.ignorecase false
 ```
 
-## SDK Structure
+With the new disbtribution created, you may publish to the official Python package repositories:
+
+To publish to TestPyPi:
 ```
-EDGEPI-PYTHON-SDK
-├── src
-│   └── edgepi
-│       ├── __init__.py
-│       ├── dac
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── peripherals
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── ...subpackages
-│       ├── edgepi_dac.py
-│       ├── edgepi_adc.py
-│       ├── edgepi_tc.py
-│       └── ...modules
-│   └── test_edgepi
-│       ├── __init__.py
-│       ├── test_dac
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── test_peripherals
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── ...test_subpackages
-├── tests
-│   ├── test_dac.py
-│   ├── test_tc.py
-│   └── ...each subpackages
-├── readme.md
-├── setup.py
-└── requirements.txt
+$ python3 -m twine upload --repository testpypi dist/* --verbose
 ```
----
-## Installing EdgePi-Python-SDK Package via Pip
-- Inside a virtual environment, run either of the following commands to install:
-- Via GitHub HTTPS 
-    * `$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@staging`
-        - The latest semi-stable version is available on the `staging` branch, but the intention is to eventually have a stable version on our `main` branch. Once we have this, `staging` here will have to replaced with `main`.
-    * Note: since this repository is currently private, you will be required to input your personal access token. See this [guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for creating a personal access token, if you do not yet have one.
-- Via TestPyPi
-    * `$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK`
-- Via PyPi
-    * ` $ python3 -m pip install EdgePi-Python-SDK`
-        - The latest stable release will be published here. Note, the SDK is not yet available on PyPi. The package name here is a placeholder and will have to be replaced.
----
-## EdgePi-Python-SDK Modules
+To publish to PyPi:
+```
+$ python3 -m twine upload dist/* --verbose
+```
+
+Both TestPyPi and PyPi will prompt you for authentication. For best practices, use a corresponding TestPyPi or PyPi token to authenticate as follows:
+```
+name: __token__
+password: <token-value>
+```
+Make sure to include the `pypi-` prefix for your token value.
