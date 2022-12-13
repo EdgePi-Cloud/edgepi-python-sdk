@@ -1,8 +1,48 @@
-# edgepi-python-sdk
----
 ![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-unit-test.yml/badge.svg)
 ![](https://github.com/osensa/edgepi-python-sdk/actions/workflows/python-lint.yml/badge.svg)
 ---
+# What is EdgePi?
+
+
+![Image](https://user-images.githubusercontent.com/3793563/207419171-c6d4ad94-edca-4daa-ad78-689c16ade4a7.png)
+
+
+A DIN rail-mounted, Raspberry Pi 4 industrial PC with the features of a Programmable Logic Controller (PLC) and Internet of Things (IoT) cloud edge device. Visit [edgepi.com](https://www.edgepi.com) for more information.
+
+# How to Use EdgePi SDK
+## How to Install
+The latest stable release of the EdgePi SDK will be available for download via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
+
+```
+python3 -m pip install EdgePi-Python-SDK
+```
+## Sample Code
+The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
+
+```
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import ADCChannel, ConvMode, ADCNum
+
+# initialize ADC
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample analog input pin AIN3
+edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.CONTINUOUS)
+
+# send command to start continuous conversions
+edgepi_adc.start_conversions(ADCNum.ADC_1)
+
+# perform 10 voltage reads
+for _ in range(10):
+  out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+  print(out)
+  
+# stop continuous conversions
+edgepi_adc.stop_conversions(ADCNum.ADC_1)
+```
+For more sample code, please refer to each module's documentation by following the links provided in the section below.
+# Implemented Modules
+
 ## Develop Environment Setup
 Two separate virtual environment is needed.
 1. venv_build: building environement where the package is compiled and published. import requirements_build.txt for pip dependencies.
