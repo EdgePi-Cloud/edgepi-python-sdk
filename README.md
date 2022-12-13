@@ -42,7 +42,7 @@ edgepi_adc.stop_conversions(ADCNum.ADC_1)
 ```
 For more sample code, please refer to each module's documentation by following the links provided in the 'Implemented Modules' section below.
 # Implemented Modules
-The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currenlty available modules.
+The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currently available modules.
 * [Thermocouple](src/edgepi/tc)
 * [Digital to Analog Converter (DAC)](src/edgepi/dac)
 * [Analog to Digital Converter (ADC)](src/edgepi/adc)
@@ -65,7 +65,7 @@ To install the SDK via HTTPS from GitHub:
 $ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
 ```
 ## Dev Environment
-Two separate virtual environments can be configured for development purposes. One option is to use a virtual environment with the SDK installed as a package, i.e. from TestPyPi. Note, the latest SDK version on TestPyPi may be out of date with active development code, as new versions are only published on merge to staging. As such, attempting to use this outdated SDK version with your new code will result in errors. Therefore, this approach is recommended for infrequent hardware calibration tests, or when you know the SDK version is up to date. For active development, it is instead recommended to use a virtual environment that does not install the SDK as a package.
+Two separate virtual environments can be configured for development purposes. One option is to use a virtual environment with the SDK installed as a package, i.e. from TestPyPi. Note, the latest SDK version on TestPyPi may be out of date with active development code, as new versions are only published on merge to staging. As such, attempting to use this outdated SDK version with your new code will result in errors. Therefore, this approach is recommended for infrequent hardware calibration tests, or when you know the SDK version is up to date. For active development, it is instead recommended to use a virtual environment that does not install the SDK as a package, but uses local source code instead.
 ### Virtual Environment with SDK Installed as a Package
 From project root directory run the following:
 1. Create virtual env: `python3 -m venv venv_integration`
@@ -79,16 +79,19 @@ From project root directory run the following:
 3. Install dependencies: `python3 -m pip install -r requirements_test.txt`
 4. Change directory: `cd ./src`
 5. Run tests: `python3 -m pytest ../tests/<test_path>`
+#### Generate Test Report
+If you wish to generate an HTML test report, choose a virtual environment from above, and replace the "Run tests" step with either of the following commands:
+* SDK as a package: `python3 -m pytest ./tests/<test_path> --html=<path-to-report> --log-level=INFO`
+* Local SDK: `python3 -m pytest ../tests/<test_path> --html=<path-to-report> --log-level=INFO`
+`<test_path>` can be left blank to run all integration and hardware tests, or set to a filepath to run a specific test module under `tests/`
+A folder containing the html test report will be added at `<path-to-report>`. An example path is: `./tests/reports/report.html`
+Include `--log-level=INFO` to add logs with helpful test details in report (recommended).
 
-
-  
-
-## Develop Environment Setup
-Two separate virtual environment is needed.
-1. venv_build: building environement where the package is compiled and published. import requirements_build.txt for pip dependencies.
-2. venv_test 
-   - TDD environment where the package source tree can be tested as bug fix / new features are implemented.The `testPyPi` tries to install the dependency in `testPyPi` instead of actual `PyPi`. Therefore, the `install_requires` option fails to install the required package. 
-   - This environment is also used to test the package after it is published. Install the package using `pip` and run test scripts inside `test` folder. This will import the installed package, not the modules in the `src` directory.
+To view the HTML report:
+1. Change directory to report folder: `cd <path-to-report>`
+2. Start a simple python webserver on edgepi: `python3 -m http.server`
+3. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
+4. The HTML test report folder should be visible.
 
 ## SDK packaging
 
