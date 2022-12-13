@@ -14,7 +14,7 @@ EdgePi is a DIN rail-mounted, Raspberry Pi 4 industrial PC with the features of 
 The latest stable release of the EdgePi SDK will be available for download via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
 
 ```
-python3 -m pip install EdgePi-Python-SDK
+$ python3 -m pip install EdgePi-Python-SDK
 ```
 ## Sample Code
 The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
@@ -47,8 +47,41 @@ The EdgePi SDK contains modules intended to represent each connected peripheral 
 * [Digital to Analog Converter (DAC)](src/edgepi/dac)
 * [Analog to Digital Converter (ADC)](src/edgepi/adc)
 * [LED Array](src/edgepi/led)
+# Development
+Active development SDK versions active can be accessed from the following resources:
+## Installing from TestPyPi
+To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/):
+```
+$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK
+```
+Previous development SDK versions can also be installed by specifiying the version number:
+```
+$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK==<version-number>
+```
+Please refer to [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/) for available SDK versions.
+## Installing from GitHub
+To install the SDK via HTTPS from GitHub:
+```
+$ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
+```
+## Dev Environment
+Two separate virtual environments can be configured for development purposes. One option is to use a virtual environment with the SDK installed as a package, i.e. from TestPyPi. Note, the latest SDK version on TestPyPi may be out of date with active development code, as new versions are only published on merge to staging. As such, attempting to use this outdated SDK version with your new code will result in errors. Therefore, this approach is recommended for infrequent hardware calibration tests, or when you know the SDK version is up to date. For active development, it is instead recommended to use a virtual environment that does not install the SDK as a package.
+### Virtual Environment with SDK Installed as a Package
+From project root directory run the following:
+1. Create virtual env: `python3 -m venv venv_integration`
+2. Activate virtual env: `source venv_integration/bin/activate`
+3. Install dependencies: `python3 -m pip install -r requirements_integration.txt`
+4. Run tests: `python3 -m pytest ./tests/<test_path>`
+### Virtual Environment using local SDK
+From project root directory run the following:
+1. Create virtual env: `python3 -m venv venv_test`
+2. Activate virtual env: `source venv_test/bin/activate`
+3. Install dependencies: `python3 -m pip install -r requirements_test.txt`
+4. Change directory: `cd ./src`
+5. Run tests: `python3 -m pytest ../tests/<test_path>`
 
 
+  
 
 ## Develop Environment Setup
 Two separate virtual environment is needed.
