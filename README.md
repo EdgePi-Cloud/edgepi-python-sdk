@@ -65,6 +65,47 @@ To install the SDK via HTTPS from GitHub:
 $ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
 ```
 ## Dev Environment
+
+# Packaging
+To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
+```
+$ cd edgepi-python-sdk
+
+$ python3 -m venv venv_build
+
+$ source venv_build/bin/activate 
+
+$ python3 -m pip install -r requirements_build.txt
+```
+With the build environment configured and activated, a new distribution can be built as follows:
+```
+$ python3 -m build
+```
+Note, when the package structure changes, such as after renaming the `src` module or other folders, delete the `.egg-info` file from `/src` and rebuild. This will ensure the file names in the compiled package are updated. Also note that changes in file/folder name capitalization are recognized by git. To disable this:
+```
+git config --global core.ignorecase false
+```
+
+With the new disbtribution created, you may publish to the official Python package repositories:
+
+To publish to TestPyPi:
+```
+$ python3 -m twine upload --repository testpypi dist/* --verbose
+```
+To publish to PyPi:
+```
+$ python3 -m twine upload dist/* --verbose
+```
+
+Both TestPyPi and PyPi will prompt you for authentication. For best practices, use a corresponding TestPyPi or PyPi token to authenticate as follows:
+```
+name: __token__
+password: <token-value>
+```
+Make sure to include the `pypi-` prefix for your token value.
+
+# Tests
+## Test Environment
 Two separate virtual environments can be configured for development purposes. One option is to use a virtual environment with the SDK installed as a package, i.e. from TestPyPi. Note, the latest SDK version on TestPyPi may be out of date with active development code, as new versions are only published on merge to staging. As such, attempting to use this outdated SDK version with your new code will result in errors. Therefore, this approach is recommended for infrequent hardware calibration tests, or when you know the SDK version is up to date. For active development, it is instead recommended to use a virtual environment that does not install the SDK as a package, but uses local source code instead.
 ### Virtual Environment with SDK Installed as a Package
 From the project root directory run the following:
@@ -129,41 +170,3 @@ $ python3 -m http.server
 ```
 3. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
 4. The HTML test report folder should be visible.
-
-# Packaging
-To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
-```
-$ cd edgepi-python-sdk
-
-$ python3 -m venv venv_build
-
-$ source venv_build/bin/activate 
-
-$ python3 -m pip install -r requirements_build.txt
-```
-With the build environment configured and activated, a new distribution can be built as follows:
-```
-$ python3 -m build
-```
-Note, when the package structure changes, such as after renaming the `src` module or other folders, delete the `.egg-info` file from `/src` and rebuild. This will ensure the file names in the compiled package are updated. Also note that changes in file/folder name capitalization are recognized by git. To disable this:
-```
-git config --global core.ignorecase false
-```
-
-With the new disbtribution created, you may publish to the official Python package repositories:
-
-To publish to TestPyPi:
-```
-$ python3 -m twine upload --repository testpypi dist/* --verbose
-```
-To publish to PyPi:
-```
-$ python3 -m twine upload dist/* --verbose
-```
-
-Both TestPyPi and PyPi will prompt you for authentication. For best practices, use a corresponding TestPyPi or PyPi token to authenticate as follows:
-```
-name: __token__
-password: <token-value>
-```
-Make sure to include the `pypi-` prefix for your token value.
