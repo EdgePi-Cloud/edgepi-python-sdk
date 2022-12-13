@@ -40,8 +40,15 @@ for _ in range(10):
 # stop continuous conversions
 edgepi_adc.stop_conversions(ADCNum.ADC_1)
 ```
-For more sample code, please refer to each module's documentation by following the links provided in the section below.
+For more sample code, please refer to each module's documentation by following the links provided in the 'Implemented Modules' section below.
 # Implemented Modules
+The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currenlty available modules.
+* [Thermocouple](src/edgepi/tc)
+* [Digital to Analog Converter (DAC)](src/edgepi/dac)
+* [Analog to Digital Converter (ADC)](src/edgepi/adc)
+* [LED Array](src/edgepi/led)
+
+
 
 ## Develop Environment Setup
 Two separate virtual environment is needed.
@@ -111,7 +118,4 @@ EDGEPI-PYTHON-SDK
         - The latest stable release will be published here. Note, the SDK is not yet available on PyPi. The package name here is a placeholder and will have to be replaced.
 ---
 ## EdgePi-Python-SDK Modules
-This SDK contains modules intended to represent each connected peripheral device on the EdgePi. Below is a directory of the available modules.
-* [Thermocouple](src/edgepi/tc)
-* [Digital to Analogue Converter](src/edgepi/dac)
-* [Analog to Digital Converter](src/edgepi/adc)
+
