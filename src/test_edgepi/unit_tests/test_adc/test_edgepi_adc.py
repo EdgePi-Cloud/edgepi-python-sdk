@@ -909,3 +909,25 @@ def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc
     with err:
         out = adc._EdgePiADC__get_calibration_values(_mock_adc_calibs, adc_num)
         assert out == expected
+
+
+@pytest.mark.parametrize("adc_to_read, validate",
+    [
+        (ADCNum.ADC_1, True),
+        (ADCNum.ADC_2, False),
+    ]
+)
+def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, adc):
+    validate_func = mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__check_adc_1_conv_mode"
+    )
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
+    mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
+    adc.read_voltage(adc_to_read)
+    if validate:
+        validate_func.assert_called()
+    else:
+        validate_func.assert_not_called()
