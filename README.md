@@ -65,6 +65,7 @@ To install the SDK via HTTPS from GitHub:
 $ python3 -m pip install git+https://github.com/osensa/edgepi-python-sdk.git@<branch-name>
 ```
 ## Dev Environment
+ 
 
 # Packaging
 To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
@@ -171,3 +172,18 @@ $ python3 -m http.server
 ```
 3. In a browser-enabled machine, navigate to `http://<edgepi-address>:8000/`
 4. The HTML test report folder should be visible.
+
+### Configure Self-hosted GitHub Actions Test Runner
+The integration tests can be run as part of GitHub Actions workflows, but this requires setting up an EdgePi unit as a self-hosted test runner.
+To do so, follow the steps below (working as of Dec 2022):
+1. Visit https://github.com/osensa/edgepi-python-sdk/settings/actions/runners/
+2. Select `New self-hosted runner`
+3. Choose OS and architecture -> `Linux` -> `ARM64`
+4. Follow all steps under `Download`
+5. Run `$ ./config.sh --url https://github.com/osensa/edgepi-python-sdk --token <token>`
+    * `<token>` here denotes your personal GitHub access token
+6. Run the actions runner as a service: https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service
+```
+$ sudo ./svc.sh install
+$ sudo ./svc.sh start
+```
