@@ -182,7 +182,7 @@ To do so, follow the steps below (working as of Dec 2022):
 4. Follow all steps under `Download`
 5. Run `$ ./config.sh --url https://github.com/osensa/edgepi-python-sdk --token <token>`
     * `<token>` here denotes your personal GitHub access token
-6. Run the actions runner as a service: https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service
+6. Run the actions runner [as a service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service):
 ```
 $ sudo ./svc.sh install
 $ sudo ./svc.sh start
