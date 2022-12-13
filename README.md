@@ -14,7 +14,7 @@ Use our user-friendly Python SDK to control the EdgePi hardware with just a few 
 The latest stable release of the EdgePi SDK will be available to be installed via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
 
 ```
-$ python3 -m pip install EdgePi-Python-SDK
+$ python3 -m pip install edgepi-python-sdk
 ```
 ## Example Code
 The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
@@ -52,15 +52,15 @@ The EdgePi SDK contains modules intended to represent each connected peripheral 
 # Development
 Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi
-To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/):
+To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/):
 ```
-$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK
+$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk
 ```
 Previous development SDK versions can also be installed by specifiying the version number:
 ```
-$ python3 -m pip install -i https://test.pypi.org/simple/ EdgePi-Python-SDK==<version-number>
+$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk==<version-number>
 ```
-Please refer to [TestPyPi](https://test.pypi.org/project/EdgePi-Python-SDK/) for available SDK versions.
+Please refer to [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/) for available SDK versions.
 ## Installing from GitHub
 To install the SDK via HTTPS from GitHub:
 ```
