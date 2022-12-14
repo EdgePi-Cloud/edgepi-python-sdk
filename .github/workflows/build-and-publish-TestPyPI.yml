@@ -29,6 +29,7 @@ jobs:
     - name: FragileTech/bump-version
       uses: FragileTech/bump-version@main
       with:
+        current_version: "${{ env.current_version }}"
         files: setup.py
         commit_name: EdgePi-Cloud
         commit_email: edgepi@edgepi.com
