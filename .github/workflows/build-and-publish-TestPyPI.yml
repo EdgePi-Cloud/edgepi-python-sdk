@@ -26,7 +26,7 @@ jobs:
     #     if [ -f requirements_build.txt ]; then python -m pip install -r requirements_build.txt; fi
     - name: current_version
       run: |
-        current_version=$(grep "version" setup.py | cut -d '"' -f2)
+        echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
         echo $current_version
     - name: FragileTech/bump-version
       uses: FragileTech/bump-version@main
