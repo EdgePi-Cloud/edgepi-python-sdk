@@ -11,8 +11,8 @@ on:
       - 'dev'
 
 jobs:
-  build:
-
+  lint:
+    name: Linter
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

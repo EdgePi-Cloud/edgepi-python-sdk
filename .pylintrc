@@ -1,9 +1,24 @@
 [MESSAGES CONTROL]
 
-disable=trailing-whitespace,
-        logging-fstring-interpolation,
-        line-too-long,
-        invalid-name
+disable=logging-fstring-interpolation,
+        too-many-locals,
+        too-many-arguments,
+        fixme,
+        too-few-public-methods,
+        duplicate-code
+
+[LOGGING]
+
+# Format style used to check logging format string. `old` means using %
+# formatting, while `new` is for `{}` formatting.
+logging-format-style=new
+
+[BASIC]
+# exclude docstring requirement for test and private functions
+no-docstring-rgx=^test_|^_|^fixture
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=fd,ch,dr,tc,i
 
 [REPORTS]
 
