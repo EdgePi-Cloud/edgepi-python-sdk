@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - 'fix-staging-publish'
+    paths-ignore:
+      - setup.py
 
 jobs:
   build-and-publish:
