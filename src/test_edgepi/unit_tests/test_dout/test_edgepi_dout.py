@@ -11,7 +11,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.gpio_configs import DOUTPins
-from edgepi.dout.edgepi_dout import EdgePiDOUT, InvalidPinName
+from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, InvalidPinName
 
 @pytest.mark.parametrize("pin_name, state, error",
                         [(GpioPins.DOUT1, True, does_not_raise()),
@@ -37,7 +37,7 @@ def test_edgepi_digital_output_state(mocker, pin_name, state, error):
     gpio_chip=mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.write_gpio_pin_state")
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
-    dout = EdgePiDOUT()
+    dout = EdgePiDigitalOutput()
     with error:
         dout.digital_output_state(pin_name, state)
         if pin_name.value in [DOUTPins.DOUT1.value,DOUTPins.DOUT2.value]:
@@ -72,7 +72,7 @@ def test_edgepi_digital_output_direction(mocker, pin_name, direction, error):
     gpio_chip=mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_gpio_pin_dir")
     exp_dir_in = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_in")
     exp_dir_out = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_out")
-    dout = EdgePiDOUT()
+    dout = EdgePiDigitalOutput()
     with error:
         dout.digital_output_direction(pin_name, direction)
         if pin_name.value in [DOUTPins.DOUT1.value,DOUTPins.DOUT2.value]:

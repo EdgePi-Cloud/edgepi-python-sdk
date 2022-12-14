@@ -7,7 +7,7 @@ from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 class InvalidPinName(Exception):
     """Raised invalid pin name"""
 
-class EdgePiDIN():
+class EdgePiDigitalInput():
     """handling reading of digital inputs"""
     def __init__(self):
         # To limit access to input functionality, using composition rather than inheritance
