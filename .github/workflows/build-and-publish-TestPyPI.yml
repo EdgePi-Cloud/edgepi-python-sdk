@@ -1,4 +1,5 @@
-# This workflow will build and publish the package to TestPyPI upon push or merge to dev branch
+# This workflow will increment version patch number, and build and publish 
+# the python package to TestPyPI upon push or merge to staging branch
 
 name: Build and Publish to TestPyPI
 
@@ -6,7 +7,7 @@ on:
   push:
     branches:
       - 'fix-staging-publish'
-    # needed to stop endless commit loop
+    # needed to stop endless commit loop by auto-bump
     paths-ignore:
       - setup.py
 
