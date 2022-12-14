@@ -47,18 +47,18 @@ The EdgePi SDK contains modules intended to represent each connected peripheral 
 * [Digital to Analog Converter (DAC)](src/edgepi/dac)
 * [Analog to Digital Converter (ADC)](src/edgepi/adc)
 * [LED Array](src/edgepi/led)
-* [Digital In (DIN)](src/edgepi/din)
-* [Digital Out (DOUT)](src/edgepi/dout)
+* [Digital Input (DIN)](src/edgepi/digital_input)
+* [Digital Output (DOUT)](src/edgepi/digital_output)
 # Development
 Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi
 To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/):
 ```
-$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk
+$ python3 -m pip install -i https://test.pypi.org/simple/edgepi-python-sdk
 ```
 Previous development SDK versions can also be installed by specifiying the version number:
 ```
-$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk==<version-number>
+$ python3 -m pip install -i https://test.pypi.org/simple/edgepi-python-sdk==<version-number>
 ```
 Please refer to [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/) for available SDK versions.
 ## Installing from GitHub
