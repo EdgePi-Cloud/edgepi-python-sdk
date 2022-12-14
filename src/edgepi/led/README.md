@@ -2,7 +2,7 @@
 
 # Hardware
 
-The EdgePi has an array of eight programmable LED lights. The LED module allows users to toggle these LEDs on and off.
+The EdgePi has an array of eight programmable LED lights. The LED module allows users to interact with each LED individually.
 
 # Example Code
 This code example demonstrates how to use the LED module to turn an LED on and off:
