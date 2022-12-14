@@ -31,10 +31,10 @@ jobs:
       with:
         current_version: "${{ env.current_version }}"
         files: setup.py
-        commit_name: EdgePi-Cloud
-        commit_email: edgepi@edgepi.com
-        login: EdgePi-Cloud
-        token: "${{ secrets.TEMP_BOT_TOKEN }}"
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+        login: bot-edgepi
+        token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
     # - name: Build Package
     #   run: |
     #     python -m build
