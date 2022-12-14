@@ -54,6 +54,7 @@ Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi
 To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/):
 ```
+
 $ python3 -m pip install -i https://test.pypi.org/simple/edgepi-python-sdk
 ```
 Previous development SDK versions can also be installed by specifiying the version number:
@@ -61,6 +62,7 @@ Previous development SDK versions can also be installed by specifiying the versi
 $ python3 -m pip install -i https://test.pypi.org/simple/edgepi-python-sdk==<version-number>
 ```
 Please refer to [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/) for available SDK versions.
+
 ## Installing from GitHub
 To install the SDK via HTTPS from GitHub:
 ```
