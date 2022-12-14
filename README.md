@@ -1,56 +1,117 @@
-# edgepi-python-sdk
+![Image](https://user-images.githubusercontent.com/3793563/207438826-bb656ca5-f19d-4699-8cb4-35acccb2ce58.svg)
 
-## Develop Environment Setup
-Two separate virtual environment is needed.
-1. venv_build: building environement where the package is compiled and published. import requirements_build.txt for pip dependencies.
-2. venv_test 
-   - TDD environment where the package source tree can be tested as bug fix / new features are implemented.The `testPyPi` tries to install the dependency in `testPyPi` instead of actual `PyPi`. Therefore, the `install_requires` option fails to install the required package. 
-   - This environment is also used to test the package after it is published. Install the package using `pip` and run test scripts inside `test` folder. This will import the installed package, not the modules in the `src` directory.
+EdgePi is a DIN rail-mounted, Raspberry Pi 4 industrial PC with the features of a Programmable Logic Controller (PLC), and Internet of Things (IoT) cloud edge device. Visit [edgepi.com](https://www.edgepi.com) for more information.
 
-## SDK packaging
+![](https://github.com/EdgePi-Cloud/edgepi-python-sdk/actions/workflows/python-unit-test.yml/badge.svg)
+![](https://github.com/EdgePi-Cloud/edgepi-python-sdk/actions/workflows/python-lint.yml/badge.svg)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/blob/main/LICENSE)
+---
+# EdgePi SDK
+Use our user-friendly Python SDK to control the EdgePi hardware with just a few lines of simple Python Code.
+![Image](https://user-images.githubusercontent.com/3793563/207419171-c6d4ad94-edca-4daa-ad78-689c16ade4a7.png)
+# How to Use EdgePi SDK
+## How to Install
+The latest stable release of the EdgePi SDK will be available to be installed via The Python Package Index (PyPi). To install the EdgePi SDK from PyPi via pip, you may use the following command from terminal:
 
-- Use setup.py file to edit meta-data when building/created new package
-- run ```python -m build``` command in root directory of the SDK create distribution
-- run ```py -m twine upload --repository testpypi dist/* --verbose``` command to upload the distribution to TestPyPi
+```
+$ python3 -m pip install edgepi-python-sdk
+```
+## Example Code
+The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
 
-__NOTE__ when package structure name, such as folder or module src file name, changes, delete '.egg-info' file and rebuild. This will ensure the file name in compiled package is changed.
+```
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import ADCChannel, ConvMode, ADCNum
 
-Change in capitalization in file/folder names are recognized by git
+# initialize ADC
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample analog input pin AIN3
+edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.CONTINUOUS)
+
+# send command to start continuous conversions
+edgepi_adc.start_conversions(ADCNum.ADC_1)
+
+# perform 10 voltage reads
+for _ in range(10):
+  out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+  print(out)
+  
+# stop continuous conversions
+edgepi_adc.stop_conversions(ADCNum.ADC_1)
+```
+For further details on this and other modules, please refer to each module's documentation by following the links provided in the `Implemented Modules` section below.
+# Implemented Modules
+The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currently available modules.
+* [Thermocouple](src/edgepi/tc)
+* [Digital to Analog Converter (DAC)](src/edgepi/dac)
+* [Analog to Digital Converter (ADC)](src/edgepi/adc)
+* [LED Array](src/edgepi/led)
+* [Digital In (DIN)](src/edgepi/din)
+* [Digital Out (DOUT)](src/edgepi/dout)
+# Development
+Active development SDK versions can be accessed from the following resources:
+## Installing from TestPyPi
+To install the most recent active development SDK version via [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/):
+```
+$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk
+```
+Previous development SDK versions can also be installed by specifiying the version number:
+```
+$ python3 -m pip install -i https://test.pypi.org/simple/ edgepi-python-sdk==<version-number>
+```
+Please refer to [TestPyPi](https://test.pypi.org/project/edgepi-python-sdk/) for available SDK versions.
+## Installing from GitHub
+To install the SDK via HTTPS from GitHub:
+```
+$ python3 -m pip install git+https://github.com/EdgePi-Cloud/edgepi-python-sdk.git@<branch-name>
+```
+
+# Packaging
+To build and publish a new SDK version as a package, a build virtual environment is required. This may be configured as follows:
+```
+$ cd edgepi-python-sdk
+
+$ python3 -m venv venv_build
+
+$ source venv_build/bin/activate 
+
+$ python3 -m pip install -r requirements_build.txt
+```
+With the build environment configured and activated, a new distribution can be built as follows:
+```
+$ python3 -m build
+```
+Note, when the package structure changes, such as after renaming the `src` module or other folders, delete the `.egg-info` file from `/src` and rebuild. This will ensure the file names in the compiled package are updated. Also note that changes in file/folder name capitalization are recognized by git. To disable this:
 ```
 git config --global core.ignorecase false
 ```
 
-## SDK Structure
+With the new disbtribution created, you may publish to the official Python package repositories:
+
+To publish to TestPyPi:
 ```
-EDGEPI-PYTHON-SDK
-├── src
-│   └── edgepi
-│       ├── __init__.py
-│       ├── dac
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── peripherals
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── ...subpackages
-│       ├── edgepi_dac.py
-│       ├── edgepi_adc.py
-│       ├── edgepi_tc.py
-│       └── ...modules
-│   └── test_edgepi
-│       ├── __init__.py
-│       ├── test_dac
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── test_peripherals
-│       │   ├── __init__.py
-│       │   └── ...submodules
-│       ├── ...test_subpackages
-├── tests
-│   ├── test_dac.py
-│   ├── test_tc.py
-│   └── ...each subpackages
-├── readme.md
-├── setup.py
-└── requirements.txt
+$ python3 -m twine upload --repository testpypi dist/* --verbose
 ```
+To publish to PyPi:
+```
+$ python3 -m twine upload dist/* --verbose
+```
+
+Both TestPyPi and PyPi will prompt you for authentication. For best practices, use a corresponding TestPyPi or PyPi token to authenticate as follows:
+```
+name: __token__
+password: <token-value>
+```
+Make sure to include the `pypi-` prefix for your token value.
+
+# Bug Reports / Feature Requests
+Use [GitHub Issues Page](https://github.com/EdgePi-Cloud/edgepi-python-sdk/issues) to report any issues or feature requests.
+
+# Get involved
+Follow [@edgepi_cloud on Twitter](https://twitter.com/edgepi_cloud/).
+Read and subscribe to the [EdgePi blog](https://www.edgepi.com/blog).
+If you have a specific question, please check out our [discussion forums](https://www.edgepi.com/forums).
+
+# License
+EdgePi SDK is distributed under [MIT License](https://github.com/EdgePi-Cloud/edgepi-python-sdk/blob/main/LICENSE). 

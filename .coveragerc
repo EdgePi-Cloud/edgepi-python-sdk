@@ -1,0 +1,12 @@
+# .coveragerc to control pytest-cov code coverage testing
+
+[run]
+branch = True
+source = src/edgepi
+
+[report]
+show_missing = True
+skip_empty = True
+
+[xml]
+output = test_cov/coverage.xml
