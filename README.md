@@ -48,7 +48,7 @@ The EdgePi SDK contains modules intended to represent each connected peripheral 
 * [Analog to Digital Converter (ADC)](src/edgepi/adc)
 * [LED Array](src/edgepi/led)
 * [Digital Input (DIN)](src/edgepi/digital_input)
-* [Digital Output (DOUT)](src/edgepi/digital_ouput)
+* [Digital Output (DOUT)](src/edgepi/digital_output)
 # Development
 Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi
