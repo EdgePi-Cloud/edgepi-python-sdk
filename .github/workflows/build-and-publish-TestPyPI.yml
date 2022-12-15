@@ -6,7 +6,7 @@ name: Build and Publish to TestPyPI
 on:
   push:
     branches:
-      - 'staging'
+      - 'fix-staging-publish'
     # needed to stop endless commit loop by auto-bump
     paths-ignore:
       - setup.py
