@@ -74,7 +74,7 @@ To do so, follow the steps below (working as of Dec 2022):
 3. Choose OS and architecture -> `Linux` -> `ARM64`
 4. Follow all steps under `Download`
 5. Run `$ ./config.sh --url https://github.com/EdgePi-Cloud/edgepi-python-sdk --token <token>`
-    * `<token>` here denotes your personal GitHub access token
+    * `<token>` here denotes your personal GitHub access token (for best practices use a workflow bot account to get the token).
 6. Run the actions runner [as a service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service):
 ```
 $ sudo ./svc.sh install
