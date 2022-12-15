@@ -1,15 +1,16 @@
 # This workflow will build and publish the package to PyPI upon push or merge to main branch
+# and then create a GitHub release based on latest release tag
 
-name: Build and Publish to PyPI
+name: Build and Release
 
 on:
   push:
-    branches:
-      - 'main'
+    tags:
+      - release/*  
 
 jobs:
   build-and-publish:
-    name: Build and publish Package to PyPI
+    name: Publish to PyPi and Release
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -28,6 +29,7 @@ jobs:
     - name: Publish Package to PyPI
       uses: pypa/gh-action-pypi-publish@v1.5.0
       with:
-        # TODO: add PyPI user password or access token
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Release Package
+      uses: ncipollo/release-action@v1.12.0
