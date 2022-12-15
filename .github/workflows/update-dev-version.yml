@@ -1,0 +1,42 @@
+# This workflow will merge staging to dev, on push to staging, in order
+# to apply auto bumped package version on staging to dev
+
+name: Merge Staging to Dev
+
+on:
+  push:
+   branches:
+    - test-branch
+    # workflow_run:
+    #   workflows: ["CI build"]
+    #   types:
+    #     - completed
+    #   branches: [staging]
+
+jobs:
+  # on-success:
+  merge-branches:
+    name: Merge Staging to Dev
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      # with:
+      #     token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+    - name: Merge Staging to Dev
+      uses: devmasx/merge-branch@master
+      with:
+          type: now
+          from_branch: update-dev-version
+          target_branch: test-branch
+          github_token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+      # env:
+      #   commit_name: bot-edgepi
+      #   commit_email: bot@edgepi.com
+      #   username: bot-edgepi
+      # run: |
+      #   git config user.name ${{ env.commit_name }}
+      #   git config user.email ${{ env.commit_email }}
+      #   git checkout origin dev
+      #   git merge --squash origin staging -m "apply bumped package version"
+      #   git push origin dev
