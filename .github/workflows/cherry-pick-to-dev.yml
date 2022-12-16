@@ -1,0 +1,35 @@
+# This workflow will cherry pick the latest staging commit to dev
+
+name: Cherry Pick Auto Bump Commit
+
+on:
+  push:
+    branches:
+      - 'custom-merge-workflow'
+
+jobs:
+  cherry-pick:
+    name: Cherry Pick
+    runs-on: ubuntu-latest
+    steps:
+      run: |
+        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:"%H")" >> $GITHUB_ENV
+    - name: Checkout Dev
+      uses: actions/checkout@v3
+      with:
+          ref: test-branch
+          token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+      name: Get Auto Bump Commit SHA
+      run: |
+        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:"%H")" >> $GITHUB_ENV
+        echo ${{ env.bump_commit }}
+    # - name: Cherry Pick
+    #   env:
+    #     commit_name: bot-edgepi
+    #     commit_email: bot@edgepi.com
+    #     username: bot-edgepi
+    #   run: |
+    #     git config user.name ${{ env.commit_name }}
+    #     git config user.email ${{ env.commit_email }}
+        
+    #     git push origin release/v${{ env.current_version }}
