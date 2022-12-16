@@ -14,6 +14,7 @@ jobs:
     steps:
     - name: Checkout Dev
       uses: actions/checkout@v3
+    - name: Commit SHA
       run: |
         echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
         echo ${{ env.bump_commit }}
