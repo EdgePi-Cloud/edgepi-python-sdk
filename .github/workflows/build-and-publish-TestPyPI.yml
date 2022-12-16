@@ -34,6 +34,14 @@ jobs:
         commit_email: bot@edgepi.com
         login: bot-edgepi
         token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+    - name: Merge Staging to Dev
+      uses: devmasx/merge-branch@master
+      with:
+          type: now
+          from_branch: staging
+          target_branch: dev
+          github_token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+          message: "apply auto bumped package version"
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
