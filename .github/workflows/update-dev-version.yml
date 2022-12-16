@@ -6,7 +6,7 @@ name: Merge Staging to Dev
 on:
   push:
    branches:
-    - test-branch
+    - update-dev-version
     # workflow_run:
     #   workflows: ["CI build"]
     #   types:
