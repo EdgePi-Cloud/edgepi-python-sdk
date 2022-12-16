@@ -20,4 +20,6 @@ jobs:
     - name: Commit SHA
       run: |
         echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
+    - name: Cherry Pick
+      run: |
         echo ${{ env.bump_commit }}
