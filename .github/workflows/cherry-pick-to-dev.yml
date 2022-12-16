@@ -25,6 +25,7 @@ jobs:
       env:
         commit_name: bot-edgepi
         commit_email: bot@edgepi.com
+        username: bot-edgepi
       run: |
         git config user.name ${{ env.commit_name }}
         git config user.email ${{ env.commit_email }}
