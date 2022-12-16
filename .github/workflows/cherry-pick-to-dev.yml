@@ -11,9 +11,6 @@ jobs:
   cherry-pick:
     name: Cherry Pick
     runs-on: ubuntu-latest
-    steps:
-      run: |
-        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:"%H")" >> $GITHUB_ENV
     - name: Checkout Dev
       uses: actions/checkout@v3
       with:
