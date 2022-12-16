@@ -14,8 +14,6 @@ jobs:
     steps:
     - name: Checkout Dev
       uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.ACTIONS_BOT_TOKEN }}
       run: |
         echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
         echo ${{ env.bump_commit }}
