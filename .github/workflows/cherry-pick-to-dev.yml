@@ -15,14 +15,19 @@ jobs:
     - name: Checkout Dev
       uses: actions/checkout@v3
       with:
-        ref: test-branch-2
+        ref: test-branch-3
         token: ${{ secrets.ACTIONS_BOT_TOKEN }}
         fetch-depth: 0
     - name: Commit SHA
       run: |
         echo "bump_commit=$(git log -n 1 origin/custom-merge-workflow --pretty=format:'%H')" >> $GITHUB_ENV
     - name: Cherry Pick
+      env:
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
       run: |
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
         echo ${{ env.bump_commit }}
         git cherry-pick ${{ env.bump_commit }}
-        git push origin test-branch-2
+        git push origin test-branch-3
