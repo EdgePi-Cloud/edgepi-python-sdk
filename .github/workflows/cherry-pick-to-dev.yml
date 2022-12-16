@@ -15,7 +15,7 @@ jobs:
     - name: Checkout Dev
       uses: actions/checkout@v3
       with:
-        ref: test-branch
+        ref: test-branch-2
         token: ${{ secrets.ACTIONS_BOT_TOKEN }}
         fetch-depth: 0
     - name: Commit SHA
@@ -25,4 +25,4 @@ jobs:
       run: |
         echo ${{ env.bump_commit }}
         git cherry-pick ${{ env.bump_commit }}
-        git push origin test-branch
+        git push origin test-branch-2
