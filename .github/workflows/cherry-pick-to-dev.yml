@@ -15,9 +15,8 @@ jobs:
     - name: Checkout Dev
       uses: actions/checkout@v3
       with:
-          ref: test-branch
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
     - name: Get Auto Bump Commit SHA
       run: |
-        echo "bump_commit=$(git log -n 1 staging --pretty=format:'%H')" >> $GITHUB_ENV
+        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
         echo ${{ env.bump_commit }}
