@@ -14,7 +14,7 @@ on:
 
 jobs:
   publish:
-    name: Bump Version
+    name: Staging Publish
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
