@@ -43,12 +43,12 @@ edgepi_adc.stop_conversions(ADCNum.ADC_1)
 For further details on this and other modules, please refer to each module's documentation by following the links provided in the `Implemented Modules` section below.
 # Implemented Modules
 The EdgePi SDK contains modules intended to represent each connected peripheral device onboard the EdgePi. Below is a directory of the currently available modules.
-* [Thermocouple](src/edgepi/tc)
-* [Digital to Analog Converter (DAC)](src/edgepi/dac)
-* [Analog to Digital Converter (ADC)](src/edgepi/adc)
-* [LED Array](src/edgepi/led)
-* [Digital Input (DIN)](src/edgepi/digital_input)
-* [Digital Output (DOUT)](src/edgepi/digital_output)
+* [Thermocouple](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/tc)
+* [Digital to Analog Converter (DAC)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/dac)
+* [Analog to Digital Converter (ADC)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/adc)
+* [LED Array](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/led)
+* [Digital Input (DIN)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/digital_input)
+* [Digital Output (DOUT)](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/src/edgepi/digital_output)
 # Development
 Active development SDK versions can be accessed from the following resources:
 ## Installing from TestPyPi

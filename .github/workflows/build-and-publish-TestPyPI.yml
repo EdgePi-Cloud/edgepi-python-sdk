@@ -1,7 +1,7 @@
-# This workflow will increment version patch number, and build and publish 
-# the python package to TestPyPI upon push or merge to staging branch
+# This workflow will increment version patch number, cherry pick this new version to dev,
+# and build and publish the package to TestPyPI upon push or merge to staging branch
 
-name: Build and Publish to TestPyPI
+name: Staging Publish
 
 on:
   push:
@@ -13,8 +13,8 @@ on:
       - .bumpversion.cfg
 
 jobs:
-  build-and-publish:
-    name: Build and publish Package to TestPyPI
+  publish:
+    name: Staging Publish
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -50,3 +50,22 @@ jobs:
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
+    - name: Checkout Dev
+      uses: actions/checkout@v3
+      with:
+        ref: dev
+        token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+        fetch-depth: 0
+    - name: Auto Bump Commit SHA
+      run: |
+        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
+    - name: Cherry Pick
+      env:
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+      run: |
+        echo ${{ env.bump_commit }}
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
+        git cherry-pick ${{ env.bump_commit }}
+        git push origin dev
