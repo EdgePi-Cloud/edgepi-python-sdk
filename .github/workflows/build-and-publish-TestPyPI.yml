@@ -34,6 +34,7 @@ jobs:
         commit_email: bot@edgepi.com
         login: bot-edgepi
         token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+
   cherry-pick:
     name: Cherry Pick
     runs-on: ubuntu-latest
@@ -57,11 +58,13 @@ jobs:
         git config user.name ${{ env.commit_name }}
         git config user.email ${{ env.commit_email }}
         git cherry-pick ${{ env.bump_commit }}
-        git push origin dev 
+        git push origin dev
+
   build-and-publish:
     name: Build and Publish to TestPyPI
     runs-on: ubuntu-latest
     needs: cherry-pick
+    steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up Python
