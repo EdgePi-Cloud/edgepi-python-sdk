@@ -1,0 +1,27 @@
+# This workflow will merge staging to dev, on auto-bump completed, in order
+# to apply auto bumped package version on staging to dev
+
+name: Merge Staging to Dev
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish to TestPyPI"]
+    types:
+      - completed
+    branches: [staging]
+
+jobs:
+  on-success:
+    name: Merge Staging to Dev
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Merge Staging to Dev
+      uses: devmasx/merge-branch@master
+      with:
+          type: now
+          from_branch: staging
+          target_branch: dev
+          github_token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+          message: "apply auto bumped package version"
