@@ -1,5 +1,7 @@
 '''Helper class to access on board eeprom'''
 
+# pylint: disable=no-name-in-module
+
 import logging
 import math
 

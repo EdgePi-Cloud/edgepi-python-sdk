@@ -8,6 +8,7 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 # pylint: disable=wrong-import-position
+# pylint: disable=no-name-in-module
 # pylint: disable=protected-access
 
 import pytest
@@ -21,8 +22,8 @@ from edgepi.dac.dac_constants import (
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
-from test_edgepi.unit_tests.test_calibration.read_serialized import read_binfile
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from test_edgepi.unit_tests.test_calibration.read_serialized import read_binfile
 
 dummy_calib_param_dict = {0:CalibParam(gain=1,offset=0),
                           1:CalibParam(gain=1,offset=0),

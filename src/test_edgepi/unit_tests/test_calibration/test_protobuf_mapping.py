@@ -1,6 +1,7 @@
 '''unit test for access eeprom'''
 # pylint: disable=C0413
 # pylint: disable=no-member
+# pylint: disable=no-name-in-module
 from unittest import mock
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -46,7 +47,7 @@ tc_dict_calib = {0:CalibParam(gain = 1.024272873, offset=-0.018334615)}
 tc_dict_hw = {0:1}
 
 
-keys = '-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLykG+T\
+KEYS = '-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLykG+T\
 mZQcd6pE\r\nv7fji6ZoW/dl8dKwwdi/cfSS/J5Iv+5FwQU4KGNBbhVAnmJeLd+PMUT4bQTf9rVF\r\nHsDoIPoQLDH7jmBu8ai\
 7jQ0hY5SqPbynPGELFrk/vEpHwg/8fO4lbw1YxwgGc0SR\r\n8k1tFdi4On7NymBiv88HOsrrziAPGCd7Hc07s+SdFQF+nDPidy\
 M1pMqvUC25c5Sk\r\ncsrBlMgmcSRY8y6MJFPObg0ahLsI/YT+jT2G6AioQOz9ZJ89DSzjEfoFK9KlIzq1\r\n46THPR8Tdc9qu\
@@ -88,7 +89,7 @@ def test_edgepi_eeprom_data():
     assert eeprom_data.serial == '20221110-021'
     assert eeprom_data.model == 'EdgePi-Bearbone'
     assert eeprom_data.client_id == 'SO-2022-1023'
-    assert eeprom_data.config_key.certificate == keys
-    assert eeprom_data.config_key.private == keys
-    assert eeprom_data.data_key.certificate == keys
-    assert eeprom_data.data_key.certificate == keys
+    assert eeprom_data.config_key.certificate == KEYS
+    assert eeprom_data.config_key.private == KEYS
+    assert eeprom_data.data_key.certificate == KEYS
+    assert eeprom_data.data_key.certificate == KEYS
