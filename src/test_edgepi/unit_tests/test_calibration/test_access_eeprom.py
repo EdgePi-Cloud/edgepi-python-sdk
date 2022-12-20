@@ -1,7 +1,7 @@
 '''unit test for access eeprom'''
 
 # pylint: disable=C0413
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module https://github.com/protocolbuffers/protobuf/issues/10372
 
 from unittest import mock
 import os

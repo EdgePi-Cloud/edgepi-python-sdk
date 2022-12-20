@@ -1,6 +1,6 @@
 '''Helper class to access on board eeprom'''
 
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module https://github.com/protocolbuffers/protobuf/issues/10372 
 
 import logging
 import math
@@ -23,6 +23,7 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
+        self.log.info("Initializing EEPROM Access")
         self.eeprom_layout = EepromLayout()
         super().__init__(self.__dev_path)
 
@@ -118,9 +119,9 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
-        self.log.debug(f'Reading Address {mem_addr}, {length} bytes, {msg[1].data}')
+        self.log.debug(f'Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        # self.log.debug(f'Read data: {msg[1].data}') TODO: log number of bytes
+        self.log.debug(f'Read data: {len(msg[1].data)}')
         return read_result
 
 
