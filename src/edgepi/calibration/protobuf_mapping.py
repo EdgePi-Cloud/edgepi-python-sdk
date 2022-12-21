@@ -1,6 +1,7 @@
 """module to map protobuf data to a class"""
 
-# pylint: disable=no-name-in-module https://github.com/protocolbuffers/protobuf/issues/10372
+# pylint: disable=no-name-in-module
+# https://github.com/protocolbuffers/protobuf/issues/10372
 from dataclasses import dataclass
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.calibration.calibration_constants import CalibParam

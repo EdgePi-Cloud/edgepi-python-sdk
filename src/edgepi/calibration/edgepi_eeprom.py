@@ -1,6 +1,7 @@
 '''Helper class to access on board eeprom'''
 
-# pylint: disable=no-name-in-module https://github.com/protocolbuffers/protobuf/issues/10372 
+# pylint: disable=no-name-in-module
+# https://github.com/protocolbuffers/protobuf/issues/10372 
 
 import logging
 import math
