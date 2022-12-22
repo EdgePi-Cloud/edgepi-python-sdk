@@ -112,6 +112,7 @@ class EdgePiGPIOExpander(I2CDevice):
         reg_addx = dir_out_code.reg_address
 
         # get register value of port this pin belongs to
+        print(f'reg_addx {reg_addx}, dev_address {dev_address}')
         reg_val = self.__read_register(reg_addx, dev_address)
 
         # set pin to low before setting to output (hazard)
