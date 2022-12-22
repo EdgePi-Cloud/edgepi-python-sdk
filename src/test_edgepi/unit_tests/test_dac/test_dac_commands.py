@@ -19,7 +19,7 @@ def fixture_test_dac_ops(mocker):
                   return_value = read_binfile())
     eeprom = EdgePiEEPROM()
     eeprom_data  = eeprom.get_edgepi_reserved_data()
-    dac_calib_params = eeprom_data.dac_calib_parms
+    dac_calib_params = eeprom_data.dac_calib_params
     dac_ops = DACCommands(dac_calib_params)
     return dac_ops
 
@@ -109,7 +109,7 @@ def test_dac_generate_write_and_update_command(a, b, c, dac_ops):
 
 
 @pytest.mark.parametrize("ch, expected, dac_gain, result",
-                        [(1, 2.345, 1, 30282), (0, 2.345, 2, 15285), (3, 2.345, 1, 30341)])
+                        [(1, 2.345, 1, 30293), (0, 2.345, 2, 15221), (3, 2.345, 1, 30229)])
 def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
     assert dac_ops.voltage_to_code(ch, expected, dac_gain) == result
 
@@ -118,8 +118,8 @@ def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
     "ch, code, dac_gain, result",
     [
         (1, 33798, 1, 2.619),
-        (0, 33798, 2, 5.239),
-        (3, 33798, 1, 2.614),
+        (0, 33798, 2, 5.263),
+        (3, 33798, 1, 2.624),
     ],
 )
 def test_dac_code_to_voltage(ch, code, dac_gain, result, dac_ops):

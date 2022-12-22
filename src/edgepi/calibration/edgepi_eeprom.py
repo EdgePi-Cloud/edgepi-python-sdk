@@ -1,13 +1,17 @@
 '''Helper class to access on board eeprom'''
 
+# pylint: disable=no-name-in-module
+# https://github.com/protocolbuffers/protobuf/issues/10372
+
 import logging
 import math
 
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    MessageFieldNumber,
-    EdgePiEEPROMData)
+    MessageFieldNumber
+    )
+from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
@@ -20,6 +24,7 @@ class EdgePiEEPROM(I2CDevice):
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
+        self.log.info("Initializing EEPROM Access")
         self.eeprom_layout = EepromLayout()
         super().__init__(self.__dev_path)
 
@@ -98,16 +103,7 @@ class EdgePiEEPROM(I2CDevice):
         """
         # pylint: disable=no-member
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
-        eeprom_data = EdgePiEEPROMData()
-        eeprom_data.dac_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.dac)
-        eeprom_data.adc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.adc)
-        eeprom_data.rtd_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.rtd)
-        eeprom_data.tc_calib_parms=eeprom_data.message_to_dict(self.eeprom_layout.tc)
-        eeprom_data.config_key=eeprom_data.keys_to_str(self.eeprom_layout.config_key)
-        eeprom_data.data_key=eeprom_data.keys_to_str(self.eeprom_layout.data_key)
-        eeprom_data.serial= self.eeprom_layout.serial_number
-        eeprom_data.model= self.eeprom_layout.model
-        eeprom_data.client_id= self.eeprom_layout.client_id
+        eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
     def sequential_read(self, mem_addr: int = None, length: int = None):
@@ -124,9 +120,9 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
-        self.log.debug(f'Reading Address {mem_addr}, {length} bytes, {msg[1].data}')
+        self.log.debug(f'Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {msg[1].data}')
+        self.log.debug(f'Read data: {len(msg[1].data)}')
         return read_result
 
 

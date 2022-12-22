@@ -223,7 +223,7 @@ class EdgePiADC(SPI):
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
         eeprom_data  = eeprom.get_edgepi_reserved_data()
-        self.adc_calib_params = eeprom_data.adc_calib_parms
+        self.adc_calib_params = eeprom_data.adc_calib_params
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()

@@ -4,9 +4,12 @@ Module for I2C devices
 Classes:
     I2CDevice
 """
+import logging
 
 from typing import Union
 from periphery import I2C
+
+_logger = logging.getLogger(__name__)
 
 class I2CDevice():
     '''
@@ -14,7 +17,8 @@ class I2CDevice():
     '''
     def __init__(self, fd: str = None):
         self.fd = fd
-        self.i2cdev = I2C(fd)
+        _logger.debug(f"Initialized I2C device with path '{self.fd}'")
+        self.i2cdev = I2C(devpath=fd)
 
     def set_read_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''
