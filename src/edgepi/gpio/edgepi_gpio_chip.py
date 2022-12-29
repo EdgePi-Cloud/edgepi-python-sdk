@@ -44,7 +44,7 @@ class EdgePiGPIOChip(GpioDevice):
                        pin_dir=self.gpiochip_pins_dict[pin_name].dir,
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias)
         state = self.read_state()
-        self.close()
+        self.close_gpio()
         return state
 
     def write_gpio_pin_state(self, pin_name: str = None, state: bool = None):
@@ -61,7 +61,7 @@ class EdgePiGPIOChip(GpioDevice):
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias)
         self.write_state(state)
         read_back = self.read_state()
-        self.close()
+        self.close_gpio()
         return read_back
 
     def set_gpio_pin_dir(self, pin_name: str = None, direction: bool = None):
@@ -74,7 +74,7 @@ class EdgePiGPIOChip(GpioDevice):
         self.open_gpio(pin_num=self.__pin_name_dict[pin_name],
                        pin_dir="in" if direction else "out",
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias)
-        self.close()
+        self.close_gpio()
 
     def toggle_gpio_pin_state(self, pin_name: str = None):
         """
@@ -92,4 +92,4 @@ class EdgePiGPIOChip(GpioDevice):
             self.write_state(False)
         else:
             self.write_state(True)
-        self.close()
+        self.close_gpio()

@@ -232,6 +232,7 @@ _list_of_DOUT_cpu_gpios =  [
 ]
 
 _list_of_DOUT_expander_gpios =[
+    None, None,
     DOUTPins.DOUT8.value, DOUTPins.DOUT7.value,
     DOUTPins.DOUT6.value, DOUTPins.DOUT5.value,
     DOUTPins.DOUT4.value, DOUTPins.DOUT3.value]
@@ -349,7 +350,8 @@ def _generate_DOUT_expander_pins(): #pylint: disable=C0103
     pin_dict = {}
     for pin, set_code, clear_code, dir_out_code, dir_in_code in \
     zip(_list_of_DOUT_expander_gpios,GpioAOutputSet,GpioAOutputClear,GpioAPinDirOut,GpioAPinDirIn):
-
+        if pin is None:
+            continue
         pin_dict.update({pin : I2cPinInfo(set_code.value,
                                           clear_code.value,
                                           dir_out_code.value,
