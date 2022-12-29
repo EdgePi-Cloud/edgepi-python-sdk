@@ -24,7 +24,7 @@ def test_edgepi_gpio_init():
 @pytest.mark.parametrize("pin_name, mock_value, result", [("DIN1",[True], True)])
 def test_read_gpio_pin_state(mocker, pin_name, mock_value, result):
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.open_gpio")
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close")
+    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close_gpio")
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.read_state", return_value = mock_value[0])
     gpio = EdgePiGPIOChip()
     assert gpio.read_gpio_pin_state(pin_name) == result
@@ -33,7 +33,7 @@ def test_read_gpio_pin_state(mocker, pin_name, mock_value, result):
                                                           ("DIN1",[False], False)])
 def test_write_gpio_pin_state(mocker, pin_name, mock_value, result):
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.open_gpio")
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close")
+    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close_gpio")
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.write_state")
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.read_state", return_value = mock_value[0])
     gpio = EdgePiGPIOChip()
