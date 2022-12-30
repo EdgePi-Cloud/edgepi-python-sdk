@@ -1,7 +1,7 @@
 '''Integration tests for edgepi_digital_output.py module'''
 
-import pytest
 import time
+import pytest
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput
 from edgepi.gpio.gpio_constants import GpioPins
 
