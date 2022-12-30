@@ -43,6 +43,6 @@ class GpioDevice:
         """
         self.gpio.write(state)
 
-    def close(self):
+    def close_gpio(self):
         """Close GPIO connection"""
         self.gpio.close()
