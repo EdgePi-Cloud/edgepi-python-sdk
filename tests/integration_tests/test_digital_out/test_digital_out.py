@@ -17,7 +17,7 @@ from edgepi.gpio.gpio_constants import GpioPins
 ])
 def test_output_high(pin_name):
     dout=EdgePiDigitalOutput()
-    dout.digital_output_direction(pin_name, True)
+    dout.digital_output_state(pin_name, True)
     time.sleep(1)
 
 @pytest.mark.parametrize("pin_name", [
@@ -32,5 +32,5 @@ def test_output_high(pin_name):
 ])
 def test_output_low(pin_name):
     dout=EdgePiDigitalOutput()
-    dout.digital_output_direction(pin_name, False)
+    dout.digital_output_state(pin_name, False)
     time.sleep(1)
