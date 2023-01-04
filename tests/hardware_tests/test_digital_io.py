@@ -22,7 +22,7 @@ def test_input_state(din_pin, dout_pin):
     dout.digital_output_state(dout_pin, True)
     changed_state = din.digital_input_state(din_pin)
     assert initial_state is not changed_state
-    dout.digital_output_state(dout_pin, True)
+    dout.digital_output_state(dout_pin, False)
     changed_state = din.digital_input_state(din_pin)
     assert initial_state is changed_state
     
