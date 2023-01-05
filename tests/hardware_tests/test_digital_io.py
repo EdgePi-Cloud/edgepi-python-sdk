@@ -1,5 +1,6 @@
 '''Hardware tests for verifying digital input and output module'''
 
+from time import sleep
 import pytest
 from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput
@@ -20,9 +21,11 @@ def test_input_state(din_pin, dout_pin):
     dout = EdgePiDigitalOutput()
     initial_state = din.digital_input_state(din_pin)
     dout.digital_output_state(dout_pin, True)
+    sleep(0.1)
     changed_state = din.digital_input_state(din_pin)
     assert initial_state is not changed_state
     dout.digital_output_state(dout_pin, False)
+    sleep(0.1)
     changed_state = din.digital_input_state(din_pin)
     assert initial_state is changed_state
     
