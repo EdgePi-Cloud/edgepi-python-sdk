@@ -28,4 +28,3 @@ def test_input_state(din_pin, dout_pin):
     sleep(0.1)
     changed_state = din.digital_input_state(din_pin)
     assert initial_state is changed_state
-    

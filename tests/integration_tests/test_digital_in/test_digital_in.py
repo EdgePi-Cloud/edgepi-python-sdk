@@ -18,4 +18,3 @@ def test_input_state(pin_name):
     din=EdgePiDigitalInput()
     pin_state = din.digital_input_state(pin_name)
     assert pin_state is False
-    
