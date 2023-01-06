@@ -94,6 +94,7 @@ def test_dac_reset(dac):
     dac.reset()
 
     for ch in CH:
-        assert dac.compute_expected_voltage(ch) == pytest.approx(0, abs=FLOAT_ERROR)
+        # pylint: disable=line-too-long
+        assert dac.compute_expected_voltage(ch) == pytest.approx(dac.dac_ops.dict_calib_param[ch] , abs=FLOAT_ERROR)
         # pylint: disable=line-too-long
         assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
