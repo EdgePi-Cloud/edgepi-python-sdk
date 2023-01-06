@@ -18,6 +18,7 @@ UPPER_VOLT_LIMIT = UPPER_LIMIT  # upper code limit with 3 dec place precision
 LOWER_VOLT_LIMIT = 0  # lower code limit
 NUM_PINS = 8
 FLOAT_ERROR = 1e-3
+STORE_ERROR = 1e-9
 
 
 @pytest.fixture(name="dac")
@@ -94,6 +95,7 @@ def test_dac_reset(dac):
     dac.reset()
 
     for ch in CH:
-        assert dac.compute_expected_voltage(ch) == pytest.approx(0, abs=FLOAT_ERROR)
         # pylint: disable=line-too-long
-        assert not dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
+        assert dac.compute_expected_voltage(ch) == pytest.approx(dac.dac_ops.dict_calib_param[ch.value].offset , abs=STORE_ERROR)
+        # pylint: disable=line-too-long
+        assert dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
