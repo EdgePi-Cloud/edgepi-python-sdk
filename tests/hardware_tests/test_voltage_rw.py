@@ -13,7 +13,7 @@ from edgepi.dac.dac_constants import DACChannel
 _logger = logging.getLogger(__name__)
 
 
-NUM_CHANNELS = 1
+NUM_CHANNELS = 8
 READS_PER_WRITE = 1
 RW_ERROR = 1e-3 # TODO: change to mV
 MAX_VOLTAGE = 5.0
