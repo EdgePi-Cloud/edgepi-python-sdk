@@ -83,6 +83,13 @@ class GpioConfigs(Enum):
                              port='B',
                              address=GpioExpanderAddress.EXP_TWO.value,
                              dev_path='/dev/i2c-10')
+    RELAY = GpioExpanderConfig(name = 'relay',
+                             device='i2c',
+                             num_pins=1,
+                             dir='out',
+                             port='B',
+                             address=GpioExpanderAddress.EXP_TWO.value,
+                             dev_path='/dev/i2c-10')
     LED = GpioExpanderConfig(name = 'led',
                              device='i2c',
                              num_pins=8,
@@ -316,6 +323,21 @@ def _generate_RTD_pins(): #pylint: disable=C0103
                                                         GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
+def _generate_RELAY_pins(): #pylint: disable=C0103
+    '''
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    '''
+    pin_dict = {}
+    pin_dict.update({_list_of_RTD_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_8.value,
+                                                        GpioBOutputClear.CLEAR_OUTPUT_8.value,
+                                                        GpioBPinDirOut.PIN8_DIR_OUT.value,
+                                                        GpioBPinDirIn.PIN8_DIR_IN.value,
+                                                        GpioExpanderAddress.EXP_TWO.value)})
+    return pin_dict
+
 def _generate_DIN_pins(): #pylint: disable=C0103
     """
         Args:
@@ -377,6 +399,8 @@ def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
         pin_dict =  _generate_ADC_pins()
     elif config.name == GpioConfigs.RTD.value.name:
         pin_dict =  _generate_RTD_pins()
+    elif config.name == GpioConfigs.RELAY.value.name:
+        pin_dict = _generate_RELAY_pins()
     elif config.name == GpioConfigs.DIN.value.name:
         pin_dict = _generate_DIN_pins()
     elif config.name == GpioConfigs.DOUT1.value.name:
@@ -396,6 +420,7 @@ def generate_expander_pin_info():
     pin_dict.update(_generate_DAC_pins())
     pin_dict.update(_generate_ADC_pins())
     pin_dict.update(_generate_RTD_pins())
+    pin_dict.update(_generate_RELAY_pins())
     pin_dict.update(_generate_LED_pins())
     pin_dict.update(_generate_DOUT_expander_pins())
     return pin_dict

@@ -12,6 +12,8 @@ import pytest
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.relay.edgepi_relay import EdgePiRelay
 
+@pytest.mark.parametrize("normallyOpen, pin_name", [(True, GpioPins.RELAY.value),
+                                                    (False, GpioPins.RELAY.value)])
 def test_edgepi_relay_init(mocker, normallyOpen, pin_name):
     mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO')
     pin_set = mocker.patch('edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_pin_state')
