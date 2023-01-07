@@ -8,11 +8,13 @@ _logger = logging.getLogger(__name__)
 
 class EdgePiRelay():
     """A class to control the relay"""
-    def __init__(self, NormallyOpen : bool = True):
+    def __init__(self, normally_open : bool = True):
         # To limit access to input functionality, using composition rather than inheritance
         self.gpio = EdgePiGPIO()
-        self.gpio.clear_pin_state(GpioPins.RELAY.value) if NormallyOpen else \
-        self.gpio.set_pin_state (GpioPins.RELAY.value)
+        if normally_open:
+            self.gpio.clear_pin_state(GpioPins.RELAY.value)
+        else:
+            self.gpio.set_pin_state (GpioPins.RELAY.value)
 
     def get_state_relay(self):
         """
@@ -34,7 +36,7 @@ class EdgePiRelay():
             N/A
         """
         self.gpio.toggle_pin(GpioPins.RELAY.value)
-    
+
     def close_relay(self):
         """
         Method to close the relay
@@ -52,5 +54,5 @@ class EdgePiRelay():
             N/A
         Return:
             N/A
-        """ 
+        """
         self.gpio.clear_pin_state(GpioPins.RELAY.value)

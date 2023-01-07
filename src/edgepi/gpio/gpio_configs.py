@@ -181,6 +181,11 @@ class RTDPins(Enum):
 
 _list_of_RTD_gpios = [RTDPins.RTD_EN.value]
 
+class RELAYPins(Enum):
+    "RTD GPIO Pin Names"
+    RELAY_EN = 'RELAY_EN'
+_list_of_RELAY_gpios = [RELAYPins.RELAY_EN.value]
+
 
 class LEDPins(Enum):
     "LED GPIO Pin Names"
@@ -331,7 +336,7 @@ def _generate_RELAY_pins(): #pylint: disable=C0103
         a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     '''
     pin_dict = {}
-    pin_dict.update({_list_of_RTD_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_8.value,
+    pin_dict.update({_list_of_RELAY_gpios[0] : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_8.value,
                                                         GpioBOutputClear.CLEAR_OUTPUT_8.value,
                                                         GpioBPinDirOut.PIN8_DIR_OUT.value,
                                                         GpioBPinDirIn.PIN8_DIR_IN.value,
