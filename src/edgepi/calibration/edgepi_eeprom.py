@@ -15,6 +15,8 @@ from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
+class MemoryOutOfBound(Exception):
+    """Raised memory out-of-bound error"""
 
 class EdgePiEEPROM(I2CDevice):
     '''
@@ -63,7 +65,7 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             length (int): size of memory to read
         '''
-        length = self.sequential_read(EdgePiMemoryInfo.USED_SPACE.value, 2)
+        length = self.__sequential_read(EdgePiMemoryInfo.USED_SPACE.value, 2)
         return (length[0]<<8)| length[1]
 
     def __read_edgepi_reserved_memory(self):
@@ -76,7 +78,7 @@ class EdgePiEEPROM(I2CDevice):
             Byte_string (bytes): strings of bytes read from the eeprom
         '''
         mem_size = self.__allocated_memory()
-        buff_list = self.sequential_read(EdgePiMemoryInfo.BUFF_START.value, mem_size)
+        buff_list = self.__sequential_read(EdgePiMemoryInfo.BUFF_START.value, mem_size)
         return bytes(buff_list)
 
     def get_message_of_interest(self, msg: MessageFieldNumber = None):
@@ -106,7 +108,7 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
-    def sequential_read(self, mem_addr: int = None, length: int = None):
+    def __sequential_read(self, mem_addr: int = None, length: int = None):
         '''
         Read operation reads the specified number of memory location starting from provided address.
         The address pointer will wrap around when it reaches the end of the memory.
@@ -126,7 +128,7 @@ class EdgePiEEPROM(I2CDevice):
         return read_result
 
 
-    def selective_read(self, mem_addr: int = None):
+    def __selective_read(self, mem_addr: int = None):
         '''
         Read operation reads a data from the specified address
         Args:
@@ -142,7 +144,7 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'Read data: {msg[1].data}')
         return read_result
 
-    def byte_write_register(self, mem_addr: int = None, data: int = None):
+    def __byte_write_register(self, mem_addr: int = None, data: int = None):
         '''
         Write operation writes a data to the specified address
         Args:
@@ -157,7 +159,7 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
-    def page_write_register(self, mem_addr: int = None, data: list = None):
+    def __page_write_register(self, mem_addr: int = None, data: list = None):
         '''
         Write operation writes a page of data to the specified address
         Args:
@@ -171,3 +173,60 @@ class EdgePiEEPROM(I2CDevice):
         msg = self.set_write_msg(mem_addr_list, data)
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
+
+    def __check_memory_bound(self, mem_addr: int = None, length: int = None):
+        """
+        Check whether the length is within the memory size. Raise error when length goes out of
+        bound
+        Args:
+            mem_addr (int): starting memory address to read from
+            length (int): length of data to read
+        """
+        if mem_addr+length > EdgePiMemoryInfo.USER_SPACE_END_BYTE.value:
+            raise MemoryOutOfBound(f'Operation range is over the size of the memory')
+    
+    def __generate_list_of_pages(self, mem_addr: int = None, data: int = None):
+        """
+        Generate a two dimensional structured list by pages of data
+        Args:
+            mem_addr (int): starting memory address to read from
+            data (int): data to write
+        Return:
+            page_writable_list (list): [[Page_N], [Page_N+1]...]]
+        """
+        curr_page_remainder = EEPROMInfo.PAGE_SIZE.value - mem_addr%EEPROMInfo.PAGE_SIZE.value
+        page_1 = [data[val] for val in curr_page_remainder]
+        data_remainder = data[curr_page_remainder:-1]
+        page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
+                  for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
+        page_n.insert(0, page_1)
+        return page_n
+
+    def read_memory(self, mem_addr: int = None, length: int = None):
+        """
+        Read user space memory starting from 0 to 16383
+        Args:
+            mem_addr (int): starting memory address to read from
+            length (int): length of data to read
+        Return:
+            data (list): list of data read from the specified memory and length
+        """
+        if mem_addr is None or length is None:
+            raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
+        self.__check_memory_bound(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
+        data = self.__sequential_read(mem_addr, (length + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value))
+        return data
+
+    def write_memory(self, mem_addr: int = None, data: list = None):
+        """
+        Address to write to
+        Args:
+            mem_addr (int): starting memory address to write to
+            data (list): list of data to write
+        Return:
+            N/A
+        """
+        if mem_addr is None or data is None:
+            raise ValueError(f'Invalid Value passed: {mem_addr}, {data}')
+        self.__check_memory_bound(mem_addr+EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, len(data))
+

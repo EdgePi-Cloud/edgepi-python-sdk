@@ -54,7 +54,7 @@ def test__byte_address_generation(memory_address, result, eeprom):
 @pytest.mark.parametrize("reg_addr, mock_val, result", [(1, [23], [23])])
 def test_selective_read(mocker, eeprom, reg_addr, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
-    read_result = eeprom.selective_read(reg_addr)
+    read_result = eeprom._EdgePiEEPROM__selective_read(reg_addr)
     assert read_result == result
 
 
@@ -64,7 +64,7 @@ def test_selective_read(mocker, eeprom, reg_addr, mock_val, result):
                                                                 [23, 34, 56, 7, 8])])
 def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
-    read_result = eeprom.sequential_read( reg_addr, length)
+    read_result = eeprom._EdgePiEEPROM__sequential_read( reg_addr, length)
     assert read_result == result
 
 @pytest.mark.parametrize("mock_value,result",
@@ -75,7 +75,7 @@ def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
                         ])
 def test__allocated_memory(mocker,mock_value,result, eeprom):
     # pylint: disable=protected-access
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.sequential_read",
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 return_value =mock_value)
     length = eeprom._EdgePiEEPROM__allocated_memory()
     assert length == result
@@ -83,7 +83,7 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
 def test__read_edgepi_reserved_memory(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory")
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.sequential_read",
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 return_value =list(read_binfile()))
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == read_binfile()
