@@ -187,19 +187,25 @@ class EdgePiEEPROM(I2CDevice):
     
     def __generate_list_of_pages(self, mem_addr: int = None, data: int = None):
         """
-        Generate a two dimensional structured list by pages of data
+        Generate a two dimensional structured list with length of a page. This is method is used for
+        read/write by page
         Args:
             mem_addr (int): starting memory address to read from
             data (int): data to write
         Return:
             page_writable_list (list): [[Page_N], [Page_N+1]...]]
         """
-        curr_page_remainder = EEPROMInfo.PAGE_SIZE.value - mem_addr%EEPROMInfo.PAGE_SIZE.value
-        page_1 = [data[val] for val in curr_page_remainder]
-        data_remainder = data[curr_page_remainder:-1]
-        page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
-                  for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
-        page_n.insert(0, page_1)
+        # starting memory address can be anywhere from 0~63, check whether the length of data fits
+        # within the range.
+        if (mem_addr%EEPROMInfo.PAGE_SIZE.value + len(data)) < EEPROMInfo.PAGE_SIZE.value:
+            page_n = [data]
+        else:
+            curr_page_remainder = EEPROMInfo.PAGE_SIZE.value - mem_addr%EEPROMInfo.PAGE_SIZE.value
+            page_1 = [data[val] for val in range(curr_page_remainder)]
+            data_remainder = data[curr_page_remainder:]
+            page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
+                      for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
+            page_n.insert(0, page_1)
         return page_n
 
     def read_memory(self, mem_addr: int = None, length: int = None):
@@ -211,7 +217,7 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        if mem_addr is None or length is None:
+        if mem_addr is None or length is None or mem_addr < 0 or length < 0:
             raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
         self.__check_memory_bound(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
         data = self.__sequential_read(mem_addr, (length + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value))

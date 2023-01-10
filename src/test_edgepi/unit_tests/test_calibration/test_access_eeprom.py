@@ -10,9 +10,10 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
+from contextlib import nullcontext as does_not_raise
 import pytest
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
@@ -188,3 +189,79 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
+
+@pytest.mark.parametrize("mem_address,length, error",
+                        [(0, 5000,does_not_raise()),
+                         (0, 10000,does_not_raise()),
+                         (0, 16383,does_not_raise()),
+                         (0, 16384,pytest.raises(MemoryOutOfBound)),
+                         (16383, 0,does_not_raise()),
+                         (16384, 1,pytest.raises(MemoryOutOfBound))
+                        ])
+def test__check_memory_bound(mem_address, length, error, eeprom):
+    address = mem_address + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+    with error:
+        eeprom._EdgePiEEPROM__check_memory_bound(address , length)
+
+@pytest.mark.parametrize("mem_address,data,expected",
+                        [(0, [1,2,3,4,5,6], [[1,2,3,4,5,6]]),
+                         (60, [60,61,62,63], [[60,61,62,63]]),
+                         (60, [60,61,62,63,64], [[60,61,62,63],[64]]),
+                         (63, [63,64,65,66,67,68],[[63],[64,65,66,67,68]]),
+                         (63, [63, 64, 65, 66, 67,
+                               68, 69, 70, 71, 72,
+                               73, 74, 75, 76, 77,
+                               78, 79, 80, 81, 82,
+                               83, 84, 85, 86, 87,
+                               88, 89, 90, 91, 92, 
+                               93, 94, 95, 96, 97, 
+                               98, 99, 100, 101, 102, 
+                               103, 104, 105, 106, 107, 
+                               108, 109, 110, 111, 112, 
+                               113, 114, 115, 116, 117, 
+                               118, 119, 120, 121, 122, 
+                               123, 124, 125, 126],[[63], [64, 65, 66, 67,
+                                                           68, 69, 70, 71, 72,
+                                                           73, 74, 75, 76, 77,
+                                                           78, 79, 80, 81, 82,
+                                                           83, 84, 85, 86, 87,
+                                                           88, 89, 90, 91, 92, 
+                                                           93, 94, 95, 96, 97, 
+                                                           98, 99, 100, 101, 102, 
+                                                           103, 104, 105, 106, 107, 
+                                                           108, 109, 110, 111, 112, 
+                                                           113, 114, 115, 116, 117, 
+                                                           118, 119, 120, 121, 122, 
+                                                           123, 124, 125, 126]]),
+                         (63, [63, 64, 65, 66, 67,
+                               68, 69, 70, 71, 72,
+                               73, 74, 75, 76, 77,
+                               78, 79, 80, 81, 82,
+                               83, 84, 85, 86, 87,
+                               88, 89, 90, 91, 92, 
+                               93, 94, 95, 96, 97, 
+                               98, 99, 100, 101, 102, 
+                               103, 104, 105, 106, 107, 
+                               108, 109, 110, 111, 112, 
+                               113, 114, 115, 116, 117, 
+                               118, 119, 120, 121, 122, 
+                               123, 124, 125, 126, 127, 128],[[63],
+                                                              [64, 65, 66, 67,
+                                                               68, 69, 70, 71, 72,
+                                                               73, 74, 75, 76, 77,
+                                                               78, 79, 80, 81, 82,
+                                                               83, 84, 85, 86, 87,
+                                                               88, 89, 90, 91, 92, 
+                                                               93, 94, 95, 96, 97, 
+                                                               98, 99, 100, 101, 102, 
+                                                               103, 104, 105, 106, 107, 
+                                                               108, 109, 110, 111, 112, 
+                                                               113, 114, 115, 116, 117, 
+                                                               118, 119, 120, 121, 122, 
+                                                               123, 124, 125, 126, 127],
+                                                              [128]]),
+                        ])
+def test__generate_list_of_pages(mem_address, data, expected, eeprom):
+    result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
+    assert result == expected
+
