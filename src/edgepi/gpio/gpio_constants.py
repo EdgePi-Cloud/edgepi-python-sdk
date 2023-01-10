@@ -180,7 +180,7 @@ class GpioPins(Enum):
     GNDSW_IN1 = 'GNDSW_IN1'
     GNDSW_IN2 = 'GNDSW_IN2'
     RTD_EN = 'RTD_EN'
-    RELAY = 'RELAY'
+    RELAY = 'RELAY_EN'
     DOUT1 = 'DOUT1'
     DOUT2 = 'DOUT2'
     DOUT3 = 'DOUT3'
