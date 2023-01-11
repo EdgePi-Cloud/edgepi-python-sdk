@@ -196,6 +196,8 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
                          (0, 16383,does_not_raise()),
                          (0, 16384,pytest.raises(MemoryOutOfBound)),
                          (16383, 0,does_not_raise()),
+                        #  following shouldn't raise an error
+                         (16383, 1,does_not_raise()),
                          (16384, 1,pytest.raises(MemoryOutOfBound))
                         ])
 def test__check_memory_bound(mem_address, length, error, eeprom):

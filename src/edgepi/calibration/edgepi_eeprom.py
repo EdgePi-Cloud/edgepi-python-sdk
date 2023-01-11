@@ -174,6 +174,7 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
+# Todo: add separate generic check function to check length, userspace and other space
     def __check_memory_bound(self, mem_addr: int = None, length: int = None):
         """
         Check whether the length is within the memory size. Raise error when length goes out of
@@ -182,10 +183,11 @@ class EdgePiEEPROM(I2CDevice):
             mem_addr (int): starting memory address to read from
             length (int): length of data to read
         """
+        # me
         if mem_addr+length > EdgePiMemoryInfo.USER_SPACE_END_BYTE.value:
             raise MemoryOutOfBound(f'Operation range is over the size of the memory')
-    
-    def __generate_list_of_pages(self, mem_addr: int = None, data: int = None):
+    # TODO: suppport different data structure and types ex_ json
+    def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
         Generate a two dimensional structured list with length of a page. This is method is used for
         read/write by page
@@ -208,6 +210,7 @@ class EdgePiEEPROM(I2CDevice):
             page_n.insert(0, page_1)
         return page_n
 
+# Todo: nomenclautre for mem_address for different functions
     def read_memory(self, mem_addr: int = None, length: int = None):
         """
         Read user space memory starting from 0 to 16383
@@ -217,10 +220,11 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        if mem_addr is None or length is None or mem_addr < 0 or length < 0:
+        # move to check memory bound function
+        if mem_addr is None or length is None or mem_addr < 0 or length <= 0:
             raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
         self.__check_memory_bound(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
-        data = self.__sequential_read(mem_addr, (length + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value))
+        data = self.__sequential_read(mem_addr+EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
         return data
 
     def write_memory(self, mem_addr: int = None, data: list = None):
