@@ -194,14 +194,13 @@ class EdgePiEEPROM(I2CDevice):
         if mem_addr+length > end_address:
             raise MemoryOutOfBound(f'Operation range is over the size of the memory')
 
-    # TODO: suppport different data structure and types ex_ json
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
         Generate a two dimensional structured list with length of a page. This is method is used for
         read/write by page
         Args:
             mem_addr (int): starting memory address to read from
-            data (int): data to write
+            data (list): data to write
         Return:
             page_writable_list (list): [[Page_N], [Page_N+1]...]]
         """
@@ -228,20 +227,23 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        self.__parameter_sanity_chekc(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
-        data = self.__sequential_read(mem_addr+EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
+        self.__parameter_sanity_chekc(mem_addr, length, True)
+        start_adress = mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        data = self.__sequential_read(start_adress, length)
         return data
 
-    def write_memory(self, mem_addr: int = None, data: list = None):
+    def write_memory(self, mem_addr: int = None, data: bytes = None):
         """
         Address to write to
         Args:
             mem_addr (int): starting memory address to write to
-            data (list): list of data to write
+            data (bytes): serialized data to be stoed in the EEPROM
         Return:
             N/A
         """
         if mem_addr is None or data is None:
             raise ValueError(f'Invalid Value passed: {mem_addr}, {data}')
-        self.__check_memory_bound(mem_addr+EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, len(data))
+        self.__parameter_sanity_chekc(mem_addr, len(data))
+        start_adress = mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        self.__generate_list_of_pages(start_adress, list(data))
 
