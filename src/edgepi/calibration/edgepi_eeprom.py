@@ -228,9 +228,14 @@ class EdgePiEEPROM(I2CDevice):
             data (list): list of data read from the specified memory and length
         """
         self.__parameter_sanity_chekc(mem_addr, length, True)
+        dummy_data = self.__generate_list_of_pages(mem_addr, [0]*length)
         start_adress = mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        data = self.__sequential_read(start_adress, length)
-        return data
+        address_offset = 0
+        data_read = []
+        for data in dummy_data:
+            data_read = data_read + self.__sequential_read(start_adress+address_offset, len(data))
+            address_offset = len(data)
+        return data_read
 
     def write_memory(self, mem_addr: int = None, data: bytes = None):
         """

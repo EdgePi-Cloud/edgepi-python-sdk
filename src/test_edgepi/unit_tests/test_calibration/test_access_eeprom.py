@@ -281,3 +281,19 @@ def test__generate_list_of_pages(mem_address, data, expected, eeprom):
     result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
     assert result == expected
 
+# TODO: add more teset cases
+@pytest.mark.parametrize("mem_address, length, expected",
+                        [(0, 34, [i for i in range(0,34)]),
+                         (0, 64, [i for i in range(0,64)]),
+                         (30, 34, [i for i in range(30,(30+34))]),
+                         (30, 35, [i for i in range(30,(30+35))]),
+                         (0, 128, [i for i in range(0,(128))]),
+                         (3, 128, [i for i in range(3,(3+128))])
+                        ])
+def test_read_memory(mocker, mem_address, length, expected, eeprom):
+    dummay = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, [i for i in range(mem_address,mem_address+length)])
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
+        side_effect = dummay)
+    result = eeprom.read_memory(mem_address, length)
+    assert result == expected
