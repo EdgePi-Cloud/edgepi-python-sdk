@@ -173,19 +173,27 @@ class EdgePiEEPROM(I2CDevice):
         msg = self.set_write_msg(mem_addr_list, data)
         self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-
-# Todo: add separate generic check function to check length, userspace and other space
-    def __check_memory_bound(self, mem_addr: int = None, length: int = None):
+    
+    def __parameter_sanity_chekc(self, mem_addr: int = None,
+                                 length: int = None,
+                                 user_space: bool = True):
         """
-        Check whether the length is within the memory size. Raise error when length goes out of
-        bound
+        Generic check function for target memory address and length of data to read/write
         Args:
             mem_addr (int): starting memory address to read from
             length (int): length of data to read
+            user_space (bool): True if mem_addr is in user space
         """
-        # me
-        if mem_addr+length > EdgePiMemoryInfo.USER_SPACE_END_BYTE.value:
+        # End address depending on the user_space flag
+        end_address = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value if user_space \
+                      else (EdgePiMemoryInfo.USER_SPACE_START_BYTE.value - 1)
+        # Checks whether proper values are passed
+        if mem_addr is None or length is None or mem_addr < 0 or length <= 0:
+            raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
+        # Checks whether starting address and length of data to read/write are within memory bound
+        if mem_addr+length > end_address:
             raise MemoryOutOfBound(f'Operation range is over the size of the memory')
+
     # TODO: suppport different data structure and types ex_ json
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
@@ -210,7 +218,7 @@ class EdgePiEEPROM(I2CDevice):
             page_n.insert(0, page_1)
         return page_n
 
-# Todo: nomenclautre for mem_address for different functions
+# TODO: nomenclautre for mem_address for different functions
     def read_memory(self, mem_addr: int = None, length: int = None):
         """
         Read user space memory starting from 0 to 16383
@@ -220,10 +228,7 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        # move to check memory bound function
-        if mem_addr is None or length is None or mem_addr < 0 or length <= 0:
-            raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
-        self.__check_memory_bound(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
+        self.__parameter_sanity_chekc(mem_addr + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
         data = self.__sequential_read(mem_addr+EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, length)
         return data
 

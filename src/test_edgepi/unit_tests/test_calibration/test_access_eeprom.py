@@ -22,6 +22,13 @@ def fixture_test_dac(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     yield EdgePiEEPROM()
 
+# Max data size of osensa space
+OSENSA_DATA_SIZE = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value-3
+
+# Max size of User space = End of memory - start of memory + 1
+USER_SPACE_SIZE = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
+                  EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 1
+
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""
     with open(PATH+"/serializedFile","rb") as fd:
@@ -190,20 +197,27 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
 
-@pytest.mark.parametrize("mem_address,length, error",
-                        [(0, 5000,does_not_raise()),
-                         (0, 10000,does_not_raise()),
-                         (0, 16383,does_not_raise()),
-                         (0, 16384,pytest.raises(MemoryOutOfBound)),
-                         (16383, 0,does_not_raise()),
-                        #  following shouldn't raise an error
-                         (16383, 1,does_not_raise()),
-                         (16384, 1,pytest.raises(MemoryOutOfBound))
+@pytest.mark.parametrize("mem_address,length, user_space, error",
+                        [(0, 5000,True,does_not_raise()),
+                         (0, 10000, True,does_not_raise()),
+                         (0, USER_SPACE_SIZE-1,True,does_not_raise()),
+                         (0, USER_SPACE_SIZE, True,pytest.raises(MemoryOutOfBound)),
+                         (USER_SPACE_SIZE-1,0,True,pytest.raises(ValueError)),
+                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
+                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
+                         (USER_SPACE_SIZE-2,1,True,does_not_raise()),
+                         (0, 5000, False,does_not_raise()),
+                         (0, 10000, False,does_not_raise()),
+                         (2, OSENSA_DATA_SIZE, False,does_not_raise()),
+                         (3, OSENSA_DATA_SIZE, False,pytest.raises(MemoryOutOfBound)),
+                         (4, OSENSA_DATA_SIZE, False, pytest.raises(MemoryOutOfBound)),
+                         (4, 0, False,pytest.raises(ValueError))
                         ])
-def test__check_memory_bound(mem_address, length, error, eeprom):
-    address = mem_address + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
+    address = (EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + mem_address) if user_space \
+              else mem_address
     with error:
-        eeprom._EdgePiEEPROM__check_memory_bound(address , length)
+        eeprom._EdgePiEEPROM__parameter_sanity_chekc(address , length, user_space)
 
 @pytest.mark.parametrize("mem_address,data,expected",
                         [(0, [1,2,3,4,5,6], [[1,2,3,4,5,6]]),
