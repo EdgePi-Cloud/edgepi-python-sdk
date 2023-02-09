@@ -11,7 +11,9 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 from contextlib import nullcontext as does_not_raise
+import json
 import pytest
+
 from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
 from edgepi.calibration.calibration_constants import CalibParam
@@ -62,6 +64,7 @@ def test__byte_address_generation(memory_address, result, eeprom):
 @pytest.mark.parametrize("reg_addr, mock_val, result", [(1, [23], [23])])
 def test_selective_read(mocker, eeprom, reg_addr, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
+    # pylint: disable=protected-access
     read_result = eeprom._EdgePiEEPROM__selective_read(reg_addr)
     assert read_result == result
 
@@ -72,6 +75,7 @@ def test_selective_read(mocker, eeprom, reg_addr, mock_val, result):
                                                                 [23, 34, 56, 7, 8])])
 def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
+    # pylint: disable=protected-access
     read_result = eeprom._EdgePiEEPROM__sequential_read( reg_addr, length)
     assert read_result == result
 
@@ -85,7 +89,8 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
     # pylint: disable=protected-access
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 return_value =mock_value)
-    length = eeprom._EdgePiEEPROM__allocated_memory()
+    # pylint: disable=protected-access
+    length = eeprom._EdgePiEEPROM__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
     assert length == result
 
 def test__read_edgepi_reserved_memory(mocker, eeprom):
@@ -93,6 +98,7 @@ def test__read_edgepi_reserved_memory(mocker, eeprom):
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory")
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 return_value =list(read_binfile()))
+    # pylint: disable=protected-access
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == read_binfile()
 
@@ -217,7 +223,8 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
     address = (EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + mem_address) if user_space \
               else mem_address
     with error:
-        eeprom._EdgePiEEPROM__parameter_sanity_chekc(address , length, user_space)
+        # pylint: disable=protected-access
+        eeprom._EdgePiEEPROM__parameter_sanity_check(address , length, user_space)
 
 @pytest.mark.parametrize("mem_address,data,expected",
                         [(0, [1,2,3,4,5,6], [[1,2,3,4,5,6]]),
@@ -229,71 +236,100 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
                                73, 74, 75, 76, 77,
                                78, 79, 80, 81, 82,
                                83, 84, 85, 86, 87,
-                               88, 89, 90, 91, 92, 
-                               93, 94, 95, 96, 97, 
-                               98, 99, 100, 101, 102, 
-                               103, 104, 105, 106, 107, 
-                               108, 109, 110, 111, 112, 
-                               113, 114, 115, 116, 117, 
-                               118, 119, 120, 121, 122, 
+                               88, 89, 90, 91, 92,
+                               93, 94, 95, 96, 97,
+                               98, 99, 100, 101, 102,
+                               103, 104, 105, 106, 107,
+                               108, 109, 110, 111, 112,
+                               113, 114, 115, 116, 117,
+                               118, 119, 120, 121, 122,
                                123, 124, 125, 126],[[63], [64, 65, 66, 67,
                                                            68, 69, 70, 71, 72,
                                                            73, 74, 75, 76, 77,
                                                            78, 79, 80, 81, 82,
                                                            83, 84, 85, 86, 87,
-                                                           88, 89, 90, 91, 92, 
-                                                           93, 94, 95, 96, 97, 
-                                                           98, 99, 100, 101, 102, 
-                                                           103, 104, 105, 106, 107, 
-                                                           108, 109, 110, 111, 112, 
-                                                           113, 114, 115, 116, 117, 
-                                                           118, 119, 120, 121, 122, 
+                                                           88, 89, 90, 91, 92,
+                                                           93, 94, 95, 96, 97,
+                                                           98, 99, 100, 101, 102,
+                                                           103, 104, 105, 106, 107,
+                                                           108, 109, 110, 111, 112,
+                                                           113, 114, 115, 116, 117,
+                                                           118, 119, 120, 121, 122,
                                                            123, 124, 125, 126]]),
                          (63, [63, 64, 65, 66, 67,
                                68, 69, 70, 71, 72,
                                73, 74, 75, 76, 77,
                                78, 79, 80, 81, 82,
                                83, 84, 85, 86, 87,
-                               88, 89, 90, 91, 92, 
-                               93, 94, 95, 96, 97, 
-                               98, 99, 100, 101, 102, 
-                               103, 104, 105, 106, 107, 
-                               108, 109, 110, 111, 112, 
-                               113, 114, 115, 116, 117, 
-                               118, 119, 120, 121, 122, 
+                               88, 89, 90, 91, 92,
+                               93, 94, 95, 96, 97,
+                               98, 99, 100, 101, 102,
+                               103, 104, 105, 106, 107,
+                               108, 109, 110, 111, 112,
+                               113, 114, 115, 116, 117,
+                               118, 119, 120, 121, 122,
                                123, 124, 125, 126, 127, 128],[[63],
                                                               [64, 65, 66, 67,
                                                                68, 69, 70, 71, 72,
                                                                73, 74, 75, 76, 77,
                                                                78, 79, 80, 81, 82,
                                                                83, 84, 85, 86, 87,
-                                                               88, 89, 90, 91, 92, 
-                                                               93, 94, 95, 96, 97, 
-                                                               98, 99, 100, 101, 102, 
-                                                               103, 104, 105, 106, 107, 
-                                                               108, 109, 110, 111, 112, 
-                                                               113, 114, 115, 116, 117, 
-                                                               118, 119, 120, 121, 122, 
+                                                               88, 89, 90, 91, 92,
+                                                               93, 94, 95, 96, 97,
+                                                               98, 99, 100, 101, 102,
+                                                               103, 104, 105, 106, 107,
+                                                               108, 109, 110, 111, 112,
+                                                               113, 114, 115, 116, 117,
+                                                               118, 119, 120, 121, 122,
                                                                123, 124, 125, 126, 127],
                                                               [128]]),
                         ])
 def test__generate_list_of_pages(mem_address, data, expected, eeprom):
+    # pylint: disable=protected-access
     result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
     assert result == expected
 
 # TODO: add more teset cases
 @pytest.mark.parametrize("mem_address, length, expected",
-                        [(0, 34, [i for i in range(0,34)]),
-                         (0, 64, [i for i in range(0,64)]),
-                         (30, 34, [i for i in range(30,(30+34))]),
-                         (30, 35, [i for i in range(30,(30+35))]),
-                         (0, 128, [i for i in range(0,(128))]),
-                         (3, 128, [i for i in range(3,(3+128))])
+                        [(0, 34, list(range(0,34))),
+                         (0, 64, list(range(0,64))),
+                         (30, 34, list(range(30,(30+34)))),
+                         (30, 35, list(range(30,(30+35)))),
+                         (0, 128, list(range(0,(128)))),
+                         (3, 128, list(range(3,(3+128))))
                         ])
 def test_read_memory(mocker, mem_address, length, expected, eeprom):
-    dummay = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, [i for i in range(mem_address,mem_address+length)])
+    # pylint: disable=line-too-long
+    # pylint: disable=protected-access
+    dummay = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, list(range(mem_address,mem_address+length)))
     mocker.patch(
         "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
         side_effect = dummay)
     result = eeprom.read_memory(mem_address, length)
     assert result == expected
+
+@pytest.mark.parametrize("mem_size, dummy_size, result, error",
+                        [(3, 3,[False, False], does_not_raise()),
+                         (512, 512, [False, False], does_not_raise()),
+                         (0x3FFF, 0, [True, False], pytest.raises(ValueError)),
+                         (0x3FFC, 5460, [True, False], does_not_raise()),
+                         (0xFFFF, 0, [False, True], does_not_raise()),
+                        ])
+def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.read_memory",
+        return_value = list(bytes(json.dumps([2]*dummy_size), "utf8")))
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
+                  return_value = mem_size)
+    with error:
+        is_full, is_empty = eeprom.init_memory()
+        assert is_full == result[0]
+        assert is_empty == result[1]
+        if not is_full and not is_empty:
+            assert eeprom.data_list == [2]*mem_size
+            assert eeprom.used_size == mem_size
+        elif is_full and not is_empty:
+            assert eeprom.data_list == [2]*int(mem_size/3)
+            assert eeprom.used_size == mem_size
+        else:
+            assert eeprom.data_list == []
