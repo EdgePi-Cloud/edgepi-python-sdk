@@ -25,8 +25,11 @@ class EdgePiMemoryInfo(Enum):
     """
     USED_SPACE = 0x00
     BUFF_START = 0x02
-    USER_SPACE_START = 0x100
-    USER_SPACE_END = 0x1FF
+    USER_SPACE_START_BYTE = 0x4000
+    USER_SPACE_END_BYTE = 0x7FFF
+    USER_SPACE_START_PAGE = 0x100
+    USER_SPACE_END_PAGE = 0x1FF
+    USER_SPACE_MAX = 0X3FFC
 
 class MessageFieldNumber(Enum):
     """
