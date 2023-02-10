@@ -2,6 +2,7 @@
 
 import logging
 
+from time import sleep
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode
@@ -14,9 +15,10 @@ _logger = logging.getLogger(__name__)
 
 NUM_CHANNELS = 8
 READS_PER_WRITE = 1
-RW_ERROR = 1e-1 # TODO: change to mV
+RW_ERROR = 1e-3 # TODO: change to mV
 MAX_VOLTAGE = 5.0
-VOLTAGE_STEP = 0.1
+VOLTAGE_STEP = 0.01
+WRITE_READ_DELAY = 0.1
 
 
 _ch_map = {
@@ -71,7 +73,7 @@ def _measure_voltage_individual(
     ):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
-
+    sleep(WRITE_READ_DELAY)
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         _logger.info(_voltage_rw_msg(dac_ch, write_voltage, read_voltage))
