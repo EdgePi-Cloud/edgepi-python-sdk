@@ -213,5 +213,7 @@ class EdgePiDAC(spi):
         """
         code_val = self.channel_readback(analog_out) if code else None
         voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
-        gain_state = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value) if gain else None
+        gain_state = self.gpio.read_pin_state(GainPin.DAC_GAIN.value) if gain else None
+        self.log.debug(f":get_state: state of {analog_out} code {code_val},"
+                       f"expected {voltage_val}, dac_gain {gain_state}")
         return code_val, voltage_val, gain_state

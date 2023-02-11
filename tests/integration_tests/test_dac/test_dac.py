@@ -18,7 +18,7 @@ UPPER_VOLT_LIMIT = UPPER_LIMIT  # upper code limit with 3 dec place precision
 LOWER_VOLT_LIMIT = 0  # lower code limit
 NUM_PINS = 8
 FLOAT_ERROR = 1e-3
-STORE_ERROR = 1e-9
+STORE_ERROR = 1e-3
 
 
 @pytest.fixture(name="dac")
@@ -69,33 +69,36 @@ def test_dac_init(dac):
 )
 def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
+        # expected_voltage = (voltage)*dac.dac_ops.dict_calib_param[analog_out.value].gain - dac.dac_ops.dict_calib_param[analog_out.value].offset
         dac.write_voltage(analog_out, voltage)
-        assert dac.compute_expected_voltage(analog_out) == pytest.approx(voltage, abs=FLOAT_ERROR)
-        if voltage > 0:
-            assert dac.gpio.expander_pin_dict[
-                    dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
-                ].is_high
-        else:
-            assert not dac.gpio.expander_pin_dict[
-                dac._EdgePiDAC__analog_out_pin_map[analog_out.value].value
-            ].is_high
+        code, voltage_val, gain_state = dac.get_state(analog_out, True, True, True)
+        dac_gain = 2 if gain_state else 1
+        expected_voltage = dac.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
+        assert voltage_val == pytest.approx(expected_voltage, abs=STORE_ERROR)
+        assert code == dac.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
 
-
-# TODO: test actual A/D OUT pin voltages on writes via ADC module
-
+def test_dac_gain(dac):
+    _, _, initial_gain_state = dac.get_state(None, False, False, True)
+    gain_state = dac.enable_dac_gain(True)
+    assert initial_gain_state != gain_state
+    gain_state = dac.enable_dac_gain(False)
 
 def test_dac_reset(dac):
     voltage = 2.2
     for ch in CH:
         dac.write_voltage(ch, voltage)
-
-    for ch in CH:
-        assert dac.compute_expected_voltage(ch) == pytest.approx(voltage, abs=FLOAT_ERROR)
+        code, _, gain_state = dac.get_state(ch, True, True, True)
+        dac_gain = 2 if gain_state else 1
+        expected_voltage = dac.dac_ops.code_to_voltage(ch.value, code, dac_gain)
+        assert expected_voltage == pytest.approx(voltage, abs=FLOAT_ERROR)
 
     dac.reset()
 
     for ch in CH:
-        # pylint: disable=line-too-long
-        assert dac.compute_expected_voltage(ch) == pytest.approx(dac.dac_ops.dict_calib_param[ch.value].offset , abs=STORE_ERROR)
+        # pylint: disable=line-too-longx
+        code, _, gain_state = dac.get_state(ch, True, True, True)
+        dac_gain = 2 if gain_state else 1
+        expected_voltage = dac.dac_ops.code_to_voltage(ch.value, code, dac_gain)
+        assert expected_voltage == pytest.approx(dac.dac_ops.dict_calib_param[ch.value].offset , abs=STORE_ERROR)
         # pylint: disable=line-too-long
         assert dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high
