@@ -6,6 +6,7 @@
 import logging
 import math
 import json
+import time
 
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
@@ -56,7 +57,7 @@ class EdgePiEEPROM(I2CDevice):
         """
         page_addr  = math.floor(memory_address/EEPROMInfo.PAGE_SIZE.value)
         byte_addr = memory_address%EEPROMInfo.PAGE_SIZE.value
-        self.log.debug(f'Page address = {page_addr}, byte Address = {byte_addr}')
+        self.log.debug(f'__byte_address_generation: Page address = {page_addr}, byte Address = {byte_addr}')
         return page_addr, byte_addr
 
     def __allocated_memory(self, offset):
@@ -127,9 +128,9 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
-        self.log.debug(f'Reading Address {mem_addr}, {length} bytes')
+        self.log.debug(f'__sequential_read: Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {len(msg[1].data)}')
+        self.log.debug(f'__sequential_read: Read data: {len(msg[1].data)}')
         return read_result
 
     # TODO: delete candidate when module implementation is complete
@@ -164,7 +165,7 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_write_msg(mem_addr_list, [data])
-        self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
+        self.log.debug(f'__byte_write_register: writing {data} to memory address of {mem_addr}, {msg[0].data}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
     def __page_write_register(self, mem_addr: int = None, data: list = None):
@@ -179,7 +180,7 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_write_msg(mem_addr_list, data)
-        self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
+        self.log.debug(f'__page_write_register: writing {data} to memory address of {mem_addr}, {len(msg[0].data)}')
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
     def __parameter_sanity_check(self, mem_addr: int = None,
@@ -224,6 +225,7 @@ class EdgePiEEPROM(I2CDevice):
             page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
                       for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
             page_n.insert(0, page_1)
+            self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
         return page_n
 
     def read_memory(self, start_addrx: int = None, length: int = None):
@@ -240,8 +242,9 @@ class EdgePiEEPROM(I2CDevice):
         start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         address_offset = 0
         data_read = []
-        for data in dummy_data:
-            data_read = data_read + self.__sequential_read(start_addrx+address_offset, len(data))
+        for indx, data in enumerate(dummy_data):
+            data_read = data_read + self.__sequential_read(start_addrx+(address_offset*indx), len(data))
+            time.sleep(0.001)
             address_offset = len(data)
         return data_read
 
@@ -259,16 +262,20 @@ class EdgePiEEPROM(I2CDevice):
         else:
             data_serialized = json.dumps(json.load(self.data_list) + [json.load(self.data)])
             used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
-
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
-
+        
         mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-            EdgePiMemoryInfo.BUFF_START.value
+                    EdgePiMemoryInfo.BUFF_START.value
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
+        self.log.debug(f"write_memory: length of data {len(data_serialized)}, {used_mem}")
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
+        time.sleep(0.001)
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
+        time.sleep(0.001)
+        
         pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
         for indx, page in enumerate(pages_list):
-            self.__page_write_register(mem_start+indx, page)
+            self.__page_write_register(mem_start+(indx*EEPROMInfo.PAGE_SIZE.value), page)
+            time.sleep(0.001)
 
     def init_memory(self):
         """
@@ -329,8 +336,10 @@ class EdgePiEEPROM(I2CDevice):
         reset_vals = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
                             EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 1)
         page_n = self.__generate_list_of_pages(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, reset_vals)
-        start_address_page = EdgePiMemoryInfo.USER_SPACE_START_PAGE.value
+        start_address_page = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         for indx, page in enumerate(page_n):
-            self.__page_write_register(start_address_page+indx, page)
+            self.__page_write_register(start_address_page+(indx*EEPROMInfo.PAGE_SIZE.value), page)
+            time.sleep(0.001)
+
 
         
