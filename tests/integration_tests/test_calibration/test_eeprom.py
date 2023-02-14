@@ -22,9 +22,33 @@ def fixture_test_dac():
     eeprom.init_memory()
     return eeprom
 
+def read_dummy_json(file_name: str):
+    with open(PATH +"/"+file_name, "r") as f:
+        dummy = json.loads(f.read())
+    return dummy
+
 @pytest.mark.parametrize("data",
                         [
-                         ([1])
+                         
                         ])
-def test_reset(mocker, data, eeprom):
-    eeprom.init()
+def test__byte_write_register(data, eeprom):
+check =1
+
+
+@pytest.mark.parametrize("data",
+                        [
+                         
+                        ])
+def test__page_write_register(data, eeprom):
+    check =1
+
+
+
+@pytest.mark.parametrize("data",
+                        [
+                         (read_dummy_json("dummy_0.json"))
+                        ])
+def test_write_memory(data, eeprom):
+    dummy = bytes(data)
+    
+

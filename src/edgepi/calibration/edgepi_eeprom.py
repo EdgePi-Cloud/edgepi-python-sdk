@@ -245,7 +245,7 @@ class EdgePiEEPROM(I2CDevice):
             address_offset = len(data)
         return data_read
 
-    def write_memory(self, data: bytes):
+    def write_memory(self, data: bytes, is_empty: bool = False):
         """
         Writes data to the eeprom
         Args:
@@ -253,7 +253,16 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             N/A
         """
-        data_serialized = json.dumps(self.data_list) + data
+        if is_empty:
+            data_serialized = data
+            used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
+        else:
+            data_serialized = json.dumps(json.load(self.data_list) + [json.load(self.data)])
+            used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
+
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[1])
+        
         mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
             EdgePiMemoryInfo.BUFF_START.value
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
