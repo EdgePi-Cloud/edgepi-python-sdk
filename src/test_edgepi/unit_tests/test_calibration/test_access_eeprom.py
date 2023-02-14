@@ -282,12 +282,21 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
                                                                113, 114, 115, 116, 117,
                                                                118, 119, 120, 121, 122,
                                                                123, 124, 125, 126, 127],
-                                                              [128]]),
+                                                              [128]])
                         ])
 def test__generate_list_of_pages(mem_address, data, expected, eeprom):
     # pylint: disable=protected-access
     result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
     assert result == expected
+
+@pytest.mark.parametrize("mem_address,result", 
+                        [(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value,[])])
+def test__generate_list_of_pages_reset(mem_address, result, eeprom):
+    # pylint: disable=protected-access
+    data = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1)
+    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
+    assert len(page_n) == len(data)/64
+
 
 # TODO: add more teset cases
 @pytest.mark.parametrize("mem_address, length, expected",

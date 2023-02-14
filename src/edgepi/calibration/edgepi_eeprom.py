@@ -258,7 +258,8 @@ class EdgePiEEPROM(I2CDevice):
             EdgePiMemoryInfo.BUFF_START.value
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
         pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
-        self.__page_write_register(mem_start, pages_list)
+        for indx, page in enumerate(pages_list):
+            self.__page_write_register(mem_start+indx, page)
 
     def init_memory(self):
         """
@@ -306,3 +307,21 @@ class EdgePiEEPROM(I2CDevice):
             self.log.info(f'{mem_size}bytes of data is read from the user space')
 
         return is_full, is_empty
+    
+    def eeprom_reset(self):
+        """
+        Reset User space memory 
+        Args:
+            N/A
+        Return:
+            N/A
+        """
+        self.log.info("EEPROM Reset")
+        reset_vals = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
+                            EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 1)
+        page_n = self.__generate_list_of_pages(EdgePiMemoryInfo.USER_SPACE_START_BYTE, reset_vals)
+        start_address_page = EdgePiMemoryInfo.USER_SPACE_START_PAGE.value
+        for indx, page in enumerate(page_n):
+            self.__page_write_register(start_address_page+indx, page)
+
+        
