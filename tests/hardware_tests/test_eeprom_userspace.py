@@ -26,7 +26,7 @@ def fixture_test_dac():
 
 def read_dummy_json(file_name: str):
     with open(file_name, "r") as f:
-        dummy = f.read()
+        dummy = json.load(f)
     return dummy
 
 def test__page_write_register(eeprom):
@@ -87,8 +87,7 @@ def test_write_memory(eeprom):
     #     assert data == 255
 
     json_data = read_dummy_json(PATH+"/dummy_0.json")
-    # json_data_b = bytes(json.dumps(json_data), "utf-8")
-    json_data_b = bytes(json_data, "utf-8")
+    json_data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
     json_data_l = list(json_data_b)
     _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
     _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
