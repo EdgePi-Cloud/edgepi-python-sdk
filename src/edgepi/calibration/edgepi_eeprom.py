@@ -130,7 +130,7 @@ class EdgePiEEPROM(I2CDevice):
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
         self.log.debug(f'__sequential_read: Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'__sequential_read: Read data: {len(msg[1].data)}')
+        self.log.debug(f'__sequential_read: Read data: {msg[1].data}')
         return read_result
 
     # TODO: delete candidate when module implementation is complete
@@ -262,8 +262,8 @@ class EdgePiEEPROM(I2CDevice):
             data_serialized
             used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
         
-        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 64
-                    # EdgePiMemoryInfo.BUFF_START.value
+        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value +\
+                    EdgePiMemoryInfo.BUFF_START.value
                     
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
         self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
