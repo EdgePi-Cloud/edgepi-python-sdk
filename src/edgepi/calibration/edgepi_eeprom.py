@@ -238,9 +238,9 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
+        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         self.__parameter_sanity_check(start_addrx, length, True)
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
-        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         address_offset = 0
         data_read = []
         for indx, data in enumerate(dummy_data):
