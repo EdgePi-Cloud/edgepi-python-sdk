@@ -98,11 +98,12 @@ def test_write_memory(eeprom):
     new_data = eeprom.read_memory(2,len(json_data_b))
     new_data_b = bytes(new_data)
     # new_data_s = new_data_b.decode("utf-8")
+    _logger.info(f"test_write_memory: {new_data} of data to be written\n type = {type(new_data)}\n length = {len(new_data)}")
     _logger.info(f"test_write_memory: {new_data_b} of new data")
 
-    for indx, data_b in enumerate(new_data_b):
-        if data_b != json_data_b[indx]:
-            _logger.info(f"{indx}nt index, data byte = {data_b}, old = {json_data_b[indx]} ")
+    for indx, data_l in enumerate(json_data_l):
+        if data_l != new_data[indx]:
+            _logger.info(f"{indx}nt index, data byte = {data_l}, old = {new_data[indx]} ")
     new_data_parsed = json.loads(new_data_b)
     _logger.info(f"test_write_memory: {new_data_parsed} of new data")
     # for indx, data in enumerate(new_data_parsed):
