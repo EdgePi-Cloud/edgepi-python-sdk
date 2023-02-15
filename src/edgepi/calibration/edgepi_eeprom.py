@@ -240,11 +240,9 @@ class EdgePiEEPROM(I2CDevice):
         self.__parameter_sanity_check(start_addrx, length, True)
         start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
-        address_offset = 0
         data_read = []
         for indx, data in enumerate(dummy_data):
-            data_read = data_read + self.__sequential_read(start_addrx+(address_offset*indx), len(data))
-            address_offset = len(data)
+            data_read = data_read + self.__sequential_read(start_addrx+(EEPROMInfo.PAGE_SIZE.value*indx), len(data))
         return data_read
 
     def write_memory(self, data: bytes, is_empty: bool = False):
@@ -264,16 +262,17 @@ class EdgePiEEPROM(I2CDevice):
             data_serialized
             used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
         
-        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                    EdgePiMemoryInfo.BUFF_START.value
+        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+                    # EdgePiMemoryInfo.BUFF_START.value
                     
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
-        self.log.debug(f"write_memory: length of data {len(data_serialized)}, {used_mem}")
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        time.sleep(0.002) 
-        # TODO: explain the reaosn for thedealuy
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
-        time.sleep(0.002)
+        data_serialized = used_mem+data_serialized
+        self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
+        # self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
+        # time.sleep(0.002) 
+        # # TODO: explain the reaosn for thedealuy
+        # self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
+        # time.sleep(0.002)
         
         pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
         for indx, page in enumerate(pages_list):

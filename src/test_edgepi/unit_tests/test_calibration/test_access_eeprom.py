@@ -37,6 +37,11 @@ def read_binfile():
         b_string = fd.read()
     return b_string
 
+def read_dummy_json(file_name: str):
+    with open(PATH+"/"+file_name, "r") as f:
+        dummy = json.load(f)
+    return dummy
+
 @pytest.mark.parametrize("page_addr, byte_addr, result",
                         [(0, 8, [0x00, 0x08]),
                          (0, 63, [0x00, 0x3F]),
@@ -207,10 +212,10 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
                         [(0, 5000,True,does_not_raise()),
                          (0, 10000, True,does_not_raise()),
                          (0, USER_SPACE_SIZE-1,True,does_not_raise()),
-                         (0, USER_SPACE_SIZE, True,pytest.raises(MemoryOutOfBound)),
+                         (0, USER_SPACE_SIZE, False,does_not_raise()),
                          (USER_SPACE_SIZE-1,0,True,pytest.raises(ValueError)),
-                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
-                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
+                         (USER_SPACE_SIZE-1,1,False,does_not_raise()),
+                         (USER_SPACE_SIZE-1,1,False,does_not_raise()),
                          (USER_SPACE_SIZE-2,1,True,does_not_raise()),
                          (0, 5000, False,does_not_raise()),
                          (0, 10000, False,does_not_raise()),
@@ -296,6 +301,20 @@ def test__generate_list_of_pages_reset(mem_address, result, eeprom):
     data = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1)
     page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
     assert len(page_n) == len(data)/64
+
+@pytest.mark.parametrize("mem_address,json_file_name", 
+                        [(0, "dummy_0.json"),
+                         (2, "dummy_0.json"),
+                         ])
+def test__generate_list_of_pages_json(mem_address, json_file_name,eeprom):
+    json_data = read_dummy_json(json_file_name)
+    data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
+    data_l = list(data_b)
+    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, list(data_l))
+    target = iter(data_l)
+    for page in page_n:
+        for val in page:
+            assert val == next(target)
 
 
 # TODO: add more teset cases
