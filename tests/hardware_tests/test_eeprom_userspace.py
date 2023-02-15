@@ -29,33 +29,30 @@ def read_dummy_json(file_name: str):
         dummy = json.loads(f.read())
     return dummy
 
-# TODO add differetn type of values, increment values by page, write entire memory with the same number
-@pytest.mark.parametrize("data, num_page, address, expected",
-                        [
-                        #  (list(range(0,64)), 2, 0, list(range(0,64))),
-                        #  (list(range(0,64)), 4, 0, list(range(0,64))),
-                        #  (list(range(0,64)), 6, 0, list(range(0,64))),
-                         (list(range(0,64)), 20, 0, list(range(0,64))),
-                        ])
-def test__page_write_register(data, num_page, address, expected, eeprom):
-    data = data*num_page
-    initial_data = eeprom.read_memory(address, len(data))
-    addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
-    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(addrx, data)
-    for indx, page in enumerate(page_n):
-        eeprom._EdgePiEEPROM__page_write_register(addrx + (indx*EEPROMInfo.PAGE_SIZE.value), page)
-        time.sleep(0.001)
-    new_data = eeprom.read_memory(address, len(data))
-    for indx, init_data in enumerate(initial_data):
-        assert init_data != new_data[indx]
-        assert new_data[indx] == data[indx]
+def test__page_write_register(eeprom):
+    for val in range(0, 256):
+        _logger.info(f"test__page_write_register: Test Value = {val}")
+        data = [val]*16384
+        initial_data = eeprom.read_memory(0, len(data))
+        _logger.info(f"test__page_write_register: Initial Value = {len(initial_data)}")
+        addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(addrx, data)
+        for indx, page in enumerate(page_n):
+            eeprom._EdgePiEEPROM__page_write_register(addrx + (indx*EEPROMInfo.PAGE_SIZE.value), page)
+            time.sleep(0.002)
+        _logger.info(f"test__page_write_register: Page Written = {len(page_n)}")
+        new_data = eeprom.read_memory(0, len(data))
+        _logger.info(f"test__page_write_register: New Value = {len(new_data)}")
+        for indx, init_data in enumerate(initial_data):
+            assert init_data != new_data[indx]
+            assert new_data[indx] == data[indx]
     
-    reset_data = [255]*EEPROMInfo.PAGE_SIZE.value*num_page
-    addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
-    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(addrx, reset_data)
-    for indx, page in enumerate(page_n):
-        eeprom._EdgePiEEPROM__page_write_register(addrx + (indx*EEPROMInfo.PAGE_SIZE.value), page)
-        time.sleep(0.001)
+    # reset_data = [255]*EEPROMInfo.PAGE_SIZE.value*num_page
+    # addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
+    # page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(addrx, reset_data)
+    # for indx, page in enumerate(page_n):
+    #     eeprom._EdgePiEEPROM__page_write_register(addrx + (indx*EEPROMInfo.PAGE_SIZE.value), page)
+    #     time.sleep(0.001)
 
 
 def test_eeprom_reset(eeprom):
@@ -63,6 +60,17 @@ def test_eeprom_reset(eeprom):
     reset_vals = eeprom.read_memory(0, 16384)
     for val in reset_vals:
         assert val == 255
+
+def test_write_json(eeprom):
+    json_data = read_dummy_json(PATH+"/dummy_0.json")
+    json_data_b = bytes(json.dumps(json_data), "utf-8")
+    json_data = read_dummy_json(PATH+"/dummy_0.json")
+    json_data_b = bytes(json.dumps(json_data), "utf-8")
+    json_data_l = list(json_data_b)
+    # _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
+    _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
+    # _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
+    eeprom.write_memory(json_data_b, True)
 
 # TODO test write to different memory location, 
 # initially empty memory
@@ -84,7 +92,7 @@ def test_write_memory(eeprom):
     # _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
     _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
     # _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
-    # eeprom.write_memory(json_data_b, True)
+    eeprom.write_memory(json_data_b, True)
     
     # # # # new data
     new_data = eeprom.read_memory(2,633)
@@ -92,12 +100,11 @@ def test_write_memory(eeprom):
     # new_data_s = new_data_b.decode("utf-8")
     _logger.info(f"test_write_memory: {new_data_b} of new data")
 
-    # for indx, data_b in enumerate(new_data_b):
-    #     _logger.info(f"{indx}nt index")
-    #     if data_b != json_data_b[indx]:
-    #         _logger.info(f"data byte = {data_b}, old = {json_data_b[indx]} ")
-    new_data_parsed = json.loads(new_data_b)
-    _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
+    for indx, data_b in enumerate(new_data_b):
+        if data_b != json_data_b[indx]:
+            _logger.info(f"{indx}nt index, data byte = {data_b}, old = {json_data_b[indx]} ")
+    # new_data_parsed = json.loads(new_data_b)
+    # _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
     # for indx, data in enumerate(new_data_parsed):
     #     assert data == fill_data[indx]
 

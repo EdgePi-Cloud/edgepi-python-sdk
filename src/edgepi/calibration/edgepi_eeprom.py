@@ -227,8 +227,9 @@ class EdgePiEEPROM(I2CDevice):
             page_n.insert(0, page_1)
             self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
         return page_n
+
 # TODO: default addres to either 0 or start of user space
-    def read_memory(self, start_addrx: int = None, length: int = None):
+    def read_memory(self, start_addrx: int = 0, length: int = None):
         """
         Read user space memory starting from 0 to 16383
         Args:
@@ -244,11 +245,8 @@ class EdgePiEEPROM(I2CDevice):
         data_read = []
         for indx, data in enumerate(dummy_data):
             data_read = data_read + self.__sequential_read(start_addrx+(address_offset*indx), len(data))
-            time.sleep(0.01)
             address_offset = len(data)
         return data_read
-
-# TODO: [0]*length is createinge pointer to the same objet length times 
 
     def write_memory(self, data: bytes, is_empty: bool = False):
         """
@@ -298,12 +296,13 @@ class EdgePiEEPROM(I2CDevice):
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)
 
         # mem_size of greater than EdgePiMemoryInfo.USER_SPACE_MAX.value should never happen
-        #TODO: 0xFFFF should be an enum ex) Factory default
-        if mem_size > EdgePiMemoryInfo.USER_SPACE_MAX.value and mem_size != 0xFFFF:
+        if mem_size > EdgePiMemoryInfo.USER_SPACE_MAX.value and \
+           mem_size != EdgePiMemoryInfo.FACTORY_DEFAULT_VALUE.value:
             raise ValueError(f'Invalid memory size read, possible data corruption, {mem_size}')
 
         # Memory Full
-        if mem_size == EdgePiMemoryInfo.USER_SPACE_MAX.value and mem_size != 0xFFFF:
+        if mem_size == EdgePiMemoryInfo.USER_SPACE_MAX.value and \
+           mem_size != EdgePiMemoryInfo.FACTORY_DEFAULT_VALUE.value:
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
@@ -313,7 +312,7 @@ class EdgePiEEPROM(I2CDevice):
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
         # Memory Empty
-        elif mem_size == 0xFFFF:
+        elif mem_size == EdgePiMemoryInfo.FACTORY_DEFAULT_VALUE.value:
             is_full=False
             is_empty=True
             self.used_size = 0
@@ -347,7 +346,7 @@ class EdgePiEEPROM(I2CDevice):
         start_address_page = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         for indx, page in enumerate(page_n):
             self.__page_write_register(start_address_page+(indx*EEPROMInfo.PAGE_SIZE.value), page)
-            time.sleep(0.001)
+            time.sleep(0.002)
 
 
         
