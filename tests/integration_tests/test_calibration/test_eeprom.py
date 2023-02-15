@@ -23,11 +23,6 @@ def fixture_test_dac():
     # eeprom.init_memory()
     return eeprom
 
-def read_dummy_json(file_name: str):
-    with open(PATH +"/"+file_name, "r") as f:
-        dummy = json.loads(f.read())
-    return dummy
-
 @pytest.mark.parametrize("data, address, expected",
                         [(32, 0, 32),
                          (32, 32, 32)

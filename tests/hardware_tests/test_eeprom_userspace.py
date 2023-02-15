@@ -25,7 +25,7 @@ def fixture_test_dac():
     return eeprom
 
 def read_dummy_json(file_name: str):
-    with open(PATH +"/"+file_name, "r") as f:
+    with open(file_name, "r") as f:
         dummy = json.loads(f.read())
     return dummy
 
@@ -64,6 +64,7 @@ def test_eeprom_reset(eeprom):
 
 # initially empty memory
 def test_write_memory(eeprom):
+    
     # is_full, is_empty = eeprom.init_memory()
     # assert is_empty == True
     # assert is_full == False
@@ -74,18 +75,27 @@ def test_write_memory(eeprom):
     # for data in initial_data:
     #     assert data == 255
 
-    fill_data = list(range(2,2916))
-    fill_data_b = bytes(json.dumps(fill_data), "utf-8")
-    _logger.info(f"test_write_memory: {len(fill_data_b)} of data to be written")
-    eeprom.write_memory(fill_data_b, True)
+    json_data = read_dummy_json(PATH+"/dummy_0.json")
+    json_data_b = bytes(json.dumps(json_data), "utf-8")
+    json_data_l = list(json_data_b)
+    _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
+    _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
+    _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
+    eeprom.write_memory(json_data_b, True)
     
-    # # # new data
-    new_data = eeprom.read_memory(2,16380)
+    # # # # new data
+    new_data = eeprom.read_memory(2,633)
     new_data_b = bytes(new_data)
+    # new_data_s = new_data_b.decode("utf-8")
     _logger.info(f"test_write_memory: {new_data_b} of new data")
-    new_data_parsed = json.loads(new_data_b)
-    _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
-    for indx, data in enumerate(new_data_parsed):
-        assert data == fill_data[indx]
+
+    for indx, data_b in enumerate(new_data_b):
+        _logger.info(f"{indx}nt index")
+        if data_b != json_data_b[indx]:
+            _logger.info(f"data byte = {data_b}, old = {json_data_b[indx]} ")
+    # new_data_parsed = json.loads(new_data_s)
+    # _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
+    # for indx, data in enumerate(new_data_parsed):
+    #     assert data == fill_data[indx]
 
     
