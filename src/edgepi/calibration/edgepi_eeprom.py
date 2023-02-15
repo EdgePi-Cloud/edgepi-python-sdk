@@ -265,8 +265,9 @@ class EdgePiEEPROM(I2CDevice):
             data_serialized
             used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
         
-        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                    EdgePiMemoryInfo.BUFF_START.value
+        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 640
+                    # EdgePiMemoryInfo.BUFF_START.value
+                    
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
         self.log.debug(f"write_memory: length of data {len(data_serialized)}, {used_mem}")
         self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])

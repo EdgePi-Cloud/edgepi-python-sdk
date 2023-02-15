@@ -95,7 +95,7 @@ def test_write_memory(eeprom):
     time.sleep(0.002)
     
     # # # # new data
-    new_data = eeprom.read_memory(2,len(json_data_b))
+    new_data = eeprom.read_memory(640,len(json_data_b))
     new_data_b = bytes(new_data)
     # new_data_s = new_data_b.decode("utf-8")
     _logger.info(f"test_write_memory: {new_data} of data to be written\n type = {type(new_data)}\n length = {len(new_data)}")
