@@ -241,8 +241,10 @@ class EdgePiEEPROM(I2CDevice):
         start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
         data_read = []
-        for indx, data in enumerate(dummy_data):
-            data_read = data_read + self.__sequential_read(start_addrx+(EEPROMInfo.PAGE_SIZE.value*indx), len(data))
+        mem_offset = start_addrx
+        for data in dummy_data:
+            data_read = data_read + self.__sequential_read(mem_offset, len(data))
+            mem_offset = mem_offset+len(data)
         return data_read
 
     def write_memory(self, data: bytes, is_empty: bool = False):
@@ -274,8 +276,10 @@ class EdgePiEEPROM(I2CDevice):
         time.sleep(0.002)
         
         pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
-        for indx, page in enumerate(pages_list):
-            self.__page_write_register(mem_start+(indx*EEPROMInfo.PAGE_SIZE.value), page)
+        mem_offset = mem_start
+        for page in pages_list:
+            self.__page_write_register(mem_offset, page)
+            mem_offset = mem_offset+len(page)
             time.sleep(0.002)
 
 # TODO why not separate it into a class 
