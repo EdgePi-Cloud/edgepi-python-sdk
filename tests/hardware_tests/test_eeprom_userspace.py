@@ -88,25 +88,17 @@ def test_write_memory(eeprom):
 
     json_data = read_dummy_json(PATH+"/dummy_0.json")
     json_data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
-    json_data_l = list(json_data_b)
     _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
-    _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
-    eeprom.write_memory(json_data_b, True)
+    eeprom.write_memory(json_data_b)
     time.sleep(0.002)
     
     # # # # new data
     new_data = eeprom.read_memory(2,len(json_data_b))
     new_data_b = bytes(new_data)
-    # new_data_s = new_data_b.decode("utf-8")
-    _logger.info(f"test_write_memory: {new_data} of data to be written\n type = {type(new_data)}\n length = {len(new_data)}")
-    _logger.info(f"test_write_memory: {new_data_b} of new data")
-
-    for indx, data_l in enumerate(json_data_l):
-        if data_l != new_data[indx]:
-            _logger.info(f"{indx}nt index, data byte = {data_l}, old = {new_data[indx]} ")
+    _logger.info(f"test_write_memory: {new_data_b} of data to be written\n type = {type(new_data_b)}\n length = {len(new_data_b)}")
     new_data_parsed = json.loads(new_data_b)
-    _logger.info(f"test_write_memory: {new_data_parsed} of new data")
-    # for indx, data in enumerate(new_data_parsed):
-    #     assert data == fill_data[indx]
+
+    assert json_data == new_data_parsed
+
 
     
