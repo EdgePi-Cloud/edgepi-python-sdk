@@ -26,7 +26,7 @@ def fixture_test_dac():
 
 def read_dummy_json(file_name: str):
     with open(file_name, "r") as f:
-        dummy = json.loads(f.read())
+        dummy = json.load(f)
     return dummy
 
 def test__page_write_register(eeprom):
@@ -89,13 +89,13 @@ def test_write_memory(eeprom):
     json_data = read_dummy_json(PATH+"/dummy_0.json")
     json_data_b = bytes(json.dumps(json_data), "utf-8")
     json_data_l = list(json_data_b)
-    # _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
     _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
-    # _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
+    _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
     eeprom.write_memory(json_data_b, True)
+    time.sleep(0.002)
     
     # # # # new data
-    new_data = eeprom.read_memory(2,633)
+    new_data = eeprom.read_memory(2,len(json_data_b))
     new_data_b = bytes(new_data)
     # new_data_s = new_data_b.decode("utf-8")
     _logger.info(f"test_write_memory: {new_data_b} of new data")
@@ -103,8 +103,8 @@ def test_write_memory(eeprom):
     for indx, data_b in enumerate(new_data_b):
         if data_b != json_data_b[indx]:
             _logger.info(f"{indx}nt index, data byte = {data_b}, old = {json_data_b[indx]} ")
-    # new_data_parsed = json.loads(new_data_b)
-    # _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
+    new_data_parsed = json.loads(new_data_b)
+    _logger.info(f"test_write_memory: {new_data_parsed} of new data")
     # for indx, data in enumerate(new_data_parsed):
     #     assert data == fill_data[indx]
 
