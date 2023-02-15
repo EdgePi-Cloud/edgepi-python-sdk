@@ -340,8 +340,10 @@ class EdgePiEEPROM(I2CDevice):
                             EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + 1)
         page_n = self.__generate_list_of_pages(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, reset_vals)
         start_address_page = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        for indx, page in enumerate(page_n):
-            self.__page_write_register(start_address_page+(indx*EEPROMInfo.PAGE_SIZE.value), page)
+        mem_offset = start_address_page
+        for page in page_n:
+            self.__page_write_register(mem_offset, page)
+            mem_offset = mem_offset+len(page)
             time.sleep(0.002)
 
 
