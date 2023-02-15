@@ -29,11 +29,13 @@ def read_dummy_json(file_name: str):
         dummy = json.loads(f.read())
     return dummy
 
+# TODO add differetn type of values, increment values by page, write entire memory with the same number
 @pytest.mark.parametrize("data, num_page, address, expected",
                         [
-                         (list(range(0,64)), 2, 0, list(range(0,64))),
-                         (list(range(0,64)), 4, 0, list(range(0,64))),
-                         (list(range(0,64)), 6, 0, list(range(0,64))),
+                        #  (list(range(0,64)), 2, 0, list(range(0,64))),
+                        #  (list(range(0,64)), 4, 0, list(range(0,64))),
+                        #  (list(range(0,64)), 6, 0, list(range(0,64))),
+                         (list(range(0,64)), 20, 0, list(range(0,64))),
                         ])
 def test__page_write_register(data, num_page, address, expected, eeprom):
     data = data*num_page
@@ -62,6 +64,7 @@ def test_eeprom_reset(eeprom):
     for val in reset_vals:
         assert val == 255
 
+# TODO test write to different memory location, 
 # initially empty memory
 def test_write_memory(eeprom):
     
@@ -69,7 +72,7 @@ def test_write_memory(eeprom):
     # assert is_empty == True
     # assert is_full == False
 
-    # when empty every value is 255
+    # # when empty every value is 255
     # initial_data = eeprom.read_memory(0, 0x4000)
     # _logger.info(f"test_write_memory: {len(initial_data)} of initial data")
     # for data in initial_data:
@@ -78,10 +81,10 @@ def test_write_memory(eeprom):
     json_data = read_dummy_json(PATH+"/dummy_0.json")
     json_data_b = bytes(json.dumps(json_data), "utf-8")
     json_data_l = list(json_data_b)
-    _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
+    # _logger.info(f"test_write_memory: {json_data} of data to be written\n type = {type(json_data)}\n length = {len(json_data)}")
     _logger.info(f"test_write_memory: {json_data_b} of data to be written\n type = {type(json_data_b)}\n length = {len(json_data_b)}")
-    _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
-    eeprom.write_memory(json_data_b, True)
+    # _logger.info(f"test_write_memory: {json_data_l} of data to be written\n type = {type(json_data_l)}\n length = {len(json_data_l)}")
+    # eeprom.write_memory(json_data_b, True)
     
     # # # # new data
     new_data = eeprom.read_memory(2,633)
@@ -89,12 +92,12 @@ def test_write_memory(eeprom):
     # new_data_s = new_data_b.decode("utf-8")
     _logger.info(f"test_write_memory: {new_data_b} of new data")
 
-    for indx, data_b in enumerate(new_data_b):
-        _logger.info(f"{indx}nt index")
-        if data_b != json_data_b[indx]:
-            _logger.info(f"data byte = {data_b}, old = {json_data_b[indx]} ")
-    # new_data_parsed = json.loads(new_data_s)
-    # _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
+    # for indx, data_b in enumerate(new_data_b):
+    #     _logger.info(f"{indx}nt index")
+    #     if data_b != json_data_b[indx]:
+    #         _logger.info(f"data byte = {data_b}, old = {json_data_b[indx]} ")
+    new_data_parsed = json.loads(new_data_b)
+    _logger.info(f"test_write_memory: {len(new_data_parsed)} of new data")
     # for indx, data in enumerate(new_data_parsed):
     #     assert data == fill_data[indx]
 

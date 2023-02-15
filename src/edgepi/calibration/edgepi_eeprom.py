@@ -227,7 +227,7 @@ class EdgePiEEPROM(I2CDevice):
             page_n.insert(0, page_1)
             self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
         return page_n
-
+# TODO: default addres to either 0 or start of user space
     def read_memory(self, start_addrx: int = None, length: int = None):
         """
         Read user space memory starting from 0 to 16383
@@ -247,6 +247,8 @@ class EdgePiEEPROM(I2CDevice):
             time.sleep(0.01)
             address_offset = len(data)
         return data_read
+
+# TODO: [0]*length is createinge pointer to the same objet length times 
 
     def write_memory(self, data: bytes, is_empty: bool = False):
         """
@@ -270,7 +272,8 @@ class EdgePiEEPROM(I2CDevice):
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
         self.log.debug(f"write_memory: length of data {len(data_serialized)}, {used_mem}")
         self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        time.sleep(0.001)
+        time.sleep(0.001) 
+        # TODO: explain the reaosn for thedealuy
         self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
         time.sleep(0.001)
         
@@ -279,6 +282,7 @@ class EdgePiEEPROM(I2CDevice):
             self.__page_write_register(mem_start+(indx*EEPROMInfo.PAGE_SIZE.value), page)
             time.sleep(0.001)
 
+# TODO why not separate it into a class 
     def init_memory(self):
         """
         Initial Memory Reading
@@ -290,9 +294,11 @@ class EdgePiEEPROM(I2CDevice):
         is_full=False
         is_empty=False
         mem_content = []
+        # TODO adding CRC bytes, and better naming for mem_size ex) data_size or used_memory, 
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)
 
         # mem_size of greater than EdgePiMemoryInfo.USER_SPACE_MAX.value should never happen
+        #TODO: 0xFFFF should be an enum ex) Factory default
         if mem_size > EdgePiMemoryInfo.USER_SPACE_MAX.value and mem_size != 0xFFFF:
             raise ValueError(f'Invalid memory size read, possible data corruption, {mem_size}')
 
