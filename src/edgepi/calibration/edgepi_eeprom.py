@@ -270,15 +270,15 @@ class EdgePiEEPROM(I2CDevice):
         self.__parameter_sanity_check(mem_start, len(data_serialized), True)
         self.log.debug(f"write_memory: length of data {len(data_serialized)}, {used_mem}")
         self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        time.sleep(0.001) 
+        time.sleep(0.002) 
         # TODO: explain the reaosn for thedealuy
         self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
-        time.sleep(0.001)
+        time.sleep(0.002)
         
         pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
         for indx, page in enumerate(pages_list):
             self.__page_write_register(mem_start+(indx*EEPROMInfo.PAGE_SIZE.value), page)
-            time.sleep(0.001)
+            time.sleep(0.002)
 
 # TODO why not separate it into a class 
     def init_memory(self):
