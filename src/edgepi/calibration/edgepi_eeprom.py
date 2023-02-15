@@ -198,7 +198,7 @@ class EdgePiEEPROM(I2CDevice):
             raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
         # Checks whether starting address and length of data to read/write are within memory bound
         if mem_addr+length > EdgePiMemoryInfo.USER_SPACE_SIZE_BYTE.value:
-            raise MemoryOutOfBound(f"Operation range is over the size of the memory by"
+            raise MemoryOutOfBound(f"Operation range is over the size of the memory by "
                                    f"{mem_addr+length-EdgePiMemoryInfo.USER_SPACE_SIZE_BYTE.value}")
 
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
@@ -235,8 +235,8 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         self.__parameter_sanity_check(start_addrx, length, True)
+        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
         address_offset = 0
         data_read = []
