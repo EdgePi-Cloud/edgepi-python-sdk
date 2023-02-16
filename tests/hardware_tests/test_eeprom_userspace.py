@@ -1,20 +1,21 @@
 '''hardware test for eeprom user space'''
 
 # pylint: disable=no-name-in-module
+# pylint: disable=wrong-import-position
 # https://github.com/protocolbuffers/protobuf/issues/10372
 
-import json
-import time
 import logging
 _logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-import pytest
-
+import json
+import time
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
+import pytest
 from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, EEPROMInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac():
@@ -25,8 +26,9 @@ def read_dummy_json(file_name: str):
     """
     Read dummy json file
     """
-    with open(file_name, "r") as f:
-        dummy = json.load(f)
+    # pylint: disable=unspecified-encoding
+    with open(file_name, "r") as file:
+        dummy = json.load(file)
     return dummy
 
 def test__page_write_register(eeprom):

@@ -1,6 +1,7 @@
 '''integration test for access eeprom'''
 
 # pylint: disable=no-name-in-module
+# pylint: disable=wrong-import-position
 # https://github.com/protocolbuffers/protobuf/issues/10372
 
 import os
