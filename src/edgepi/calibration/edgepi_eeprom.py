@@ -195,12 +195,12 @@ class EdgePiEEPROM(I2CDevice):
             length (int): length of data to read
             user_space (bool): True if mem_addr is in user space
         """
-        # Max allowable memory size = End address - Start address + 1 
+        # Max allowable memory size = End address - Start address + 1
         user_max_size = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
                         EdgePiMemoryInfo.USER_SPACE_START_BYTE.value +1
         private_max_size = EdgePiMemoryInfo.PRIVATE_SPACE_END_BYTE.value -\
                             EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value +1
-        
+
         # subtract the user space offset if user_space is set
         mem_addr = mem_addr-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value if user_space else mem_addr
         # select mem max size
@@ -247,8 +247,8 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
-        self.__parameter_sanity_check(start_addrx, length, True)
         start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        self.__parameter_sanity_check(start_addrx, length, True)
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
         data_read = []
         mem_offset = start_addrx
@@ -352,9 +352,9 @@ class EdgePiEEPROM(I2CDevice):
         tatal_page = EdgePiMemoryInfo.USER_SPACE_END_PAGE.value - \
                      EdgePiMemoryInfo.USER_SPACE_START_PAGE.value + 1
         reset_vals = [255] * page_size
-        
+
         mem_offset = start_address_page
-        for page in tatal_page:
+        for page in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+(page*page_size)
             time.sleep(0.002)
