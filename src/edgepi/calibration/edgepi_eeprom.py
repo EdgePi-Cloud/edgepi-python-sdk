@@ -195,24 +195,17 @@ class EdgePiEEPROM(I2CDevice):
             length (int): length of data to read
             user_space (bool): True if mem_addr is in user space
         """
-        # Max allowable memory size = End address - Start address + 1
-        user_max_size = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
-                        EdgePiMemoryInfo.USER_SPACE_START_BYTE.value +1
-        private_max_size = EdgePiMemoryInfo.PRIVATE_SPACE_END_BYTE.value -\
-                            EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value +1
-
-        # subtract the user space offset if user_space is set
-        mem_addr = mem_addr-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value if user_space else mem_addr
-        # select mem max size
-        mem_total_size = user_max_size if user_space else private_max_size
+        #select last address of a memory space
+        last_mem_address = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value if user_space \
+                           else EdgePiMemoryInfo.PRIVATE_SPACE_END_BYTE.value
 
         # Checks whether proper values are passed
         if mem_addr is None or length is None or mem_addr < 0 or length <= 0:
             raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
         # Checks whether starting address and length of data to read/write are within memory bound
-        if mem_addr+length > mem_total_size:
+        if mem_addr+length > (last_mem_address + 1):
             raise MemoryOutOfBound(f"Operation range is over the size of the memory by "
-                                   f"{mem_addr+length-mem_total_size}")
+                                   f"{mem_addr+length-last_mem_address}")
 
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
