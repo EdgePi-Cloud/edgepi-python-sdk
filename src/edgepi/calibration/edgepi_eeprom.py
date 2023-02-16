@@ -354,8 +354,8 @@ class EdgePiEEPROM(I2CDevice):
         reset_vals = [255] * page_size
 
         mem_offset = start_address_page
-        for page in range(tatal_page):
+        for _ in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
-            mem_offset = mem_offset+(page*page_size)
+            mem_offset = mem_offset+page_size
             time.sleep(0.002)
        
