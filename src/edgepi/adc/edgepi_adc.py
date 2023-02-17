@@ -317,7 +317,7 @@ class EdgePiADC(SPI):
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
         _logger.debug(f"__read_register: sending data")
         out = self.transfer(code)
-        _logger.debug(f"__read_register: received data")
+        _logger.debug(f"__read_register: received {out}")
 
         # first 2 entries are null bytes
         return out[2:]
@@ -336,7 +336,7 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to write to must be at least 1")
 
         code = self.adc_ops.write_register_command(start_addx.value, data)
-        _logger.debug(f"__write_register: sending data")
+        _logger.debug(f"__write_register: sending {code}")
         out = self.transfer(code)
         _logger.debug(f"__write_register: received data")
 
@@ -888,9 +888,10 @@ class EdgePiADC(SPI):
         """
         # pylint: disable=unused-argument
 
+        _logger.debug(f"\n\n")
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
-        _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
+        _logger.debug(f"__config: args after filtering out None defaults:\n{args}")
 
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
         if not override_rtd_validation:
@@ -912,11 +913,11 @@ class EdgePiADC(SPI):
 
         # get current register values
         reg_values = self.__get_register_map()
-        _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values before updates:\n{reg_values}")
 
         # get codes to update register values
         updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
-        _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values after updates:\n{reg_values}")
 
         # write updated reg values to ADC using a single write.
         data = [entry["value"] for entry in updated_reg_values.values()]
