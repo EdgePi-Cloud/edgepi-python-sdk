@@ -738,7 +738,8 @@ def fixture_adc():
     ],
 )
 def test_config(args, updated_vals, adc):
-    original_regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
+    # original_regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
+    original_regs = adc._EdgePiADC__read_registers_to_map()
 
     updates = adc._EdgePiADC__config(**args)
     updated_regs = adc._EdgePiADC__read_registers_to_map()
