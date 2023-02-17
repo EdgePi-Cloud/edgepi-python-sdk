@@ -315,9 +315,9 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to read must be at least 1")
 
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
-        _logger.debug(f"ADC __read_register -> data in: {code}")
+        _logger.debug(f"__read_register: sending data")
         out = self.transfer(code)
-        _logger.debug(f"ADC __read_register -> data out: {out}")
+        _logger.debug(f"__read_register: received data")
 
         # first 2 entries are null bytes
         return out[2:]
@@ -336,9 +336,9 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to write to must be at least 1")
 
         code = self.adc_ops.write_register_command(start_addx.value, data)
-        _logger.debug(f"ADC __write_register -> data in: {code}")
+        _logger.debug(f"__write_register: sending data")
         out = self.transfer(code)
-        _logger.debug(f"ADC __write_register -> data out: {out}")
+        _logger.debug(f"__write_register: received data")
 
         return out
 
@@ -673,12 +673,12 @@ class EdgePiADC(SPI):
             `bool`: True if RTD_EN pin is on, False otherwise
         """
         # TODO: this should use self.get_state() instead
-        _logger.debug("Checking RTD status")
+        _logger.debug("__is_rtd_on: Checking RTD status")
         idac_reg = self.__get_register_map()
         idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
         idac_1 = idac_mag[4:].uint
         status = idac_1 != 0x0
-        _logger.debug(f"RTD enabled: {status}")
+        _logger.debug(f"__is_rtd_on: RTD enabled: {status}")
         return status
 
     # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
@@ -915,7 +915,6 @@ class EdgePiADC(SPI):
         _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
 
         # get codes to update register values
-        _logger.debug(f"opcodes = {ops_list}")
         updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
         _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
 
