@@ -2,6 +2,8 @@
 
 
 import pytest
+import logging
+_logger = logging.getLogger(__name__)
 
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
@@ -740,6 +742,9 @@ def test_config(args, updated_vals, adc):
 
     updates = adc._EdgePiADC__config(**args)
     updated_regs = adc._EdgePiADC__read_registers_to_map()
+
+    _logger.info(f"test_config: original_regs = {original_regs}")
+    _logger.info(f"test_config: updated_regs  = {updated_regs}")
 
     for addx, entry in updates.items():
         # assert update values used by __config() were written to registers

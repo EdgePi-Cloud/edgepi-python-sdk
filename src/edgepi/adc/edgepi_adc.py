@@ -887,8 +887,6 @@ class EdgePiADC(SPI):
             `override_rtd_validation` (bool): turn off RTD property validation for RTD mode updates
         """
         # pylint: disable=unused-argument
-
-        _logger.debug(f"\n\n")
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
         _logger.debug(f"__config: args after filtering out None defaults:\n{args}")
