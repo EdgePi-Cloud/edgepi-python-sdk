@@ -1,0 +1,39 @@
+{
+	"random": "46",
+	"random float": "22.208",
+	"bool": "true",
+	"date": "1995-12-11",
+	"regEx": "hellooooooooooooooooo to you",
+	"enum": "json",
+	"firstname": "Lynde",
+	"lastname": "Pulsifer",
+	"city": "Port Hedland",
+	"country": "Christmas Island",
+	"countryCode": "NL",
+	"email uses current data": "Lynde.Pulsifer@gmail.com",
+	"email from expression": "Lynde.Pulsifer@yopmail.com",
+	"array": [
+		"Taffy",
+		"Ekaterina",
+		"Julieta",
+		"Alyssa",
+		"Bibby"
+	],
+	"array of objects": [
+		{
+			"index": "0",
+			"index start at 5": "5"
+		},
+		{
+			"index": "1",
+			"index start at 5": "6"
+		},
+		{
+			"index": "2",
+			"index start at 5": "7"
+		}
+	],
+	"Shannah": {
+		"age": "59"
+	}
+}

@@ -25,7 +25,7 @@ def fixture_test_dac(mocker):
     yield EdgePiEEPROM()
 
 # Max data size of osensa space
-OSENSA_DATA_SIZE = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value-3
+OSENSA_DATA_SIZE = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
 
 # Max size of User space = End of memory - start of memory + 1
 USER_SPACE_SIZE = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
@@ -36,6 +36,13 @@ def read_binfile():
     with open(PATH+"/serializedFile","rb") as fd:
         b_string = fd.read()
     return b_string
+
+def read_dummy_json(file_name: str):
+    """Read Jason file"""
+    # pylint: disable=unspecified-encoding
+    with open(PATH+"/"+file_name, "r") as file:
+        dummy = json.load(file)
+    return dummy
 
 @pytest.mark.parametrize("page_addr, byte_addr, result",
                         [(0, 8, [0x00, 0x08]),
@@ -207,17 +214,20 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
                         [(0, 5000,True,does_not_raise()),
                          (0, 10000, True,does_not_raise()),
                          (0, USER_SPACE_SIZE-1,True,does_not_raise()),
-                         (0, USER_SPACE_SIZE, True,pytest.raises(MemoryOutOfBound)),
+                         (0, USER_SPACE_SIZE, True,does_not_raise()),
+                         (1, USER_SPACE_SIZE, True,pytest.raises(MemoryOutOfBound)),
                          (USER_SPACE_SIZE-1,0,True,pytest.raises(ValueError)),
-                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
-                         (USER_SPACE_SIZE-1,1,True,pytest.raises(MemoryOutOfBound)),
+                         (USER_SPACE_SIZE-1,1,True,does_not_raise()),
+                         (USER_SPACE_SIZE-1,2,True,pytest.raises(MemoryOutOfBound)),
                          (USER_SPACE_SIZE-2,1,True,does_not_raise()),
                          (0, 5000, False,does_not_raise()),
                          (0, 10000, False,does_not_raise()),
-                         (2, OSENSA_DATA_SIZE, False,does_not_raise()),
-                         (3, OSENSA_DATA_SIZE, False,pytest.raises(MemoryOutOfBound)),
-                         (4, OSENSA_DATA_SIZE, False, pytest.raises(MemoryOutOfBound)),
-                         (4, 0, False,pytest.raises(ValueError))
+                         (0, OSENSA_DATA_SIZE, False,does_not_raise()),
+                         (1, OSENSA_DATA_SIZE, False,pytest.raises(MemoryOutOfBound)),
+                         (2, OSENSA_DATA_SIZE, False, pytest.raises(MemoryOutOfBound)),
+                         (OSENSA_DATA_SIZE-1, 0, False,pytest.raises(ValueError)),
+                         (OSENSA_DATA_SIZE-1, 1, False,does_not_raise()),
+                         (OSENSA_DATA_SIZE-1, 2, False,pytest.raises(MemoryOutOfBound)),
                         ])
 def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
     address = (EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + mem_address) if user_space \
@@ -282,12 +292,37 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
                                                                113, 114, 115, 116, 117,
                                                                118, 119, 120, 121, 122,
                                                                123, 124, 125, 126, 127],
-                                                              [128]]),
+                                                              [128]])
                         ])
 def test__generate_list_of_pages(mem_address, data, expected, eeprom):
     # pylint: disable=protected-access
     result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
     assert result == expected
+
+@pytest.mark.parametrize("mem_address",
+                        [(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)])
+def test__generate_list_of_pages_reset(mem_address, eeprom):
+    # pylint: disable=protected-access
+    # pylint: disable=line-too-long
+    data = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1)
+    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
+    assert len(page_n) == len(data)/64
+
+@pytest.mark.parametrize("mem_address,json_file_name",
+                        [(0, "dummy_0.json"),
+                         (2, "dummy_0.json"),
+                         ])
+def test__generate_list_of_pages_json(mem_address, json_file_name,eeprom):
+    json_data = read_dummy_json(json_file_name)
+    data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
+    data_l = list(data_b)
+    # pylint: disable=protected-access
+    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, list(data_l))
+    target = iter(data_l)
+    for page in page_n:
+        for val in page:
+            assert val == next(target)
+
 
 # TODO: add more teset cases
 @pytest.mark.parametrize("mem_address, length, expected",

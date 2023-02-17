@@ -69,7 +69,8 @@ def test_dac_init(dac):
 )
 def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
-        # expected_voltage = (voltage)*dac.dac_ops.dict_calib_param[analog_out.value].gain - dac.dac_ops.dict_calib_param[analog_out.value].offset
+        # expected_voltage = (voltage)*dac.dac_ops.dict_calib_param[analog_out.value].gain -\
+        #  dac.dac_ops.dict_calib_param[analog_out.value].offset
         dac.write_voltage(analog_out, voltage)
         code, voltage_val, gain_state = dac.get_state(analog_out, True, True, True)
         dac_gain = 2 if gain_state else 1
@@ -95,10 +96,10 @@ def test_dac_reset(dac):
     dac.reset()
 
     for ch in CH:
-        # pylint: disable=line-too-longx
         code, _, gain_state = dac.get_state(ch, True, True, True)
         dac_gain = 2 if gain_state else 1
         expected_voltage = dac.dac_ops.code_to_voltage(ch.value, code, dac_gain)
+        # pylint: disable=line-too-long
         assert expected_voltage == pytest.approx(dac.dac_ops.dict_calib_param[ch.value].offset , abs=STORE_ERROR)
         # pylint: disable=line-too-long
         assert dac.gpio.expander_pin_dict[dac._EdgePiDAC__analog_out_pin_map[ch.value].value].is_high

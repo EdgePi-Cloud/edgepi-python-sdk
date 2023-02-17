@@ -1,0 +1,39 @@
+{
+	"random": "77",
+	"random float": "44.6",
+	"bool": "true",
+	"date": "1994-02-15",
+	"regEx": "helloooooooooooooooooooooooooooooooooooooooooooooooooooo to you",
+	"enum": "generator",
+	"firstname": "Edith",
+	"lastname": "Felizio",
+	"city": "Sri Jayawardenapura-Kotte",
+	"country": "Latvia",
+	"countryCode": "NI",
+	"email uses current data": "Edith.Felizio@gmail.com",
+	"email from expression": "Edith.Felizio@yopmail.com",
+	"array": [
+		"Ardys",
+		"Gloria",
+		"Bee",
+		"Hermione",
+		"Kore"
+	],
+	"array of objects": [
+		{
+			"index": "0",
+			"index start at 5": "5"
+		},
+		{
+			"index": "1",
+			"index start at 5": "6"
+		},
+		{
+			"index": "2",
+			"index start at 5": "7"
+		}
+	],
+	"Dulce": {
+		"age": "61"
+	}
+}
