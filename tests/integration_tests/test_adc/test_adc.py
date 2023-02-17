@@ -738,7 +738,6 @@ def fixture_adc():
     ],
 )
 def test_config(args, updated_vals, adc):
-    # original_regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
     original_regs = adc._EdgePiADC__read_registers_to_map()
 
     updates = adc._EdgePiADC__config(**args)
@@ -781,6 +780,7 @@ def test_voltage_individual(ch, adc):
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()
+    _logger.info(f"test_voltage_individual: voltage  = {out}")
     assert out != 0
 
 

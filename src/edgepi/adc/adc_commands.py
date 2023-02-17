@@ -20,8 +20,6 @@ class ADCCommands:
         """Trigger ADC register read"""
         self.check_for_int([address, num])
         command = [ADCComs.COM_RREG.value + address, num - 1]
-        _logger.debug(f"read_register_command: Length of "
-                      f"RREG command to send is {len(command + [255] * num)}")
         return command + [255] * num
 
     def write_register_command(self, address, values):
@@ -30,8 +28,6 @@ class ADCCommands:
         all(self.check_range(value, 0, 255) for value in values)
         self.check_for_int(values)
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
-        _logger.debug(f"write_register_command: Length of "
-                      f"WREG Command to send is {len(command + values)}")
         return command + values
 
     def start_adc(self, adc_num: ADCNum):

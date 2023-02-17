@@ -315,7 +315,6 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to read must be at least 1")
 
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
-        _logger.debug(f"__read_register: sending data")
         out = self.transfer(code)
         _logger.debug(f"__read_register: received {out}")
 
@@ -338,7 +337,6 @@ class EdgePiADC(SPI):
         code = self.adc_ops.write_register_command(start_addx.value, data)
         _logger.debug(f"__write_register: sending {code}")
         out = self.transfer(code)
-        _logger.debug(f"__write_register: received data")
 
         return out
 
@@ -398,7 +396,7 @@ class EdgePiADC(SPI):
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
                 f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
-                f"data_rate={hex(data_rate.value.op_code)}"
+                f"data_rate={hex(data_rate.value.op_code)}, "
                 f"filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
@@ -599,11 +597,12 @@ class EdgePiADC(SPI):
 
         # log STATUS byte
         status = get_adc_status(status_code)
-        _logger.debug(f"Logging STATUS byte:\n{status}")
+        _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
 
         calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
 
         # convert from code to voltage
+        _logger.debug(f"single_sample: voltage code:\n{voltage_code}")
         return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):

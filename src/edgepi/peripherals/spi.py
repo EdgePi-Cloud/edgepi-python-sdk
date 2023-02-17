@@ -42,9 +42,7 @@ class SpiDevice:
 
     def transfer(self, data: list) -> list:
         """Conduct an SPI data transfer"""
-        _logger.debug(f"SPI transfer: data={len(data)}")
         out = self.spi.transfer(data)
-        _logger.debug(f"SPI transfer: data={len(out)}")
         return out
 
     def close(self):
