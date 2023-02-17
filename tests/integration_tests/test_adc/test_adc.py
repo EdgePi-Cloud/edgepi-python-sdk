@@ -821,6 +821,7 @@ def test_voltage_continuous(adc_num, ch, adc):
         adc.start_conversions(adc_num)
         for _ in range(10):
             out = adc.read_voltage(adc_num)
+            _logger.info(f"test_voltage_individual: voltage  = {out}")
             assert out != 0
     finally:
         adc.stop_conversions(adc_num)

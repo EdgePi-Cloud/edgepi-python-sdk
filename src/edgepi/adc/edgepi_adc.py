@@ -659,7 +659,7 @@ class EdgePiADC(SPI):
 
         # build dict with (register addx : register_value) pairs.
         reg_dict = {addx + i: reg_values[i] for i in range(ADC_NUM_REGS)}
-        _logger.debug(f"__read_registers_to_map: {reg_dict}")
+        # _logger.debug(f"__read_registers_to_map: {reg_dict}")
 
         return reg_dict
 
