@@ -540,10 +540,10 @@ class EdgePiADC(SPI):
 
         # log STATUS byte
         status = get_adc_status(status_code)
-        _logger.debug(f"Logging STATUS byte:\n{status}")
+        _logger.debug(f" read_voltage: Logging STATUS byte:\n{status}")
 
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
-
+        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
         return code_to_voltage(voltage_code, adc_num.value, calibs)
 
