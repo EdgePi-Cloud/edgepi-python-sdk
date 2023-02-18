@@ -602,7 +602,7 @@ class EdgePiADC(SPI):
         calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
 
         # convert from code to voltage
-        _logger.debug(f"single_sample: voltage code:\n{voltage_code}")
+        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):
