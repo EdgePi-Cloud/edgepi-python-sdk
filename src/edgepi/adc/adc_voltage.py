@@ -71,7 +71,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     num_bits = adc_info.num_data_bytes * 8
 
     # code is given in 2's complement, remove leading 1
-    uint_code = code_bits.uin
+    uint_code = code_bits.uint
     if _is_negative_voltage(code_bits):
         # code_bits[0] = 0
         uint_code =  uint_code - 2**32
