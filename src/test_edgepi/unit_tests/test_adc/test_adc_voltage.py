@@ -16,8 +16,7 @@ from edgepi.adc.adc_voltage import (
     code_to_temperature,
     CRC_8_ATM_GEN,
     STEP_DOWN_RESISTOR_1,
-    STEP_DOWN_RESISTOR_2,
-    REFERENCE_VOLTAGE
+    STEP_DOWN_RESISTOR_2
 )
 from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 
@@ -56,7 +55,7 @@ def test_is_negative_voltage(code, result):
             [0x7F,0xFF,0xFF,0xFF],
             2.5,
             ADCNum.ADC_2.value.num_data_bytes,
-        ),      
+        ),
         (
             [0x80,0x0,0x0,0x0],
             -2.5,
@@ -93,7 +92,7 @@ def test_code_to_input_voltage(code, voltage, num_bytes):
             [0x7F,0xFF,0xFF,0xFF],
             2.5,
             ADCNum.ADC_2.value.num_data_bytes,
-        ),      
+        ),
         (
             [0x80,0x0,0x0,0x0],
             -2.5,
