@@ -76,7 +76,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
         # code_bits[0] = 0
         uint_code =  uint_code - 2**32
 
-    v_in = _code_to_input_voltage(code_bits.uint, REFERENCE_VOLTAGE, num_bits)
+    v_in = _code_to_input_voltage(uint_code, REFERENCE_VOLTAGE, num_bits)
 
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
