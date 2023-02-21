@@ -25,7 +25,6 @@ def fixture_adc():
     yield adc
 
 
-# TODO: Test EdgePi Unit unavailable, these tests have not been run yet
 @pytest.mark.parametrize(
     "updates, state_property, expected",
     [
@@ -395,15 +394,162 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
-    _logger.info(f"Eval state_property = {eval(state_property)}")
-    _logger.info(f"state = {state.adc_1.mux_p}")
-    if state_property == "state.adc_1.mux_p":
-        _logger.info(f"state = {state.adc_1.mux_p}")
-        assert state.adc_1.mux_p == expected
-    elif state_property =="state.adc_1.mux_n":
-        _logger.info(f"state = {state.adc_1.mux_n}")
-        assert state.adc_1.mux_n == expected
+    assert eval(state_property) == expected
 
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # ADC1 MUX_P
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN0.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN1},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN1.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN2},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN2.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN3},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN3.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN4},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN4.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN5},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN5.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN6},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN6.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN7},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AIN7.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AINCOM},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.AINCOM.value << 4],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.FLOAT},
+            ADCProperties.ADC1_MUXP.value.values[ADCChannel.FLOAT.value << 4],
+        )])
+def test_edgepi_state_no_cache_adc1_muxp(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc1.mux_p == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # ADC1 MUX_N: need to set mux_p as well, otherwise updates only to mux_n fail
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN0},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN0.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN1},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN1.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN2},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN2.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN3},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN3.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN4},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN4.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN5},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN5.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN6},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN6.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AIN7},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AIN7.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.AINCOM},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.AINCOM.value],
+        ),
+        (
+            {"adc_1_analog_in": ADCChannel.AIN0, "adc_1_mux_n": ADCChannel.FLOAT},
+            ADCProperties.ADC1_MUXN.value.values[ADCChannel.FLOAT.value],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc1_muxn(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc1.mux_n == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # ADC2 MUX_P
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN0.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN1},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN1.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN2},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN2.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN3},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN3.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN4},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN4.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN5},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN5.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN6},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN6.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN7},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AIN7.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AINCOM},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.AINCOM.value << 4],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.FLOAT},
+            ADCProperties.ADC2_MUXP.value.values[ADCChannel.FLOAT.value << 4],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc2_muxn(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc2.mux_p == expected
 
 @pytest.mark.parametrize(
     "enable_rtd, state_property, expected",
