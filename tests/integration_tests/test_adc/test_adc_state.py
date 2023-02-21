@@ -396,7 +396,13 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
     _logger.info(f"Eval state_property = {eval(state_property)}")
-    assert eval(state_property) == expected
+    _logger.info(f"state = {state.adc_1.mux_p}")
+    if state_property == "state.adc_1.mux_p":
+        _logger.info(f"state = {state.adc_1.mux_p}")
+        assert state.adc_1.mux_p == expected
+    elif state_property =="state.adc_1.mux_n":
+        _logger.info(f"state = {state.adc_1.mux_n}")
+        assert state.adc_1.mux_n == expected
 
 
 @pytest.mark.parametrize(
