@@ -250,12 +250,12 @@ def fixture_adc():
         ),
         # CONV MODE
         (
-            {"state.adc_1.conversion_mode": ConvMode.PULSE},
+            {"conversion_mode": ConvMode.PULSE},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
         ),
         (
-            {"state.adc_1.conversion_mode": ConvMode.CONTINUOUS},
+            {"conversion_mode": ConvMode.CONTINUOUS},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
         ),
@@ -632,11 +632,11 @@ def test_edgepi_state_no_cache_check_mode(updates, expected, adc):
     [
         # CONV MODE
         (
-            {"state.adc_1.conversion_mode": ConvMode.PULSE},
+            {"conversion_mode": ConvMode.PULSE},
             ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
         ),
         (
-            {"state.adc_1.conversion_mode": ConvMode.CONTINUOUS},
+            {"conversion_mode": ConvMode.CONTINUOUS},
             ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
         ),
     ])
