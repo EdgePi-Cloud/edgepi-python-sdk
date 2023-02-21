@@ -647,6 +647,141 @@ def test_edgepi_state_no_cache_conv_mode(updates, expected, adc):
     state = adc.get_state()
     assert state.adc_1.conversion_mode == expected
 
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # ADC1 DATA RATE
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_2P5},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2P5.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_5},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_5.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_10},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_10.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_16P6},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_16P6.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_20},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_20.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_50},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_50.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_60},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_60.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_100},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_100.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_400},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_400.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_1200},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_1200.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_2400},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_2400.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_4800},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_4800.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_7200},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_7200.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_14400},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_14400.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_19200},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_19200.value.op_code],
+        ),
+        (
+            {"adc_1_data_rate": ADC1DataRate.SPS_38400},
+            ADCProperties.DATA_RATE_1.value.values[ADC1DataRate.SPS_38400.value.op_code],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc1_data_rate(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc_1.data_rate == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+    # ADC2 Data Rate
+        (
+            {"adc_2_data_rate": ADC2DataRate.SPS_10},
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_10.value.op_code],
+        ),
+        (
+            {"adc_2_data_rate": ADC2DataRate.SPS_100},
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_100.value.op_code],
+        ),
+        (
+            {"adc_2_data_rate": ADC2DataRate.SPS_400},
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_400.value.op_code],
+        ),
+        (
+            {"adc_2_data_rate": ADC2DataRate.SPS_800},
+            ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc2_data_rate(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc_2.data_rate == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # FILTER MODE
+        (
+            {"filter_mode": FilterMode.SINC1},
+            ADCProperties.FILTER_MODE.value.values[FilterMode.SINC1.value.op_code],
+        ),
+        (
+            {"filter_mode": FilterMode.SINC2},
+            ADCProperties.FILTER_MODE.value.values[FilterMode.SINC2.value.op_code],
+        ),
+        (
+            {"filter_mode": FilterMode.SINC3},
+            ADCProperties.FILTER_MODE.value.values[FilterMode.SINC3.value.op_code],
+        ),
+        (
+            {"filter_mode": FilterMode.SINC4},
+            ADCProperties.FILTER_MODE.value.values[FilterMode.SINC4.value.op_code],
+        ),
+        (
+            {"filter_mode": FilterMode.FIR},
+            ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc2_data_rate(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.filter_mode == expected
 
 @pytest.mark.parametrize(
     "enable_rtd, state_property, expected",
