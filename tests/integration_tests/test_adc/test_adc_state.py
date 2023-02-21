@@ -776,7 +776,7 @@ def test_edgepi_state_no_cache_adc2_data_rate(updates, expected, adc):
             ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
     ])
-def test_edgepi_state_no_cache_adc2_data_rate(updates, expected, adc):
+def test_edgepi_state_no_cache_filter_mode(updates, expected, adc):
     adc._EdgePiADC__config(**updates)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
