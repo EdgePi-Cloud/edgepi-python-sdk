@@ -395,7 +395,6 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
-    _logger.info(f'eval state property = {eval(state_property)}')
     assert eval(state_property) == expected
 
 
