@@ -445,7 +445,7 @@ def test_edgepi_state_no_cache_adc1_muxp(updates, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
-    assert state.adc1.mux_p == expected
+    assert state.adc_1.mux_p == expected
 
 @pytest.mark.parametrize(
     "updates, expected",
@@ -497,7 +497,7 @@ def test_edgepi_state_no_cache_adc1_muxn(updates, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
-    assert state.adc1.mux_n == expected
+    assert state.adc_1.mux_n == expected
 
 @pytest.mark.parametrize(
     "updates, expected",
@@ -549,7 +549,7 @@ def test_edgepi_state_no_cache_adc2_muxn(updates, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
-    assert state.adc2.mux_p == expected
+    assert state.adc_2.mux_p == expected
 
 @pytest.mark.parametrize(
     "enable_rtd, state_property, expected",
