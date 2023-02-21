@@ -250,12 +250,12 @@ def fixture_adc():
         ),
         # CONV MODE
         (
-            {"checksum_mode": ConvMode.PULSE},
+            {"state.adc_1.conversion_mode": ConvMode.PULSE},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
         ),
         (
-            {"checksum_mode": ConvMode.CONTINUOUS},
+            {"state.adc_1.conversion_mode": ConvMode.CONTINUOUS},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
         ),
@@ -544,12 +544,109 @@ def test_edgepi_state_no_cache_adc1_muxn(updates, expected, adc):
             ADCProperties.ADC2_MUXP.value.values[ADCChannel.FLOAT.value << 4],
         ),
     ])
-def test_edgepi_state_no_cache_adc2_muxn(updates, expected, adc):
+def test_edgepi_state_no_cache_adc2_muxp(updates, expected, adc):
     adc._EdgePiADC__config(**updates)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
     assert state.adc_2.mux_p == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # ADC2 MUX_N
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN0},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN0.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN1},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN1.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN2},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN2.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN3},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN3.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN4},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN4.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN5},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN5.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN6},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN6.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AIN7},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AIN7.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.AINCOM},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.AINCOM.value],
+        ),
+        (
+            {"adc_2_analog_in": ADCChannel.AIN0, "adc_2_mux_n": ADCChannel.FLOAT},
+            ADCProperties.ADC2_MUXN.value.values[ADCChannel.FLOAT.value],
+        ),
+    ])
+def test_edgepi_state_no_cache_adc2_muxn(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc_2.mux_n == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # CHECK MODE
+        (
+            {"checksum_mode": CheckMode.CHECK_BYTE_CRC},
+            ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_CRC.value.op_code],
+        ),
+        (
+            {"checksum_mode": CheckMode.CHECK_BYTE_CHK},
+            ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_CHK.value.op_code],
+        ),
+        (
+            {"checksum_mode": CheckMode.CHECK_BYTE_OFF},
+            ADCProperties.CHECK_MODE.value.values[CheckMode.CHECK_BYTE_OFF.value.op_code],
+        ),
+    ])
+def test_edgepi_state_no_cache_check_mode(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.checksum_mode == expected
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        # CONV MODE
+        (
+            {"state.adc_1.conversion_mode": ConvMode.PULSE},
+            ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
+        ),
+        (
+            {"state.adc_1.conversion_mode": ConvMode.CONTINUOUS},
+            ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
+        ),
+    ])
+def test_edgepi_state_no_cache_conv_mode(updates, expected, adc):
+    adc._EdgePiADC__config(**updates)
+    # pylint: disable=eval-used, unused-variable
+    # using eval to access nested attributes of state with dot notation
+    state = adc.get_state()
+    assert state.adc_1.conversion_mode == expected
+
 
 @pytest.mark.parametrize(
     "enable_rtd, state_property, expected",
