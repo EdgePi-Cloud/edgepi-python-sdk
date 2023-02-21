@@ -85,10 +85,11 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     ],
 )
 def test_dac_gain(gain_enable,dac):
-    gain_state = dac.enable_dac_gain(not gain_enable)
+    dac.enable_dac_gain(not gain_enable)
     _, _, initial_gain_state = dac.get_state(None, False, False, True)
+    gain_state = dac.enable_dac_gain(gain_enable)
     assert initial_gain_state != gain_state
-    gain_state = dac.enable_dac_gain(False)
+    dac.enable_dac_gain(False)
 
 def test_dac_reset(dac):
     voltage = 2.2
