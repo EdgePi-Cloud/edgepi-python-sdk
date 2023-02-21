@@ -9,6 +9,8 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 import time
 import pytest
+import logging
+_logger = logging.getLogger(__name__)
 
 from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
@@ -33,6 +35,9 @@ def test__byte_write_register(data, address, expected, eeprom):
     time.sleep(0.002)
     # pylint: disable=protected-access
     eeprom._EdgePiEEPROM__byte_write_register(addrx, 255)
+    _logger.info(f"data to write = {data}")
+    _logger.info(f"initial data  = {initial_data}")
+    _logger.info(f"new data      = {new_data}")
     assert initial_data[0] != new_data[0]
     assert new_data[0] == expected
 
@@ -51,6 +56,9 @@ def test__page_write_register(data, address, eeprom):
     # pylint: disable=protected-access
     time.sleep(0.002)
     eeprom._EdgePiEEPROM__page_write_register(addrx, [255]*len(data))
+    _logger.info(f"data to write = {data}")
+    _logger.info(f"initial data  = {initial_data}")
+    _logger.info(f"new data      = {new_data}")
     for indx, init_data in enumerate(initial_data):
         assert init_data != new_data[indx]
         assert new_data[indx] == data[indx]
