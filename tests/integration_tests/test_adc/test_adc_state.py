@@ -1,6 +1,7 @@
 """Integration testing for EdgePiADC get_state()"""
 
 import pytest
+import logging
 
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_query_lang import ADCProperties
@@ -12,6 +13,8 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     FilterMode,
 )
+
+_logger = logging.getLogger(__name__)
 
 # pylint: disable=protected-access, too-many-lines
 @pytest.fixture(name="adc", scope="module")
@@ -392,6 +395,7 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
+    _logger.info(f"Eval state_property = {eval(state_property)}")
     assert eval(state_property) == expected
 
 
