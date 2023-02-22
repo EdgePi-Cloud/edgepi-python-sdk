@@ -246,9 +246,8 @@ class EdgePiTC(SpiDevice):
                 updated_value = entry["value"]
                 self.__write_to_register(reg_addx, updated_value)
                 _logger.debug(
-                    f"register value at address ({hex(reg_addx)}")
-                    f" has been updated to ({hex(updated_value)})"
-                )
+                    f"register value at address ({hex(reg_addx)})"
+                    f" has been updated to ({hex(updated_value)})")
 
     def __get_tc_type(self):
         """Returns the currently configured thermocouple type"""
