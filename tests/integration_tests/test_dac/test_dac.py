@@ -80,8 +80,8 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
 
 @pytest.mark.parametrize(
     "gain_enable",
-    [(True),
-     (False),
+    [True,
+     False,
     ],
 )
 def test_dac_gain(gain_enable,dac):
