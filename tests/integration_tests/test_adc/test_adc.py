@@ -1,12 +1,9 @@
 """ Integration tests for EdgePi ADC module """
 
-
+# pylint: disable=wrong-import-order
 import pytest
-import logging
-_logger = logging.getLogger(__name__)
 
 from edgepi.adc.adc_constants import (
-    ADC_NUM_REGS,
     ADCNum,
     ADCReg,
     ADCChannel as CH,
@@ -23,6 +20,8 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
+import logging
+_logger = logging.getLogger(__name__)
 
 # pylint: disable=protected-access
 @pytest.fixture(name="adc", scope="module")

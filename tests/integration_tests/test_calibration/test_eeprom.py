@@ -8,8 +8,8 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import time
-import pytest
 import logging
+import pytest
 _logger = logging.getLogger(__name__)
 
 from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo
@@ -46,7 +46,6 @@ def test__byte_write_register(data, address, expected, eeprom):
                         [
                          (list(range(0,64)),0),
                          (list(range(64,128)),64),
-                         
                         ])
 def test__page_write_register(data, address, eeprom):
     initial_data = eeprom.read_memory(address, len(data))

@@ -5,6 +5,7 @@ import pytest
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 def reset_pins(gpio, pin_name):
+    """Reset pins to power up default setting"""
     gpio.set_pin_direction_in(pin_name)
     gpio.set_pin_state(pin_name)
 
@@ -143,4 +144,3 @@ def test_clear_pin_state(pin_name):
     pin_val = gpio.read_pin_state(pin_name)
     assert pin_val is False
     reset_pins(gpio, pin_name)
-

@@ -209,7 +209,7 @@ class EdgePiTC(SpiDevice):
         """
         data = [reg_addx] + [value]
         _logger.debug(f"__write_to_registers: shifting in data => {data}")
-        new_data = self.transfer(data)
+        self.transfer(data)
 
     def __read_registers_to_map(self):
         """

@@ -1,7 +1,7 @@
 """Integration testing for EdgePiADC get_state()"""
 
-import pytest
 import logging
+import pytest
 
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_query_lang import ADCProperties
