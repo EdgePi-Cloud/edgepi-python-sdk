@@ -3,6 +3,7 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=wrong-import-position
 # https://github.com/protocolbuffers/protobuf/issues/10372
+# TODO: I2C Transaction fails without 0.002ms delay
 
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))

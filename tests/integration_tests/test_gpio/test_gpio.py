@@ -100,7 +100,6 @@ def test_set_pin_direction_out(pin_name):
 ])
 def test_set_pin_state(pin_name):
     gpio = EdgePiGPIO()
-    # TODO: setting pins 5-8 to high causes crash
     gpio.set_pin_state(pin_name)
     pin_val = gpio.read_pin_state(pin_name)
     assert pin_val is True

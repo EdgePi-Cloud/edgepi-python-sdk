@@ -426,7 +426,6 @@ def fixture_adc_cache():
     yield adc
 
 
-# TODO: Test EdgePi Unit unavailable, these tests have not been run yet
 @pytest.mark.parametrize(
     "updates, state_property, expected",
     [
