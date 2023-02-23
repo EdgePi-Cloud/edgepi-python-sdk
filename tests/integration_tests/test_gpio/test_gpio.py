@@ -83,7 +83,7 @@ def test_set_pin_direction_out(pin_name):
     pin_dir = gpio.get_pin_direction(pin_name)
     pin_val = gpio.read_pin_state(pin_name)
     assert pin_dir is False
-    assert pin_val is False
+    assert pin_val is True
     reset_pins(gpio, pin_name)
 
 
