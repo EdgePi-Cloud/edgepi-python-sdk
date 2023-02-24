@@ -38,6 +38,72 @@ from edgepi.tc.tc_conv_time import calc_conv_time
 
 _logger = logging.getLogger(__name__)
 
+class TCState:
+    """
+    A Class to store TC state
+    """
+    def __init__(self):
+        # cmode = True = auto conv mode
+        self.cmode = None
+        # one_shot = True = single shot
+        self.one_shot = None
+        self.OC_fault = None
+        # cj = True = disabled
+        self.cj = None
+        # fault = True = interrupt mode
+        self.fault = None
+        self.fault_clr = None
+        # noise_rejection = true = 50Hz
+        self.noise_rejection = None
+        self.sampling_average = None
+        self.TC_type = None
+
+    def __tc_get_state_bool(self, cr_reg: int, mask:int):
+        """
+        Populate the state value using the cr_regs
+        Args:
+            cr_reg (int): value of one of configuration register either CR0 | CR1
+            bitmask (int): bit mask 
+        Return:
+            Bool
+        """
+        return (cr_reg & mask) == mask  
+
+    def __tc_get_state(self, cr_reg: int, mask: int):
+        """
+        Populate thes state value using the cr_regs
+        Args:
+            cr_reg (int): value of one of configuration register either CR0 | CR1
+            bitmask (int): bit mask 
+        Return:
+            int
+        """
+        return (cr_reg & mask)
+
+    def tc_update_state(self, cr_regs: list):
+        """
+        Update configurations using configuration registers
+        """
+        # cmode = True = auto conv mode
+        self.cmode = self.__tc_get_state_bool(cr_regs[0], ConvMode.AUTO.value.op_code)
+        # one_shot = True = single shot
+        self.one_shot = self.__tc_get_state_bool(cr_regs[0], TCOps.SINGLE_SHOT.value.op_code)
+        self.OC_fault = None
+        # cj = True = disabled
+        self.cj = self.__tc_get_state_bool(cr_regs[0], CJMode.DISABLE.value.op_code)
+        # fault = True = interrupt mode
+        self.fault = self.__tc_get_state_bool(cr_regs[0], FaultMode.INTERRUPT.value.op_code)
+        self.fault_clr = None
+        # noise_rejection = true = 50Hz
+        self.noise_rejection = self.__tc_get_state_bool(cr_regs[0], NoiseFilterMode.HZ_50.value.op_code)
+        # sampling_average = 0x00 =1sample,
+        #                    0x10 = 2 samples,
+        #                    0x20 = 4 samples,
+        #                    0x30 = 8 samples,
+        #                    0x40 = 16 samples
+        self.sampling_average = self.__tc_get_state(cr_regs[1], AvgMode.AVG_MASK.value)
+        #TC_TYPE = 0->7 = B->E->J->K->N->R->S->T
+        self.TC_type = self.__tc_get_state(cr_regs[1], TCType.TYPE_MASK.value)
 
 class EdgePiTC(SpiDevice):
     """
@@ -62,6 +128,7 @@ class EdgePiTC(SpiDevice):
 
     def __init__(self):
         super().__init__(bus_num=6, dev_id=2)
+        self.tc_state = TCState()
 
     def read_temperatures(self):
         """Use to read cold junction and linearized thermocouple temperature measurements"""
@@ -468,3 +535,14 @@ class EdgePiTC(SpiDevice):
 
         # only update registers whose values have been changed
         self.__update_registers_from_dict(reg_values)
+
+    def get_state(self):
+        """
+        Read config registers and update state object
+        Args:
+            N/A
+        Retuern:
+            N/A
+        """
+        cr_regs = self.__read_registers(TCAddresses.CR0_R.value, 2)
+        self.tc_state.tc_update_state(cr_regs[1:])
