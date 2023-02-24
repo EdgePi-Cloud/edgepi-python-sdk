@@ -48,7 +48,7 @@ def fixture_test_edgepi_tc(mocker):
     yield EdgePiTC()
 
 @pytest.fixture(name="tc_state")
-def fixture_test_edgepi_tc_state(mocker):
+def fixture_test_edgepi_tc_state():
     # yield instead of return so local state (i.e mocks) not lost
     # upon returning EdgePiTC object in test functions below
     yield TCState()
@@ -528,15 +528,15 @@ def test_tc_reset_registers(mock_write, tc):
     mock_write.assert_has_calls(write_calls, any_order=True)
 
 def test_tc_state_init(tc):
-    assert tc.tc_state.cmode == None
-    assert tc.tc_state.one_shot == None
-    assert tc.tc_state.OC_fault == None
-    assert tc.tc_state.cj == None
-    assert tc.tc_state.fault == None
-    assert tc.tc_state.fault_clr == None
-    assert tc.tc_state.noise_rejection == None
-    assert tc.tc_state.sampling_average == None
-    assert tc.tc_state.TC_type == None
+    assert tc.tc_state.cmode is None
+    assert tc.tc_state.one_shot is None
+    assert tc.tc_state.open_circuit_fault is None
+    assert tc.tc_state.cold_junction is None
+    assert tc.tc_state.fault is None
+    assert tc.tc_state.fault_clr is None
+    assert tc.tc_state.noise_rejection is None
+    assert tc.tc_state.sampling_average is None
+    assert tc.tc_state.tc_type is None
 
 @pytest.mark.parametrize(
     "cr_val, state_mask, state_expected",
@@ -634,11 +634,11 @@ def test_tc_update_state(cr_val, state_expected, tc_state):
     tc_state.tc_update_state(cr_val)
     assert tc_state.cmode == state_expected[0]
     assert tc_state.one_shot == state_expected[1]
-    assert tc_state.cj == state_expected[2]
+    assert tc_state.cold_junction == state_expected[2]
     assert tc_state.fault == state_expected[3]
     assert tc_state.noise_rejection == state_expected[4]
     assert tc_state.sampling_average == state_expected[5]
-    assert tc_state.TC_type == state_expected[6]
+    assert tc_state.tc_type == state_expected[6]
 
 
 @pytest.mark.parametrize(
@@ -669,8 +669,8 @@ def test_get_state(mocker, cr_val, state_expected, tc):
     tc.get_state()
     assert tc.tc_state.cmode == state_expected[0]
     assert tc.tc_state.one_shot == state_expected[1]
-    assert tc.tc_state.cj == state_expected[2]
+    assert tc.tc_state.cold_junction == state_expected[2]
     assert tc.tc_state.fault == state_expected[3]
     assert tc.tc_state.noise_rejection == state_expected[4]
     assert tc.tc_state.sampling_average == state_expected[5]
-    assert tc.tc_state.TC_type == state_expected[6]
+    assert tc.tc_state.tc_type == state_expected[6]

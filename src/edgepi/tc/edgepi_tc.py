@@ -38,6 +38,7 @@ from edgepi.tc.tc_conv_time import calc_conv_time
 
 _logger = logging.getLogger(__name__)
 
+# pylint: disable=too-many-instance-attributes
 class TCState:
     """
     A Class to store TC state
@@ -47,38 +48,38 @@ class TCState:
         self.cmode = None
         # one_shot = True = single shot
         self.one_shot = None
-        self.OC_fault = None
+        self.open_circuit_fault = None
         # cj = True = disabled
-        self.cj = None
+        self.cold_junction = None
         # fault = True = interrupt mode
         self.fault = None
         self.fault_clr = None
         # noise_rejection = true = 50Hz
         self.noise_rejection = None
         self.sampling_average = None
-        self.TC_type = None
+        self.tc_type = None
 
     def __tc_get_state_bool(self, cr_reg: int, mask:int):
         """
         Populate the state value using the cr_regs
         Args:
             cr_reg (int): value of one of configuration register either CR0 | CR1
-            bitmask (int): bit mask 
+            bitmask (int): bit mask
         Return:
             Bool
         """
-        return (cr_reg & mask) == mask  
+        return (cr_reg & mask) == mask
 
     def __tc_get_state(self, cr_reg: int, mask: int):
         """
         Populate thes state value using the cr_regs
         Args:
             cr_reg (int): value of one of configuration register either CR0 | CR1
-            bitmask (int): bit mask 
+            bitmask (int): bit mask
         Return:
             int
         """
-        return (cr_reg & mask)
+        return cr_reg & mask
 
     def tc_update_state(self, cr_regs: list):
         """
@@ -88,14 +89,15 @@ class TCState:
         self.cmode = self.__tc_get_state_bool(cr_regs[0], ConvMode.AUTO.value.op_code)
         # one_shot = True = single shot
         self.one_shot = self.__tc_get_state_bool(cr_regs[0], TCOps.SINGLE_SHOT.value.op_code)
-        self.OC_fault = None
+        self.open_circuit_fault = None
         # cj = True = disabled
-        self.cj = self.__tc_get_state_bool(cr_regs[0], CJMode.DISABLE.value.op_code)
+        self.cold_junction = self.__tc_get_state_bool(cr_regs[0], CJMode.DISABLE.value.op_code)
         # fault = True = interrupt mode
         self.fault = self.__tc_get_state_bool(cr_regs[0], FaultMode.INTERRUPT.value.op_code)
         self.fault_clr = None
         # noise_rejection = true = 50Hz
-        self.noise_rejection = self.__tc_get_state_bool(cr_regs[0], NoiseFilterMode.HZ_50.value.op_code)
+        self.noise_rejection = self.__tc_get_state_bool(cr_regs[0],
+                                                        NoiseFilterMode.HZ_50.value.op_code)
         # sampling_average = 0x00 =1sample,
         #                    0x10 = 2 samples,
         #                    0x20 = 4 samples,
@@ -103,7 +105,7 @@ class TCState:
         #                    0x40 = 16 samples
         self.sampling_average = self.__tc_get_state(cr_regs[1], AvgMode.AVG_MASK.value)
         #TC_TYPE = 0->7 = B->E->J->K->N->R->S->T
-        self.TC_type = self.__tc_get_state(cr_regs[1], TCType.TYPE_MASK.value)
+        self.tc_type = self.__tc_get_state(cr_regs[1], TCType.TYPE_MASK.value)
 
 class EdgePiTC(SpiDevice):
     """
@@ -321,7 +323,7 @@ class EdgePiTC(SpiDevice):
         cr1 = Bits(uint=self.__read_register(TCAddresses.CR1_R.value)[1], length=8)
         tc_bits = cr1[-4:].uint
         for enum in TCType:
-            if enum.value.op_code == tc_bits:
+            if not isinstance(enum.value, int) and enum.value.op_code == tc_bits:
                 return enum
         return None
 
