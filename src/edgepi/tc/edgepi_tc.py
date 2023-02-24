@@ -179,7 +179,6 @@ class EdgePiTC(SpiDevice):
             new_data[0] = register address, new_data[1] = register value
         """
         data = [reg_addx] + [0xFF]
-        _logger.debug(f"__read_register: addx = {reg_addx} => data before xfer = {data}")
         new_data = self.transfer(data)
         _logger.debug(f"__read_register: addx = {reg_addx} => data after xfer = {new_data}")
         return new_data
@@ -196,7 +195,6 @@ class EdgePiTC(SpiDevice):
             is the start address: register values begin from the second entry.
         """
         data = [start_addx] + [0xFF] * regs_to_read
-        _logger.debug(f"__read_registers: shifting in data => {data}")
         new_data = self.transfer(data)
         _logger.debug(f"__read_registers: shifted out data => {new_data}")
         return new_data
@@ -211,8 +209,7 @@ class EdgePiTC(SpiDevice):
         """
         data = [reg_addx] + [value]
         _logger.debug(f"__write_to_registers: shifting in data => {data}")
-        new_data = self.transfer(data)
-        _logger.debug(f"__write_to_registers: shifted out data => {new_data}")
+        self.transfer(data)
 
     def __read_registers_to_map(self):
         """
@@ -249,9 +246,8 @@ class EdgePiTC(SpiDevice):
                 updated_value = entry["value"]
                 self.__write_to_register(reg_addx, updated_value)
                 _logger.debug(
-                    f"""register value at address ({hex(reg_addx)})
-                     has been updated to ({hex(updated_value)})"""
-                )
+                    f"register value at address ({hex(reg_addx)})"
+                    f" has been updated to ({hex(updated_value)})")
 
     def __get_tc_type(self):
         """Returns the currently configured thermocouple type"""
@@ -437,7 +433,7 @@ class EdgePiTC(SpiDevice):
 
         # filter out self from args
         args_dict = filter_dict(locals(), "self", None)
-        _logger.debug(f"set_config: args dict:\n\n {args_dict}\n\n")
+        _logger.debug(f"set_config: args dict:\n {args_dict}")
 
         # extract non-temperature setting opcodes from Enums
         ops_list = [
@@ -464,11 +460,11 @@ class EdgePiTC(SpiDevice):
         # read value of every write register into dict, starting from CR0_W.
         # Tuples are (write register addx : register_value) pairs.
         reg_values = self.__read_registers_to_map()
-        _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"set_config: register values before updates:\n{reg_values}")
 
         # updated register values
         apply_opcodes(reg_values, ops_list)
-        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}")
 
         # only update registers whose values have been changed
         self.__update_registers_from_dict(reg_values)

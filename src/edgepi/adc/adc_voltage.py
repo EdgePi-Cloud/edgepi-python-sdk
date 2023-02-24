@@ -40,6 +40,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
     voltage_range = v_ref / 2 ** (num_bits - 1)
+    _logger.debug(f" _code_to_input_voltage: code {code}")
     return float(code) * voltage_range
 
 

@@ -1,7 +1,7 @@
 """Integration testing for EdgePiADC get_state()"""
 
-import pytest
 import logging
+import pytest
 
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_query_lang import ADCProperties
@@ -25,7 +25,6 @@ def fixture_adc():
     yield adc
 
 
-# TODO: Test EdgePi Unit unavailable, these tests have not been run yet
 @pytest.mark.parametrize(
     "updates, state_property, expected",
     [
@@ -251,12 +250,12 @@ def fixture_adc():
         ),
         # CONV MODE
         (
-            {"checksum_mode": ConvMode.PULSE},
+            {"conversion_mode": ConvMode.PULSE},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.PULSE.value.op_code],
         ),
         (
-            {"checksum_mode": ConvMode.CONTINUOUS},
+            {"conversion_mode": ConvMode.CONTINUOUS},
             "state.adc_1.conversion_mode",
             ADCProperties.CONV_MODE.value.values[ConvMode.CONTINUOUS.value.op_code],
         ),
@@ -397,7 +396,6 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     state = adc.get_state()
     assert eval(state_property) == expected
 
-
 @pytest.mark.parametrize(
     "enable_rtd, state_property, expected",
     [
@@ -428,7 +426,6 @@ def fixture_adc_cache():
     yield adc
 
 
-# TODO: Test EdgePi Unit unavailable, these tests have not been run yet
 @pytest.mark.parametrize(
     "updates, state_property, expected",
     [
