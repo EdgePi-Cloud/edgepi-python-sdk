@@ -639,3 +639,38 @@ def test_tc_update_state(cr_val, state_expected, tc_state):
     assert tc_state.noise_rejection == state_expected[4]
     assert tc_state.sampling_average == state_expected[5]
     assert tc_state.TC_type == state_expected[6]
+
+
+@pytest.mark.parametrize(
+    "cr_val, state_expected",
+    [
+        ([0x2f,0xFF, 0xFF], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x7F, 0xFF], [False, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x3F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x0F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x07, 0xFF], [False, False, False, True, True, 0x70, 0x07]),
+        ([0x2f,0x03, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x2f,0x01, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x2f,0x00, 0xFF], [False, False, False, False, False, 0x70, 0x07]),
+
+        ([0x2f,0xFF, 0x7F], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x7F, 0x3F], [False, True, True, True, True, 0x30, 0x07]),
+        ([0x2f,0x3F, 0x2F], [False, False, True, True, True, 0x20, 0x07]),
+        ([0x2f,0x0F, 0x1F], [False, False, True, True, True, 0x10, 0x07]),
+        ([0x2f,0x07, 0x0F], [False, False, False, True, True, 0x00, 0x07]),
+        ([0x2f,0x03, 0x07], [False, False, False, False, True, 0x00, 0x07]),
+        ([0x2f,0x01, 0x03], [False, False, False, False, True, 0x00, 0x03]),
+        ([0x2f,0x00, 0x01], [False, False, False, False, False, 0x00, 0x01]),
+        ([0x2f,0x00, 0x00], [False, False, False, False, False, 0x00, 0x00]),
+    ],
+)
+def test_get_state(mocker, cr_val, state_expected, tc):
+    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_registers", return_value=cr_val)
+    tc.get_state()
+    assert tc.tc_state.cmode == state_expected[0]
+    assert tc.tc_state.one_shot == state_expected[1]
+    assert tc.tc_state.cj == state_expected[2]
+    assert tc.tc_state.fault == state_expected[3]
+    assert tc.tc_state.noise_rejection == state_expected[4]
+    assert tc.tc_state.sampling_average == state_expected[5]
+    assert tc.tc_state.TC_type == state_expected[6]

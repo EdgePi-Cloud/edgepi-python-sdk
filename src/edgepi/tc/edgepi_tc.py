@@ -536,6 +536,9 @@ class EdgePiTC(SpiDevice):
         # only update registers whose values have been changed
         self.__update_registers_from_dict(reg_values)
 
+        # Update configuration state
+        self.get_state()
+
     def get_state(self):
         """
         Read config registers and update state object
