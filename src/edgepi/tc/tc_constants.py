@@ -276,7 +276,7 @@ class TCType(Enum):
     TYPE_R = OpCode(0x05, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type R thermocouple
     TYPE_S = OpCode(0x06, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type S thermocouple
     TYPE_T = OpCode(0x07, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type T thermocouple
-    TYPE_MASK = 0x0F
+    TYPE_MASK = 0x07
 
 class VoltageMode(Enum):
     """
