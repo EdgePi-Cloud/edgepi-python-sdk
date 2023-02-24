@@ -47,7 +47,7 @@ def generate_mux_opcodes(mux_updates: dict):
     Returns:
         `list`: OpCodes for updated multiplexer mapping
     """
-    _logger.debug(f"mux updates = {mux_updates}")
+    _logger.debug(f"generate_mux_opcodes: mux updates = {mux_updates}")
 
     mux_opcodes = []
     # generate OpCodes for mux updates

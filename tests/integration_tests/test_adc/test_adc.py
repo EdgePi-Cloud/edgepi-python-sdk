@@ -1,10 +1,9 @@
 """ Integration tests for EdgePi ADC module """
 
-
+import logging
 import pytest
 
 from edgepi.adc.adc_constants import (
-    ADC_NUM_REGS,
     ADCNum,
     ADCReg,
     ADCChannel as CH,
@@ -21,6 +20,7 @@ from edgepi.adc.adc_constants import (
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
+_logger = logging.getLogger(__name__)
 
 # pylint: disable=protected-access
 @pytest.fixture(name="adc", scope="module")
@@ -736,10 +736,13 @@ def fixture_adc():
     ],
 )
 def test_config(args, updated_vals, adc):
-    original_regs = adc._EdgePiADC__read_register(ADCReg.REG_ID, ADC_NUM_REGS)
+    original_regs = adc._EdgePiADC__read_registers_to_map()
 
     updates = adc._EdgePiADC__config(**args)
     updated_regs = adc._EdgePiADC__read_registers_to_map()
+
+    _logger.info(f"test_config: original_regs = {original_regs}")
+    _logger.info(f"test_config: updated_regs  = {updated_regs}")
 
     for addx, entry in updates.items():
         # assert update values used by __config() were written to registers
@@ -775,6 +778,7 @@ def test_voltage_individual(ch, adc):
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()
+    _logger.info(f"test_voltage_individual: voltage  = {out}")
     assert out != 0
 
 
@@ -815,6 +819,7 @@ def test_voltage_continuous(adc_num, ch, adc):
         adc.start_conversions(adc_num)
         for _ in range(10):
             out = adc.read_voltage(adc_num)
+            _logger.info(f"test_voltage_individual: voltage  = {out}")
             assert out != 0
     finally:
         adc.stop_conversions(adc_num)
