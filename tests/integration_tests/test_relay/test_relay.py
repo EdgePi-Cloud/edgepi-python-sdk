@@ -15,13 +15,13 @@ def test_relay_close():
     edge_relay=EdgePiRelay(True)
     edge_relay.close_relay()
     relay_state = edge_relay.get_state_relay()
-    assert relay_state == True
+    assert relay_state is True
 
 def test_relay_open():
     edge_relay=EdgePiRelay(False)
     edge_relay.open_relay()
     relay_state = edge_relay.get_state_relay()
-    assert relay_state == False
+    assert relay_state is False
 
 def test_relay_toggle():
     edge_relay=EdgePiRelay(False)
