@@ -323,9 +323,9 @@ class EdgePiTC(SpiDevice):
         """Returns the currently configured thermocouple type"""
         cr1 = Bits(uint=self.__read_register(TCAddresses.CR1_R.value)[1], length=8)
         tc_bits = cr1[-4:].uint
-        for type in TCType:
-            if not isinstance(type.value, int) and type.value.op_code == tc_bits:
-                return type
+        for tc in TCType:
+            if not isinstance(tc.value, int) and tc.value.op_code == tc_bits:
+                return tc
         return None
 
     def __get_cj_status(self):
