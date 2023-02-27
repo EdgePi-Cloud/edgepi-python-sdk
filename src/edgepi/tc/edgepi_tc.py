@@ -21,6 +21,7 @@ from edgepi.tc.tc_constants import (
     DecBits6,
     FaultMode,
     NoiseFilterMode,
+    Masks,
     OpenCircuitMode,
     OpenMask,
     OvuvMask,
@@ -103,9 +104,9 @@ class TCState:
         #                    0x20 = 4 samples,
         #                    0x30 = 8 samples,
         #                    0x40 = 16 samples
-        self.sampling_average = self.__tc_get_state(cr_regs[1], AvgMode.AVG_MASK.value)
+        self.sampling_average = self.__tc_get_state(cr_regs[1], Masks.AVG_MASK.value)
         #TC_TYPE = 0->7 = B->E->J->K->N->R->S->T
-        self.tc_type = self.__tc_get_state(cr_regs[1], TCType.TYPE_MASK.value)
+        self.tc_type = self.__tc_get_state(cr_regs[1], Masks.TYPE_MASK.value)
 
 class EdgePiTC(SpiDevice):
     """
@@ -322,9 +323,9 @@ class EdgePiTC(SpiDevice):
         """Returns the currently configured thermocouple type"""
         cr1 = Bits(uint=self.__read_register(TCAddresses.CR1_R.value)[1], length=8)
         tc_bits = cr1[-4:].uint
-        for enum in TCType:
-            if not isinstance(enum.value, int) and enum.value.op_code == tc_bits:
-                return enum
+        for type in TCType:
+            if not isinstance(type.value, int) and type.value.op_code == tc_bits:
+                return type
         return None
 
     def __get_cj_status(self):
