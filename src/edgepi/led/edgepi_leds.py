@@ -39,6 +39,7 @@ class EdgePiLED:
         self.__validate_led_name(led_name)
         self.gpio_ops.set_pin_state(led_name.value)
         self.log.info(f"LED with name {led_name.value} has been turned on")
+        self.log.info(f"Hello")
 
     def turn_led_off(self, led_name: LEDPins):
         """
