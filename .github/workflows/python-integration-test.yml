@@ -5,10 +5,10 @@ name: PyTest Integration Test
 on:
   push:
     branches:
-      - 'dev'
+      - 'integration-test-implement'
   pull_request:
     branches:
-      - 'dev'
+      - 'integration-test-implement'
 
 jobs:
   test:
