@@ -49,6 +49,8 @@ class TCAddresses(Enum):
 class Masks(Enum):
     """values for clearing or 'masking' register bits"""
 
+    AVG_MASK = 0x70
+    TYPE_MASK = 0x07
     BIT0_MASK = 0xFE
     BIT1_MASK = 0xFD
     BIT2_MASK = 0xFB
@@ -263,7 +265,6 @@ class AvgMode(Enum):
     AVG_8 = OpCode(0x30, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)  # 8 samples averaged
     AVG_16 = OpCode(0x40, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)  # 16 samples averaged
 
-
 @unique
 class TCType(Enum):
     """valid opcodes for setting thermocouple type"""
@@ -276,7 +277,6 @@ class TCType(Enum):
     TYPE_R = OpCode(0x05, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type R thermocouple
     TYPE_S = OpCode(0x06, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type S thermocouple
     TYPE_T = OpCode(0x07, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type T thermocouple
-
 
 class VoltageMode(Enum):
     """

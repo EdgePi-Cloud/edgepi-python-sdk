@@ -11,7 +11,7 @@ sys.modules['periphery'] = mock.MagicMock()
 # pylint: disable=wrong-import-position
 
 import pytest
-from edgepi.tc.edgepi_tc import EdgePiTC
+from edgepi.tc.edgepi_tc import EdgePiTC, TCState
 from edgepi.tc.tc_constants import (
     AvgMode,
     CJHighMask,
@@ -22,6 +22,7 @@ from edgepi.tc.tc_constants import (
     DecBits6,
     FaultMode,
     NoiseFilterMode,
+    Masks,
     OpenCircuitMode,
     OpenMask,
     OvuvMask,
@@ -30,6 +31,7 @@ from edgepi.tc.tc_constants import (
     TCLowMask,
     TCType,
     VoltageMode,
+    TCOps,
 )
 from edgepi.tc.tc_faults import FaultMsg, FaultType, Fault
 
@@ -46,6 +48,11 @@ def fixture_test_edgepi_tc(mocker):
     # upon returning EdgePiTC object in test functions below
     yield EdgePiTC()
 
+@pytest.fixture(name="tc_state")
+def fixture_test_edgepi_tc_state():
+    # yield instead of return so local state (i.e mocks) not lost
+    # upon returning EdgePiTC object in test functions below
+    yield TCState()
 
 @pytest.mark.parametrize(
     "reg_address, data",
@@ -520,3 +527,151 @@ def test_tc_reset_registers(mock_write, tc):
     write_calls = [call(addx, value) for addx, value in tc.default_reg_values.items()]
     tc.reset_registers()
     mock_write.assert_has_calls(write_calls, any_order=True)
+
+def test_tc_state_init(tc):
+    assert tc.tc_state.cmode is None
+    assert tc.tc_state.one_shot is None
+    assert tc.tc_state.open_circuit_fault is None
+    assert tc.tc_state.cold_junction is None
+    assert tc.tc_state.fault is None
+    assert tc.tc_state.fault_clr is None
+    assert tc.tc_state.noise_rejection is None
+    assert tc.tc_state.sampling_average is None
+    assert tc.tc_state.tc_type is None
+
+@pytest.mark.parametrize(
+    "cr_val, state_mask, state_expected",
+    [
+        # TC Type Test
+        (0x00, Masks.TYPE_MASK.value, 0x00),
+        (0x01, Masks.TYPE_MASK.value, 0x01),
+        (0x02, Masks.TYPE_MASK.value, 0x02),
+        (0x03, Masks.TYPE_MASK.value, 0x03),
+        (0x04, Masks.TYPE_MASK.value, 0x04),
+        (0x05, Masks.TYPE_MASK.value, 0x05),
+        (0x06, Masks.TYPE_MASK.value, 0x06),
+        (0x07, Masks.TYPE_MASK.value, 0x07),
+        (0xFF, Masks.TYPE_MASK.value, 0x07),
+        (0x00, Masks.TYPE_MASK.value, 0x00),
+        (0xF1, Masks.TYPE_MASK.value, 0x01),
+        (0xF2, Masks.TYPE_MASK.value, 0x02),
+        (0xF3, Masks.TYPE_MASK.value, 0x03),
+        (0xF4, Masks.TYPE_MASK.value, 0x04),
+        (0xF5, Masks.TYPE_MASK.value, 0x05),
+        (0xF6, Masks.TYPE_MASK.value, 0x06),
+        (0xF7, Masks.TYPE_MASK.value, 0x07),
+        (0xFF, Masks.TYPE_MASK.value, 0x07),
+        # Ave Sample Mask
+        (0x00, Masks.AVG_MASK.value, 0x00),
+        (0x10, Masks.AVG_MASK.value, 0x10),
+        (0x20, Masks.AVG_MASK.value, 0x20),
+        (0x30, Masks.AVG_MASK.value, 0x30),
+        (0x40, Masks.AVG_MASK.value, 0x40),
+        (0xFF, Masks.AVG_MASK.value, 0x70),
+        (0x0F, Masks.AVG_MASK.value, 0x00),
+        (0x1F, Masks.AVG_MASK.value, 0x10),
+        (0x2F, Masks.AVG_MASK.value, 0x20),
+        (0x3F, Masks.AVG_MASK.value, 0x30),
+        (0x4F, Masks.AVG_MASK.value, 0x40)
+    ],
+)
+def test__tc_get_state(cr_val, state_mask, state_expected, tc_state):
+    result = tc_state._TCState__tc_get_state(cr_val,state_mask)
+    assert result == state_expected
+
+@pytest.mark.parametrize(
+    "cr_val, state_mask, state_expected",
+    [
+        # (0xFF, [True, True, True, True, True]),
+        # (0x7F, [False, True, True, True, True]),
+        # (0x3F, [False, False, True, True, True]),
+        # (0x0F, [False, False, True, True, True]),
+        # (0x07, [False, False, False, True, True]),
+        # (0x03, [False, False, False, False, True]),
+        # (0x01, [False, False, False, False, True]),
+        # (0x00, [False, False, False, False, False]),
+
+        (0xFF, ConvMode.AUTO.value.op_code, True),
+        (0x7F, ConvMode.AUTO.value.op_code, False),
+        (0x7F, TCOps.SINGLE_SHOT.value.op_code, True),
+        (0x3F, TCOps.SINGLE_SHOT.value.op_code, False),
+        (0x0F, CJMode.DISABLE.value.op_code, True),
+        (0x07, CJMode.DISABLE.value.op_code, False),
+        (0x07, FaultMode.INTERRUPT.value.op_code, True),
+        (0x03, FaultMode.INTERRUPT.value.op_code, False),
+        (0x01, NoiseFilterMode.HZ_50.value.op_code, True),
+        (0x00, NoiseFilterMode.HZ_50.value.op_code, False),
+    ],
+)
+def test__tc_get_state_bool(cr_val, state_mask, state_expected, tc_state):
+    result = tc_state._TCState__tc_get_state_bool(cr_val,state_mask)
+    assert result == state_expected
+
+
+@pytest.mark.parametrize(
+    "cr_val, state_expected",
+    [
+        ([0xFF, 0xFF], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x7F, 0xFF], [False, True, True, True, True, 0x70, 0x07]),
+        ([0x3F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x0F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x07, 0xFF], [False, False, False, True, True, 0x70, 0x07]),
+        ([0x03, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x01, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x00, 0xFF], [False, False, False, False, False, 0x70, 0x07]),
+
+        ([0xFF, 0x7F], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x7F, 0x3F], [False, True, True, True, True, 0x30, 0x07]),
+        ([0x3F, 0x2F], [False, False, True, True, True, 0x20, 0x07]),
+        ([0x0F, 0x1F], [False, False, True, True, True, 0x10, 0x07]),
+        ([0x07, 0x0F], [False, False, False, True, True, 0x00, 0x07]),
+        ([0x03, 0x07], [False, False, False, False, True, 0x00, 0x07]),
+        ([0x01, 0x03], [False, False, False, False, True, 0x00, 0x03]),
+        ([0x00, 0x01], [False, False, False, False, False, 0x00, 0x01]),
+        ([0x00, 0x00], [False, False, False, False, False, 0x00, 0x00]),
+    ],
+)
+def test_tc_update_state(cr_val, state_expected, tc_state):
+    tc_state.tc_update_state(cr_val)
+    assert tc_state.cmode == state_expected[0]
+    assert tc_state.one_shot == state_expected[1]
+    assert tc_state.cold_junction == state_expected[2]
+    assert tc_state.fault == state_expected[3]
+    assert tc_state.noise_rejection == state_expected[4]
+    assert tc_state.sampling_average == state_expected[5]
+    assert tc_state.tc_type == state_expected[6]
+
+
+@pytest.mark.parametrize(
+    "cr_val, state_expected",
+    [
+        ([0x2f,0xFF, 0xFF], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x7F, 0xFF], [False, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x3F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x0F, 0xFF], [False, False, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x07, 0xFF], [False, False, False, True, True, 0x70, 0x07]),
+        ([0x2f,0x03, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x2f,0x01, 0xFF], [False, False, False, False, True, 0x70, 0x07]),
+        ([0x2f,0x00, 0xFF], [False, False, False, False, False, 0x70, 0x07]),
+
+        ([0x2f,0xFF, 0x7F], [True, True, True, True, True, 0x70, 0x07]),
+        ([0x2f,0x7F, 0x3F], [False, True, True, True, True, 0x30, 0x07]),
+        ([0x2f,0x3F, 0x2F], [False, False, True, True, True, 0x20, 0x07]),
+        ([0x2f,0x0F, 0x1F], [False, False, True, True, True, 0x10, 0x07]),
+        ([0x2f,0x07, 0x0F], [False, False, False, True, True, 0x00, 0x07]),
+        ([0x2f,0x03, 0x07], [False, False, False, False, True, 0x00, 0x07]),
+        ([0x2f,0x01, 0x03], [False, False, False, False, True, 0x00, 0x03]),
+        ([0x2f,0x00, 0x01], [False, False, False, False, False, 0x00, 0x01]),
+        ([0x2f,0x00, 0x00], [False, False, False, False, False, 0x00, 0x00]),
+    ],
+)
+def test_get_state(mocker, cr_val, state_expected, tc):
+    mocker.patch("edgepi.tc.edgepi_tc.EdgePiTC._EdgePiTC__read_registers", return_value=cr_val)
+    tc.get_state()
+    assert tc.tc_state.cmode == state_expected[0]
+    assert tc.tc_state.one_shot == state_expected[1]
+    assert tc.tc_state.cold_junction == state_expected[2]
+    assert tc.tc_state.fault == state_expected[3]
+    assert tc.tc_state.noise_rejection == state_expected[4]
+    assert tc.tc_state.sampling_average == state_expected[5]
+    assert tc.tc_state.tc_type == state_expected[6]
