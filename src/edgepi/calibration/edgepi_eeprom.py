@@ -332,7 +332,7 @@ class EdgePiEEPROM(I2CDevice):
 
     def eeprom_reset(self):
         """
-        Reset User space memory 
+        Reset User space memory
         Args:
             N/A
         Return:
