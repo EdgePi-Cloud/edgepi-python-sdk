@@ -213,7 +213,9 @@ def expected_initial_time_delay(adc_num: ADCNum, data_rate: int, filter_mode: in
 
     # no initial figures given in documentation, but estimate initial delay
     # is 3 times longer than subsequent conversion delays
-    return ADC2_DELAYS[data_rate] * 3
+    # return ADC2_DELAYS[data_rate] * 3
+    return ADC2_DELAYS[data_rate]
+
 
 
 def expected_continuous_time_delay(adc_num: ADCNum, data_rate: int):
