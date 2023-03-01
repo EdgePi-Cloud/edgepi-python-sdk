@@ -262,6 +262,7 @@ def _get_mean_conv_time_continuous(adc, adc_num):
 )
 def test_expected_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
     # configure ADC with new filter and data rate modes
+    adc.reset()
     if adc_num == ADCNum.ADC_1:
         adc._EdgePiADC__config(
             conversion_mode=conv_mode, adc_1_data_rate=data_rate, filter_mode=filter_mode
