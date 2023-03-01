@@ -47,7 +47,6 @@ def _get_data_ready_time(adc):
 
 def _get_conv_time(adc, adc_num):
     start = perf_counter_ns()
-    _logger.info(f"ADCNum: {adc_num.value.id_num}, read_cmd: {adc_num.value.read_cmd}")
     while not adc._EdgePiADC__is_data_ready(adc_num):
         continue
     end = perf_counter_ns()
@@ -58,7 +57,7 @@ def _get_initial_conv_time(adc, adc_num, conv_mode):
     times = []
     for _ in range(NUM_TRIALS):
         adc._EdgePiADC__send_start_command(adc_num)
-        times.append(_get_conv_time(adc, adc_num))
+        times.append(_get_conv_time(adc, ))
         if conv_mode == ConvMode.CONTINUOUS:
             adc.stop_conversions(adc_num)
     return statistics.fmean(times)
@@ -68,7 +67,7 @@ def _get_mean_conv_time_continuous(adc, adc_num):
     adc._EdgePiADC__send_start_command(adc_num)
     times = []
     for _ in range(NUM_TRIALS):
-        times.append(_get_conv_time(adc))
+        times.append(_get_conv_time(adc, adc_num))
     adc.stop_conversions(adc_num)
     # skip first 2 conv times because these are not measured correctly due to
     # new data being available before we start sampling STATUS byte
