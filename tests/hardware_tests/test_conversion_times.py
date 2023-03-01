@@ -57,7 +57,7 @@ def _get_initial_conv_time(adc, adc_num, conv_mode):
     times = []
     for _ in range(NUM_TRIALS):
         adc._EdgePiADC__send_start_command(adc_num)
-        times.append(_get_conv_time(adc, ))
+        times.append(_get_conv_time(adc, adc_num))
         if conv_mode == ConvMode.CONTINUOUS:
             adc.stop_conversions(adc_num)
     return statistics.fmean(times)
