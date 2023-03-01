@@ -647,7 +647,7 @@ class EdgePiADC(SPI):
         _logger.debug(f" __is_data_ready:Command to send = {[adc_num.value.read_cmd] + [255] * 6}")
         read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
         _logger.debug(f" __is_data_ready:read data = {read_data}")
-        return read_data[1] & 0b01000000
+        return read_data[1] & 0b01000000 if adc_num is ADCNum.ADC_1 else read_data[1] & 0b10000000
 
     def __read_registers_to_map(self):
         """
