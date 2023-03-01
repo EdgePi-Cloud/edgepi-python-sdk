@@ -45,9 +45,9 @@ def _get_data_ready_time(adc):
     return statistics.fmean(times)
 
 
-def _get_conv_time(adc):
+def _get_conv_time(adc, adc_num):
     start = perf_counter_ns()
-    while not adc._EdgePiADC__is_data_ready():
+    while not adc._EdgePiADC__is_data_ready(adc_num):
         continue
     end = perf_counter_ns()
     return (end - start) * 10**-6
@@ -57,7 +57,7 @@ def _get_initial_conv_time(adc, adc_num, conv_mode):
     times = []
     for _ in range(NUM_TRIALS):
         adc._EdgePiADC__send_start_command(adc_num)
-        times.append(_get_conv_time(adc))
+        times.append(_get_conv_time(adc, adc_num))
         if conv_mode == ConvMode.CONTINUOUS:
             adc.stop_conversions(adc_num)
     return statistics.fmean(times)

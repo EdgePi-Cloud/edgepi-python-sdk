@@ -640,11 +640,11 @@ class EdgePiADC(SPI):
         self.transfer(self.adc_ops.reset_adc())
         self.__reapply_config()
 
-    def __is_data_ready(self):
+    def __is_data_ready(self, adc_num: ADCNum):
         # pylint: disable=unused-private-member
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
-        read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
+        read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
         return read_data[1] & 0b01000000
 
     def __read_registers_to_map(self):
