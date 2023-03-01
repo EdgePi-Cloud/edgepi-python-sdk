@@ -6,7 +6,7 @@ Note, the EdgePi ADC can be used with two different sampling modes: pulse conver
 
 ### Reading Voltage from Analog Input Pin: Pulse Conversion Mode
 In pulse conversion mode, a sampling event must be manually triggered. This can be achieved as follows.
-```
+```python
 from edgepi.dac.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCChannel, ConvMode
 
@@ -25,7 +25,7 @@ print(out)
 In continuous conversion mode, sampling events occur automatically. However, after configuring the ADC
 to perform continuous conversion, the user must send a command to start the conversions, and
 sampling data must also be manually by the user.
-```
+```python
 from edgepi.dac.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCChannel, ConvMode
 

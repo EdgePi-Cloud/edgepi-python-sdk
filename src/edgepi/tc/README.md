@@ -5,7 +5,7 @@
 This section will demonstrate how to import the EdgePi Thermcouple module, and use it to make cold-junction and linearized thermocouple temperature measurement. The first example shows how to do this manually, and the second shows how use the thermocouple's continuous conversion functionality to make measurements automatically.
 
 ### Manual Measurements
-```
+```python
 from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import ConvMode
 
@@ -21,9 +21,9 @@ print(temps)
 ```
 
 ### Automatic Measurements
-```
+```python
 import time
-from edgepi.edgepi_tc import EdgePiTC
+from edgepi.tc.edgepi_tc import EdgePiTC
 from edgepi.tc.tc_constants import ConvMode
 
 # initialize thermocouple
