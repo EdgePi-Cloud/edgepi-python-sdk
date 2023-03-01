@@ -645,6 +645,7 @@ class EdgePiADC(SPI):
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
         read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
+        _logger.debug(f"__is_data_ready: cmd {adc_num.value.read_cmd,} read_data {read_data[1]}")
         return (read_data[1] & 0b01000000) == 0b01000000 if adc_num is ADCNum.ADC_1 else\
                (read_data[1] & 0b10000000) == 0b10000000
 
