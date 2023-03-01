@@ -644,7 +644,9 @@ class EdgePiADC(SPI):
         # pylint: disable=unused-private-member
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
+        _logger.debug(f" __is_data_ready:Command to send = {[adc_num.value.read_cmd] + [255] * 6}")
         read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
+        _logger.debug(f" __is_data_ready:read data = {read_data}")
         return read_data[1] & 0b01000000
 
     def __read_registers_to_map(self):
