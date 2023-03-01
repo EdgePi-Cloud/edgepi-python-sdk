@@ -6,15 +6,17 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.utilities.utilities import bitstring_from_list
 from edgepi.adc.adc_constants import ADCNum
-from edgepi.adc.adc_voltage import (
+from edgepi.adc.adc_crc_8_atm import (
+    generate_crc_8_table,
     check_crc,
     CRCCheckError,
+    CRC_8_ATM_GEN,
+)
+from edgepi.adc.adc_voltage import (
     _code_to_input_voltage,
     _is_negative_voltage,
     _adc_voltage_to_input_voltage,
-    generate_crc_8_table,
     code_to_temperature,
-    CRC_8_ATM_GEN,
     STEP_DOWN_RESISTOR_1,
     STEP_DOWN_RESISTOR_2
 )
