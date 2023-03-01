@@ -47,6 +47,7 @@ def _get_data_ready_time(adc):
 
 def _get_conv_time(adc, adc_num):
     start = perf_counter_ns()
+    _logger.info(f"ADCNum: {adc_num.value.id_num}, read_cmd: {adc_num.value.read_cmd}")
     while not adc._EdgePiADC__is_data_ready(adc_num):
         continue
     end = perf_counter_ns()
