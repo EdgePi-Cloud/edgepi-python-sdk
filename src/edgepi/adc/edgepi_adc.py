@@ -36,7 +36,7 @@ from edgepi.adc.adc_constants import (
     AllowedChannels,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
-from edgepi.adc.adc_crc_8_atm import check_crc
+from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins
 from edgepi.utilities.utilities import filter_dict
