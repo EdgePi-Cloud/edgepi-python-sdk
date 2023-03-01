@@ -11,8 +11,9 @@ from edgepi.gpio.gpio_constants import GpioPins
     (GpioPins.DIN4),
     (GpioPins.DIN5),
     (GpioPins.DIN6),
-    (GpioPins.DIN7),
-    (GpioPins.DIN8),
+    # TODO: disabled for the current version of hardware
+    # (GpioPins.DIN7),
+    # (GpioPins.DIN8),
 ])
 def test_input_state(pin_name):
     din=EdgePiDigitalInput()

@@ -40,6 +40,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
     voltage_range = v_ref / 2 ** (num_bits - 1)
+    _logger.debug(f" _code_to_input_voltage: code {code}")
     return float(code) * voltage_range
 
 
@@ -66,14 +67,14 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = bitstring_from_list(code)
+    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
-
-    # code is given in 2's complement, remove leading 1
+    code_uint = code_bits.uint
+    # handling negative number
     if _is_negative_voltage(code_bits):
-        code_bits[0] = 0
+        code_uint = code_uint - 2**num_bits
 
-    v_in = _code_to_input_voltage(code_bits.uint, REFERENCE_VOLTAGE, num_bits)
+    v_in = _code_to_input_voltage(code_uint, REFERENCE_VOLTAGE, num_bits)
 
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 

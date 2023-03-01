@@ -11,6 +11,7 @@ from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes, is_bit_set
 
 _logger = logging.getLogger(__name__)
 
+#TODO: take out the software safety steps for performance improvements issue #257
 # pylint: disable=logging-too-many-args
 class EdgePiGPIOExpander(I2CDevice):
     '''
@@ -33,11 +34,11 @@ class EdgePiGPIOExpander(I2CDevice):
             `int`: 8-bit uint value of port/register
         '''
         msg_read = self.set_read_msg(reg_address, [0xFF])
-        _logger.debug(f'Read Message: Register Address {msg_read[0].data}\
-                      , Msg Place Holder {msg_read[1].data}')
+        _logger.debug(f"Read Message: Register Address {msg_read[0].data}"
+                      f", Msg Place Holder {msg_read[1].data}")
         self.transfer(dev_address, msg_read)
-        _logger.debug(f'Message Read: Register Address {msg_read[0].data},\
-         Msg Place Holder {msg_read[1].data}')
+        _logger.debug(f"Message Read: Register Address {msg_read[0].data},"
+                      f"Msg Place Holder {msg_read[1].data}")
         return msg_read[1].data[0]
 
     def __write_changed_values(self, reg_dict: dict, dev_address: int):
@@ -114,8 +115,8 @@ class EdgePiGPIOExpander(I2CDevice):
         # get register value of port this pin belongs to
         reg_val = self.__read_register(reg_addx, dev_address)
 
-        # set pin to low before setting to output (hazard)
-        self.clear_expander_pin(pin_name)
+        # # set pin to low before setting to output (hazard)
+        # self.clear_expander_pin(pin_name)
 
         # set pin direction to out
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_out_code)
@@ -204,7 +205,7 @@ class EdgePiGPIOExpander(I2CDevice):
 
         # set pin state to low
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, clear_code)
-        _logger.debug(":set_expander_pin: pin '%s' = set to low", pin_name)
+        _logger.debug(":clear_expander_pin: pin '%s' = set to low", pin_name)
 
         self.expander_pin_dict[pin_name].is_high = False
 

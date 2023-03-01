@@ -315,9 +315,8 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to read must be at least 1")
 
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
-        _logger.debug(f"ADC __read_register -> data in: {code}")
         out = self.transfer(code)
-        _logger.debug(f"ADC __read_register -> data out: {out}")
+        _logger.debug(f"__read_register: received {out}")
 
         # first 2 entries are null bytes
         return out[2:]
@@ -336,9 +335,8 @@ class EdgePiADC(SPI):
             raise ValueError("Number of registers to write to must be at least 1")
 
         code = self.adc_ops.write_register_command(start_addx.value, data)
-        _logger.debug(f"ADC __write_register -> data in: {code}")
+        _logger.debug(f"__write_register: sending {code}")
         out = self.transfer(code)
-        _logger.debug(f"ADC __write_register -> data out: {out}")
 
         return out
 
@@ -398,7 +396,7 @@ class EdgePiADC(SPI):
             (
                 f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
                 f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
-                f"data_rate={hex(data_rate.value.op_code)}"
+                f"data_rate={hex(data_rate.value.op_code)}, "
                 f"filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
@@ -542,10 +540,10 @@ class EdgePiADC(SPI):
 
         # log STATUS byte
         status = get_adc_status(status_code)
-        _logger.debug(f"Logging STATUS byte:\n{status}")
+        _logger.debug(f" read_voltage: Logging STATUS byte:\n{status}")
 
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
-
+        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
         return code_to_voltage(voltage_code, adc_num.value, calibs)
 
@@ -599,11 +597,13 @@ class EdgePiADC(SPI):
 
         # log STATUS byte
         status = get_adc_status(status_code)
-        _logger.debug(f"Logging STATUS byte:\n{status}")
+        _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
 
         calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
 
         # convert from code to voltage
+        _logger.debug(f" read_voltage: code {voltage_code}")
+        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):
@@ -660,7 +660,7 @@ class EdgePiADC(SPI):
 
         # build dict with (register addx : register_value) pairs.
         reg_dict = {addx + i: reg_values[i] for i in range(ADC_NUM_REGS)}
-        _logger.debug(f"__read_registers_to_map: {reg_dict}")
+        # _logger.debug(f"__read_registers_to_map: {reg_dict}")
 
         return reg_dict
 
@@ -673,12 +673,12 @@ class EdgePiADC(SPI):
             `bool`: True if RTD_EN pin is on, False otherwise
         """
         # TODO: this should use self.get_state() instead
-        _logger.debug("Checking RTD status")
+        _logger.debug("__is_rtd_on: Checking RTD status")
         idac_reg = self.__get_register_map()
         idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
         idac_1 = idac_mag[4:].uint
         status = idac_1 != 0x0
-        _logger.debug(f"RTD enabled: {status}")
+        _logger.debug(f"__is_rtd_on: RTD enabled: {status}")
         return status
 
     # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
@@ -887,10 +887,9 @@ class EdgePiADC(SPI):
             `override_rtd_validation` (bool): turn off RTD property validation for RTD mode updates
         """
         # pylint: disable=unused-argument
-
         # filter out self and None args
         args = filter_dict(locals(), "self", None)
-        _logger.debug(f"__config: args after filtering out None defaults:\n\n{args}\n\n")
+        _logger.debug(f"__config: args after filtering out None defaults:\n{args}")
 
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
         if not override_rtd_validation:
@@ -912,12 +911,11 @@ class EdgePiADC(SPI):
 
         # get current register values
         reg_values = self.__get_register_map()
-        _logger.debug(f"__config: register values before updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values before updates:\n{reg_values}")
 
         # get codes to update register values
-        _logger.debug(f"opcodes = {ops_list}")
         updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
-        _logger.debug(f"__config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"__config: register values after updates:\n{reg_values}")
 
         # write updated reg values to ADC using a single write.
         data = [entry["value"] for entry in updated_reg_values.values()]

@@ -6,6 +6,7 @@
 import logging
 import math
 import json
+import time
 
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
@@ -56,7 +57,8 @@ class EdgePiEEPROM(I2CDevice):
         """
         page_addr  = math.floor(memory_address/EEPROMInfo.PAGE_SIZE.value)
         byte_addr = memory_address%EEPROMInfo.PAGE_SIZE.value
-        self.log.debug(f'Page address = {page_addr}, byte Address = {byte_addr}')
+        self.log.debug(f"__byte_address_generation: Page address = {page_addr},"
+                       f"byte Address = {byte_addr}")
         return page_addr, byte_addr
 
     def __allocated_memory(self, offset):
@@ -127,9 +129,9 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_read_msg(mem_addr_list, [0x00]*length)
-        self.log.debug(f'Reading Address {mem_addr}, {length} bytes')
+        self.log.debug(f'__sequential_read: Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {len(msg[1].data)}')
+        self.log.debug(f'__sequential_read: Read data: {len(msg[1].data)}')
         return read_result
 
     # TODO: delete candidate when module implementation is complete
@@ -150,7 +152,6 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'Read data: {msg[1].data}')
         return read_result
 
-    # TODO: delete candidate when module implementation is complete
     # pylint: disable=unused-private-member
     def __byte_write_register(self, mem_addr: int = None, data: int = None):
         '''
@@ -164,7 +165,8 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_write_msg(mem_addr_list, [data])
-        self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
+        self.log.debug(f"__byte_write_register: writing {data} to memory address of {mem_addr},"
+                       f"{msg[0].data}")
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
     def __page_write_register(self, mem_addr: int = None, data: list = None):
@@ -179,7 +181,8 @@ class EdgePiEEPROM(I2CDevice):
         page_addr, byte_addr = self.__byte_address_generation(mem_addr)
         mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
         msg = self.set_write_msg(mem_addr_list, data)
-        self.log.debug(f'Writing {data} to memory address of {mem_addr}, {msg[0].data}')
+        self.log.debug(f"__page_write_register: writing {data} to memory address of {mem_addr},"
+                       f"{len(msg[0].data)}")
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
     def __parameter_sanity_check(self, mem_addr: int = None,
@@ -192,16 +195,17 @@ class EdgePiEEPROM(I2CDevice):
             length (int): length of data to read
             user_space (bool): True if mem_addr is in user space
         """
-        # End address depending on the user_space flag
-        end_address = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value if user_space \
-                      else (EdgePiMemoryInfo.USER_SPACE_START_BYTE.value - 1)
+        #select last address of a memory space
+        last_mem_address = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value if user_space \
+                           else EdgePiMemoryInfo.PRIVATE_SPACE_END_BYTE.value
+
         # Checks whether proper values are passed
         if mem_addr is None or length is None or mem_addr < 0 or length <= 0:
             raise ValueError(f'Invalid Value passed: {mem_addr}, {length}')
         # Checks whether starting address and length of data to read/write are within memory bound
-        if mem_addr+length > end_address:
-            raise MemoryOutOfBound(f'Operation range is over the size of the memory by \
-                                     {mem_addr+length-end_address}')
+        if mem_addr+length > (last_mem_address + 1):
+            raise MemoryOutOfBound(f"Operation range is over the size of the memory by "
+                                   f"{mem_addr+length-last_mem_address}")
 
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
@@ -224,9 +228,10 @@ class EdgePiEEPROM(I2CDevice):
             page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
                       for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
             page_n.insert(0, page_1)
+            self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
         return page_n
 
-    def read_memory(self, start_addrx: int = None, length: int = None):
+    def read_memory(self, start_addrx: int = 0, length: int = None):
         """
         Read user space memory starting from 0 to 16383
         Args:
@@ -235,14 +240,14 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             data (list): list of data read from the specified memory and length
         """
+        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
         self.__parameter_sanity_check(start_addrx, length, True)
         dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
-        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        address_offset = 0
         data_read = []
+        mem_offset = start_addrx
         for data in dummy_data:
-            data_read = data_read + self.__sequential_read(start_addrx+address_offset, len(data))
-            address_offset = len(data)
+            data_read = data_read + self.__sequential_read(mem_offset, len(data))
+            mem_offset = mem_offset+len(data)
         return data_read
 
     def write_memory(self, data: bytes):
@@ -253,13 +258,29 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             N/A
         """
-        data_serialized = json.dumps(self.data_list) + data
-        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-            EdgePiMemoryInfo.BUFF_START.value
-        self.__parameter_sanity_check(mem_start, len(data_serialized), True)
-        pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
-        self.__page_write_register(mem_start, pages_list)
+        data_serialized = list(data)
+        used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
 
+        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value +\
+                    EdgePiMemoryInfo.BUFF_START.value
+
+        self.__parameter_sanity_check(mem_start, len(data_serialized), True)
+        self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
+
+        # time sleep of 0.002 sec need for consecutive i2c writes/read
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
+        time.sleep(0.002)
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
+        time.sleep(0.002)
+
+        pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
+        mem_offset = mem_start
+        for page in pages_list:
+            self.__page_write_register(mem_offset, page)
+            mem_offset = mem_offset+len(page)
+            time.sleep(0.002)
+
+# TODO why not separate it into a class
     def init_memory(self):
         """
         Initial Memory Reading
@@ -271,14 +292,22 @@ class EdgePiEEPROM(I2CDevice):
         is_full=False
         is_empty=False
         mem_content = []
+        # TODO adding CRC bytes, and better naming for mem_size ex) data_size or used_memory,
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)
 
         # mem_size of greater than EdgePiMemoryInfo.USER_SPACE_MAX.value should never happen
-        if mem_size > EdgePiMemoryInfo.USER_SPACE_MAX.value and mem_size != 0xFFFF:
+        if mem_size > EdgePiMemoryInfo.USER_SPACE_MAX.value and \
+           mem_size != EdgePiMemoryInfo.FACTORY_DEFAULT_VALUE.value:
             raise ValueError(f'Invalid memory size read, possible data corruption, {mem_size}')
 
+        # Memory Empty
+        if mem_size == EdgePiMemoryInfo.FACTORY_DEFAULT_VALUE.value:
+            is_full=False
+            is_empty=True
+            self.used_size = 0
+            self.log.info('User Space Memory is empty')
         # Memory Full
-        if mem_size == EdgePiMemoryInfo.USER_SPACE_MAX.value and mem_size != 0xFFFF:
+        elif mem_size == EdgePiMemoryInfo.USER_SPACE_MAX.value:
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
@@ -287,12 +316,6 @@ class EdgePiEEPROM(I2CDevice):
             mem_content = bytes(self.read_memory(mem_start, mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
-        # Memory Empty
-        elif mem_size == 0xFFFF:
-            is_full=False
-            is_empty=True
-            self.used_size = 0
-            self.log.info('User Space Memory is empty')
         # part of memory occupied
         else:
             is_full=False
@@ -306,3 +329,26 @@ class EdgePiEEPROM(I2CDevice):
             self.log.info(f'{mem_size}bytes of data is read from the user space')
 
         return is_full, is_empty
+
+    def eeprom_reset(self):
+        """
+        Reset User space memory
+        Args:
+            N/A
+        Return:
+            N/A
+        """
+        self.log.info("EEPROM Reset: User Space Memory Reset")
+
+        start_address_page = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        page_size = EEPROMInfo.PAGE_SIZE.value
+        tatal_page = EdgePiMemoryInfo.USER_SPACE_END_PAGE.value - \
+                     EdgePiMemoryInfo.USER_SPACE_START_PAGE.value + 1
+        reset_vals = [255] * page_size
+
+        mem_offset = start_address_page
+        for _ in range(tatal_page):
+            self.__page_write_register(mem_offset, reset_vals)
+            mem_offset = mem_offset+page_size
+            time.sleep(0.002)
+       
