@@ -1,7 +1,7 @@
 # Tests
 ## Test Environment
 Two separate virtual environments can be configured for testing purposes. One option is to use a virtual environment with the SDK installed as a package, i.e. from TestPyPi. Note, the latest SDK version on TestPyPi may be out of date with active development code, as new versions are only published on merge to `staging`. Attempting to use an outdated SDK version with new test code will result in errors. Therefore, this approach is recommended for infrequent hardware calibration tests, or when you know the SDK version to be installed is up to date with your test code. For active development, it is instead recommended to use a virtual environment that does not install the SDK as a package, but uses local source code instead.
-## Run Integration/Hardware Tests
+## Run Hardware Tests
 ### Virtual Environment with SDK Installed as a Package
 From the project root directory run the following:
 1. Create virtual env:
