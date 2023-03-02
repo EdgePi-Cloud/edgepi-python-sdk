@@ -931,3 +931,15 @@ def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, ad
         validate_func.assert_called()
     else:
         validate_func.assert_not_called()
+
+@pytest.mark.parametrize("adc_num, mock_val, expected",
+    [
+        (ADCNum.ADC_1, [161,96]+[255]*5, True),
+        (ADCNum.ADC_1, [161,160]+[255]*5, False),
+        (ADCNum.ADC_2, [161,160]+[255]*5, True),
+        (ADCNum.ADC_2, [161,96]+[255]*5, False),
+    ]
+)
+def test__is_data_ready(mocker,adc_num, mock_val, expected, adc):
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.transfer", return_value = mock_val)
+    assert expected == adc._EdgePiADC__is_data_ready(adc_num)
