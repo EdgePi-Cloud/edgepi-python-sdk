@@ -82,9 +82,9 @@ class TCState:
         """
         reg_val = cr_reg&mask
         if mask == Masks.CR1_HIGH_MASK.value:
-            state = TCType.get_TC_type(reg_val=reg_val)
+            state = TCType.get_tc_type(reg_val=reg_val)
         else:
-            state = AvgMode.get_Avg_mode(reg_val=reg_val)
+            state = AvgMode.get_avg_mode(reg_val=reg_val)
         return state
 
     def tc_update_state(self, cr_regs: list):
