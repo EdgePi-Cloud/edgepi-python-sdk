@@ -17,7 +17,6 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel as CH,
-    ADCComs,
     ADCNum,
     ADCPower,
     ConvMode,
