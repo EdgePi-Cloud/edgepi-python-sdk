@@ -81,7 +81,7 @@ class TCState:
             int
         """
         reg_val = cr_reg&mask
-        return TCType.get_TC_type(reg_val=reg_val) if reg_val < 0x0F else\
+        return TCType.get_TC_type(reg_val=reg_val) if mask == Masks.CR1_HIGH_MASK.value else\
                AvgMode.get_Avg_mode(reg_val=reg_val)
 
     def tc_update_state(self, cr_regs: list):
@@ -106,9 +106,9 @@ class TCState:
         #                    0x20 = 4 samples,
         #                    0x30 = 8 samples,
         #                    0x40 = 16 samples
-        self.sampling_average = self.__tc_get_state(cr_regs[1], Masks.AVG_MASK.value)
+        self.sampling_average = self.__tc_get_state(cr_regs[1], Masks.CR1_LOW_MASK.value)
         #TC_TYPE = 0->7 = B->E->J->K->N->R->S->T
-        self.tc_type = self.__tc_get_state(cr_regs[1], Masks.TYPE_MASK.value)
+        self.tc_type = self.__tc_get_state(cr_regs[1], Masks.CR1_HIGH_MASK.value)
 
 class EdgePiTC(SpiDevice):
     """
