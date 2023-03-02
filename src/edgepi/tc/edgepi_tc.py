@@ -80,7 +80,9 @@ class TCState:
         Return:
             int
         """
-        return cr_reg & mask
+        reg_val = cr_reg&mask
+        return TCType.get_TC_type(reg_val=reg_val) if reg_val < 0x0F else\
+               AvgMode.get_Avg_mode(reg_val=reg_val)
 
     def tc_update_state(self, cr_regs: list):
         """
