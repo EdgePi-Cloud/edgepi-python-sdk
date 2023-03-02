@@ -183,12 +183,19 @@ ADC1_CONT_DELAYS = {
 }
 
 
-# continuous conversion delay times for ADC2 (ADC2 only uses continuous mode)
-ADC2_DELAYS = {
+# initial conversion delay times for ADC2 (ADC2 only uses initial mode)
+ADC2_INITIAL_DELAYS = {
     DR2.SPS_10.value.op_code: 121,
     DR2.SPS_100.value.op_code: 31.2,
     DR2.SPS_400.value.op_code: 8.71,
     DR2.SPS_800.value.op_code: 4.97,
+}
+
+ADC2_CONT_DELAYS = {
+    DR2.SPS_10.value.op_code: 100,
+    DR2.SPS_100.value.op_code: 10,
+    DR2.SPS_400.value.op_code: 2.5,
+    DR2.SPS_800.value.op_code: 1.25,
 }
 
 
@@ -213,8 +220,7 @@ def expected_initial_time_delay(adc_num: ADCNum, data_rate: int, filter_mode: in
 
     # no initial figures given in documentation, but estimate initial delay
     # is 3 times longer than subsequent conversion delays
-    # return ADC2_DELAYS[data_rate] * 3
-    return ADC2_DELAYS[data_rate]
+    return ADC2_INITIAL_DELAYS[data_rate]
 
 
 
@@ -234,4 +240,4 @@ def expected_continuous_time_delay(adc_num: ADCNum, data_rate: int):
     if adc_num == ADCNum.ADC_1:
         return ADC1_CONT_DELAYS[data_rate]
 
-    return ADC2_DELAYS[data_rate]
+    return ADC2_CONT_DELAYS[data_rate]
