@@ -4,7 +4,7 @@ GPIO module is intended to be used inside other modules that requires GPIO contr
 This section demonstartes the use case of this module.
 
 ### Import and Initialization
-```
+```python
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.edgpio_config import GpioConfigs
 
@@ -22,7 +22,7 @@ edgepi_gpio = EdgePiGPIO(GpioConfigs.LED.value)
 ```
 
 ### Set Default State
-```
+```python
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.edgpio_config import GpioConfigs
 
@@ -34,7 +34,7 @@ edgepi_gpio.set_expander_default()
 ```
 
 ### Set Expander Pin
-```
+```python
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.edgpio_config import GpioConfigs
 
@@ -49,7 +49,7 @@ edgepi_gpio.set_expander_pi('AO_EN2')
 ```
 
 ### clear Expander Pin
-```
+```python
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.edgpio_config import GpioConfigs
 
@@ -64,7 +64,7 @@ edgepi_gpio.clear_expander_pi('AO_EN2')
 ```
 
 ### Toggle Expander Pin
-```
+```python
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.edgpio_config import GpioConfigs
 

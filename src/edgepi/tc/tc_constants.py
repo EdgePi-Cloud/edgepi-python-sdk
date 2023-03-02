@@ -49,8 +49,6 @@ class TCAddresses(Enum):
 class Masks(Enum):
     """values for clearing or 'masking' register bits"""
 
-    AVG_MASK = 0x70
-    TYPE_MASK = 0x07
     BIT0_MASK = 0xFE
     BIT1_MASK = 0xFD
     BIT2_MASK = 0xFB
@@ -265,6 +263,29 @@ class AvgMode(Enum):
     AVG_8 = OpCode(0x30, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)  # 8 samples averaged
     AVG_16 = OpCode(0x40, TCAddresses.CR1_W.value, Masks.CR1_HIGH_MASK.value)  # 16 samples averaged
 
+    @staticmethod
+    def get_avg_mode(reg_val: int):
+        """
+        get the sampling average mode config enum by checking register value passed
+        Args:
+            reg_val (int): masked register value passed
+        Return:
+            avg_mode (Eum): avg_mode Enum value
+        """
+        if reg_val == 0:
+            avg_mode = AvgMode.AVG_1
+        elif reg_val == 16:
+            avg_mode = AvgMode.AVG_2
+        elif reg_val == 32:
+            avg_mode = AvgMode.AVG_4
+        elif reg_val == 48:
+            avg_mode = AvgMode.AVG_8
+        elif reg_val == 64:
+            avg_mode = AvgMode.AVG_16
+        else:
+            avg_mode = None
+        return avg_mode
+
 @unique
 class TCType(Enum):
     """valid opcodes for setting thermocouple type"""
@@ -277,6 +298,35 @@ class TCType(Enum):
     TYPE_R = OpCode(0x05, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type R thermocouple
     TYPE_S = OpCode(0x06, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type S thermocouple
     TYPE_T = OpCode(0x07, TCAddresses.CR1_W.value, Masks.CR1_LOW_MASK.value)  # type T thermocouple
+
+    @staticmethod
+    def get_tc_type(reg_val: int):
+        """
+        get the thermocouple type config enum by checking register value passed
+        Args:
+            reg_val (int): masked register value passed
+        Return:
+            tc_type (Eum): TC_type Enum value
+        """
+        if reg_val == 0:
+            tc_type = TCType.TYPE_B
+        elif reg_val == 1:
+            tc_type = TCType.TYPE_E
+        elif reg_val == 2:
+            tc_type = TCType.TYPE_J
+        elif reg_val == 3:
+            tc_type = TCType.TYPE_K
+        elif reg_val == 4:
+            tc_type = TCType.TYPE_N
+        elif reg_val == 5:
+            tc_type = TCType.TYPE_R
+        elif reg_val == 6:
+            tc_type = TCType.TYPE_S
+        elif reg_val == 7:
+            tc_type = TCType.TYPE_T
+        else:
+            tc_type = None
+        return tc_type
 
 class VoltageMode(Enum):
     """

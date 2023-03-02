@@ -17,7 +17,6 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel as CH,
-    ADCComs,
     ADCNum,
     ADCPower,
     ConvMode,
@@ -35,7 +34,8 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     AllowedChannels,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, check_crc, code_to_temperature
+from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
+from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins
 from edgepi.utilities.utilities import filter_dict
@@ -640,12 +640,16 @@ class EdgePiADC(SPI):
         self.transfer(self.adc_ops.reset_adc())
         self.__reapply_config()
 
-    def __is_data_ready(self):
+    def __is_data_ready(self, adc_num: ADCNum):
         # pylint: disable=unused-private-member
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
-        read_data = self.transfer([ADCComs.COM_RDATA1.value] + [255] * 6)
-        return read_data[1] & 0b01000000
+        read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
+        if adc_num is ADCNum.ADC_1:
+            ready = (read_data[1] & 0b01000000) == 0b01000000
+        if adc_num is ADCNum.ADC_2:
+            ready = (read_data[1] & 0b10000000) == 0b10000000
+        return ready
 
     def __read_registers_to_map(self):
         """
