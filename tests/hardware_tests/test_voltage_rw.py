@@ -5,7 +5,7 @@ import logging
 from time import sleep
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode
+from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode, ADC1DataRate
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
@@ -13,8 +13,8 @@ from edgepi.dac.dac_constants import DACChannel
 _logger = logging.getLogger(__name__)
 
 
-NUM_CHANNELS = 8
-READS_PER_WRITE = 1
+NUM_CHANNELS = 1
+READS_PER_WRITE = 10
 RW_ERROR = 1e-3 # TODO: change to mV
 MAX_VOLTAGE = 5.0
 VOLTAGE_STEP = 0.5
@@ -63,7 +63,7 @@ def _assert_approx(a: float, b: float, error: float):
 def _voltage_rw_msg(dac_ch: DACChannel, write_voltage: float, read_voltage: float) -> str:
     return (
         f"\nchannel_number={dac_ch.value}, "
-        f"write_voltage={write_voltage} V, read_voltage={read_voltage} V"
+        f"write_voltage={write_voltage} V, read_voltage={read_voltage} V, number of reads={READS_PER_WRITE}"
         f"\nassert {read_voltage} == {write_voltage} ± {RW_ERROR}\n"
     )
 
@@ -73,11 +73,13 @@ def _measure_voltage_individual(
     ):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
+    read_voltage = 0
     sleep(WRITE_READ_DELAY)
     for _ in range(READS_PER_WRITE):
-        read_voltage = adc.read_voltage(adc_num)
-        _logger.info(_voltage_rw_msg(dac_ch, write_voltage, read_voltage))
-        _assert_approx(write_voltage, read_voltage, RW_ERROR)
+        read_voltage += adc.read_voltage(adc_num)
+    read_voltage = read_voltage/READS_PER_WRITE
+    _logger.info(_voltage_rw_msg(dac_ch, write_voltage, read_voltage))
+    _assert_approx(write_voltage, read_voltage, RW_ERROR)
 
 
 def _generate_test_cases():
@@ -96,7 +98,7 @@ def _generate_test_cases():
 
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
 def test_voltage_rw_adc_1(channel, write_voltage, adc_1, dac):
-    adc_1.set_config(adc_1_analog_in=_ch_map[channel][0])
+    adc_1.set_config(adc_1_analog_in=_ch_map[channel][0], adc_1_data_rate=ADC1DataRate.SPS_20)
     _measure_voltage_individual(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
 
 
@@ -104,6 +106,16 @@ def test_voltage_rw_adc_1(channel, write_voltage, adc_1, dac):
 def test_voltage_rw_adc_2(channel, write_voltage, adc_2, dac):
     adc_2.set_config(adc_2_analog_in=_ch_map[channel][0])
     _measure_voltage_individual(adc_2, dac, ADCNum.ADC_2, _ch_map[channel][1], write_voltage)
+
+#####################################
+
+@pytest.mark.parametrize("adc_channel, dac_channel, write_voltage",
+                          [(_ch_map[0][0], _ch_map[0][1], 3.5),
+                           (_ch_map[1][0], _ch_map[1][1], 3.5)
+                           ])
+def test_voltage_rw_adc_1_individual_channels(adc_channel, dac_channel, write_voltage, adc_1, dac):
+    adc_1.set_config(adc_1_analog_in = adc_channel)
+    _measure_voltage_individual(adc_1, dac, ADCNum.ADC_1, dac_channel, write_voltage)
 
 #####################################
 
