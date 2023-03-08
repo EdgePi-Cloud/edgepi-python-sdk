@@ -8,6 +8,10 @@ import math
 import json
 import time
 
+from edgepi.utilities.crc_8_atm import (
+    CRC_BYTE_SIZE,
+    get_crc
+)
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
@@ -74,6 +78,56 @@ class EdgePiEEPROM(I2CDevice):
         '''
         length = self.__sequential_read(offset, 2)
         return (length[0]<<8)| length[1]
+
+    def __generate_data_list(self, data_b: bytes):
+        """
+        Transform data bytes to list with 255 filling the remainder of the last page. The remainder
+        is calculated with the page size of PAGE_SIZE-CRC_BYTE_SIZE because we want to insert CRC
+        byte at the end of each page later
+        Args:
+            data_b (bytes): data in bytes format
+        Return:
+            data_l (list): data in list type if following format
+            [len(data)1, len(data)2, data .... data, 255, 255, ...255]
+        """
+        data_l = list(data_b)
+        data_l = [(len(data_l)>>8)&0xFF, len(data_l)&0xFF] + data_l
+        # calculate the remainder of last page
+        page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
+        remainder = page_size - len(data_l)%(page_size)
+        # list of data with 255 appended in the last page
+        data_l = data_l+[255]*remainder
+        return data_l
+        
+
+
+    def __write_edgepi_reserved_memory(self, pb_serial_list: bytes):
+        """
+        Write Edgepi reserved memory space.
+        Args:
+            pb_serial_list (list): serialized data converted into list
+        Return:
+            N/A
+        """
+        # calculated the used memsize
+        data = self.__generate_data_list(pb_serial_list)
+
+
+        self.__parameter_sanity_check(mem_start, len(data_serialized), True)
+        self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
+
+        # time sleep of 0.002 sec need for consecutive i2c writes/read
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
+        time.sleep(0.002)
+        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
+        time.sleep(0.002)
+
+        pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
+        mem_offset = mem_start
+        for page in pages_list:
+            self.__page_write_register(mem_offset, page)
+            mem_offset = mem_offset+len(page)
+            time.sleep(0.002)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -206,7 +260,8 @@ class EdgePiEEPROM(I2CDevice):
         if mem_addr+length > (last_mem_address + 1):
             raise MemoryOutOfBound(f"Operation range is over the size of the memory by "
                                    f"{mem_addr+length-last_mem_address}")
-
+    
+    # TODO: to be deleted afte crc implementation
     def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
         """
         Generate a two dimensional structured list with length of a page. This is method is used for
@@ -230,6 +285,33 @@ class EdgePiEEPROM(I2CDevice):
             page_n.insert(0, page_1)
             self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
         return page_n
+
+    def __generate_list_of_pages_crc(self, data: list = None):
+        """
+        Generate a two dimensional structured list with length of a page. This is method is used for
+        read/write by page
+        Args:
+            mem_addr (int): starting memory address to read from
+            data (list): list of data already prepared to insert crc at 64th element
+        Return:
+            page_writable_list (list): [[Page_N], [Page_N+1]...]]
+        """
+        pages = []
+        # data is always populates full page, each page = 63 data bytes + crc byte
+        page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
+        number_of_pages = int(len(data)/page_size)
+        # generate list of pages with size of page_size
+        for page in range(number_of_pages):
+            page_start = page*page_size
+            page_end = page_start+page_size
+            pages.append(data[page_start:page_end])
+
+        # insert the crc at the end of each page
+        for indx, page in enumerate(pages):
+            pages[indx] = get_crc(page)
+
+        self.log.debug(f"__generate_list_of_pages: {number_of_pages} pages generated")
+        return pages
 
     def read_memory(self, start_addrx: int = 0, length: int = None):
         """

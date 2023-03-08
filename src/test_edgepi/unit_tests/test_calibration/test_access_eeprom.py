@@ -14,7 +14,8 @@ from contextlib import nullcontext as does_not_raise
 import json
 import pytest
 
-from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo
+from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, CRCCheckError
+from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -209,6 +210,41 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
+
+@pytest.mark.parametrize("size",
+                        [
+                         (6704),
+                         (5000),
+                         (9000)
+                        ])
+def test__generate_data_list(size, eeprom):
+    page_size = EEPROMInfo.PAGE_SIZE.value - CRC_BYTE_SIZE
+    data = [1]*size
+    expected = [(size>>8)&0xFF, size&0xFF] + data + [255]*(page_size - (size+2)%page_size)
+    data_l = eeprom._EdgePiEEPROM__generate_data_list(data)
+    assert data_l == expected
+
+@pytest.mark.parametrize("size, error",
+                        [
+                         (6704, does_not_raise()),
+                         (5000, does_not_raise()),
+                         (9000, does_not_raise())
+                        ])
+def test__generate_list_of_pages_crc(size, error, eeprom):
+    data = [1]*size
+    data_l = eeprom._EdgePiEEPROM__generate_data_list(data)
+    pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
+    with error:
+        for page in pages:
+            check_crc(page[:-1], page[-1])
+
+def test__write_edgepi_reserved_memory(mocker, eeprom):
+    # TODO: implementation
+    assert True
+
+def test_set_edgepi_reserved_data(modcker, eeprom):
+    # TODO: implementation
+    assert True
 
 @pytest.mark.parametrize("mem_address,length, user_space, error",
                         [(0, 5000,True,does_not_raise()),
