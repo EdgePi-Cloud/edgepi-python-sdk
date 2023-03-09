@@ -14,7 +14,7 @@ from contextlib import nullcontext as does_not_raise
 import json
 import pytest
 
-from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, CRCCheckError
+from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, CRCCheckError, get_crc
 from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
 from edgepi.calibration.calibration_constants import CalibParam
@@ -94,21 +94,28 @@ def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
                          ([63, 0], 16128)
                         ])
 def test__allocated_memory(mocker,mock_value,result, eeprom):
+    data = mock_value + [1]*61
+    data = get_crc(data)
     # pylint: disable=protected-access
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
-                return_value =mock_value)
+                return_value =data)
     # pylint: disable=protected-access
     length = eeprom._EdgePiEEPROM__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
     assert length == result
 
 def test__read_edgepi_reserved_memory(mocker, eeprom):
+    data_b = read_binfile()
+    data_l = eeprom._EdgePiEEPROM__generate_data_list(data_b)
+    pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
+    
     # pylint: disable=protected-access
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory")
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
+                 return_value = (data_l[0]<<8) + data_l[1])
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
-                return_value =list(read_binfile()))
+                side_effect = [page for page in pages])
     # pylint: disable=protected-access
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
-    assert byte_string == read_binfile()
+    assert byte_string == data_b
 
 @pytest.mark.parametrize("msg",
                         [(MessageFieldNumber.DAC),
@@ -252,10 +259,6 @@ def test__write_edgepi_reserved_memory(mocker, data_size, error, eeprom):
     with error:
         eeprom._EdgePiEEPROM__write_edgepi_reserved_memory(data)
 
-def test_set_edgepi_reserved_data(mocker, eeprom):
-    # TODO: implementation
-    assert True
-
 @pytest.mark.parametrize("mem_address,length, user_space, error",
                         [(0, 5000,True,does_not_raise()),
                          (0, 10000, True,does_not_raise()),
@@ -282,78 +285,7 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
         # pylint: disable=protected-access
         eeprom._EdgePiEEPROM__parameter_sanity_check(address , length, user_space)
 
-@pytest.mark.parametrize("mem_address,data,expected",
-                        [(0, [1,2,3,4,5,6], [[1,2,3,4,5,6]]),
-                         (60, [60,61,62,63], [[60,61,62,63]]),
-                         (60, [60,61,62,63,64], [[60,61,62,63],[64]]),
-                         (63, [63,64,65,66,67,68],[[63],[64,65,66,67,68]]),
-                         (63, [63, 64, 65, 66, 67,
-                               68, 69, 70, 71, 72,
-                               73, 74, 75, 76, 77,
-                               78, 79, 80, 81, 82,
-                               83, 84, 85, 86, 87,
-                               88, 89, 90, 91, 92,
-                               93, 94, 95, 96, 97,
-                               98, 99, 100, 101, 102,
-                               103, 104, 105, 106, 107,
-                               108, 109, 110, 111, 112,
-                               113, 114, 115, 116, 117,
-                               118, 119, 120, 121, 122,
-                               123, 124, 125, 126],[[63], [64, 65, 66, 67,
-                                                           68, 69, 70, 71, 72,
-                                                           73, 74, 75, 76, 77,
-                                                           78, 79, 80, 81, 82,
-                                                           83, 84, 85, 86, 87,
-                                                           88, 89, 90, 91, 92,
-                                                           93, 94, 95, 96, 97,
-                                                           98, 99, 100, 101, 102,
-                                                           103, 104, 105, 106, 107,
-                                                           108, 109, 110, 111, 112,
-                                                           113, 114, 115, 116, 117,
-                                                           118, 119, 120, 121, 122,
-                                                           123, 124, 125, 126]]),
-                         (63, [63, 64, 65, 66, 67,
-                               68, 69, 70, 71, 72,
-                               73, 74, 75, 76, 77,
-                               78, 79, 80, 81, 82,
-                               83, 84, 85, 86, 87,
-                               88, 89, 90, 91, 92,
-                               93, 94, 95, 96, 97,
-                               98, 99, 100, 101, 102,
-                               103, 104, 105, 106, 107,
-                               108, 109, 110, 111, 112,
-                               113, 114, 115, 116, 117,
-                               118, 119, 120, 121, 122,
-                               123, 124, 125, 126, 127, 128],[[63],
-                                                              [64, 65, 66, 67,
-                                                               68, 69, 70, 71, 72,
-                                                               73, 74, 75, 76, 77,
-                                                               78, 79, 80, 81, 82,
-                                                               83, 84, 85, 86, 87,
-                                                               88, 89, 90, 91, 92,
-                                                               93, 94, 95, 96, 97,
-                                                               98, 99, 100, 101, 102,
-                                                               103, 104, 105, 106, 107,
-                                                               108, 109, 110, 111, 112,
-                                                               113, 114, 115, 116, 117,
-                                                               118, 119, 120, 121, 122,
-                                                               123, 124, 125, 126, 127],
-                                                              [128]])
-                        ])
-def test__generate_list_of_pages(mem_address, data, expected, eeprom):
-    # pylint: disable=protected-access
-    result = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
-    assert result == expected
-
-@pytest.mark.parametrize("mem_address",
-                        [(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)])
-def test__generate_list_of_pages_reset(mem_address, eeprom):
-    # pylint: disable=protected-access
-    # pylint: disable=line-too-long
-    data = [255]*(EdgePiMemoryInfo.USER_SPACE_END_BYTE.value-EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1)
-    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, data)
-    assert len(page_n) == len(data)/64
-
+# TODO:need to fix this 
 @pytest.mark.parametrize("mem_address,json_file_name",
                         [(0, "dummy_0.json"),
                          (2, "dummy_0.json"),
@@ -369,25 +301,18 @@ def test__generate_list_of_pages_json(mem_address, json_file_name,eeprom):
         for val in page:
             assert val == next(target)
 
-
-# TODO: add more teset cases
-@pytest.mark.parametrize("mem_address, length, expected",
-                        [(0, 34, list(range(0,34))),
-                         (0, 64, list(range(0,64))),
-                         (30, 34, list(range(30,(30+34)))),
-                         (30, 35, list(range(30,(30+35)))),
-                         (0, 128, list(range(0,(128)))),
-                         (3, 128, list(range(3,(3+128))))
-                        ])
-def test_read_memory(mocker, mem_address, length, expected, eeprom):
-    # pylint: disable=line-too-long
-    # pylint: disable=protected-access
-    dummay = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, list(range(mem_address,mem_address+length)))
+ 
+def test_read_memory(mocker, eeprom):
+    dummy_data = read_dummy_json("dummy_0.json")
+    dummy_data_b = bytes(json.dumps(dummy_data), "utf-8")
+    dummy_data_l = eeprom._EdgePiEEPROM__generate_data_list(dummy_data_b)
+    pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(dummy_data_l)
     mocker.patch(
         "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
-        side_effect = dummay)
-    result = eeprom.read_memory(mem_address, length)
-    assert result == expected
+        side_effect = pages)
+    data_size = (dummy_data_l[0]<<8) + dummy_data_l[1]
+    result = eeprom.read_memory(data_size)
+    assert result == list(dummy_data_b)
 
 @pytest.mark.parametrize("mem_size, dummy_size, result, error",
                         [(3, 3,[False, False], does_not_raise()),
