@@ -109,22 +109,17 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             N/A
         """
-        # calculated the used memsize
+        start_mem = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
+        
+        # generate list of data: used mem_size + length of data + filler
         data = self.__generate_data_list(pb_serial_list)
-
-
-        self.__parameter_sanity_check(mem_start, len(data_serialized), True)
-        self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
-
-        # time sleep of 0.002 sec need for consecutive i2c writes/read
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        time.sleep(0.002)
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
-        time.sleep(0.002)
-
-        pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
-        mem_offset = mem_start
-        for page in pages_list:
+        # length of data + # of CRC to be added, # of CRC = # of pages
+        expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
+        self.__parameter_sanity_check(start_mem, expected_data_size, False)
+        pages = self.__generate_list_of_pages_crc(data)
+        
+        mem_offset = start_mem
+        for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
             time.sleep(0.002)
@@ -168,6 +163,15 @@ class EdgePiEEPROM(I2CDevice):
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
+
+    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, module: MessageFieldNumber):
+        """
+        Write EdgePi reserved memory space using the populated dataclass
+        Args:
+            eeprom_data (EdgePiEEPROMData): eeprom data class with modified section
+        """
+        # 
+        pb_data = self.eeprom_layout.SerializeToString()
 
     def __sequential_read(self, mem_addr: int = None, length: int = None):
         '''

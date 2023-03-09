@@ -10,6 +10,7 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
+from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -94,3 +95,35 @@ def test_edgepi_eeprom_data():
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
+
+@pytest.mark.parametrize("msg",
+                        [(MessageFieldNumber.DAC),
+                         (MessageFieldNumber.ADC),
+                         (MessageFieldNumber.RTD),
+                         (MessageFieldNumber.TC),
+                        ])
+def test_edgepi_protobuf_pack_data(msg):
+    original_memory_map = EepromLayout()
+    changed_memory_map = EepromLayout()
+    original_memory_map.ParseFromString(read_binfile())
+    changed_memory_map.ParseFromString(read_binfile())
+    eeprom_data = EdgePiEEPROMData(original_memory_map)
+    change_data = EdgePiEEPROMData(changed_memory_map)
+    for value in change_data.dac_calib_params.values():
+            value.gain = 1
+            value.offset = 2
+    for value in change_data.adc_calib_params.values():
+            value.gain = 1
+            value.offset = 2
+    for value in change_data.rtd_calib_params.values():
+            value.gain = 1
+            value.offset = 2
+    for value in change_data.tc_calib_params.values():
+            value.gain = 1
+            value.offset = 2
+    for key, value in change_data.rtd_hw_params.items():
+            change_data.rtd_hw_params[key] = 1
+    for key, value in change_data.tc_hw_params.items():
+            change_data.tc_hw_params[key] = 1
+    change_data.pack_dataclass(changed_memory_map, msg)
+    assert original_memory_map != changed_memory_map

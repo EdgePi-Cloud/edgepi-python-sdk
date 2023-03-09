@@ -3,6 +3,7 @@
 # pylint: disable=no-name-in-module
 # https://github.com/protocolbuffers/protobuf/issues/10372
 from dataclasses import dataclass
+from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.calibration.calibration_constants import CalibParam
 
@@ -29,6 +30,7 @@ class EdgePiEEPROMData:
     model (str)
     client_id (str)
     """
+
     def __init__(self, data_to_unpack: EepromLayout = None):
         self.dac_calib_params = self.calib_message_to_dict(data_to_unpack.dac)
         self.adc_calib_params = self.calib_message_to_dict(data_to_unpack.adc)
@@ -78,3 +80,81 @@ class EdgePiEEPROMData:
             Keys (dataclass): keys values
         """
         return Keys(certificate = data_to_unpack.certificate, private = data_to_unpack.private_key)
+
+    def pack_dac_calib(self, pb: EepromLayout):
+        """
+        Pack dac calib dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb dac message
+        """
+        for ch, calib_param in self.dac_calib_params.items():
+            pb.calibs[ch].gain = calib_param.gain
+            pb.calibs[ch].offset = calib_param.offset
+
+    def pack_adc_calib(self, pb: EepromLayout):
+        """
+        Pack adc calib dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb adc message
+        """
+        for ch, calib_param in self.adc_calib_params.items():
+            pb.calibs[ch].gain = calib_param.gain
+            pb.calibs[ch].offset = calib_param.offset
+
+    def pack_rtd_calib(self, pb: EepromLayout):
+        """
+        Pack rtd calib dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb rtd message
+        """
+        for ch, calib_param in self.rtd_calib_params.items():
+            pb.calibs[ch].gain = calib_param.gain
+            pb.calibs[ch].offset = calib_param.offset
+
+    def pack_rtd_hw(self, pb: EepromLayout):
+        """
+        Pack rtd hardware dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb rtd message
+        """
+        for indx, hw_param in self.rtd_hw_params.items():
+            pb.hw_val[indx].ref_resistor = hw_param
+
+    def pack_tc_calib(self, pb: EepromLayout):
+        """
+        Pack tc calib dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb tc message
+        """
+        for ch, calib_param in self.tc_calib_params.items():
+            pb.calibs[ch].gain = calib_param.gain
+            pb.calibs[ch].offset = calib_param.offset
+
+    def pack_tc_hw(self, pb: EepromLayout):
+        """
+        Pack tc hardware dictionary to pb messages
+        Args:
+            pb (EepromLayout): pb tc message
+        """
+        for indx, hw_param in self.tc_hw_params.items():
+            pb.hw_val[indx].ref_resistor = hw_param
+
+    def pack_dataclass(self, pb: EepromLayout, message_feild: MessageFieldNumber):
+        """
+        Function to populate current dictionary value to proto buffer message
+        Args:
+            pb (EepromLayout): protobuffer layout
+            message_feild (Enum): message filed number to populate
+        # """
+        if message_feild == MessageFieldNumber.DAC:
+            self.pack_dac_calib(pb.dac)
+        elif message_feild == MessageFieldNumber.ADC:
+            self.pack_adc_calib(pb.adc)
+        elif message_feild == MessageFieldNumber.RTD:
+            self.pack_rtd_calib(pb.rtd)
+            self.pack_rtd_hw(pb.rtd)
+        elif message_feild == MessageFieldNumber.TC:
+            self.pack_tc_calib(pb.tc)
+            self.pack_tc_hw(pb.tc)
+
+        

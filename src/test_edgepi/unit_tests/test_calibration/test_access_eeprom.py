@@ -238,11 +238,21 @@ def test__generate_list_of_pages_crc(size, error, eeprom):
         for page in pages:
             check_crc(page[:-1], page[-1])
 
-def test__write_edgepi_reserved_memory(mocker, eeprom):
-    # TODO: implementation
-    assert True
+@pytest.mark.parametrize("data_size, error",
+                        [
+                         (6704, does_not_raise()),
+                         (5000, does_not_raise()),
+                         (9000, does_not_raise()),
+                         (OSENSA_DATA_SIZE, pytest.raises(MemoryOutOfBound)),
+                         (OSENSA_DATA_SIZE-256, pytest.raises(MemoryOutOfBound)),
+                        ])
+def test__write_edgepi_reserved_memory(mocker, data_size, error, eeprom):
+    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__page_write_register")
+    data = bytes([1]*data_size)
+    with error:
+        eeprom._EdgePiEEPROM__write_edgepi_reserved_memory(data)
 
-def test_set_edgepi_reserved_data(modcker, eeprom):
+def test_set_edgepi_reserved_data(mocker, eeprom):
     # TODO: implementation
     assert True
 
