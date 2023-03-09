@@ -139,6 +139,34 @@ class EdgePiEEPROMData:
         for indx, hw_param in self.tc_hw_params.items():
             pb.hw_val[indx].ref_resistor = hw_param
 
+    def pack_config_key(self, pb: EepromLayout):
+        """
+        Pack config key dataclass to pb
+        Args:
+            pb (EepromLayout): pb config_key message
+        """
+        pb.certificate = self.config_key.certificate
+        pb.private_key = self.config_key.private
+
+    def pack_data_key(self, pb: EepromLayout):
+        """
+        Pack data key dataclass to pb
+        Args:
+            pb (EepromLayout): pb data key message
+        """
+        pb.certificate = self.data_key.certificate
+        pb.private_key = self.data_key.private
+
+    def pack_product_info(self, pb: EepromLayout):
+        """
+        Pack product data
+        Args:
+            pb (EepromLayout): pb data
+        """
+        pb.serial_number = self.serial
+        pb.model = self.model
+        pb.client_id = self.client_id
+
     def pack_dataclass(self, pb: EepromLayout, message_feild: MessageFieldNumber):
         """
         Function to populate current dictionary value to proto buffer message
@@ -156,5 +184,12 @@ class EdgePiEEPROMData:
         elif message_feild == MessageFieldNumber.TC:
             self.pack_tc_calib(pb.tc)
             self.pack_tc_hw(pb.tc)
-
-        
+        elif message_feild == MessageFieldNumber.CONFIGS_KEY:
+            self.pack_config_key(pb.config_key)
+        elif message_feild == MessageFieldNumber.DATA_KEY:
+            self.pack_data_key(pb.data_key)
+        elif message_feild == MessageFieldNumber.MODEL or\
+             message_feild == MessageFieldNumber.CLIENT_ID or \
+             message_feild == MessageFieldNumber.SERIAL:
+            self.pack_product_info(pb)
+            

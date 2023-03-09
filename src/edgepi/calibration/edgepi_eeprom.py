@@ -10,7 +10,8 @@ import time
 
 from edgepi.utilities.crc_8_atm import (
     CRC_BYTE_SIZE,
-    get_crc
+    get_crc,
+    check_crc
 )
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
@@ -76,8 +77,9 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             length (int): size of memory to read
         '''
-        length = self.__sequential_read(offset, 2)
-        return (length[0]<<8)| length[1]
+        read_data = self.__sequential_read(offset, EEPROMInfo.PAGE_SIZE.value)
+        check_crc(read_data[:-1], [-1])
+        return (read_data[0]<<8)| read_data[1]
 
     def __generate_data_list(self, data_b: bytes):
         """
@@ -133,9 +135,19 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             Byte_string (bytes): strings of bytes read from the eeprom
         '''
+        buff = []
+        page_size = EEPROMInfo.PAGE_SIZE.value
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
-        buff_list = self.__sequential_read(EdgePiMemoryInfo.BUFF_START.value, mem_size)
-        return bytes(buff_list)
+        buff_and_len = mem_size+EdgePiMemoryInfo.BUFF_START.value
+
+        # Calculated number of pages being used
+        num_pages = (buff_and_len)/page_size if buff_and_len%page_size == 0 else\
+                    ((buff_and_len)/page_size) +1
+        for page in num_pages:
+            buff_list = self.__sequential_read(EdgePiMemoryInfo.BUFF_START.value,(page+1)*page_size)
+            check_crc(buff_list[:-1], buff_list[-1])
+            buff+=buff_list[:-1]
+        return bytes(buff_list[2:])
 
     def get_message_of_interest(self, msg: MessageFieldNumber = None):
         """
@@ -164,14 +176,18 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
-    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, module: MessageFieldNumber):
+    # TODO: Integration test required
+    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
         """
         Write EdgePi reserved memory space using the populated dataclass
         Args:
             eeprom_data (EdgePiEEPROMData): eeprom data class with modified section
         """
-        # 
+        # Update the pb layout by packing the updated EEPROM data dataclass
+        eeprom_data.pack_dataclass(self.eeprom_layout, message)
+        # Serialize the pb
         pb_data = self.eeprom_layout.SerializeToString()
+        self.__write_edgepi_reserved_memory(pb_data)
 
     def __sequential_read(self, mem_addr: int = None, length: int = None):
         '''
