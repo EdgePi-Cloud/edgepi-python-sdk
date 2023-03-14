@@ -286,20 +286,23 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
         eeprom._EdgePiEEPROM__parameter_sanity_check(address , length, user_space)
 
 # TODO:need to fix this 
-@pytest.mark.parametrize("mem_address,json_file_name",
-                        [(0, "dummy_0.json"),
-                         (2, "dummy_0.json"),
+@pytest.mark.parametrize("json_file_name, error",
+                        [("dummy_0.json",does_not_raise()),
+                         ("dummy_0.json",does_not_raise()),
                          ])
-def test__generate_list_of_pages_json(mem_address, json_file_name,eeprom):
+def test__generate_list_of_pages_json(json_file_name, error,eeprom):
     json_data = read_dummy_json(json_file_name)
     data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
-    data_l = list(data_b)
+    data_l = eeprom._EdgePiEEPROM__generate_data_list(data_b)
+    assert data_l[0] == (len(data_b)>>8)&0xFF
+    assert data_l[1] == len(data_b)&0xFF
+    assert len(data_l)%(EEPROMInfo.PAGE_SIZE.value - CRC_BYTE_SIZE) == 0
     # pylint: disable=protected-access
-    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(mem_address, list(data_l))
-    target = iter(data_l)
-    for page in page_n:
-        for val in page:
-            assert val == next(target)
+    page_n = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
+    with error:
+        for page in page_n:
+            assert len(page) == EEPROMInfo.PAGE_SIZE.value
+            check_crc(page[:-1], page[-1])
 
  
 def test_read_memory(mocker, eeprom):
