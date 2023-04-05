@@ -31,12 +31,6 @@ def read_dummy_json(file_name: str):
         dummy = json.load(file)
     return dummy
 
-def read_binfile():
-    """Read the dummy serializedFile and return byte string"""
-    with open(PATH+"/serializedFile","rb") as fd:
-        b_string = fd.read()
-    return b_string
-
 def test__page_write_register(eeprom):
     for val in range(0, 256):
         _logger.info(f"test__page_write_register: Test Value = {val}")
@@ -58,8 +52,11 @@ def test__page_write_register(eeprom):
             assert new_data[indx] == data[indx]
 
 def test_eeprom_reset(eeprom):
+    reset_vals = []
     eeprom.eeprom_reset()
-    reset_vals = eeprom.read_memory(0, 16384)
+    num_of_pages = int(EEPROMInfo.NUM_OF_PAGE.value / 2)
+    for page in range(num_of_pages, EEPROMInfo.NUM_OF_PAGE.value):
+        reset_vals += eeprom._EdgePiEEPROM__sequential_read(page * EEPROMInfo.PAGE_SIZE.value,EEPROMInfo.PAGE_SIZE.value)
     for val in reset_vals:
         assert val == 255
 
@@ -75,17 +72,15 @@ def test_write_memory(eeprom):
     time.sleep(0.002)
 
     # # # # new data
-    eeprom.init()
+    _logger.info(f"\nCheck the memory by reading back\n")
+    eeprom.init_memory()
     new_data = eeprom.read_memory(eeprom.used_size)
     new_data_b = bytes(new_data)
-    _logger.info(f"test_write_memory: {new_data_b} of data to be written")
-    _logger.info(f"test_write_memory: type = {type(new_data_b)}")
-    _logger.info(f"test_write_memory: length = {len(new_data_b)}")
+    _logger.info(f"test_write_memory: {new_data_b} read from the memory")
+    _logger.info(f"test_write_memory: New Data type = {type(new_data_b)}")
+    _logger.info(f"test_write_memory: New Data length = {len(new_data_b)}")
     new_data_parsed = json.loads(new_data_b)
 
     assert json_data == new_data_parsed
 
-# Reserved space write/read test
-def  test_set_edgepi_reserved_data(eeprom):
-    eeprom.layout
-    check = 1
+
