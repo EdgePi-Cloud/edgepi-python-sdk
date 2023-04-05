@@ -53,3 +53,4 @@ class MessageFieldNumber(Enum):
     SERIAL=7
     MODEL=8
     CLIENT_ID=9
+    ALL=10

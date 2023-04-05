@@ -8,6 +8,11 @@ import math
 import json
 import time
 
+from edgepi.utilities.crc_8_atm import (
+    CRC_BYTE_SIZE,
+    get_crc,
+    check_crc
+)
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
@@ -72,8 +77,52 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             length (int): size of memory to read
         '''
-        length = self.__sequential_read(offset, 2)
-        return (length[0]<<8)| length[1]
+        read_data = self.__sequential_read(offset, EEPROMInfo.PAGE_SIZE.value)
+        check_crc(read_data[:-1], read_data[-1])
+        return (read_data[0]<<8)| read_data[1]
+
+    def __generate_data_list(self, data_b: bytes):
+        """
+        Transform data bytes to list with 255 filling the remainder of the last page. The remainder
+        is calculated with the page size of PAGE_SIZE-CRC_BYTE_SIZE because we want to insert CRC
+        byte at the end of each page later
+        Args:
+            data_b (bytes): data in bytes format
+        Return:
+            data_l (list): data in list type if following format
+            [len(data)1, len(data)2, data .... data, 255, 255, ...255]
+        """
+        data_list = list(data_b)
+        data_list = [(len(data_list)>>8)&0xFF, len(data_list)&0xFF] + data_list
+        # calculate the remainder of last page
+        page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
+        remainder = page_size - len(data_list)%(page_size)
+        # list of data with 255 appended in the last page
+        data_list = data_list+[255]*remainder
+        return data_list
+
+    def __write_edgepi_reserved_memory(self, pb_serial_list: bytes):
+        """
+        Write Edgepi reserved memory space.
+        Args:
+            pb_serial_list (list): serialized data converted into list
+        Return:
+            N/A
+        """
+        start_mem = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
+
+        # generate list of data: used mem_size + length of data + filler
+        data = self.__generate_data_list(pb_serial_list)
+        # length of data + # of CRC to be added, # of CRC = # of pages
+        expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
+        self.__parameter_sanity_check(start_mem, expected_data_size, False)
+        pages = self.__generate_list_of_pages_crc(data)
+
+        mem_offset = start_mem
+        for page in pages:
+            self.__page_write_register(mem_offset, page)
+            mem_offset = mem_offset+len(page)
+            time.sleep(0.002)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -84,9 +133,23 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             Byte_string (bytes): strings of bytes read from the eeprom
         '''
+        buff = []
+        page_size = EEPROMInfo.PAGE_SIZE.value
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
-        buff_list = self.__sequential_read(EdgePiMemoryInfo.BUFF_START.value, mem_size)
-        return bytes(buff_list)
+        buff_and_len = mem_size+EdgePiMemoryInfo.BUFF_START.value
+
+        # Calculated number of pages being used
+        num_pages = (buff_and_len)/(page_size-CRC_BYTE_SIZE) \
+                    if buff_and_len%(page_size-CRC_BYTE_SIZE) == 0 else\
+                    int((buff_and_len)/(page_size-CRC_BYTE_SIZE))+1
+
+        mem_offset = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
+        for page in range(num_pages):
+            buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
+            check_crc(buff_list[:-1], buff_list[-1])
+            buff+=buff_list[:-1]
+            time.sleep(0.002)
+        return bytes(buff[2:buff_and_len])
 
     def get_message_of_interest(self, msg: MessageFieldNumber = None):
         """
@@ -115,6 +178,18 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
+    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
+        """
+        Write EdgePi reserved memory space using the populated dataclass
+        Args:
+            eeprom_data (EdgePiEEPROMData): eeprom data class with modified section
+        """
+        # Update the pb layout by packing the updated EEPROM data dataclass
+        eeprom_data.pack_dataclass(self.eeprom_layout, message)
+        # Serialize the pb
+        pb_data = self.eeprom_layout.SerializeToString()
+        self.__write_edgepi_reserved_memory(pb_data)
+
     def __sequential_read(self, mem_addr: int = None, length: int = None):
         '''
         Read operation reads the specified number of memory location starting from provided address.
@@ -133,41 +208,6 @@ class EdgePiEEPROM(I2CDevice):
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
         self.log.debug(f'__sequential_read: Read data: {len(msg[1].data)}')
         return read_result
-
-    # TODO: delete candidate when module implementation is complete
-    # pylint: disable=unused-private-member
-    def __selective_read(self, mem_addr: int = None):
-        '''
-        Read operation reads a data from the specified address
-        Args:
-            mem_addr: starting memory address to read from
-        Returns:
-            List of read data
-        '''
-        page_addr, byte_addr = self.__byte_address_generation(mem_addr)
-        mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        msg = self.set_read_msg(mem_addr, [0x00])
-        self.log.debug(f'Reading Address {mem_addr_list}, {msg[1].data}')
-        read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {msg[1].data}')
-        return read_result
-
-    # pylint: disable=unused-private-member
-    def __byte_write_register(self, mem_addr: int = None, data: int = None):
-        '''
-        Write operation writes a data to the specified address
-        Args:
-            mem_addr: starting memory address to read from
-            data: data to write to the location
-        Returns:
-            N/A
-        '''
-        page_addr, byte_addr = self.__byte_address_generation(mem_addr)
-        mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        msg = self.set_write_msg(mem_addr_list, [data])
-        self.log.debug(f"__byte_write_register: writing {data} to memory address of {mem_addr},"
-                       f"{msg[0].data}")
-        self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
 
     def __page_write_register(self, mem_addr: int = None, data: list = None):
         '''
@@ -207,48 +247,62 @@ class EdgePiEEPROM(I2CDevice):
             raise MemoryOutOfBound(f"Operation range is over the size of the memory by "
                                    f"{mem_addr+length-last_mem_address}")
 
-    def __generate_list_of_pages(self, mem_addr: int = None, data: list = None):
+    def __generate_list_of_pages_crc(self, data: list = None):
         """
         Generate a two dimensional structured list with length of a page. This is method is used for
         read/write by page
         Args:
             mem_addr (int): starting memory address to read from
-            data (list): data to write
+            data (list): list of data already prepared to insert crc at 64th element
         Return:
             page_writable_list (list): [[Page_N], [Page_N+1]...]]
         """
-        # starting memory address can be anywhere from 0~63, check whether the length of data fits
-        # within the range.
-        if (mem_addr%EEPROMInfo.PAGE_SIZE.value + len(data)) < EEPROMInfo.PAGE_SIZE.value:
-            page_n = [data]
-        else:
-            curr_page_remainder = EEPROMInfo.PAGE_SIZE.value - mem_addr%EEPROMInfo.PAGE_SIZE.value
-            page_1 = [data[val] for val in range(curr_page_remainder)]
-            data_remainder = data[curr_page_remainder:]
-            page_n = [data_remainder[byte:byte+EEPROMInfo.PAGE_SIZE.value] \
-                      for byte in range(0,len(data_remainder), EEPROMInfo.PAGE_SIZE.value)]
-            page_n.insert(0, page_1)
-            self.log.debug(f"__generate_list_of_pages: {len(page_n)} pages generated")
-        return page_n
+        pages = []
+        # data is always populates full page, each page = 63 data bytes + crc byte
+        page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
+        number_of_pages = int(len(data)/page_size)
+        # Check number of pages
+        if number_of_pages > EEPROMInfo.NUM_OF_PAGE.value / 2:
+            raise ValueError(f'Invalid page size: {number_of_pages}'
+                             f', available page: {EEPROMInfo.NUM_OF_PAGE.value / 2}')
+        # generate list of pages with size of page_size
+        for page in range(number_of_pages):
+            page_start = page*page_size
+            page_end = page_start+page_size
+            pages.append(data[page_start:page_end])
 
-    def read_memory(self, start_addrx: int = 0, length: int = None):
+
+        # insert the crc at the end of each page
+        pages = [get_crc(page) for page in pages]
+
+        self.log.debug(f"__generate_list_of_pages_crc: {number_of_pages} pages generated")
+        return pages
+
+    def read_memory(self, mem_size: int = None):
         """
         Read user space memory starting from 0 to 16383
         Args:
             mem_addr (int): starting memory address to read from
-            length (int): length of data to read
+            mem_size (int): length of data to read
         Return:
             data (list): list of data read from the specified memory and length
         """
-        start_addrx = start_addrx + EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        self.__parameter_sanity_check(start_addrx, length, True)
-        dummy_data = self.__generate_list_of_pages(start_addrx, [0]*length)
-        data_read = []
-        mem_offset = start_addrx
-        for data in dummy_data:
-            data_read = data_read + self.__sequential_read(mem_offset, len(data))
-            mem_offset = mem_offset+len(data)
-        return data_read
+        buff = []
+        page_size = EEPROMInfo.PAGE_SIZE.value
+        buff_and_len = mem_size+EdgePiMemoryInfo.BUFF_START.value
+
+        # Calculated number of pages being used
+        if buff_and_len%(page_size-CRC_BYTE_SIZE) == 0:
+            num_pages = (buff_and_len)/(page_size-CRC_BYTE_SIZE)
+        else:
+            num_pages = int((buff_and_len)/(page_size-CRC_BYTE_SIZE))+1
+
+        mem_offset = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+        for page in range(num_pages):
+            buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
+            check_crc(buff_list[:-1], buff_list[-1])
+            buff+=buff_list[:-1]
+        return buff[2:buff_and_len]
 
     def write_memory(self, data: bytes):
         """
@@ -258,24 +312,17 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             N/A
         """
-        data_serialized = list(data)
-        used_mem = [(len(data_serialized)>>8)&0xFF, len(data_serialized)&0xFF]
+        start_mem = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
 
-        mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value +\
-                    EdgePiMemoryInfo.BUFF_START.value
+        # generate list of data: used mem_size + length of data + filler
+        data = self.__generate_data_list(data)
+        # length of data + # of CRC to be added, # of CRC = # of pages
+        expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
+        self.__parameter_sanity_check(start_mem, expected_data_size, True)
+        pages = self.__generate_list_of_pages_crc(data)
 
-        self.__parameter_sanity_check(mem_start, len(data_serialized), True)
-        self.log.debug(f"write_memory: length of data {data_serialized}\n{used_mem}")
-
-        # time sleep of 0.002 sec need for consecutive i2c writes/read
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value, used_mem[0])
-        time.sleep(0.002)
-        self.__byte_write_register(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value+1, used_mem[1])
-        time.sleep(0.002)
-
-        pages_list = self.__generate_list_of_pages(mem_start, list(data_serialized))
-        mem_offset = mem_start
-        for page in pages_list:
+        mem_offset = start_mem
+        for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
             time.sleep(0.002)
@@ -292,7 +339,6 @@ class EdgePiEEPROM(I2CDevice):
         is_full=False
         is_empty=False
         mem_content = []
-        # TODO adding CRC bytes, and better naming for mem_size ex) data_size or used_memory,
         mem_size = self.__allocated_memory(EdgePiMemoryInfo.USER_SPACE_START_BYTE.value)
 
         # mem_size of greater than EdgePiMemoryInfo.USER_SPACE_MAX.value should never happen
@@ -311,19 +357,15 @@ class EdgePiEEPROM(I2CDevice):
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
-            mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                        EdgePiMemoryInfo.BUFF_START.value
-            mem_content = bytes(self.read_memory(mem_start, mem_size))
+            mem_content = bytes(self.read_memory(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
         # part of memory occupied
         else:
             is_full=False
             is_empty=False
-            mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                        EdgePiMemoryInfo.BUFF_START.value
             # read memory content should be in json encoded bytes converted into list
-            mem_content = bytes(self.read_memory(mem_start, mem_size))
+            mem_content = bytes(self.read_memory(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
             self.log.info(f'{mem_size}bytes of data is read from the user space')
@@ -350,5 +392,5 @@ class EdgePiEEPROM(I2CDevice):
         for _ in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
-            time.sleep(0.002)
+            time.sleep(0.02)
        

@@ -10,6 +10,7 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
+from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -94,3 +95,46 @@ def test_edgepi_eeprom_data():
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
+
+@pytest.mark.parametrize("msg",
+                        [(MessageFieldNumber.DAC),
+                         (MessageFieldNumber.ADC),
+                         (MessageFieldNumber.RTD),
+                         (MessageFieldNumber.TC),
+                         (MessageFieldNumber.CONFIGS_KEY),
+                         (MessageFieldNumber.DATA_KEY),
+                         (MessageFieldNumber.MODEL),
+                         (MessageFieldNumber.SERIAL),
+                         (MessageFieldNumber.CLIENT_ID),
+                        ])
+def test_edgepi_protobuf_pack_data(msg):
+    original_memory_map = EepromLayout()
+    changed_memory_map = EepromLayout()
+    original_memory_map.ParseFromString(read_binfile())
+    changed_memory_map.ParseFromString(read_binfile())
+    change_data = EdgePiEEPROMData(changed_memory_map)
+    for value in change_data.dac_calib_params.values():
+        value.gain = 1
+        value.offset = 2
+    for value in change_data.adc_calib_params.values():
+        value.gain = 1
+        value.offset = 2
+    for value in change_data.rtd_calib_params.values():
+        value.gain = 1
+        value.offset = 2
+    for value in change_data.tc_calib_params.values():
+        value.gain = 1
+        value.offset = 2
+    for key, value in change_data.rtd_hw_params.items():
+        change_data.rtd_hw_params[key] = 1
+    for key, value in change_data.tc_hw_params.items():
+        change_data.tc_hw_params[key] = 1
+    change_data.config_key.certificate = "config_certificate"
+    change_data.config_key.private = "config_private"
+    change_data.data_key.certificate = "data_certificate"
+    change_data.data_key.private = "data_private"
+    change_data.client_id = "This is new id"
+    change_data.model = "This is new model"
+    change_data.serial = "this is new serial number"
+    change_data.pack_dataclass(changed_memory_map, msg)
+    assert original_memory_map != changed_memory_map
