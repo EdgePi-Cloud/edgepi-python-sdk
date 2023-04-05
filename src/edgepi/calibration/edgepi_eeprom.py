@@ -90,7 +90,6 @@ class EdgePiEEPROM(I2CDevice):
             data_b (bytes): data in bytes format
         Return:
             data_l (list): data in list type if following format
-            # TODO: better description of the
             [len(data)1, len(data)2, data .... data, 255, 255, ...255]
         """
         data_list = list(data_b)
@@ -179,7 +178,6 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
-    # TODO: Integration test required
     def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
         """
         Write EdgePi reserved memory space using the populated dataclass
@@ -209,24 +207,6 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'__sequential_read: Reading Address {mem_addr}, {length} bytes')
         read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
         self.log.debug(f'__sequential_read: Read data: {len(msg[1].data)}')
-        return read_result
-
-    # TODO: delete candidate when module implementation is complete
-    # pylint: disable=unused-private-member
-    def __selective_read(self, mem_addr: int = None):
-        '''
-        Read operation reads a data from the specified address
-        Args:
-            mem_addr: starting memory address to read from
-        Returns:
-            List of read data
-        '''
-        page_addr, byte_addr = self.__byte_address_generation(mem_addr)
-        mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        msg = self.set_read_msg(mem_addr, [0x00])
-        self.log.debug(f'Reading Address {mem_addr_list}, {msg[1].data}')
-        read_result = self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-        self.log.debug(f'Read data: {msg[1].data}')
         return read_result
 
     def __page_write_register(self, mem_addr: int = None, data: list = None):
@@ -293,9 +273,7 @@ class EdgePiEEPROM(I2CDevice):
 
 
         # insert the crc at the end of each page
-        # TODO: use comprehension
-        for indx, page in enumerate(pages):
-            pages[indx] = get_crc(page)
+        pages = [get_crc(page) for page in pages]
 
         self.log.debug(f"__generate_list_of_pages_crc: {number_of_pages} pages generated")
         return pages

@@ -69,15 +69,6 @@ def test__byte_address_generation(memory_address, result, eeprom):
     assert page_addr == result[0]
     assert byte_addr == result[1]
 
-@pytest.mark.parametrize("reg_addr, mock_val, result", [(1, [23], [23])])
-def test_selective_read(mocker, eeprom, reg_addr, mock_val, result):
-    mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
-    # pylint: disable=protected-access
-    read_result = eeprom._EdgePiEEPROM__selective_read(reg_addr)
-    assert read_result == result
-
-
-
 @pytest.mark.parametrize("reg_addr, length, mock_val, result", [(1, 5,
                                                                 [23, 34, 56, 7, 8],
                                                                 [23, 34, 56, 7, 8])])
