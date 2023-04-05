@@ -101,7 +101,7 @@ class EdgePiEEPROM(I2CDevice):
         # list of data with 255 appended in the last page
         data_list = data_list+[255]*remainder
         return data_list
-        
+
     def __write_edgepi_reserved_memory(self, pb_serial_list: bytes):
         """
         Write Edgepi reserved memory space.
@@ -111,14 +111,14 @@ class EdgePiEEPROM(I2CDevice):
             N/A
         """
         start_mem = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
-        
+
         # generate list of data: used mem_size + length of data + filler
         data = self.__generate_data_list(pb_serial_list)
         # length of data + # of CRC to be added, # of CRC = # of pages
         expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
         self.__parameter_sanity_check(start_mem, expected_data_size, False)
         pages = self.__generate_list_of_pages_crc(data)
-        
+
         mem_offset = start_mem
         for page in pages:
             self.__page_write_register(mem_offset, page)
@@ -140,8 +140,10 @@ class EdgePiEEPROM(I2CDevice):
         buff_and_len = mem_size+EdgePiMemoryInfo.BUFF_START.value
 
         # Calculated number of pages being used
-        num_pages = (buff_and_len)/(page_size-CRC_BYTE_SIZE) if buff_and_len%(page_size-CRC_BYTE_SIZE) == 0 else\
+        num_pages = (buff_and_len)/(page_size-CRC_BYTE_SIZE) \
+                    if buff_and_len%(page_size-CRC_BYTE_SIZE) == 0 else\
                     int((buff_and_len)/(page_size-CRC_BYTE_SIZE))+1
+
         mem_offset = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
         for page in range(num_pages):
             buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
@@ -287,8 +289,8 @@ class EdgePiEEPROM(I2CDevice):
         for page in range(number_of_pages):
             page_start = page*page_size
             page_end = page_start+page_size
-            pages.append(data[page_start:page_end]) 
-            
+            pages.append(data[page_start:page_end])
+
 
         # insert the crc at the end of each page
         # TODO: use comprehension
@@ -333,14 +335,14 @@ class EdgePiEEPROM(I2CDevice):
             N/A
         """
         start_mem = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        
+
         # generate list of data: used mem_size + length of data + filler
         data = self.__generate_data_list(data)
         # length of data + # of CRC to be added, # of CRC = # of pages
         expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
         self.__parameter_sanity_check(start_mem, expected_data_size, True)
         pages = self.__generate_list_of_pages_crc(data)
-        
+
         mem_offset = start_mem
         for page in pages:
             self.__page_write_register(mem_offset, page)

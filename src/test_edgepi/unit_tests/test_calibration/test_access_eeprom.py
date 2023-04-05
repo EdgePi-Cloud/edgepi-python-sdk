@@ -14,7 +14,7 @@ from contextlib import nullcontext as does_not_raise
 import json
 import pytest
 
-from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, CRCCheckError, get_crc
+from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
 from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
 from edgepi.calibration.calibration_constants import CalibParam
@@ -105,14 +105,16 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
 
 def test__read_edgepi_reserved_memory(mocker, eeprom):
     data_b = read_binfile()
+    # pylint: disable=protected-access
     data_l = eeprom._EdgePiEEPROM__generate_data_list(data_b)
+    # pylint: disable=protected-access
     pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
-    
+
     # pylint: disable=protected-access
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
                  return_value = (data_l[0]<<8) + data_l[1])
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
-                side_effect = [page for page in pages])
+                side_effect = list(pages))
     # pylint: disable=protected-access
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == data_b
@@ -228,6 +230,7 @@ def test__generate_data_list(size, eeprom):
     page_size = EEPROMInfo.PAGE_SIZE.value - CRC_BYTE_SIZE
     data = [1]*size
     expected = [(size>>8)&0xFF, size&0xFF] + data + [255]*(page_size - (size+2)%page_size)
+    # pylint: disable=protected-access
     data_l = eeprom._EdgePiEEPROM__generate_data_list(data)
     assert data_l == expected
 
@@ -239,7 +242,9 @@ def test__generate_data_list(size, eeprom):
                         ])
 def test__generate_list_of_pages_crc(size, error, eeprom):
     data = [1]*size
+    # pylint: disable=protected-access
     data_l = eeprom._EdgePiEEPROM__generate_data_list(data)
+    # pylint: disable=protected-access
     pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
     with error:
         for page in pages:
@@ -257,6 +262,7 @@ def test__write_edgepi_reserved_memory(mocker, data_size, error, eeprom):
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__page_write_register")
     data = bytes([1]*data_size)
     with error:
+    # pylint: disable=protected-access
         eeprom._EdgePiEEPROM__write_edgepi_reserved_memory(data)
 
 @pytest.mark.parametrize("mem_address,length, user_space, error",
@@ -285,7 +291,7 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
         # pylint: disable=protected-access
         eeprom._EdgePiEEPROM__parameter_sanity_check(address , length, user_space)
 
-# TODO:need to fix this 
+# TODO:need to fix this
 @pytest.mark.parametrize("json_file_name, error",
                         [("dummy_0.json",does_not_raise()),
                          ("dummy_0.json",does_not_raise()),
@@ -293,6 +299,7 @@ def test_parameter_sanity_chekc(mem_address, length, user_space, error, eeprom):
 def test__generate_list_of_pages_json(json_file_name, error,eeprom):
     json_data = read_dummy_json(json_file_name)
     data_b = bytes(json.dumps(json_data,indent=0,sort_keys=False,separators=(',', ':')), "utf-8")
+    # pylint: disable=protected-access
     data_l = eeprom._EdgePiEEPROM__generate_data_list(data_b)
     assert data_l[0] == (len(data_b)>>8)&0xFF
     assert data_l[1] == len(data_b)&0xFF
@@ -304,11 +311,12 @@ def test__generate_list_of_pages_json(json_file_name, error,eeprom):
             assert len(page) == EEPROMInfo.PAGE_SIZE.value
             check_crc(page[:-1], page[-1])
 
- 
 def test_read_memory(mocker, eeprom):
     dummy_data = read_dummy_json("dummy_0.json")
     dummy_data_b = bytes(json.dumps(dummy_data), "utf-8")
+    # pylint: disable=protected-access
     dummy_data_l = eeprom._EdgePiEEPROM__generate_data_list(dummy_data_b)
+    # pylint: disable=protected-access
     pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(dummy_data_l)
     mocker.patch(
         "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",

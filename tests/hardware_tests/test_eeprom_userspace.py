@@ -56,6 +56,8 @@ def test_eeprom_reset(eeprom):
     eeprom.eeprom_reset()
     num_of_pages = int(EEPROMInfo.NUM_OF_PAGE.value / 2)
     for page in range(num_of_pages, EEPROMInfo.NUM_OF_PAGE.value):
+        # pylint: disable=line-too-long
+        # pylint: disable=protected-access
         reset_vals += eeprom._EdgePiEEPROM__sequential_read(page * EEPROMInfo.PAGE_SIZE.value,EEPROMInfo.PAGE_SIZE.value)
     for val in reset_vals:
         assert val == 255
@@ -72,7 +74,7 @@ def test_write_memory(eeprom):
     time.sleep(0.002)
 
     # # # # new data
-    _logger.info(f"\nCheck the memory by reading back\n")
+    _logger.info("\nCheck the memory by reading back\n")
     eeprom.init_memory()
     new_data = eeprom.read_memory(eeprom.used_size)
     new_data_b = bytes(new_data)
@@ -82,5 +84,3 @@ def test_write_memory(eeprom):
     new_data_parsed = json.loads(new_data_b)
 
     assert json_data == new_data_parsed
-
-

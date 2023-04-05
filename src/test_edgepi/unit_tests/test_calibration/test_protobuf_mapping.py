@@ -112,24 +112,23 @@ def test_edgepi_protobuf_pack_data(msg):
     changed_memory_map = EepromLayout()
     original_memory_map.ParseFromString(read_binfile())
     changed_memory_map.ParseFromString(read_binfile())
-    eeprom_data = EdgePiEEPROMData(original_memory_map)
     change_data = EdgePiEEPROMData(changed_memory_map)
     for value in change_data.dac_calib_params.values():
-            value.gain = 1
-            value.offset = 2
+        value.gain = 1
+        value.offset = 2
     for value in change_data.adc_calib_params.values():
-            value.gain = 1
-            value.offset = 2
+        value.gain = 1
+        value.offset = 2
     for value in change_data.rtd_calib_params.values():
-            value.gain = 1
-            value.offset = 2
+        value.gain = 1
+        value.offset = 2
     for value in change_data.tc_calib_params.values():
-            value.gain = 1
-            value.offset = 2
+        value.gain = 1
+        value.offset = 2
     for key, value in change_data.rtd_hw_params.items():
-            change_data.rtd_hw_params[key] = 1
+        change_data.rtd_hw_params[key] = 1
     for key, value in change_data.tc_hw_params.items():
-            change_data.tc_hw_params[key] = 1
+        change_data.tc_hw_params[key] = 1
     change_data.config_key.certificate = "config_certificate"
     change_data.config_key.private = "config_private"
     change_data.data_key.certificate = "data_certificate"
