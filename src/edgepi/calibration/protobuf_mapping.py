@@ -3,6 +3,7 @@
 # pylint: disable=no-name-in-module
 # https://github.com/protocolbuffers/protobuf/issues/10372
 from dataclasses import dataclass
+from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.calibration.calibration_constants import CalibParam
 
@@ -29,6 +30,7 @@ class EdgePiEEPROMData:
     model (str)
     client_id (str)
     """
+
     def __init__(self, data_to_unpack: EepromLayout = None):
         self.dac_calib_params = self.calib_message_to_dict(data_to_unpack.dac)
         self.adc_calib_params = self.calib_message_to_dict(data_to_unpack.adc)
@@ -78,3 +80,125 @@ class EdgePiEEPROMData:
             Keys (dataclass): keys values
         """
         return Keys(certificate = data_to_unpack.certificate, private = data_to_unpack.private_key)
+
+    def pack_dac_calib(self, proto_buf: EepromLayout):
+        """
+        Pack dac calib dictionary to proto_buf messages
+        Args:
+            proto_buf (EepromLayout): proto_buf dac message
+        """
+        for ch, calib_param in self.dac_calib_params.items():
+            proto_buf.calibs[ch].gain = calib_param.gain
+            proto_buf.calibs[ch].offset = calib_param.offset
+
+    def pack_adc_calib(self, proto_buf: EepromLayout):
+        """
+        Pack adc calib dictionary to proto_buf messages
+        Args:
+            proto_buf (EepromLayout): proto_buf adc message
+        """
+        for ch, calib_param in self.adc_calib_params.items():
+            proto_buf.calibs[ch].gain = calib_param.gain
+            proto_buf.calibs[ch].offset = calib_param.offset
+
+    def pack_rtd_calib(self, proto_buf: EepromLayout):
+        """
+        Pack rtd calib dictionary to proto_buf messages
+        Args:
+            proto_buf (EepromLayout): proto_buf rtd message
+        """
+        for ch, calib_param in self.rtd_calib_params.items():
+            proto_buf.calibs[ch].gain = calib_param.gain
+            proto_buf.calibs[ch].offset = calib_param.offset
+
+    def pack_rtd_hw(self, proto_buf: EepromLayout):
+        """
+        Pack rtd hardware dictionary to pb messages
+        Args:
+            proto_buf (EepromLayout): proto_buf rtd message
+        """
+        for indx, hw_param in self.rtd_hw_params.items():
+            proto_buf.hw_val[indx].ref_resistor = hw_param
+
+    def pack_tc_calib(self, proto_buf: EepromLayout):
+        """
+        Pack tc calib dictionary to proto_buf messages
+        Args:
+            proto_buf (EepromLayout): proto_buf tc message
+        """
+        for ch, calib_param in self.tc_calib_params.items():
+            proto_buf.calibs[ch].gain = calib_param.gain
+            proto_buf.calibs[ch].offset = calib_param.offset
+
+    def pack_tc_hw(self, proto_buf: EepromLayout):
+        """
+        Pack tc hardware dictionary to proto_buf messages
+        Args:
+            proto_buf (EepromLayout): proto_buf tc message
+        """
+        for indx, hw_param in self.tc_hw_params.items():
+            proto_buf.hw_val[indx].ref_resistor = hw_param
+
+    def pack_config_key(self, proto_buf: EepromLayout):
+        """
+        Pack config key dataclass to proto_buf
+        Args:
+            proto_buf (EepromLayout): proto_buf config_key message
+        """
+        proto_buf.certificate = self.config_key.certificate
+        proto_buf.private_key = self.config_key.private
+
+    def pack_data_key(self, proto_buf: EepromLayout):
+        """
+        Pack data key dataclass to proto_buf
+        Args:
+            proto_buf (EepromLayout): proto_buf data key message
+        """
+        proto_buf.certificate = self.data_key.certificate
+        proto_buf.private_key = self.data_key.private
+
+    def pack_product_info(self, proto_buf: EepromLayout):
+        """
+        Pack product data
+        Args:
+            proto_buf (EepromLayout): proto_buf data
+        """
+        proto_buf.serial_number = self.serial
+        proto_buf.model = self.model
+        proto_buf.client_id = self.client_id
+
+    def pack_dataclass(self, proto_buf: EepromLayout, message_feild: MessageFieldNumber):
+        """
+        Function to populate current dictionary value to proto buffer message
+        Args:
+            proto_buf (EepromLayout): protobuffer layout
+            message_feild (Enum): message filed number to populate
+        # """
+        if message_feild == MessageFieldNumber.DAC:
+            self.pack_dac_calib(proto_buf.dac)
+        elif message_feild == MessageFieldNumber.ADC:
+            self.pack_adc_calib(proto_buf.adc)
+        elif message_feild == MessageFieldNumber.RTD:
+            self.pack_rtd_calib(proto_buf.rtd)
+            self.pack_rtd_hw(proto_buf.rtd)
+        elif message_feild == MessageFieldNumber.TC:
+            self.pack_tc_calib(proto_buf.tc)
+            self.pack_tc_hw(proto_buf.tc)
+        elif message_feild == MessageFieldNumber.CONFIGS_KEY:
+            self.pack_config_key(proto_buf.config_key)
+        elif message_feild == MessageFieldNumber.DATA_KEY:
+            self.pack_data_key(proto_buf.data_key)
+        elif message_feild in (MessageFieldNumber.MODEL,\
+                               MessageFieldNumber.CLIENT_ID,\
+                               MessageFieldNumber.SERIAL):
+            self.pack_product_info(proto_buf)
+        else:
+            self.pack_dac_calib(proto_buf.dac)
+            self.pack_adc_calib(proto_buf.adc)
+            self.pack_rtd_calib(proto_buf.rtd)
+            self.pack_rtd_hw(proto_buf.rtd)
+            self.pack_tc_calib(proto_buf.tc)
+            self.pack_tc_hw(proto_buf.tc)
+            self.pack_config_key(proto_buf.config_key)
+            self.pack_data_key(proto_buf.data_key)
+            self.pack_product_info(proto_buf)

@@ -52,8 +52,13 @@ def test__page_write_register(eeprom):
             assert new_data[indx] == data[indx]
 
 def test_eeprom_reset(eeprom):
+    reset_vals = []
     eeprom.eeprom_reset()
-    reset_vals = eeprom.read_memory(0, 16384)
+    num_of_pages = int(EEPROMInfo.NUM_OF_PAGE.value / 2)
+    for page in range(num_of_pages, EEPROMInfo.NUM_OF_PAGE.value):
+        # pylint: disable=line-too-long
+        # pylint: disable=protected-access
+        reset_vals += eeprom._EdgePiEEPROM__sequential_read(page * EEPROMInfo.PAGE_SIZE.value,EEPROMInfo.PAGE_SIZE.value)
     for val in reset_vals:
         assert val == 255
 
@@ -69,11 +74,13 @@ def test_write_memory(eeprom):
     time.sleep(0.002)
 
     # # # # new data
-    new_data = eeprom.read_memory(2,len(json_data_b))
+    _logger.info("\nCheck the memory by reading back\n")
+    eeprom.init_memory()
+    new_data = eeprom.read_memory(eeprom.used_size)
     new_data_b = bytes(new_data)
-    _logger.info(f"test_write_memory: {new_data_b} of data to be written")
-    _logger.info(f"test_write_memory: type = {type(new_data_b)}")
-    _logger.info(f"test_write_memory: length = {len(new_data_b)}")
+    _logger.info(f"test_write_memory: {new_data_b} read from the memory")
+    _logger.info(f"test_write_memory: New Data type = {type(new_data_b)}")
+    _logger.info(f"test_write_memory: New Data length = {len(new_data_b)}")
     new_data_parsed = json.loads(new_data_b)
 
     assert json_data == new_data_parsed
