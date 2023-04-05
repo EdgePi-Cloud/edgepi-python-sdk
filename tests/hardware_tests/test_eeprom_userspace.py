@@ -31,6 +31,12 @@ def read_dummy_json(file_name: str):
         dummy = json.load(file)
     return dummy
 
+def read_binfile():
+    """Read the dummy serializedFile and return byte string"""
+    with open(PATH+"/serializedFile","rb") as fd:
+        b_string = fd.read()
+    return b_string
+
 def test__page_write_register(eeprom):
     for val in range(0, 256):
         _logger.info(f"test__page_write_register: Test Value = {val}")
@@ -69,7 +75,8 @@ def test_write_memory(eeprom):
     time.sleep(0.002)
 
     # # # # new data
-    new_data = eeprom.read_memory(2,len(json_data_b))
+    eeprom.init()
+    new_data = eeprom.read_memory(eeprom.used_size)
     new_data_b = bytes(new_data)
     _logger.info(f"test_write_memory: {new_data_b} of data to be written")
     _logger.info(f"test_write_memory: type = {type(new_data_b)}")
@@ -77,3 +84,8 @@ def test_write_memory(eeprom):
     new_data_parsed = json.loads(new_data_b)
 
     assert json_data == new_data_parsed
+
+# Reserved space write/read test
+def  test_set_edgepi_reserved_data(eeprom):
+    eeprom.layout
+    check = 1

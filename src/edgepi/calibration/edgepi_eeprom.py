@@ -295,9 +295,11 @@ class EdgePiEEPROM(I2CDevice):
         pages = []
         # data is always populates full page, each page = 63 data bytes + crc byte
         page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
-        # TODO: Double floor division?
         number_of_pages = int(len(data)/page_size)
-        # TODO: number of pages cannot exceed number of pages available
+        # Check number of pages
+        if number_of_pages > EEPROMInfo.NUM_OF_PAGE.value / 2:
+            raise ValueError(f'Invalid page size: {number_of_pages}'
+                             f', available page: {EEPROMInfo.NUM_OF_PAGE.value / 2}')
         # generate list of pages with size of page_size
         for page in range(number_of_pages):
             page_start = page*page_size

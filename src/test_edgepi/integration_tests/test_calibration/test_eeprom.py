@@ -17,9 +17,8 @@ from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
 @pytest.fixture(name="eeprom")
-def fixture_test_dac():
+def fixture_test_eeprom():
     eeprom = EdgePiEEPROM()
-    # eeprom.init_memory()
     return eeprom
 
 @pytest.mark.parametrize("data, address, expected",
