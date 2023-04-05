@@ -21,27 +21,6 @@ def fixture_test_eeprom():
     eeprom = EdgePiEEPROM()
     return eeprom
 
-@pytest.mark.parametrize("data, address, expected",
-                        [(32, 0, 32),
-                         (32, 32, 32)
-                        ])
-def test__byte_write_register(data, address, expected, eeprom):
-    initial_data = eeprom.read_memory(address, 1)
-    addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
-    # pylint: disable=protected-access
-    eeprom._EdgePiEEPROM__byte_write_register(addrx, data)
-    time.sleep(0.002)
-    new_data = eeprom.read_memory(address, 1)
-    time.sleep(0.002)
-    # pylint: disable=protected-access
-    eeprom._EdgePiEEPROM__byte_write_register(addrx, 255)
-    _logger.info(f"data to write = {data}")
-    _logger.info(f"initial data  = {initial_data}")
-    _logger.info(f"new data      = {new_data}")
-    assert initial_data[0] != new_data[0]
-    assert new_data[0] == expected
-
-
 @pytest.mark.parametrize("data, address",
                         [
                          (list(range(0,64)),0),

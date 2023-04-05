@@ -192,4 +192,17 @@ class EdgePiEEPROMData:
              message_feild == MessageFieldNumber.CLIENT_ID or \
              message_feild == MessageFieldNumber.SERIAL:
             self.pack_product_info(pb)
+        else:
+            self.pack_dac_calib(pb.dac)
+            self.pack_adc_calib(pb.adc)
+            self.pack_rtd_calib(pb.rtd)
+            self.pack_rtd_hw(pb.rtd)
+            self.pack_tc_calib(pb.tc)
+            self.pack_tc_hw(pb.tc)
+            self.pack_config_key(pb.config_key)
+            self.pack_data_key(pb.data_key)
+            self.pack_product_info(pb)
+
+
+
             

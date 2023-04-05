@@ -227,23 +227,6 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f'Read data: {msg[1].data}')
         return read_result
 
-    # pylint: disable=unused-private-member
-    def __byte_write_register(self, mem_addr: int = None, data: int = None):
-        '''
-        Write operation writes a data to the specified address
-        Args:
-            mem_addr: starting memory address to read from
-            data: data to write to the location
-        Returns:
-            N/A
-        '''
-        page_addr, byte_addr = self.__byte_address_generation(mem_addr)
-        mem_addr_list = self.__pack_mem_address(page_addr, byte_addr)
-        msg = self.set_write_msg(mem_addr_list, [data])
-        self.log.debug(f"__byte_write_register: writing {data} to memory address of {mem_addr},"
-                       f"{msg[0].data}")
-        self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
-
     def __page_write_register(self, mem_addr: int = None, data: list = None):
         '''
         Write operation writes a page of data to the specified address
@@ -341,7 +324,6 @@ class EdgePiEEPROM(I2CDevice):
             buff+=buff_list[:-1]
         return buff[2:buff_and_len]
 
-# TODO: Integration test
     def write_memory(self, data: bytes):
         """
         Writes data to the eeprom
@@ -356,7 +338,7 @@ class EdgePiEEPROM(I2CDevice):
         data = self.__generate_data_list(data)
         # length of data + # of CRC to be added, # of CRC = # of pages
         expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
-        self.__parameter_sanity_check(start_mem, expected_data_size, False)
+        self.__parameter_sanity_check(start_mem, expected_data_size, True)
         pages = self.__generate_list_of_pages_crc(data)
         
         mem_offset = start_mem
@@ -395,19 +377,15 @@ class EdgePiEEPROM(I2CDevice):
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
-            mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                        EdgePiMemoryInfo.BUFF_START.value
-            mem_content = bytes(self.read_memory(mem_start, mem_size))
+            mem_content = bytes(self.read_memory(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
         # part of memory occupied
         else:
             is_full=False
             is_empty=False
-            mem_start = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + \
-                        EdgePiMemoryInfo.BUFF_START.value
             # read memory content should be in json encoded bytes converted into list
-            mem_content = bytes(self.read_memory(mem_start, mem_size))
+            mem_content = bytes(self.read_memory(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
             self.log.info(f'{mem_size}bytes of data is read from the user space')
@@ -434,5 +412,5 @@ class EdgePiEEPROM(I2CDevice):
         for _ in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
-            time.sleep(0.002)
+            time.sleep(0.02)
        
