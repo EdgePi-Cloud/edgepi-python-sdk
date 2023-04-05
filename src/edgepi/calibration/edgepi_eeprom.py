@@ -90,16 +90,17 @@ class EdgePiEEPROM(I2CDevice):
             data_b (bytes): data in bytes format
         Return:
             data_l (list): data in list type if following format
+            # TODO: better description of the
             [len(data)1, len(data)2, data .... data, 255, 255, ...255]
         """
-        data_l = list(data_b)
-        data_l = [(len(data_l)>>8)&0xFF, len(data_l)&0xFF] + data_l
+        data_list = list(data_b)
+        data_list = [(len(data_list)>>8)&0xFF, len(data_list)&0xFF] + data_list
         # calculate the remainder of last page
         page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
-        remainder = page_size - len(data_l)%(page_size)
+        remainder = page_size - len(data_list)%(page_size)
         # list of data with 255 appended in the last page
-        data_l = data_l+[255]*remainder
-        return data_l
+        data_list = data_list+[255]*remainder
+        return data_list
         
     def __write_edgepi_reserved_memory(self, pb_serial_list: bytes):
         """
@@ -294,14 +295,18 @@ class EdgePiEEPROM(I2CDevice):
         pages = []
         # data is always populates full page, each page = 63 data bytes + crc byte
         page_size = EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE
+        # TODO: Double floor division?
         number_of_pages = int(len(data)/page_size)
+        # TODO: number of pages cannot exceed number of pages available
         # generate list of pages with size of page_size
         for page in range(number_of_pages):
             page_start = page*page_size
             page_end = page_start+page_size
-            pages.append(data[page_start:page_end])
+            pages.append(data[page_start:page_end]) 
+            
 
         # insert the crc at the end of each page
+        # TODO: use comprehension
         for indx, page in enumerate(pages):
             pages[indx] = get_crc(page)
 

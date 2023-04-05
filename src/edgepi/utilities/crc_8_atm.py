@@ -344,6 +344,7 @@ def get_crc(data: list):
     for byte in data:
         index = crc ^ byte
         crc = CRC_8_ATM_LUT[index]
-    
+
+    # TODO: why not append?
     data_crc = data+[crc]
     return data_crc
