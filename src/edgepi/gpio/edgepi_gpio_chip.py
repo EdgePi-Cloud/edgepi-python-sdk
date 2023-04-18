@@ -21,8 +21,8 @@ class EdgePiGPIOChip(GpioDevice):
                        DINPins.DIN4.value : 9,
                        DINPins.DIN5.value : 22,
                        DINPins.DIN6.value : 27,
-                       DINPins.DIN7.value : 3,
-                       DINPins.DIN8.value : 2
+                       DINPins.DIN7.value : 10,
+                       DINPins.DIN8.value : 7
                     }
 
     def __init__(self):
