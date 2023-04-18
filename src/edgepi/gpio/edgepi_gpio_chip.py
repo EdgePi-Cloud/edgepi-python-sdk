@@ -22,9 +22,8 @@ class EdgePiGPIOChip(GpioDevice):
                        DINPins.DIN5.value : 22,
                        DINPins.DIN6.value : 27,
                        DINPins.DIN7.value : 3,
-                       DINPins.DIN8.value : 2,
-                       DOUTPins.DOUT1.value : 13,
-                       DOUTPins.DOUT2.value : 12}
+                       DINPins.DIN8.value : 2
+                    }
 
     def __init__(self):
         super().__init__(GpioDevPaths.GPIO_CIHP_DEV_PATH.value)
