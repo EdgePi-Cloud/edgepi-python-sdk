@@ -34,14 +34,14 @@ class EdgePiDacCom(Enum):
 class DACChannel(Enum):
     """EdgePi DAC channel addresses"""
 
-    AOUT0 = 0x0
-    AOUT1 = 0x1
-    AOUT2 = 0x2
-    AOUT3 = 0x3
-    AOUT4 = 0x4
-    AOUT5 = 0x5
-    AOUT6 = 0x6
-    AOUT7 = 0x7
+    AOUT1 = 0x0
+    AOUT2 = 0x1
+    AOUT3 = 0x2
+    AOUT4 = 0x3
+    AOUT5 = 0x4
+    AOUT6 = 0x5
+    AOUT7 = 0x6
+    AOUT8 = 0x7
 
 
 NUM_PINS = len(DACChannel)

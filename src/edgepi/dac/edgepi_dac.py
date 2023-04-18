@@ -26,14 +26,14 @@ class EdgePiDAC(spi):
 
     # analog_out number to pin name
     __analog_out_pin_map = {
-        DACChannel.AOUT0.value: AOPins.AO_EN1,
-        DACChannel.AOUT1.value: AOPins.AO_EN2,
-        DACChannel.AOUT2.value: AOPins.AO_EN3,
-        DACChannel.AOUT3.value: AOPins.AO_EN4,
-        DACChannel.AOUT4.value: AOPins.AO_EN5,
-        DACChannel.AOUT5.value: AOPins.AO_EN6,
-        DACChannel.AOUT6.value: AOPins.AO_EN7,
-        DACChannel.AOUT7.value: AOPins.AO_EN8,
+        DACChannel.AOUT1.value: AOPins.AO_EN1,
+        DACChannel.AOUT2.value: AOPins.AO_EN2,
+        DACChannel.AOUT3.value: AOPins.AO_EN3,
+        DACChannel.AOUT4.value: AOPins.AO_EN4,
+        DACChannel.AOUT5.value: AOPins.AO_EN5,
+        DACChannel.AOUT6.value: AOPins.AO_EN6,
+        DACChannel.AOUT7.value: AOPins.AO_EN7,
+        DACChannel.AOUT8.value: AOPins.AO_EN8,
     }
 
     def __init__(self):
@@ -50,6 +50,7 @@ class EdgePiDAC(spi):
         self.gpio = EdgePiGPIO()
 
         self.__dac_power_state = {
+            DACChannel.AOUT8.value: PowerMode.NORMAL.value,
             DACChannel.AOUT7.value: PowerMode.NORMAL.value,
             DACChannel.AOUT6.value: PowerMode.NORMAL.value,
             DACChannel.AOUT5.value: PowerMode.NORMAL.value,
@@ -57,7 +58,6 @@ class EdgePiDAC(spi):
             DACChannel.AOUT3.value: PowerMode.NORMAL.value,
             DACChannel.AOUT2.value: PowerMode.NORMAL.value,
             DACChannel.AOUT1.value: PowerMode.NORMAL.value,
-            DACChannel.AOUT0.value: PowerMode.NORMAL.value,
         }
 
     def __send_to_gpio_pins(self, analog_out: int, voltage: float):

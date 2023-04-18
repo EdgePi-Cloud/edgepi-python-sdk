@@ -61,6 +61,7 @@ def fixture_test_dac_write_voltage(mocker):
 
 
 _default_power_modes = {
+    CH.AOUT8.value: PowerMode.NORMAL.value,
     CH.AOUT7.value: PowerMode.NORMAL.value,
     CH.AOUT6.value: PowerMode.NORMAL.value,
     CH.AOUT5.value: PowerMode.NORMAL.value,
@@ -68,43 +69,42 @@ _default_power_modes = {
     CH.AOUT3.value: PowerMode.NORMAL.value,
     CH.AOUT2.value: PowerMode.NORMAL.value,
     CH.AOUT1.value: PowerMode.NORMAL.value,
-    CH.AOUT0.value: PowerMode.NORMAL.value,
 }
 
 
 @pytest.mark.parametrize(
     "power_modes, analog_out, mode, expected",
     [
-        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
-        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
-        (deepcopy(_default_power_modes), CH.AOUT7, PowerMode.NORMAL, [64, 0, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT8, PowerMode.POWER_DOWN_GROUND, [64, 64, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT8, PowerMode.POWER_DOWN_3_STATE, [64, 192, 0]),
+        (deepcopy(_default_power_modes), CH.AOUT8, PowerMode.NORMAL, [64, 0, 0]),
         (
             {
-                CH.AOUT7.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT8.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT7.value: PowerMode.NORMAL.value,
                 CH.AOUT6.value: PowerMode.NORMAL.value,
                 CH.AOUT5.value: PowerMode.NORMAL.value,
                 CH.AOUT4.value: PowerMode.NORMAL.value,
                 CH.AOUT3.value: PowerMode.NORMAL.value,
                 CH.AOUT2.value: PowerMode.NORMAL.value,
                 CH.AOUT1.value: PowerMode.NORMAL.value,
-                CH.AOUT0.value: PowerMode.NORMAL.value,
             },
-            CH.AOUT7,
+            CH.AOUT8,
             PowerMode.NORMAL,
             [64, 0, 0],
         ),
         (
             {
+                CH.AOUT8.value: PowerMode.NORMAL.value,
                 CH.AOUT7.value: PowerMode.NORMAL.value,
-                CH.AOUT6.value: PowerMode.NORMAL.value,
-                CH.AOUT5.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT6.value: PowerMode.POWER_DOWN_GROUND.value,
+                CH.AOUT5.value: PowerMode.NORMAL.value,
                 CH.AOUT4.value: PowerMode.NORMAL.value,
                 CH.AOUT3.value: PowerMode.NORMAL.value,
                 CH.AOUT2.value: PowerMode.NORMAL.value,
                 CH.AOUT1.value: PowerMode.NORMAL.value,
-                CH.AOUT0.value: PowerMode.NORMAL.value,
             },
-            CH.AOUT5,
+            CH.AOUT6,
             PowerMode.NORMAL,
             [0x40, 0, 0],
         ),
@@ -123,14 +123,14 @@ def test_dac_reset(mocker, dac):
     mock_transfer.assert_called_once_with([96, 18, 52])
 
 @pytest.mark.parametrize("analog_out, mock_val",
-                         [(CH.AOUT0, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT1, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT2, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT3, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT4, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT5, [0xA1,0x69, 0xDF]),
+                         [(CH.AOUT8, [0xA1,0x69, 0xDF]),
+                          (CH.AOUT7, [0xA1,0x69, 0xDF]),
                           (CH.AOUT6, [0xA1,0x69, 0xDF]),
-                          (CH.AOUT7, [0xA1,0x69, 0xDF])])
+                          (CH.AOUT5, [0xA1,0x69, 0xDF]),
+                          (CH.AOUT4, [0xA1,0x69, 0xDF]),
+                          (CH.AOUT3, [0xA1,0x69, 0xDF]),
+                          (CH.AOUT2, [0xA1,0x69, 0xDF]),
+                          (CH.AOUT1, [0xA1,0x69, 0xDF])])
 def test_channel_readback(mocker, analog_out, mock_val, dac):
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val)
     bits = pack("uint:8, uint:8, uint:8", mock_val[0], mock_val[1], mock_val[2])
@@ -141,6 +141,7 @@ def test_channel_readback(mocker, analog_out, mock_val, dac):
 @pytest.mark.parametrize(
     "analog_out, read_data",
     [
+        (CH.AOUT8, [0, 0, 0]),
         (CH.AOUT7, [0, 0, 0]),
         (CH.AOUT6, [0, 0, 0]),
         (CH.AOUT5, [0, 0, 0]),
@@ -148,7 +149,6 @@ def test_channel_readback(mocker, analog_out, mock_val, dac):
         (CH.AOUT3, [0, 0, 0]),
         (CH.AOUT2, [0, 0, 0]),
         (CH.AOUT1, [0, 0, 0]),
-        (CH.AOUT0, [0, 0, 0]),
     ]
 )
 def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
@@ -225,14 +225,14 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
 
 
 @pytest.mark.parametrize("analog_out, voltage, mock_value, result",
-                         [(CH.AOUT0, 2.123, [None, None, True], [13913]),
-                          (CH.AOUT1, 2.123, [None, None, True], [13913]),
-                          (CH.AOUT2, 2.123, [None, None, True], [13913]),
-                          (CH.AOUT3, 2.123, [None, None, True], [13913]),
+                         [(CH.AOUT8, 2.123, [None, None, True], [13913]),
+                          (CH.AOUT7, 2.123, [None, None, True], [13913]),
+                          (CH.AOUT6, 2.123, [None, None, True], [13913]),
+                          (CH.AOUT5, 2.123, [None, None, True], [13913]),
                           (CH.AOUT4, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT5, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT6, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT7, 2.123, [None, None, False], [27826])
+                          (CH.AOUT3, 2.123, [None, None, False], [27826]),
+                          (CH.AOUT2, 2.123, [None, None, False], [27826]),
+                          (CH.AOUT1, 2.123, [None, None, False], [27826])
                         ])
 def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_periph):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",
@@ -264,14 +264,14 @@ def test_enable_dac_gain(mocker, enable, result, mocker_values):
         else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",
-    [([0xA1,0x69, 0xDF, True], CH.AOUT0, True, True, True, [27103, 2.116, True]),
-    ([0xA1,0x69, 0xDF, False], CH.AOUT1, True, True, True, [27103, 2.116, False]),
-    ([0xA1,0x69, 0xDF, True], CH.AOUT2, True, True, False, [27103, 2.116, None]),
-    ([0xA1,0x69, 0xDF, True], CH.AOUT3, True, True, None, [27103, 2.116, None]),
+    [([0xA1,0x69, 0xDF, True], CH.AOUT8, True, True, True, [27103, 2.116, True]),
+    ([0xA1,0x69, 0xDF, False], CH.AOUT7, True, True, True, [27103, 2.116, False]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT6, True, True, False, [27103, 2.116, None]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT5, True, True, None, [27103, 2.116, None]),
     ([0xA1,0x69, 0xDF, True], CH.AOUT4, True, False, True, [27103, None, True]),
-    ([0xA1,0x69, 0xDF, True], CH.AOUT5, True, None, True, [27103, None, True]),
-    ([0xA1,0x69, 0xDF, True], CH.AOUT6, False, True, True, [None, 2.116, True]),
-    ([0xA1,0x69, 0xDF, True], CH.AOUT7, None, True, True, [None, 2.116, True])])
+    ([0xA1,0x69, 0xDF, True], CH.AOUT3, True, None, True, [27103, None, True]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT2, False, True, True, [None, 2.116, True]),
+    ([0xA1,0x69, 0xDF, True], CH.AOUT1, None, True, True, [None, 2.116, True])])
 def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
