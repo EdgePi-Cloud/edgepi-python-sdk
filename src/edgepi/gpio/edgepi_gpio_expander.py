@@ -199,7 +199,7 @@ class EdgePiGPIOExpander(I2CDevice):
 
         # get register value of port this pin belongs to
         reg_val = self.__read_register(reg_addx, dev_address)
-        
+
         if self.get_expander_pin_direction(pin_name):
             # set pin direction to output (also sets to low)
             self.set_expander_pin_direction_out(pin_name)

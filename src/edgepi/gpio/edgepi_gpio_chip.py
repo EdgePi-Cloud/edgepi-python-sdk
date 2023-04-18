@@ -5,7 +5,7 @@ Provides a class for interacting with the GPIO pins through GPIO peripheral
 import logging
 from edgepi.peripherals.gpio import GpioDevice
 from edgepi.gpio.gpio_constants import GpioDevPaths
-from edgepi.gpio.gpio_configs import DOUTPins, DINPins, generate_gpiochip_pin_info
+from edgepi.gpio.gpio_configs import DINPins, generate_gpiochip_pin_info
 
 _logger = logging.getLogger(__name__)
 

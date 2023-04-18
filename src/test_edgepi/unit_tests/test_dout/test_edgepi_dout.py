@@ -10,7 +10,6 @@ if sys.platform != 'linux':
 from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.gpio.gpio_configs import DOUTPins
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, InvalidPinName
 
 @pytest.mark.parametrize("pin_name, state, error",
