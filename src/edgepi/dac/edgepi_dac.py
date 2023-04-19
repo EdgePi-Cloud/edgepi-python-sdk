@@ -18,6 +18,7 @@ from edgepi.dac.dac_constants import (
     GainPin
 )
 from edgepi.peripherals.spi import SpiDevice as spi
+from edgepi.gpio.gpio_constants import GpioPins 
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
@@ -70,6 +71,17 @@ class EdgePiDAC(spi):
         else:
             raise ValueError("voltage cannot be negative")
 
+    def __dac_switching_logic(self, analog_out: DACChannel):
+        """
+        In order to attach DAC output to the terminal block, proper swtiching of GPIO should happen.
+        AOUT1 and AOUT2 have special switching logic
+
+        Args:
+            `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
+        """
+        if analog_out == DACChannel.AOUT1 or analog_out == DACChannel.AOUT1:
+            # if self.gpio.get_pin_direction(GpioPins.PWM)
+
     # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: DACChannel, voltage: float):
         """
@@ -89,10 +101,6 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
-
-        if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out.value].value):
-            self.gpio.clear_pin_state(self.__analog_out_pin_map[analog_out.value].value)
-            self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out.value].value)
 
         # update DAC register
         self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
