@@ -160,12 +160,12 @@ def test_generate_expander_pin_info():
     result_dict.update(generate_pin_info(GpioConfigs.RTD.value))
     result_dict.update(generate_pin_info(GpioConfigs.RELAY.value))
     result_dict.update(generate_pin_info(GpioConfigs.LED.value))
-    result_dict.update(generate_pin_info(GpioConfigs.DOUT2.value))
+    result_dict.update(generate_pin_info(GpioConfigs.DOUT.value))
+    result_dict.update(generate_pin_info(GpioConfigs.PWM.value))
     assert pin_dict == result_dict
 
 def test_generate_gpiochip_pin_info():
     pin_dict = generate_gpiochip_pin_info()
     result_dict = {}
     result_dict.update(generate_pin_info(GpioConfigs.DIN.value))
-    result_dict.update(generate_pin_info(GpioConfigs.DOUT1.value))
     assert pin_dict == result_dict
