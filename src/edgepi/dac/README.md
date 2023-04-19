@@ -6,7 +6,8 @@ This section will demonstrate how to import the EdgePi DAC module, and use it wr
 Note, the EdgePi has eight analog out pins, indexed from 1 to 8.
 
 ### Writing Voltage to Analog Out Pin
-```
+```python
+from edgepi.dac.dac_constants import DACChannel as Ch
 from edgepi.dac.edgepi_dac import EdgePiDAC
 
 # initialize DAC

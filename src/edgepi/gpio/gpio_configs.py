@@ -401,7 +401,7 @@ def _generate_PWM_expander_pins(): #pylint: disable=C0103
                                                       GpioBPinDirIn.PIN5_DIR_IN.value,
                                                       GpioExpanderAddress.EXP_TWO.value)})
 
-    pin_dict.update({PWMPins.PWM1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_6.value,
+    pin_dict.update({PWMPins.PWM2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_6.value,
                                                       GpioBOutputClear.CLEAR_OUTPUT_6.value,
                                                       GpioBPinDirOut.PIN6_DIR_OUT.value,
                                                       GpioBPinDirIn.PIN6_DIR_IN.value,
