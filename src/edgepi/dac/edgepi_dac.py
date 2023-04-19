@@ -83,12 +83,10 @@ class EdgePiDAC(spi):
         """
         pwm_en = GpioPins.PWM1 if analog_out == DACChannel.AOUT1.value else GpioPins.PWM2
         dout = GpioPins.DOUT1 if analog_out == DACChannel.AOUT1.value else GpioPins.DOUT2
-        if self.gpio.get_pin_direction(pwm_en.value) or not self.gpio.read_pin_state(pwm_en.value):
-            self.gpio.set_pin_direction_out(pwm_en.value)
-            self.gpio.set_pin_state(pwm_en.value)
-        if self.gpio.get_pin_direction(dout.value) or not self.gpio.read_pin_state(dout.value):
-            self.gpio.set_pin_direction_out(dout.value)
-            self.gpio.clear_pin_state(dout.value)
+        self.gpio.set_pin_direction_out(pwm_en.value)
+        self.gpio.set_pin_state(pwm_en.value)
+        self.gpio.set_pin_direction_out(dout.value)
+        self.gpio.clear_pin_state(dout.value)
 
     # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: DACChannel, voltage: float):
