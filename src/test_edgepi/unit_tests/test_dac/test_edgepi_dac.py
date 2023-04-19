@@ -14,6 +14,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from bitstring import pack
+from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.dac.dac_constants import (
     AOPins,
     PowerMode,
@@ -163,27 +164,27 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
 
 
 @pytest.mark.parametrize(
-    "analog_out, pin_name, voltage, mock_name",
+    "analog_out, pin_name, voltage, result",
     [
-        (0, AOPins.AO_EN1.value, 1.0, "mock_set"),
-        (1, AOPins.AO_EN2.value, 1.0, "mock_set"),
-        (2, AOPins.AO_EN3.value, 1.0, "mock_set"),
-        (3, AOPins.AO_EN4.value, 1.0, "mock_set"),
-        (4, AOPins.AO_EN5.value, 1.0, "mock_set"),
-        (5, AOPins.AO_EN6.value, 1.0, "mock_set"),
-        (6, AOPins.AO_EN7.value, 1.0, "mock_set"),
-        (7, AOPins.AO_EN8.value, 1.0, "mock_set"),
-        (0, AOPins.AO_EN1.value, 0, "mock_clear"),
-        (1, AOPins.AO_EN2.value, 0, "mock_clear"),
-        (2, AOPins.AO_EN3.value, 0, "mock_clear"),
-        (3, AOPins.AO_EN4.value, 0, "mock_clear"),
-        (4, AOPins.AO_EN5.value, 0, "mock_clear"),
-        (5, AOPins.AO_EN6.value, 0, "mock_clear"),
-        (6, AOPins.AO_EN7.value, 0, "mock_clear"),
-        (7, AOPins.AO_EN8.value, 0, "mock_clear"),
+        (0, AOPins.AO_EN1.value, 1.0, [2,1,GpioPins.DOUT1.value]),
+        (1, AOPins.AO_EN2.value, 1.0, [2,1,GpioPins.DOUT2.value]),
+        (2, AOPins.AO_EN3.value, 1.0, [1,1,GpioPins.DOUT3.value]),
+        (3, AOPins.AO_EN4.value, 1.0, [1,1,GpioPins.DOUT4.value]),
+        (4, AOPins.AO_EN5.value, 1.0, [1,1,GpioPins.DOUT5.value]),
+        (5, AOPins.AO_EN6.value, 1.0, [1,1,GpioPins.DOUT6.value]),
+        (6, AOPins.AO_EN7.value, 1.0, [1,1,GpioPins.DOUT7.value]),
+        (7, AOPins.AO_EN8.value, 1.0, [1,1,GpioPins.DOUT8.value]),
+        (0, AOPins.AO_EN1.value, 0, [1,1,AOPins.AO_EN1.value]),
+        (1, AOPins.AO_EN2.value, 0, [1,1,AOPins.AO_EN2.value]),
+        (2, AOPins.AO_EN3.value, 0, [0,1,AOPins.AO_EN3.value]),
+        (3, AOPins.AO_EN4.value, 0, [0,1,AOPins.AO_EN4.value]),
+        (4, AOPins.AO_EN5.value, 0, [0,1,AOPins.AO_EN5.value]),
+        (5, AOPins.AO_EN6.value, 0, [0,1,AOPins.AO_EN6.value]),
+        (6, AOPins.AO_EN7.value, 0, [0,1,AOPins.AO_EN7.value]),
+        (7, AOPins.AO_EN8.value, 0, [0,1,AOPins.AO_EN8.value]),
     ]
 )
-def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name):
+def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, result):
     # can't mock entire GPIO class here because need to access its methods
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
@@ -199,13 +200,13 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, mock_name)
     dac._EdgePiDAC__send_to_gpio_pins(analog_out, voltage)
     # check correct clause is entered depending on voltage written
     if voltage > 0:
-        mock_set.assert_called_with(pin_name)
-        mock_set.name = "mock_set"
-        assert mock_set.name == mock_name
+        mock_clear.assert_called_with(result[2])
+        assert mock_set.call_count == result[0]
+        assert mock_clear.call_count == result[1]
     else:
-        mock_clear.assert_called_with(pin_name)
-        mock_clear.name = "mock_clear"
-        assert mock_clear.name == mock_name
+        mock_clear.assert_called_with(result[2])
+        assert mock_set.call_count == result[0]
+        assert mock_clear.call_count == result[1]
 
 
 @pytest.mark.parametrize('analog_out, voltage', [
@@ -290,18 +291,16 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     assert gain_state == result[2]
 
 # TODO: add more test case 
-@pytest.mark.parametrize("analog_out, mock_val, result", 
-                        [(CH.AOUT1.value, [False, True], [2, 'PWM1', 'DOUT1'])
+@pytest.mark.parametrize("analog_out, result", 
+                        [(CH.AOUT1.value,  [1, 'PWM1']),
+                         (CH.AOUT2.value,  [1, 'PWM2']),
                         ])
-def test__dac_switching_logic(mocker, analog_out, mock_val, result):
+def test__dac_switching_logic(mocker, analog_out, result):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.read_pin_state", return_value = mock_val[0])
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[1])
     mock_set_pin_dir_out = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_pin_direction_out")
     mock_set_pin_state = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_pin_state")
-    mock_clear_pin_state = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_pin_state")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
@@ -312,5 +311,4 @@ def test__dac_switching_logic(mocker, analog_out, mock_val, result):
 
     assert mock_set_pin_dir_out.call_count == result[0]
     mock_set_pin_state.assert_called_once_with(result[1])
-    mock_clear_pin_state.assert_called_once_with(result[2])
 

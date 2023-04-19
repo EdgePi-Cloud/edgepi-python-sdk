@@ -37,6 +37,20 @@ class EdgePiDAC(spi):
         DACChannel.AOUT8.value: AOPins.AO_EN8,
     }
 
+    # analog_out number to DOUT pin pair
+    __analog_to_digital_pin_map = {
+        DACChannel.AOUT1.value: GpioPins.DOUT1,
+        DACChannel.AOUT2.value: GpioPins.DOUT2,
+        DACChannel.AOUT3.value: GpioPins.DOUT3,
+        DACChannel.AOUT4.value: GpioPins.DOUT4,
+        DACChannel.AOUT5.value: GpioPins.DOUT5,
+        DACChannel.AOUT6.value: GpioPins.DOUT6,
+        DACChannel.AOUT7.value: GpioPins.DOUT7,
+        DACChannel.AOUT8.value: GpioPins.DOUT8,
+    }
+
+
+
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing DAC Bus")
@@ -62,14 +76,17 @@ class EdgePiDAC(spi):
         }
 
     def __send_to_gpio_pins(self, analog_out: int, voltage: float):
-
-        if analog_out == DACChannel.AOUT1.value or analog_out == DACChannel.AOUT2.value:
-            self.__dac_switching_logic(analog_out)
         ao_pin = self.__analog_out_pin_map[analog_out].value
+        do_pin = self.__analog_to_digital_pin_map[analog_out].value
         if voltage > 0:
             self.gpio.set_pin_state(ao_pin)
+            self.gpio.clear_pin_state(do_pin)
+            if analog_out == DACChannel.AOUT1.value or analog_out == DACChannel.AOUT2.value:
+                self.__dac_switching_logic(analog_out)
         elif voltage == 0:
             self.gpio.clear_pin_state(ao_pin)
+            if analog_out == DACChannel.AOUT1.value or analog_out == DACChannel.AOUT2.value:
+                self.__dac_switching_logic(analog_out)
         else:
             raise ValueError("voltage cannot be negative")
 
@@ -82,11 +99,8 @@ class EdgePiDAC(spi):
             `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
         """
         pwm_en = GpioPins.PWM1 if analog_out == DACChannel.AOUT1.value else GpioPins.PWM2
-        dout = GpioPins.DOUT1 if analog_out == DACChannel.AOUT1.value else GpioPins.DOUT2
         self.gpio.set_pin_direction_out(pwm_en.value)
         self.gpio.set_pin_state(pwm_en.value)
-        self.gpio.set_pin_direction_out(dout.value)
-        self.gpio.clear_pin_state(dout.value)
 
     # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: DACChannel, voltage: float):
