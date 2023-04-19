@@ -62,8 +62,10 @@ class EdgePiDAC(spi):
         }
 
     def __send_to_gpio_pins(self, analog_out: int, voltage: float):
-        ao_pin = self.__analog_out_pin_map[analog_out].value
 
+        if analog_out == DACChannel.AOUT1.value or analog_out == DACChannel.AOUT2.value:
+            self.__dac_switching_logic(analog_out)
+        ao_pin = self.__analog_out_pin_map[analog_out].value
         if voltage > 0:
             self.gpio.set_pin_state(ao_pin)
         elif voltage == 0:
@@ -71,16 +73,22 @@ class EdgePiDAC(spi):
         else:
             raise ValueError("voltage cannot be negative")
 
-    def __dac_switching_logic(self, analog_out: DACChannel):
+    def __dac_switching_logic(self, analog_out: int):
         """
         In order to attach DAC output to the terminal block, proper swtiching of GPIO should happen.
-        AOUT1 and AOUT2 have special switching logic
+        AOUT1 and AOUT2 have special switching logic.
 
         Args:
             `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
         """
-        if analog_out == DACChannel.AOUT1 or analog_out == DACChannel.AOUT1:
-            # if self.gpio.get_pin_direction(GpioPins.PWM)
+        pwm_en = GpioPins.PWM1 if analog_out == DACChannel.AOUT1.value else GpioPins.PWM2
+        dout = GpioPins.DOUT1 if analog_out == DACChannel.AOUT1.value else GpioPins.DOUT2
+        if self.gpio.get_pin_direction(pwm_en.value) or not self.gpio.read_pin_state(pwm_en.value):
+            self.gpio.set_pin_direction_out(pwm_en.value)
+            self.gpio.set_pin_state(pwm_en.value)
+        if self.gpio.get_pin_direction(dout.value) or not self.gpio.read_pin_state(dout.value):
+            self.gpio.set_pin_direction_out(dout.value)
+            self.gpio.set_pin_state(dout.value)
 
     # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: DACChannel, voltage: float):

@@ -288,3 +288,26 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     assert code_val == result[0]
     assert pytest.approx(voltage_val, 1e-3) == voltage_val
     assert gain_state == result[2]
+
+# TODO: add more test case 
+@pytest.mark.parametrize("analog_out, mock_val, result", [(CH.AOUT1.value, [False, True], 2)])
+def test__dac_switching_logic(mocker, analog_out, mock_val, result):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    mocker.patch("edgepi.peripherals.i2c.I2C")
+    mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.read_pin_state", return_value = mock_val[0])
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[1])
+    mock_set_pin_dir_out = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_pin_direction_out")
+    mock_set_pin_state = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_pin_state")
+    eelayout= EepromLayout()
+    eelayout.ParseFromString(read_binfile())
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+                  return_value = EdgePiEEPROMData(eelayout))
+    dac = EdgePiDAC()
+    dac.dac_ops.dict_calib_param = dummy_calib_param_dict
+    dac._EdgePiDAC__dac_switching_logic(analog_out)
+
+    assert mock_set_pin_dir_out.call_count == result
+    assert mock_set_pin_state.call_count == result
+
+
