@@ -13,11 +13,17 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 # initialize DAC
 edgepi_dac = EdgePiDAC()
 
-# write voltage value of 3.3 V to analog out pin number 1
-edgepi_dac.write_voltage(1, 3.3)
+# setting DAC range 0-5V
+edgepi_dac.enable_dac_gain(False)
 
-# read last voltage written to pin number 1
-edgepi_dac.read_voltage(1)
+# write voltage value of 3.3 V to analog out pin number 1
+edgepi_dac.write_voltage(Ch.AOUT1, 3.3)
+
+# read state of DAC output 1
+code, voltage, gain = edgepi_dac.get_state(Ch.AOUT1, True, True, True)
+
+# Resets the DAC to power-on reset state
+edgepi_dac.reset()
 ```
 ---
 ## Using DAC Module
