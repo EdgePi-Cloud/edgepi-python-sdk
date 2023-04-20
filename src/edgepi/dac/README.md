@@ -29,11 +29,72 @@ edgepi_dac.reset()
 ## Using DAC Module
 This section introduces DAC functionality available to users, and provides a guide on how to interact with the DAC module.
 
-1. Writing Voltage to Analog Out Pins
-    - Write a voltage value to be sent through an analog output pin
-3. Reading Voltage from Analog Out Pins
-    - Read voltage from DAC channel corresponding to an analog out pin
-4. Setting Power Mode Analog Out Pins
-    - Each analog out pin can be configured to operate in lower power consumption modes.
-5. Resetting DAC
-    - Performs a software reset of the DAC, returning all settings and values to the default power-on state.
+1. setting output voltage range
+
+```python
+    def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
+        """
+        Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
+        Args:
+            enable (bool): enable boolean to set or clear the gpio pin
+            ch_code_handler (bool): flag to re-write code value of each channel to keep the same
+                                    output voltage
+        Return:
+            gain_state (bool): state of the gain pin
+        """
+```
+
+2. set output voltage
+
+```python
+    def write_voltage(self, analog_out: DACChannel, voltage: float):
+        """
+        Write a voltage value to an analog out pin. Voltage will be continuously
+        transmitted to the analog out pin until a 0 V value is written to it.
+
+        Args:
+            `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
+
+            `voltage` (float): the voltage value to write, in volts.
+
+        Raises:
+            `ValueError`: if voltage has more decimal places than DAC accuracy limit
+        """
+```
+
+3. reading channel state 
+
+```python
+    def get_state(self, analog_out: DACChannel = None,
+                        code: bool = None,
+                        voltage: bool = None,
+                        gain: bool = None):
+        """
+        the method returns the state of requested parameters. It will either read the register of
+        DAC or GPIO expander to retrieve the current state.
+
+        Args:
+            analog_out (DACChannel): channel number of interest
+            code (bool): requesting the current code value written in the specified channel input
+                         register
+            voltage (bool): requesting the current expected voltage at the terminal block pin
+            gian (bool): requesting the current gain value set for the DAC
+        Returns:
+            code_val (int): code value read from the input register, None when not requested
+            voltage_val (float): voltage calculated using the code value, None when not requested
+            gain_state (bool): true if dac gain is enabled or False disabled, None when not
+                               requested
+        """
+```
+
+4. Resetting DAC to power-on reset state
+
+```python
+    def reset(self):
+        """
+        Performs a software reset of the EdgePi DAC to power-on default values,
+        and stops all voltage transmissions through pins.
+        """
+        cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
+        self.transfer(cmd)
+```

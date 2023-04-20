@@ -81,11 +81,11 @@ class EdgePiDAC(spi):
         if voltage > 0:
             self.gpio.set_pin_state(ao_pin)
             self.gpio.clear_pin_state(do_pin)
-            if analog_out in (DACChannel.AOUT1.value, DACChannel.AOUT2.value):
+            if analog_out in [DACChannel.AOUT1.value, DACChannel.AOUT2.value]:
                 self.__dac_switching_logic(analog_out)
         elif voltage == 0:
             self.gpio.clear_pin_state(ao_pin)
-            if analog_out in (DACChannel.AOUT2.value,DACChannel.AOUT1.value):
+            if analog_out in [DACChannel.AOUT2.value,DACChannel.AOUT1.value]:
                 self.__dac_switching_logic(analog_out)
         else:
             raise ValueError("voltage cannot be negative")
@@ -118,7 +118,7 @@ class EdgePiDAC(spi):
         """
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         self.dac_ops.check_range(analog_out.value, 0, NUM_PINS)
-        self.dac_ops.check_range(voltage, 0, (UPPER_LIMIT*dac_gain)+0.001)
+        self.dac_ops.check_range(voltage, 0, (UPPER_LIMIT*dac_gain))
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
 
@@ -195,9 +195,27 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
-    def __compute_ch_code_vals(self, enable: bool = None):
+    def __modify_code_val(self, enable: bool = None, code: int = None):
         """
-        Compute the new code value to keep the current output voltage
+        Modify code value depending on the enable flag
+        Args:
+            enable(bool): False: multiply the current code value by 2 if current code value is less
+                                than the half of maixmum code value.
+                          True: divide the current code value by 2
+            code (int): intial code value
+        Return:
+            code (int): modified code value
+        """
+        if enable:
+            return int(code/CalibConst.DAC_GAIN_FACTOR.value)
+        if code<CalibConst.RANGE.value/2:
+            return code*CalibConst.DAC_GAIN_FACTOR.value
+
+        return code
+
+    def __get_ch_codes(self, enable: bool = None):
+        """
+        Read and modify channel code value
         Args:
             enable(bool): False: multiply the current code value by 2
                           True: divide the current code value by 2
@@ -207,9 +225,7 @@ class EdgePiDAC(spi):
         code_vals = []
         for ch in DACChannel:
             code, _, _ = self.get_state(ch, True, False, False)
-            code_vals.append(int(code/CalibConst.DAC_GAIN_FACTOR.value) if enable else\
-                             code*CalibConst.DAC_GAIN_FACTOR.value if code<CalibConst.RANGE.value/2\
-                             else code)
+            code_vals.append(self.__modify_code_val(enable, code))
         return code_vals
 
     def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
@@ -223,7 +239,7 @@ class EdgePiDAC(spi):
             gain_state (bool): state of the gain pin
         """
         if ch_code_handler and self.__get_gain_state() != enable:
-            codes = self.__compute_ch_code_vals(enable)
+            codes = self.__get_ch_codes(enable)
             self.log.debug(f'Code: {codes}')
             for ch, code in enumerate(codes):
                 # update DAC register
