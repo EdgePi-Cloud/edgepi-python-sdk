@@ -195,14 +195,38 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
-    def enable_dac_gain(self, enable: bool = None):
+    def __compute_ch_code_vals(self, enable: bool = None):
+        """
+        Compute the new code value to keep the current output voltage
+        Args:
+            enable(bool): False: multiply the current code value by 2
+                          True: divide the current code value by 2
+        Return:
+            code_vals (list): list of code values from ch1-ch8
+        """
+        code_vals = []
+        for ch in range(NUM_PINS):
+            code, _, _ = self.get_state(ch, True, False, False)
+            code_vals.append(int(code/2) if enable else code)
+        return code_vals
+
+    def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
             enable (bool): enable boolean to set or clear the gpio pin
+            ch_code_handler (bool): flag to re-write code value of each channel to keep the same
+                                    output voltage
         Return:
             gain_state (bool): state of the gain pin
         """
+        if ch_code_handler and self.__get_gain_state() != enable:
+            codes = self.__compute_ch_code_vals(enable)
+            self.log.debug(f'Code: {codes}')
+            for ch, code in enumerate(codes):
+                # update DAC register
+                self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
+        
         # pylint: disable=expression-not-assigned
         self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if enable else \
         self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
