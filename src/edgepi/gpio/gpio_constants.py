@@ -199,3 +199,5 @@ class GpioPins(Enum):
     DIN8 = 'DIN8'
     BUZZER = 'BUZZER'
     AUDIO = 'AUDIO'
+    PWM1 = 'PWM1'
+    PWM2 = 'PWM2'

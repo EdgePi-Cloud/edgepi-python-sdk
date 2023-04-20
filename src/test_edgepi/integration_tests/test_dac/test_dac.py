@@ -38,9 +38,6 @@ def test_dac_init(dac):
 @pytest.mark.parametrize(
     "analog_out, voltage, raises",
     [
-        (CH.AOUT0, LOWER_VOLT_LIMIT, does_not_raise()),
-        (CH.AOUT0, 2.5, does_not_raise()),
-        (CH.AOUT0, UPPER_VOLT_LIMIT, does_not_raise()),
         (CH.AOUT1, LOWER_VOLT_LIMIT, does_not_raise()),
         (CH.AOUT1, 2.5, does_not_raise()),
         (CH.AOUT1, UPPER_VOLT_LIMIT, does_not_raise()),
@@ -62,9 +59,12 @@ def test_dac_init(dac):
         (CH.AOUT7, LOWER_VOLT_LIMIT, does_not_raise()),
         (CH.AOUT7, 2.5, does_not_raise()),
         (CH.AOUT7, UPPER_VOLT_LIMIT, does_not_raise()),
-        (CH.AOUT0, -0.1, pytest.raises(ValueError)),
-        (CH.AOUT0, 5.118, pytest.raises(ValueError)),
-        (CH.AOUT0, 5.1111, pytest.raises(ValueError)),
+        (CH.AOUT8, LOWER_VOLT_LIMIT, does_not_raise()),
+        (CH.AOUT8, 2.5, does_not_raise()),
+        (CH.AOUT8, UPPER_VOLT_LIMIT, does_not_raise()),
+        (CH.AOUT1, -0.1, pytest.raises(ValueError)),
+        (CH.AOUT2, 5.118, pytest.raises(ValueError)),
+        (CH.AOUT3, 5.1111, pytest.raises(ValueError)),
     ],
 )
 def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):

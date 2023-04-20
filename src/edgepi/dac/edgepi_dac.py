@@ -18,6 +18,7 @@ from edgepi.dac.dac_constants import (
     GainPin
 )
 from edgepi.peripherals.spi import SpiDevice as spi
+from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
@@ -26,15 +27,29 @@ class EdgePiDAC(spi):
 
     # analog_out number to pin name
     __analog_out_pin_map = {
-        DACChannel.AOUT0.value: AOPins.AO_EN1,
-        DACChannel.AOUT1.value: AOPins.AO_EN2,
-        DACChannel.AOUT2.value: AOPins.AO_EN3,
-        DACChannel.AOUT3.value: AOPins.AO_EN4,
-        DACChannel.AOUT4.value: AOPins.AO_EN5,
-        DACChannel.AOUT5.value: AOPins.AO_EN6,
-        DACChannel.AOUT6.value: AOPins.AO_EN7,
-        DACChannel.AOUT7.value: AOPins.AO_EN8,
+        DACChannel.AOUT1.value: AOPins.AO_EN1,
+        DACChannel.AOUT2.value: AOPins.AO_EN2,
+        DACChannel.AOUT3.value: AOPins.AO_EN3,
+        DACChannel.AOUT4.value: AOPins.AO_EN4,
+        DACChannel.AOUT5.value: AOPins.AO_EN5,
+        DACChannel.AOUT6.value: AOPins.AO_EN6,
+        DACChannel.AOUT7.value: AOPins.AO_EN7,
+        DACChannel.AOUT8.value: AOPins.AO_EN8,
     }
+
+    # analog_out number to DOUT pin pair
+    __analog_to_digital_pin_map = {
+        DACChannel.AOUT1.value: GpioPins.DOUT1,
+        DACChannel.AOUT2.value: GpioPins.DOUT2,
+        DACChannel.AOUT3.value: GpioPins.DOUT3,
+        DACChannel.AOUT4.value: GpioPins.DOUT4,
+        DACChannel.AOUT5.value: GpioPins.DOUT5,
+        DACChannel.AOUT6.value: GpioPins.DOUT6,
+        DACChannel.AOUT7.value: GpioPins.DOUT7,
+        DACChannel.AOUT8.value: GpioPins.DOUT8,
+    }
+
+
 
     def __init__(self):
         self.log = logging.getLogger(__name__)
@@ -50,6 +65,7 @@ class EdgePiDAC(spi):
         self.gpio = EdgePiGPIO()
 
         self.__dac_power_state = {
+            DACChannel.AOUT8.value: PowerMode.NORMAL.value,
             DACChannel.AOUT7.value: PowerMode.NORMAL.value,
             DACChannel.AOUT6.value: PowerMode.NORMAL.value,
             DACChannel.AOUT5.value: PowerMode.NORMAL.value,
@@ -57,18 +73,34 @@ class EdgePiDAC(spi):
             DACChannel.AOUT3.value: PowerMode.NORMAL.value,
             DACChannel.AOUT2.value: PowerMode.NORMAL.value,
             DACChannel.AOUT1.value: PowerMode.NORMAL.value,
-            DACChannel.AOUT0.value: PowerMode.NORMAL.value,
         }
 
     def __send_to_gpio_pins(self, analog_out: int, voltage: float):
         ao_pin = self.__analog_out_pin_map[analog_out].value
-
+        do_pin = self.__analog_to_digital_pin_map[analog_out].value
         if voltage > 0:
             self.gpio.set_pin_state(ao_pin)
+            self.gpio.clear_pin_state(do_pin)
+            if analog_out in [DACChannel.AOUT1.value, DACChannel.AOUT2.value]:
+                self.__dac_switching_logic(analog_out)
         elif voltage == 0:
             self.gpio.clear_pin_state(ao_pin)
+            if analog_out in [DACChannel.AOUT2.value,DACChannel.AOUT1.value]:
+                self.__dac_switching_logic(analog_out)
         else:
             raise ValueError("voltage cannot be negative")
+
+    def __dac_switching_logic(self, analog_out: int):
+        """
+        In order to attach DAC output to the terminal block, proper swtiching of GPIO should happen.
+        AOUT1 and AOUT2 have special switching logic.
+
+        Args:
+            `analog_out` (DACChannel): A/D_OUT pin to write a voltage value to.
+        """
+        pwm_en = GpioPins.PWM1 if analog_out == DACChannel.AOUT1.value else GpioPins.PWM2
+        self.gpio.set_pin_direction_out(pwm_en.value)
+        self.gpio.set_pin_state(pwm_en.value)
 
     # TODO: Decimal instead of float for precision testing
     def write_voltage(self, analog_out: DACChannel, voltage: float):
@@ -84,15 +116,11 @@ class EdgePiDAC(spi):
         Raises:
             `ValueError`: if voltage has more decimal places than DAC accuracy limit
         """
-        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
-        self.dac_ops.check_range(voltage, 0, UPPER_LIMIT)
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
+        self.dac_ops.check_range(voltage, 0, (UPPER_LIMIT*dac_gain))
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
-
-        if self.gpio.get_pin_direction(self.__analog_out_pin_map[analog_out.value].value):
-            self.gpio.clear_pin_state(self.__analog_out_pin_map[analog_out.value].value)
-            self.gpio.set_pin_direction_out(self.__analog_out_pin_map[analog_out.value].value)
 
         # update DAC register
         self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
@@ -167,14 +195,56 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
-    def enable_dac_gain(self, enable: bool = None):
+    def __modify_code_val(self, enable: bool = None, code: int = None):
+        """
+        Modify code value depending on the enable flag
+        Args:
+            enable(bool): False: multiply the current code value by 2 if current code value is less
+                                than the half of maixmum code value.
+                          True: divide the current code value by 2
+            code (int): intial code value
+        Return:
+            code (int): modified code value
+        """
+        if enable:
+            return int(code/CalibConst.DAC_GAIN_FACTOR.value)
+        if code<CalibConst.RANGE.value/2:
+            return code*CalibConst.DAC_GAIN_FACTOR.value
+
+        return code
+
+    def __get_ch_codes(self, enable: bool = None):
+        """
+        Read and modify channel code value
+        Args:
+            enable(bool): False: multiply the current code value by 2
+                          True: divide the current code value by 2
+        Return:
+            code_vals (list): list of code values from ch1-ch8
+        """
+        code_vals = []
+        for ch in DACChannel:
+            code, _, _ = self.get_state(ch, True, False, False)
+            code_vals.append(self.__modify_code_val(enable, code))
+        return code_vals
+
+    def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
             enable (bool): enable boolean to set or clear the gpio pin
+            ch_code_handler (bool): flag to re-write code value of each channel to keep the same
+                                    output voltage
         Return:
             gain_state (bool): state of the gain pin
         """
+        if ch_code_handler and self.__get_gain_state() != enable:
+            codes = self.__get_ch_codes(enable)
+            self.log.debug(f'Code: {codes}')
+            for ch, code in enumerate(codes):
+                # update DAC register
+                self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
+
         # pylint: disable=expression-not-assigned
         self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if enable else \
         self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)

@@ -374,16 +374,16 @@ def _generate_DOUT_expander_pins(): #pylint: disable=C0103
                                           dir_out_code.value,
                                           dir_in_code.value,
                                           GpioExpanderAddress.EXP_TWO.value)})
-    pin_dict.update({DOUTPins.DOUT1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_3.value,
-                                                      GpioBOutputClear.CLEAR_OUTPUT_3.value,
-                                                      GpioBPinDirOut.PIN3_DIR_OUT.value,
-                                                      GpioBPinDirIn.PIN3_DIR_IN.value,
-                                                      GpioExpanderAddress.EXP_TWO.value)})
-
-    pin_dict.update({DOUTPins.DOUT2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_4.value,
+    pin_dict.update({DOUTPins.DOUT1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_4.value,
                                                       GpioBOutputClear.CLEAR_OUTPUT_4.value,
                                                       GpioBPinDirOut.PIN4_DIR_OUT.value,
                                                       GpioBPinDirIn.PIN4_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
+
+    pin_dict.update({DOUTPins.DOUT2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_5.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_5.value,
+                                                      GpioBPinDirOut.PIN5_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN5_DIR_IN.value,
                                                       GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
@@ -395,16 +395,16 @@ def _generate_PWM_expander_pins(): #pylint: disable=C0103
         a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
     """
     pin_dict = {}
-    pin_dict.update({PWMPins.PWM1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_5.value,
-                                                      GpioBOutputClear.CLEAR_OUTPUT_5.value,
-                                                      GpioBPinDirOut.PIN5_DIR_OUT.value,
-                                                      GpioBPinDirIn.PIN5_DIR_IN.value,
-                                                      GpioExpanderAddress.EXP_TWO.value)})
-
     pin_dict.update({PWMPins.PWM1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_6.value,
                                                       GpioBOutputClear.CLEAR_OUTPUT_6.value,
                                                       GpioBPinDirOut.PIN6_DIR_OUT.value,
                                                       GpioBPinDirIn.PIN6_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
+
+    pin_dict.update({PWMPins.PWM2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_7.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_7.value,
+                                                      GpioBPinDirOut.PIN7_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN7_DIR_IN.value,
                                                       GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
