@@ -23,8 +23,8 @@ class DACCommands:
 
     def generate_write_and_update_command(self, ch: int, data: int) -> list:
         """Construct a write and update command"""
-        self.check_range(ch, 0, len(CH))
-        self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
+        self.check_range(ch, 0, NUM_PINS-1)
+        self.check_range(data, 0, CALIB_CONSTS.RANGE.value-1)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
     def __voltage_to_float_code(self, ch: int, expected: float, dac_gain: int = 1):
@@ -50,7 +50,7 @@ class DACCommands:
             int: 16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
-        self.check_range(ch, 0, NUM_PINS)
+        self.check_range(ch, 0, NUM_PINS-1)
         float_code = self.__voltage_to_float_code(ch, expected, dac_gain)
         _logger.debug(f"Int code generated {int(float_code)}")
         # DAC only accepts int values, round to nearest int
@@ -139,7 +139,7 @@ class DACCommands:
     @staticmethod
     def check_range(target, range_min, range_max) -> bool:
         """Validates target is in range between a min and max value"""
-        if range_min <= target < range_max:
+        if range_min <= target <= range_max:
             return True
 
         raise ValueError(f"Target {target} is out of range ")

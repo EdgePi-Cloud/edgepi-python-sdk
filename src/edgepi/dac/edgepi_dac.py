@@ -117,7 +117,7 @@ class EdgePiDAC(spi):
             `ValueError`: if voltage has more decimal places than DAC accuracy limit
         """
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
-        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS)
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
         self.dac_ops.check_range(voltage, 0, (UPPER_LIMIT*dac_gain))
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
@@ -140,7 +140,7 @@ class EdgePiDAC(spi):
 
             `power_mode` (PowerMode): a valid hex code for setting DAC channel power mode
         """
-        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS)
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
         self.__dac_power_state[analog_out.value] = power_mode.value
         power_code = self.dac_ops.generate_power_code(self.__dac_power_state.values())
         cmd = self.dac_ops.combine_command(COM.COM_POWER_DOWN_OP.value, NULL_BITS, power_code)
@@ -164,7 +164,7 @@ class EdgePiDAC(spi):
             (int): code value stored in the input register, can be used to calculate expected
             voltage
         """
-        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS)
+        self.dac_ops.check_range(analog_out.value, 0, NUM_PINS-1)
         # first transfer triggers read mode, second is needed to fetch data
         cmd = self.dac_ops.combine_command(
                 COM.COM_READBACK.value, DACChannel(analog_out.value).value, NULL_BITS

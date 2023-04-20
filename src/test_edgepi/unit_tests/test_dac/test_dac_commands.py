@@ -59,7 +59,9 @@ def test_dac_check_for_int_exception(sample, error, dac_ops):
 
 @pytest.mark.parametrize(
     "range_min, target, range_max, result",
-    [(0, 0, 10, True), (0, 5, 10, True), (0.5, 1, 1.1, True)],
+    [(0, 0, 10, True),
+     (0, 5, 10, True),
+     (0.5, 1, 1.1, True)],
 )
 def test_dac_check_range(range_min, target, range_max, result, dac_ops):
     assert dac_ops.check_range(target, range_min, range_max) == result
@@ -71,7 +73,7 @@ def test_dac_check_range(range_min, target, range_max, result, dac_ops):
         (0, -1, len(CH), ValueError),
         (0, 11, len(CH), ValueError),
         (0, -5, CALIB_CONSTS.RANGE.value, ValueError),
-        (0, 65536, CALIB_CONSTS.RANGE.value, ValueError),
+        (0, 65536, (CALIB_CONSTS.RANGE.value)-1, ValueError),
     ],
 )
 def test_dac_check_range_raises(range_min, target, range_max, error, dac_ops):
