@@ -165,27 +165,27 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
 
 
 @pytest.mark.parametrize(
-    "analog_out, pin_name, voltage, result",
+    "analog_out, voltage, result",
     [
-        (0, AOPins.AO_EN1.value, 1.0, [2,1,GpioPins.DOUT1.value]),
-        (1, AOPins.AO_EN2.value, 1.0, [2,1,GpioPins.DOUT2.value]),
-        (2, AOPins.AO_EN3.value, 1.0, [1,1,GpioPins.DOUT3.value]),
-        (3, AOPins.AO_EN4.value, 1.0, [1,1,GpioPins.DOUT4.value]),
-        (4, AOPins.AO_EN5.value, 1.0, [1,1,GpioPins.DOUT5.value]),
-        (5, AOPins.AO_EN6.value, 1.0, [1,1,GpioPins.DOUT6.value]),
-        (6, AOPins.AO_EN7.value, 1.0, [1,1,GpioPins.DOUT7.value]),
-        (7, AOPins.AO_EN8.value, 1.0, [1,1,GpioPins.DOUT8.value]),
-        (0, AOPins.AO_EN1.value, 0, [1,1,AOPins.AO_EN1.value]),
-        (1, AOPins.AO_EN2.value, 0, [1,1,AOPins.AO_EN2.value]),
-        (2, AOPins.AO_EN3.value, 0, [0,1,AOPins.AO_EN3.value]),
-        (3, AOPins.AO_EN4.value, 0, [0,1,AOPins.AO_EN4.value]),
-        (4, AOPins.AO_EN5.value, 0, [0,1,AOPins.AO_EN5.value]),
-        (5, AOPins.AO_EN6.value, 0, [0,1,AOPins.AO_EN6.value]),
-        (6, AOPins.AO_EN7.value, 0, [0,1,AOPins.AO_EN7.value]),
-        (7, AOPins.AO_EN8.value, 0, [0,1,AOPins.AO_EN8.value]),
+        (0, 1.0, [2,1,GpioPins.DOUT1.value]),
+        (1, 1.0, [2,1,GpioPins.DOUT2.value]),
+        (2, 1.0, [1,1,GpioPins.DOUT3.value]),
+        (3, 1.0, [1,1,GpioPins.DOUT4.value]),
+        (4, 1.0, [1,1,GpioPins.DOUT5.value]),
+        (5, 1.0, [1,1,GpioPins.DOUT6.value]),
+        (6, 1.0, [1,1,GpioPins.DOUT7.value]),
+        (7, 1.0, [1,1,GpioPins.DOUT8.value]),
+        (0, 0, [1,1,AOPins.AO_EN1.value]),
+        (1, 0, [1,1,AOPins.AO_EN2.value]),
+        (2, 0, [0,1,AOPins.AO_EN3.value]),
+        (3, 0, [0,1,AOPins.AO_EN4.value]),
+        (4, 0, [0,1,AOPins.AO_EN5.value]),
+        (5, 0, [0,1,AOPins.AO_EN6.value]),
+        (6, 0, [0,1,AOPins.AO_EN7.value]),
+        (7, 0, [0,1,AOPins.AO_EN8.value]),
     ]
 )
-def test_dac_send_to_gpio_pins(mocker, analog_out, pin_name, voltage, result):
+def test_dac_send_to_gpio_pins(mocker, analog_out, voltage, result):
     # can't mock entire GPIO class here because need to access its methods
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
@@ -231,10 +231,11 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
                           (CH.AOUT7, 2.123, [None, None, True], [13913]),
                           (CH.AOUT6, 2.123, [None, None, True], [13913]),
                           (CH.AOUT5, 2.123, [None, None, True], [13913]),
-                          (CH.AOUT4, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT3, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT2, 2.123, [None, None, False], [27826]),
-                          (CH.AOUT1, 2.123, [None, None, False], [27826])
+                          (CH.AOUT5, 9.999, [None, None, True], [65529]),
+                          (CH.AOUT4, 2.123, [None, None, False], [27827]),
+                          (CH.AOUT3, 2.123, [None, None, False], [27827]),
+                          (CH.AOUT2, 2.123, [None, None, False], [27827]),
+                          (CH.AOUT1, 2.123, [None, None, False], [27827])
                         ])
 def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_periph):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC.get_state",

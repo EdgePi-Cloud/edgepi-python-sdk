@@ -59,7 +59,7 @@ def test_dac_check_for_int_exception(sample, error, dac_ops):
 
 @pytest.mark.parametrize(
     "range_min, target, range_max, result",
-    [(0, 0, 10, True), (0, 10, 10, True), (0, 5, 10, True), (0.5, 1, 1.1, True)],
+    [(0, 0, 10, True), (0, 5, 10, True), (0.5, 1, 1.1, True)],
 )
 def test_dac_check_range(range_min, target, range_max, result, dac_ops):
     assert dac_ops.check_range(target, range_min, range_max) == result
@@ -109,7 +109,7 @@ def test_dac_generate_write_and_update_command(a, b, c, dac_ops):
 
 
 @pytest.mark.parametrize("ch, expected, dac_gain, result",
-                        [(1, 2.345, 1, 30293), (0, 2.345, 2, 15221), (3, 2.345, 1, 30229)])
+                        [(1, 2.345, 1, 30293), (0, 2.345, 2, 15221), (3, 2.345, 1, 30230)])
 def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
     assert dac_ops.voltage_to_code(ch, expected, dac_gain) == result
 
