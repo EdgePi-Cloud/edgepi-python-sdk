@@ -205,7 +205,7 @@ class EdgePiDAC(spi):
             code_vals (list): list of code values from ch1-ch8
         """
         code_vals = []
-        for ch in range(NUM_PINS):
+        for ch in DACChannel:
             code, _, _ = self.get_state(ch, True, False, False)
             code_vals.append(int(code/2) if enable else code)
         return code_vals
