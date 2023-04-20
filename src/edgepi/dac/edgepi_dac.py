@@ -207,7 +207,9 @@ class EdgePiDAC(spi):
         code_vals = []
         for ch in DACChannel:
             code, _, _ = self.get_state(ch, True, False, False)
-            code_vals.append(int(code/2) if enable else code)
+            code_vals.append(int(code/CalibConst.DAC_GAIN_FACTOR.value) if enable else\
+                             code*CalibConst.DAC_GAIN_FACTOR.value if code<CalibConst.RANGE.value/2\
+                             else code)
         return code_vals
 
     def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):

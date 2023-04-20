@@ -20,6 +20,7 @@ from edgepi.dac.dac_constants import (
     PowerMode,
     DACChannel as CH,
     EdgePiDacCom as COM,
+    EdgePiDacCalibrationConstants as CalibConst
 )
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.calibration.calibration_constants import CalibParam
@@ -243,18 +244,11 @@ def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_
     assert result[0] == dac_mock_periph.write_voltage(analog_out, voltage)
 
 @pytest.mark.parametrize("enable, result, mock_vals,",
-                        [(True, [500,500,500,500,500,500,500,500], [[1000, 0, 0],[1000, 0, 0],
-                                                                    [1000, 0, 0],[1000, 0, 0],
-                                                                    [1000, 0, 0],[1000, 0, 0],
-                                                                    [1000, 0, 0],[1000, 0, 0],]),
-                        (True, [500,500,500,500,500,500,500,500], [[1001, 0, 0],[1001, 0, 0],
-                                                                    [1001, 0, 0],[1001, 0, 0],
-                                                                    [1001, 0, 0],[1001, 0, 0],
-                                                                    [1001, 0, 0],[1001, 0, 0],]),
-                         (False, [1000,1000,1000,1000,1000,1000,1000,1000], [[1000,0,0],[1000,0,0],
-                                                                             [1000,0,0],[1000,0,0],
-                                                                             [1000,0,0],[1000,0,0],
-                                                                             [1000,0,0],[1000,0,0]])
+                        [(True, [500]*8, [[1000,0,0]]*8),
+                        (True, [500]*8, [[1001,0,0]]*8),
+                        (False, [2000]*8, [[1000,0,0]]*8),
+                        (False, [CalibConst.RANGE.value/2]*8,[[CalibConst.RANGE.value/2,0,0]]*8),
+                        (False, [CalibConst.RANGE.value-2]*8,[[CalibConst.RANGE.value/2 -1,0,0]]*8)
                         ])
 def test__compute_ch_code_vals(mocker, enable, result, mock_vals):
     mocker.patch("edgepi.peripherals.spi.SPI")
