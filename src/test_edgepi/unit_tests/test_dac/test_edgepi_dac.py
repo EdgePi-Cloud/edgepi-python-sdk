@@ -324,7 +324,7 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     assert pytest.approx(voltage_val, 1e-3) == voltage_val
     assert gain_state == result[2]
 
-@pytest.mark.parametrize("analog_out, result", 
+@pytest.mark.parametrize("analog_out, result",
                         [(CH.AOUT1.value,  [1, 'PWM1']),
                          (CH.AOUT2.value,  [1, 'PWM2']),
                         ])
@@ -344,4 +344,3 @@ def test__dac_switching_logic(mocker, analog_out, result):
 
     assert mock_set_pin_dir_out.call_count == result[0]
     mock_set_pin_state.assert_called_once_with(result[1])
-
