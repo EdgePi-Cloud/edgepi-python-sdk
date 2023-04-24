@@ -695,54 +695,124 @@ def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
     adc.select_differential(adc_num, diff_mode)
     config.assert_called_once_with(**config_calls)
 
+@pytest.mark.parametrize("enable",[(True), (False)])
+def test__set_rtd_pin(enable, adc):
+    adc._EdgePiADC__set_rtd_pin(enable)
+    if enable:
+        adc.gpio.set_pin_state.assert_called_with("RTD_EN")
+    else:
+        adc.gpio.clear_pin_state.assert_called_with("RTD_EN")
 
 @pytest.mark.parametrize(
-    "enable, adc_2_mux, config_calls",
+    "enable, adc_num, adc_mux, config_calls",
     [
-        (False, 0x0, RTDModes.RTD_OFF.value),
+        # Case 1: RTD OFF ADC_1
+        (False, ADCNum.ADC_1, 0x0, RTDModes.RTD1_OFF.value),
+        # Case 2: RTD ON ADC_1 Not Allowed Channels
         (
             True,
+            ADCNum.ADC_1,
             0x44,
-            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+            RTDModes.RTD1_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x55,
-            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+            RTDModes.RTD1_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x66,
-            RTDModes.RTD_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
+            RTDModes.RTD1_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x77,
-            RTDModes.RTD_ON.value,
+            RTDModes.RTD1_ON.value | {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM},
         ),
+        # Case 3: RTD ON ADC_1 Allowed Channels
         (
             True,
+            ADCNum.ADC_1,
             0x33,
-            RTDModes.RTD_ON.value,
+            RTDModes.RTD1_ON.value,
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x22,
-            RTDModes.RTD_ON.value,
+            RTDModes.RTD1_ON.value,
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x11,
-            RTDModes.RTD_ON.value,
+            RTDModes.RTD1_ON.value,
         ),
         (
             True,
+            ADCNum.ADC_1,
             0x00,
-            RTDModes.RTD_ON.value,
+            RTDModes.RTD1_ON.value,
+        ),
+        # Case 4: RTD OFF ADC_2
+        (False, ADCNum.ADC_2, 0x0, RTDModes.RTD2_OFF.value),
+        # Case 5: RTD ON ADC_2 Not Allowed Channels
+        (
+            True,
+            ADCNum.ADC_2,
+            0x44,
+            RTDModes.RTD2_ON.value | {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x55,
+            RTDModes.RTD2_ON.value | {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x66,
+            RTDModes.RTD2_ON.value | {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM},
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x77,
+            RTDModes.RTD2_ON.value | {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM},
+        ),
+        # Case 6: RTD ON ADC_2 Allowed Channels
+        (
+            True,
+            ADCNum.ADC_2,
+            0x33,
+            RTDModes.RTD2_ON.value,
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x22,
+            RTDModes.RTD2_ON.value,
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x11,
+            RTDModes.RTD2_ON.value,
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            0x00,
+            RTDModes.RTD2_ON.value,
         ),
     ],
 )
-def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
+def test_rtd_mode(mocker, enable, adc_num, adc_mux, config_calls):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
@@ -755,12 +825,13 @@ def test_rtd_mode(mocker, enable, adc_2_mux, config_calls):
     config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_register_map",
-        return_value={ADCReg.REG_ADC2MUX.value: adc_2_mux}
+        return_value={ADCReg.REG_ADC2MUX.value: adc_mux} if adc_num == ADCNum.ADC_1 else\
+                     {ADCReg.REG_INPMUX.value: adc_mux}
     )
     mocker.patch(
-        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_2_mux]
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register", return_value=[adc_mux]
     )
-    adc.rtd_mode(enable=enable)
+    adc.rtd_mode(enable=enable, adc_num=adc_num)
     config.assert_called_once_with(**config_calls, override_rtd_validation=True)
 
 

@@ -839,6 +839,7 @@ class EdgePiADC(SPI):
                 }
             else:
                 updates = RTDModes.RTD2_ON.value
+            self.__set_rtd_pin(enable)
         else:
             updates =RTDModes.RTD1_OFF.value if adc_num == ADCNum.ADC_1 else RTDModes.RTD2_OFF.value
             self.__set_rtd_pin(enable)
