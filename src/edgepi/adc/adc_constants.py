@@ -313,20 +313,26 @@ class REFMUX(Enum):
     NEG_REF_EXT_AIN5 = OpCode(0x3, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
     NEG_REF_INT_VAVSS = OpCode(0x4, ADCReg.REG_REFMUX.value, ADCMasks.RMUXN_BITS.value)
 
+class ADC2REFMUX(Enum):
+    """Settings for ADC2 REFMUX register (ADC2 Configuration register 5:3 bits)"""
+    INTERNAL_2P5 = OpCode(0x0, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN0_AIN1 = OpCode(0x1, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN2_AIN3 = OpCode(0x2, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN4_AIN5 = OpCode(0x3, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value )
 
 class RTDModes(Enum):
     "ADC.__config args for for turning RTD mode on/off"
-    RTD_ON = {
-        "adc_1_analog_in": ADCChannel.AIN5,
+    RTD1_ON = {
+        "adc_1_analog_in": ADCChannel.AIN7,
         "adc_1_mux_n": ADCChannel.AIN6,
         "idac_1_mux": IDACMUX.IDAC1_AIN8,
         "idac_2_mux": IDACMUX.IDAC2_AIN9,
         "idac_1_mag": IDACMAG.IDAC1_500,
         "idac_2_mag": IDACMAG.IDAC2_500,
         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
-        "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS,
+        "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN5,
     }
-    RTD_OFF = {
+    RTD1_OFF = {
         "adc_1_analog_in": ADCChannel.FLOAT,
         "adc_1_mux_n": ADCChannel.AINCOM,
         "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
@@ -335,6 +341,24 @@ class RTDModes(Enum):
         "idac_2_mag": IDACMAG.IDAC2_OFF,
         "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
         "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
+    }
+    RTD2_ON = {
+        "adc_2_analog_in": ADCChannel.AIN7,
+        "adc_2_mux_n": ADCChannel.AIN6,
+        "idac_1_mux": IDACMUX.IDAC1_AIN8,
+        "idac_2_mux": IDACMUX.IDAC2_AIN9,
+        "idac_1_mag": IDACMAG.IDAC1_500,
+        "idac_2_mag": IDACMAG.IDAC2_500,
+        "adc2_ref_inp": ADC2REFMUX.AIN4_AIN5,
+    }
+    RTD2_OFF = {
+        "adc_2_analog_in": ADCChannel.FLOAT,
+        "adc_2_mux_n": ADCChannel.AINCOM,
+        "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
+        "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
+        "idac_1_mag": IDACMAG.IDAC1_OFF,
+        "idac_2_mag": IDACMAG.IDAC2_OFF,
+        "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
 
 
@@ -346,7 +370,6 @@ class AllowedChannels(Enum):
         ADCChannel.AIN1,
         ADCChannel.AIN2,
         ADCChannel.AIN3,
-        ADCChannel.AIN7,
         ADCChannel.AINCOM,
         ADCChannel.FLOAT,
     ]

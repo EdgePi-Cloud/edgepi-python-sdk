@@ -31,13 +31,14 @@ from edgepi.adc.adc_constants import (
     IDACMUX,
     IDACMAG,
     REFMUX,
+    ADC2REFMUX,
     RTDModes,
     AllowedChannels,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import ADCPins
+from edgepi.gpio.gpio_configs import ADCPins, RTDPins
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
@@ -339,6 +340,17 @@ class EdgePiADC(SPI):
         out = self.transfer(code)
 
         return out
+
+    def __set_rtd_pin(self, enable: bool = False):
+        """
+        Set or clear RTD_EN pin
+        Args:
+            enable (bool): RTD enable flag
+        Return:
+            None
+        """
+        self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
+        self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
@@ -769,7 +781,7 @@ class EdgePiADC(SPI):
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
 
-    def __validate_no_rtd_conflict(self, updates: dict):
+    def  __validate_no_rtd_conflict(self, updates: dict):
         """
         Checks no RTD related properties are being updated if RTD mode is enabled
 
@@ -790,7 +802,7 @@ class EdgePiADC(SPI):
                     f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
 
-    def rtd_mode(self, enable: bool):
+    def rtd_mode(self, enable: bool, adc_num: ADCNum = ADCNum.ADC_2):
         """
         Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
         if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
@@ -800,21 +812,36 @@ class EdgePiADC(SPI):
         Args:
             `enable` (bool): True to enable RTD, False to disable
         """
-        # TODO: enable RTD_EN switching pin
-        if enable:
+        if enable and adc_num == ADCNum.ADC_1:
             # check if adc_2 is reading RTD pins, remap channels if needed
             mux_reg = self.__get_register_map()
             adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
             muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
+            # If adc_2 is reading RTD pins, map adc_mux to float
             if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
-                updates = RTDModes.RTD_ON.value | {
+                updates = RTDModes.RTD1_ON.value | {
                     "adc_2_analog_in": CH.FLOAT,
                     "adc_2_mux_n": CH.AINCOM,
                 }
             else:
-                updates = RTDModes.RTD_ON.value
+                updates = RTDModes.RTD1_ON.value
+            self.__set_rtd_pin(enable)
+        elif enable and adc_num == ADCNum.ADC_2:
+            # Read ADC1 mux pin
+            mux_reg = self.__get_register_map()
+            adc1_mux = pack("uint:8", mux_reg.get(ADCReg.REG_INPMUX.value))
+            muxs = [adc1_mux[:4].uint, adc1_mux[4:].uint]
+            # If adc_1 is reading RTD pins, map adc_mux to float
+            if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
+                updates = RTDModes.RTD2_ON.value | {
+                    "adc_1_analog_in": CH.FLOAT,
+                    "adc_1_mux_n": CH.AINCOM,
+                }
+            else:
+                updates = RTDModes.RTD2_ON.value
         else:
-            updates = RTDModes.RTD_OFF.value
+            updates =RTDModes.RTD1_OFF.value if adc_num == ADCNum.ADC_1 else RTDModes.RTD2_OFF.value
+            self.__set_rtd_pin(enable)
 
         self.__config(**updates, override_rtd_validation=True)
 
@@ -859,6 +886,7 @@ class EdgePiADC(SPI):
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
         neg_ref_inp: REFMUX = None,
+        adc2_ref_inp: ADC2REFMUX = None,
         override_updates_validation: bool = False,
         override_rtd_validation: bool = False,
     ):
