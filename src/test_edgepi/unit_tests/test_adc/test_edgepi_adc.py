@@ -75,7 +75,7 @@ def fixture_adc(mocker):
         return_value=deepcopy(adc_default_vals)
     )
     # mock RTD as off by default, mock as on if needed
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=RTDModes.RTD_OFF)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
@@ -605,7 +605,7 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=RTDModes.RTD_OFF)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     adc = EdgePiADC()
     mocker.patch(
@@ -638,6 +638,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
                                                       mock.call(pin_name[1])])
 
 
+# TODO:FIX THIS, __is_rtd_on mock should be fixed, RTD state check has been changed
 @pytest.mark.parametrize(
     "updates, rtd_on, err",
     [
@@ -819,7 +820,7 @@ def test_rtd_mode(mocker, enable, adc_num, adc_mux, config_calls):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.set_expander_pin")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     # mock RTD as off by default, mock as on if needed
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=RTDModes.RTD_OFF)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     adc = EdgePiADC()
     config = mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")

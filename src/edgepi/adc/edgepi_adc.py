@@ -698,16 +698,9 @@ class EdgePiADC(SPI):
         ADC channels are available for reading.
 
         Returns:
-            `bool`: True if RTD_EN pin is on, False otherwise
+            (RTDMode): RTDMode.RTD1_ON, RTDMode.RTD2_ON or RTDMode.RTD_OFF
         """
-        # TODO: this should use self.get_state() instead
-        _logger.debug("__is_rtd_on: Checking RTD status")
-        idac_reg = self.__get_register_map()
-        idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
-        idac_1 = idac_mag[4:].uint
-        status = idac_1 != 0x0
-        _logger.debug(f"__is_rtd_on: RTD enabled: {status}")
-        return status
+        return self.get_state().rtd_on
 
     # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
     # Case 1: user sets to adc_x read ch_x -> mux_n auto mapped to AINCOM
@@ -754,7 +747,7 @@ class EdgePiADC(SPI):
         # allowed channels depend on RTD_EN status
         if not override_rtd_validation:
             channels = list(args.values())
-            rtd_enabled = self.__is_rtd_on()
+            rtd_enabled = not (self.__is_rtd_on() == RTDModes.RTD_OFF)
             validate_channels_allowed(channels, rtd_enabled)
 
         adc_mux_updates = {
@@ -804,7 +797,7 @@ class EdgePiADC(SPI):
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
         # ADC2 channel setting conflicts with RTD handled during channel mapping
-        if not self.__is_rtd_on():
+        if self.__is_rtd_on() == RTDModes.RTD_OFF:
             return
 
         rtd_properties = RTDModes.RTD1_ON.value.keys() + RTDModes.RTD2_ON.value.keys()
