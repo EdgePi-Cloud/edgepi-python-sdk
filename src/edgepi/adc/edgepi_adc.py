@@ -795,7 +795,7 @@ class EdgePiADC(SPI):
         if not self.__is_rtd_on():
             return
 
-        rtd_properties = RTDModes.RTD_ON.value.keys()
+        rtd_properties = RTDModes.RTD1_ON.value.keys() + RTDModes.RTD2_ON.value.keys()
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
