@@ -84,7 +84,7 @@ class ADCState:
         self.filter_mode: PropertyValue = self.__get_state(ADCProperties.FILTER_MODE)
         self.status_byte: PropertyValue = self.__get_state(ADCProperties.STATUS_MODE)
         self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
-        self.rtd_on: bool = self.__get_rtd_state()
+        self.rtd_on: RTDModes = self.__get_rtd_state()
 
     def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
@@ -150,13 +150,13 @@ class ADCState:
         """
         rtd_state = self.__get_current_rtd_state()
 
-        if rtd_state["adc2_ref_inp"] != ADC2REFMUX.INTERNAL_2P5:
-            return RTDModes.RTD2_ON.value
+        if ADC2REFMUX.AIN4_AIN5.value == rtd_state["adc2_ref_inp"].value:
+            return RTDModes.RTD2_ON
 
-        if rtd_state["pos_ref_inp"] != REFMUX.POS_REF_INT_2P5:
-            return RTDModes.RTD1_ON.value
+        if REFMUX.POS_REF_EXT_AIN4.value == rtd_state["pos_ref_inp"].value:
+            return RTDModes.RTD1_ON
 
-        return RTDModes.RTD_OFF.value
+        return RTDModes.RTD_OFF
 
 
 class ADCStateMissingMap(Exception):

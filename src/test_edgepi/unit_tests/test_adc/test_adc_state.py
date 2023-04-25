@@ -20,6 +20,7 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     FilterMode,
     StatusByte,
+    RTDModes,
 )
 
 # mock default register values
@@ -370,16 +371,55 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.filter_mode",
             ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
-        # RTD on
+        # RTD1 on
         (
             {
-                ADCReg.REG_INPMUX.value: 0x56,
+                ADCReg.REG_INPMUX.value: 0x76,
                 ADCReg.REG_IDACMUX.value: 0x98,
                 ADCReg.REG_IDACMAG.value: 0x44,
-                ADCReg.REG_REFMUX.value: 0b00011100,
+                ADCReg.REG_REFMUX.value: 0x1B,
             },
             "state.rtd_on",
-            True
+            RTDModes.RTD1_ON
+        ),
+        # RTD2 on
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x48,
+                ADCReg.REG_ADC2CFG.value: 0x18
+            },
+            "state.rtd_on",
+            RTDModes.RTD2_ON,
+        ),
+        # RTD2 and RTD1 on
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_INPMUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x48,
+                ADCReg.REG_ADC2CFG.value: 0x18,
+                ADCReg.REG_REFMUX.value: 0x1B,
+            },
+            "state.rtd_on",
+            RTDModes.RTD2_ON,
+            #TODO: when both ADCs are attached to RTD, RTD2 is passed
+        ),
+        # RTD2 and RTD1 OFF
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_INPMUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x48,
+                ADCReg.REG_ADC2CFG.value: 0x8,
+                ADCReg.REG_REFMUX.value: 0x22,
+            },
+            "state.rtd_on",
+            RTDModes.RTD_OFF,
+            #TODO: when everything is configured correctly and only REFMUX are wrong, RTD is OFF
         ),
         # RTD off
         (
@@ -390,18 +430,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x00,
             },
             "state.rtd_on",
-            False
-        ),
-        # RTD improperly configured
-        (
-            {
-                ADCReg.REG_INPMUX.value: 0x56,
-                ADCReg.REG_IDACMUX.value: 0x98,
-                ADCReg.REG_IDACMAG.value: 0x48,
-                ADCReg.REG_REFMUX.value: 0b00011100,
-            },
-            "state.rtd_on",
-            False
+            RTDModes.RTD_OFF
         ),
         # ADC1 Data Rate
         (
@@ -505,7 +534,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.adc_2.data_rate",
             ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
         ),
-    ],
+    ]
 )
 def test_adc_state_init(updates, state_property, expected):
     reg_map = deepcopy(ADC_REGS)

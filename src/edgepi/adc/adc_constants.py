@@ -315,10 +315,11 @@ class REFMUX(Enum):
 
 class ADC2REFMUX(Enum):
     """Settings for ADC2 REFMUX register (ADC2 Configuration register 5:3 bits)"""
-    INTERNAL_2P5 = OpCode(0x0, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
-    AIN0_AIN1 = OpCode(0x1, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
-    AIN2_AIN3 = OpCode(0x2, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
-    AIN4_AIN5 = OpCode(0x3, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value )
+    INTERNAL_2P5 = OpCode(0x00, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN0_AIN1 = OpCode(0x08, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN2_AIN3 = OpCode(0x10, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value)
+    AIN4_AIN5 = OpCode(0x18, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value )
+    INT_VAVDD_VAVSS = OpCode(0x20, ADCReg.REG_ADC2CFG.value, ADCMasks.RMUXP_BITS.value )
 
 class RTDModes(Enum):
     "ADC.__config args for for turning RTD mode on/off"
