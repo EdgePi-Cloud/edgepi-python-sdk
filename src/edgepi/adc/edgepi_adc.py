@@ -796,11 +796,12 @@ class EdgePiADC(SPI):
         Raises:
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
-        # ADC2 channel setting conflicts with RTD handled during channel mapping
-        if self.__is_rtd_on() == RTDModes.RTD_OFF:
+        rtd_state = self.__is_rtd_on()
+        if rtd_state == RTDModes.RTD_OFF:
             return
 
-        rtd_properties = RTDModes.RTD1_ON.value.keys() + RTDModes.RTD2_ON.value.keys()
+        # rtd_properties RTDModes.RTD1_ON or RTDModes.RTD2_ON
+        rtd_properties = rtd_state.value.keys()
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
