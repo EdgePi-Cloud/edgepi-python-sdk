@@ -118,7 +118,8 @@ class ADCState:
 
     def __get_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
-        Read the current state of configurable ADC properties
+        Read the current state of configurable ADC properties. Read both ADC1 and ADC2 configuration
+        to verify which one is attached to the RTD
 
         Args:
             `adc_property` (ADCProperties): ADC property whose state is to be read
@@ -132,19 +133,30 @@ class ADCState:
         return {
             "adc_1_analog_in": self.adc_1.mux_p.code,
             "adc_1_mux_n": self.adc_1.mux_n.code,
+            "adc_2_analog_in": self.adc_2.mux_p.code,
+            "adc_2_mux_n": self.adc_2.mux_n.code,
             "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
             "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX).code,
             "idac_1_mag": self.__get_state(ADCProperties.IDAC1_MAG).code,
             "idac_2_mag": self.__get_state(ADCProperties.IDAC2_MAG).code,
             "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS).code,
             "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
+            "adc2_ref_inp": self.__get_state(ADCProperties.ADC2_REFMUX).code,
         }
 
     def __get_rtd_state(self) -> bool:
         """
         Get on/off RTD state.
         """
-        return self.__get_current_rtd_state() == RTDModes.RTD_ON.value
+        rtd_state = self.__get_current_rtd_state()
+
+        if rtd_state["adc2_ref_inp"] != ADC2REFMUX.INTERNAL_2P5:
+            return RTDModes.RTD2_ON.value
+
+        if rtd_state["pos_ref_inp"] != REFMUX.POS_REF_INT_2P5:
+            return RTDModes.RTD1_ON.value
+
+        return RTDModes.RTD_OFF.value
 
 
 class ADCStateMissingMap(Exception):

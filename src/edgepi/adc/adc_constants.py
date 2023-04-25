@@ -360,6 +360,15 @@ class RTDModes(Enum):
         "idac_2_mag": IDACMAG.IDAC2_OFF,
         "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
+    RTD_OFF = {
+        "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
+        "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
+        "idac_1_mag": IDACMAG.IDAC1_OFF,
+        "idac_2_mag": IDACMAG.IDAC2_OFF,
+        "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
+        "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
+        "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
+    }
 
 
 class AllowedChannels(Enum):
