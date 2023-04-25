@@ -208,8 +208,10 @@ class EdgePiDAC(spi):
         """
         if enable:
             return int(code/CalibConst.DAC_GAIN_FACTOR.value)
-        if code<CalibConst.RANGE.value/2:
-            return code*CalibConst.DAC_GAIN_FACTOR.value
+
+        code = code*CalibConst.DAC_GAIN_FACTOR.value
+        if code > CalibConst.RANGE.value:
+            raise ValueError(f"Code Value: {code} is out of range")
 
         return code
 
