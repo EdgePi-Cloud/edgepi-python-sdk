@@ -638,7 +638,6 @@ def test_set_adc_reference(reference_config, pin_name, adc):
                                                       mock.call(pin_name[1])])
 
 
-# TODO:FIX THIS, __is_rtd_on mock should be fixed, RTD state check has been changed
 @pytest.mark.parametrize(
     "updates, rtd_on, err",
     [
