@@ -524,9 +524,8 @@ class EdgePiADC(SPI):
 
         return calibs
 
-    def __continuous_time_delay(self, adc_num: ADCNum):
+    def __continuous_time_delay(self, adc_num: ADCNum, state: ADCState):
         """Compute and enforce continuous conversion time delay"""
-        state = self.get_state()
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         data_rate = (
             state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
@@ -535,9 +534,8 @@ class EdgePiADC(SPI):
 
         time.sleep(delay / 1000)
 
-    def __check_adc_1_conv_mode(self):
+    def __check_adc_1_conv_mode(self, state: ADCState):
         # assert adc is in continuous mode
-        state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
             raise ContinuousModeError(
                 "ADC1 must be in CONTINUOUS conversion mode in order to call this method."
@@ -555,10 +553,11 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from the indicated ADC
         """
+        state = self.get_state()
         if adc_num == ADCNum.ADC_1:
-            self.__check_adc_1_conv_mode()
+            self.__check_adc_1_conv_mode(state)
 
-        self.__continuous_time_delay(adc_num)
+        self.__continuous_time_delay(adc_num, state)
 
         status_code, voltage_code, _ = self.__voltage_read(adc_num)
 
@@ -581,11 +580,13 @@ class EdgePiADC(SPI):
         Returns:
             `float`: RTD measured temperature (°C)
         """
-        self.__check_adc_1_conv_mode()
+        state = self.get_state()
+        adc_num = ADCNum.ADC_1 if state.rtd_on == RTDModes.RTD1_ON else ADCNum.ADC_2
+        if adc_num == ADCNum.ADC_1:
+            self.__check_adc_1_conv_mode(state)
+        self.__continuous_time_delay(adc_num, state)
 
-        self.__continuous_time_delay(ADCNum.ADC_1)
-
-        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+        _, voltage_code, _ = self.__voltage_read(adc_num)
 
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
@@ -595,9 +596,8 @@ class EdgePiADC(SPI):
             self.rtd_sensor_resistance_variation
         )
 
-    def __enforce_pulse_mode(self):
+    def __enforce_pulse_mode(self, state: ADCState):
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
-        state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.PULSE:
             self.__config(conversion_mode=ConvMode.PULSE)
 
@@ -611,7 +611,8 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from ADC1
         """
-        self.__enforce_pulse_mode()
+        state = self.get_state()
+        self.__enforce_pulse_mode(state)
 
         # send command to trigger conversion
         self.start_conversions(ADCNum.ADC_1)
@@ -639,13 +640,15 @@ class EdgePiADC(SPI):
         Returns:
             `float`: RTD measured temperature (°C)
         """
-        self.__enforce_pulse_mode()
+        state = self.get_state()
+        self.__enforce_pulse_mode(state)
 
+        adc_num = ADCNum.ADC_1 if state.rtd_on == RTDModes.RTD1_ON else ADCNum.ADC_2
         # send command to trigger conversion
-        self.start_conversions(ADCNum.ADC_1)
+        self.start_conversions(adc_num)
 
         # send command to read conversion data.
-        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+        _, voltage_code, _ = self.__voltage_read(adc_num)
 
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
