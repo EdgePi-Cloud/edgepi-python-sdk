@@ -245,13 +245,13 @@ def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     assert result[0] == dac_mock_periph.write_voltage(analog_out, voltage)
 
-@pytest.mark.parametrize("toggle_gain, code, result, error",
+@pytest.mark.parametrize("set_gain, code, result, error",
                     [(True, 2000, 1000, does_not_raise()),
                     (True, CalibConst.RANGE.value-1, 32767, does_not_raise()),
                     (False, CalibConst.RANGE.value-1, 0, pytest.raises(ValueError)),
                     (False,CalibConst.RANGE.value/2-1,CalibConst.RANGE.value-2,does_not_raise()),
                     ])
-def test__compute_code_val(mocker, toggle_gain, code, result, error):
+def test__compute_code_val(mocker, set_gain, code, result, error):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
@@ -262,10 +262,10 @@ def test__compute_code_val(mocker, toggle_gain, code, result, error):
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
     with error:
-        assert dac._EdgePiDAC__compute_code_val(toggle_gain, code) == result
+        assert dac._EdgePiDAC__compute_code_val(set_gain, code) == result
 
 
-@pytest.mark.parametrize("toggle_gain, result, mock_vals, error,",
+@pytest.mark.parametrize("set_gain, result, mock_vals, error,",
                         [(True, [500]*8, [[1000,0,0]]*8, does_not_raise()),
                         (True, [500]*8, [[1001,0,0]]*8, does_not_raise()),
                         (False, [2000]*8, [[1000,0,0]]*8, does_not_raise()),
@@ -280,7 +280,7 @@ def test__compute_code_val(mocker, toggle_gain, code, result, error):
                         (False, [40000]*8,[[40000,0,0]]*8,pytest.raises(ValueError)),
                         (False, [40000]*8,[[50000,0,0]]*8,pytest.raises(ValueError)),
                         ])
-def test__get_ch_codes(mocker, toggle_gain, result, mock_vals, error):
+def test__get_ch_codes(mocker, set_gain, result, mock_vals, error):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
@@ -293,10 +293,10 @@ def test__get_ch_codes(mocker, toggle_gain, result, mock_vals, error):
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
     with error:
-        assert result == dac._EdgePiDAC__get_ch_codes(toggle_gain)
+        assert result == dac._EdgePiDAC__get_ch_codes(set_gain)
 
-@pytest.mark.parametrize("toggle_gain, result,",[(True, len(CH)), (False, len(CH))])
-def test__auto_code_handler(mocker, toggle_gain, result):
+@pytest.mark.parametrize("set_gain, result,",[(True, len(CH)), (False, len(CH))])
+def test__auto_code_handler(mocker, set_gain, result):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
@@ -310,15 +310,15 @@ def test__auto_code_handler(mocker, toggle_gain, result):
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
-    dac._EdgePiDAC__auto_code_handler(toggle_gain)
+    dac._EdgePiDAC__auto_code_handler(set_gain)
     assert transfer_mock.call_count == result
     # pylint: disable=expression-not-assigned
-    set_dac_gain.assert_called_once_with("DAC_GAIN") if toggle_gain \
+    set_dac_gain.assert_called_once_with("DAC_GAIN") if set_gain \
         else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
-@pytest.mark.parametrize("toggle_gain, auto_code_change, mocker_values, result",
+@pytest.mark.parametrize("set_gain, auto_code_change, mocker_values, result",
                         [
-                        # case 1. current state is the same as toggle gain
+                        # case 1. current state is the same as set gain
                          (True, "Don't care", [True, "Don't care"], True),
                          (False, "Don't care", [False, "Don't care"], False),
                         # case 2. auto_code_change enabled
@@ -328,7 +328,7 @@ def test__auto_code_handler(mocker, toggle_gain, result):
                          (True, False, [False, True], True),
                          (False, False, [True, False], False),
                          ])
-def test_toggle_dac_gain(mocker, toggle_gain, auto_code_change, mocker_values, result):
+def test_set_gain_gain(mocker, set_gain, auto_code_change, mocker_values, result):
     mocker.patch("edgepi.peripherals.spi.SPI")
     mocker.patch("edgepi.peripherals.i2c.I2C")
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
@@ -344,11 +344,11 @@ def test_toggle_dac_gain(mocker, toggle_gain, auto_code_change, mocker_values, r
     set_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_expander_pin")
     clear_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     # pylint: disable=expression-not-assigned
-    assert dac.toggle_dac_gain(toggle_gain,auto_code_change) == result
-    if auto_code_change and toggle_gain != mocker_values[0]:
+    assert dac.set_dac_gain(set_gain,auto_code_change) == result
+    if auto_code_change and set_gain != mocker_values[0]:
         auto_code_handler.assert_called_once()
-    if not auto_code_change and toggle_gain != mocker_values[0]:
-        set_dac_gain.assert_called_once_with("DAC_GAIN") if toggle_gain \
+    if not auto_code_change and set_gain != mocker_values[0]:
+        set_dac_gain.assert_called_once_with("DAC_GAIN") if set_gain \
             else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",

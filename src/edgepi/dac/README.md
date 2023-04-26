@@ -32,11 +32,11 @@ This section introduces DAC functionality available to users, and provides a gui
 1. setting output voltage range
 
 ```python
-    def toggle_dac_gain(self, toggle_gain: bool = None, auto_code_change: bool = False):
+    def set_dac_gain(self, set_gain: bool, auto_code_change: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
-            toggle_gain (bool): enable boolean to set or clear the gpio pin
+            set_gain (bool): enable boolean to set or clear the gpio pin
             auto_code_change (bool): flag to re-write code value of each channel to keep the same
                                     output voltage
         Return:

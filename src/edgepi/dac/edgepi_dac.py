@@ -195,18 +195,18 @@ class EdgePiDAC(spi):
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
 
-    def __compute_code_val(self, toggle_gain: bool = None, code: int = None):
+    def __compute_code_val(self, set_gain: bool, code: int = None):
         """
         Modify code value depending on the enable flag
         Args:
-            toggle_gain(bool): False: multiply the current code value by 2 if current code value is
+            set_gain(bool): False: multiply the current code value by 2 if current code value is
                                less than the half of maixmum code value.
                                True: divide the current code value by 2
             code (int): intial code value
         Return:
             code (int): modified code value
         """
-        if toggle_gain:
+        if set_gain:
             return int(code/CalibConst.DAC_GAIN_FACTOR.value)
 
         code = code*CalibConst.DAC_GAIN_FACTOR.value
@@ -215,11 +215,11 @@ class EdgePiDAC(spi):
 
         return code
 
-    def __get_ch_codes(self, toggle_gain: bool = None):
+    def __get_ch_codes(self, set_gain: bool):
         """
         Read and modify channel code value
         Args:
-            toggle_gain (bool): False: multiply the current code value by 2
+            set_gain (bool): False: multiply the current code value by 2
                           True: divide the current code value by 2
         Return:
             code_vals (list): list of code values from ch1-ch8
@@ -227,22 +227,26 @@ class EdgePiDAC(spi):
         code_vals = []
         for ch in DACChannel:
             code, _, _ = self.get_state(ch, True, False, False)
-            code_vals.append(self.__compute_code_val(toggle_gain, code))
+            code_vals.append(self.__compute_code_val(set_gain, code))
         return code_vals
 
-    def __auto_code_handler(self, toggle_gain: bool = None):
+    def __auto_code_handler(self, set_gain: bool):
         """
         Compute and change code values of each channel when toggling DAC gain
         Args:
-            toggle_gain (bool): enable boolean to set or clear the gpio pin
+            set_gain (bool): enable boolean to set or clear the gpio pin
         Return:
             N/A
         """
-        codes = self.__get_ch_codes(toggle_gain)
+        codes = self.__get_ch_codes(set_gain)
         self.log.debug(f'Code: {codes}')
 
+        # When the DAC_GAIN is enabled/disabled, the output voltage is doubled/halved instantly.
+        # This may damage the circuit that the output is connected to. Therefore, enabling/disabling
+        # gain have different steps of sending code value and toggling the GPIO pin.
+
         # gain being enabled, change code first than enable gain
-        if toggle_gain:
+        if set_gain:
             for ch, code in enumerate(codes):
                 # update DAC register
                 self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
@@ -255,11 +259,11 @@ class EdgePiDAC(spi):
                 # update DAC register
                 self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
 
-    def toggle_dac_gain(self, toggle_gain: bool = None, auto_code_change: bool = False):
+    def set_dac_gain(self, set_gain: bool, auto_code_change: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
-            toggle_gain (bool): enable boolean to set or clear the gpio pin
+            set_gain (bool): enable boolean to set or clear the gpio pin
             auto_code_change (bool): flag to re-write code value of each channel to keep the same
                                     output voltage
         Return:
@@ -267,13 +271,13 @@ class EdgePiDAC(spi):
         """
         # pylint: disable=expression-not-assigned
         # if current gain state is the same as toggle_gain flag, do nothing
-        if self.__get_gain_state() == toggle_gain:
-            return toggle_gain
+        if self.__get_gain_state() == set_gain:
+            return set_gain
 
         if auto_code_change:
-            self.__auto_code_handler(toggle_gain)
+            self.__auto_code_handler(set_gain)
         else:
-            self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if toggle_gain else \
+            self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if set_gain else \
             self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
         return self.__get_gain_state()
 
