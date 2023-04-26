@@ -261,9 +261,9 @@ class EdgePiDAC(spi):
 
     def set_dac_gain(self, set_gain: bool, auto_code_change: bool = False):
         """
-        Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
+        Enable/Disable internal DAC gain.
         Args:
-            set_gain (bool): enable boolean to set or clear the gpio pin
+            set_gain (bool): True enable DAC gain, False disable DAC gain
             auto_code_change (bool): flag to re-write code value of each channel to keep the same
                                     output voltage
         Return:
