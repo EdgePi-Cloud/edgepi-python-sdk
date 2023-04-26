@@ -194,7 +194,7 @@ class EdgePiDAC(spi):
         code = self.channel_readback(analog_out)
         dac_gain = CalibConst.DAC_GAIN_FACTOR.value if self.__get_gain_state() else 1
         return self.dac_ops.code_to_voltage(analog_out.value, code, dac_gain)
-
+# TODO: change name of the function -> not modifying the code just computing the code value
     def __modify_code_val(self, enable: bool = None, code: int = None):
         """
         Modify code value depending on the enable flag
@@ -230,25 +230,28 @@ class EdgePiDAC(spi):
             code_vals.append(self.__modify_code_val(enable, code))
         return code_vals
 
-    def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
+    def enable_dac_gain(self, is_enabled: bool = None, ch_code_handler: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
-            enable (bool): enable boolean to set or clear the gpio pin
+            is_enabled(bool): enable boolean to set or clear the gpio pin
             ch_code_handler (bool): flag to re-write code value of each channel to keep the same
                                     output voltage
         Return:
             gain_state (bool): state of the gain pin
         """
-        if ch_code_handler and self.__get_gain_state() != enable:
-            codes = self.__get_ch_codes(enable)
+        # TODO: ch_code_handler better naming
+        if ch_code_handler and self.__get_gain_state() != is_enabled:
+            codes = self.__get_ch_codes(is_enabled)
             self.log.debug(f'Code: {codes}')
             for ch, code in enumerate(codes):
                 # update DAC register
                 self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
 
+
+        # TODO: Break the step into two separate branch, another edge case where the voltage cahnges split second before the gain pin is toggled
         # pylint: disable=expression-not-assigned
-        self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if enable else \
+        self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if is_enabled else \
         self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
         return self.__get_gain_state()
 
