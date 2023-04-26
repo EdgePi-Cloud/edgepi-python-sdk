@@ -199,7 +199,7 @@ class EdgePiDAC(spi):
         """
         Modify code value depending on the enable flag
         Args:
-            toggle_gain(bool): False: multiply the current code value by 2 if current code value is 
+            toggle_gain(bool): False: multiply the current code value by 2 if current code value is
                                less than the half of maixmum code value.
                                True: divide the current code value by 2
             code (int): intial code value
@@ -240,7 +240,7 @@ class EdgePiDAC(spi):
         """
         codes = self.__get_ch_codes(toggle_gain)
         self.log.debug(f'Code: {codes}')
-            
+
         # gain being enabled, change code first than enable gain
         if toggle_gain:
             for ch, code in enumerate(codes):
@@ -265,6 +265,7 @@ class EdgePiDAC(spi):
         Return:
             gain_state (bool): state of the gain pin
         """
+        # pylint: disable=expression-not-assigned
         # if current gain state is the same as toggle_gain flag, do nothing
         if self.__get_gain_state() == toggle_gain:
             return toggle_gain
@@ -272,7 +273,6 @@ class EdgePiDAC(spi):
         if auto_code_change:
             self.__auto_code_handler(toggle_gain)
         else:
-            # pylint: disable=expression-not-assigned
             self.gpio.set_pin_state(GainPin.DAC_GAIN.value) if toggle_gain else \
             self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
         return self.__get_gain_state()

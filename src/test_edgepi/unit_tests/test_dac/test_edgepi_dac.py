@@ -312,6 +312,7 @@ def test__auto_code_handler(mocker, toggle_gain, result):
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
     dac._EdgePiDAC__auto_code_handler(toggle_gain)
     assert transfer_mock.call_count == result
+    # pylint: disable=expression-not-assigned
     set_dac_gain.assert_called_once_with("DAC_GAIN") if toggle_gain \
         else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
