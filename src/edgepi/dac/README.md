@@ -14,7 +14,7 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 edgepi_dac = EdgePiDAC()
 
 # setting DAC range 0-5V
-edgepi_dac.enable_dac_gain(False)
+edgepi_dac.toggle_dac_gain(False)
 
 # write voltage value of 3.3 V to analog out pin number 1
 edgepi_dac.write_voltage(Ch.AOUT1, 3.3)
@@ -32,12 +32,12 @@ This section introduces DAC functionality available to users, and provides a gui
 1. setting output voltage range
 
 ```python
-    def enable_dac_gain(self, enable: bool = None, ch_code_handler: bool = False):
+    def toggle_dac_gain(self, toggle_gain: bool = None, auto_code_change: bool = False):
         """
         Enable/Disable internal DAC gain by toggling the DAC_GAIN pin
         Args:
-            enable (bool): enable boolean to set or clear the gpio pin
-            ch_code_handler (bool): flag to re-write code value of each channel to keep the same
+            toggle_gain (bool): enable boolean to set or clear the gpio pin
+            auto_code_change (bool): flag to re-write code value of each channel to keep the same
                                     output voltage
         Return:
             gain_state (bool): state of the gain pin
