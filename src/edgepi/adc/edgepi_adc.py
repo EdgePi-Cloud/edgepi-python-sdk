@@ -144,7 +144,8 @@ class ADCState:
             "adc2_ref_inp": self.__get_state(ADCProperties.ADC2_REFMUX).code,
         }
 
-    def __get_rtd_state(self) -> bool:
+# TODO Revert back to pass boolean, have another state 
+    def __get_rtd_state(self):
         """
         Get on/off RTD state.
         """
@@ -821,6 +822,7 @@ class EdgePiADC(SPI):
         Args:
             `enable` (bool): True to enable RTD, False to disable
         """
+        # TODO: separate into two function which handles the update parameter according to ADCNums
         if enable and adc_num == ADCNum.ADC_1:
             # check if adc_2 is reading RTD pins, remap channels if needed
             mux_reg = self.__get_register_map()

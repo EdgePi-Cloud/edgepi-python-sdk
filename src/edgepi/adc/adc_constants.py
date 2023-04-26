@@ -323,6 +323,7 @@ class ADC2REFMUX(Enum):
 
 class RTDModes(Enum):
     "ADC.__config args for for turning RTD mode on/off"
+    # TODO: looks like it has 5 modes, instead handle the differences in two separate function and reduce the list to 2 enums
     RTD1_ON = {
         "adc_1_analog_in": ADCChannel.AIN7,
         "adc_1_mux_n": ADCChannel.AIN6,
