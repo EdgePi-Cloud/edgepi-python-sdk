@@ -841,12 +841,13 @@ class EdgePiADC(SPI):
 
     def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum):
         """
-        generate update config dictionary to send to the config method
+        generate a dictionary of config parameters to enable RTD using specified ADC
         Args:
-            muxs (list): list of input multiplexer value [negative input, positive input]
-            adc_num (ADCNum): ADC number
+            muxs (list): list of input multiplexer of other ADC [negative input, positive input]
+            adc_num (ADCNum): ADC to read RTD
         Return:
             updates (dictionary): configuration dictionary for enabling RTD
+                                    {name_of_config : op_codes}
         """
         if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
             updates = RTDModes.RTD_ON.value |\
