@@ -49,6 +49,16 @@ class PwmDevice:
             N/A
         """
         self.pwm.frequency = freq
+    
+    def get_frequency_pwm(self):
+        """
+        get pwm frequency
+        Args:
+            N/A
+        Return:
+            freq (int): frequency to set
+        """
+        return self.pwm.frequency
 
     def set_duty_cycle_pwm(self, duty_cycle: float = None):
         """
@@ -59,6 +69,16 @@ class PwmDevice:
             N/A
         """
         self.pwm.duty_cycle = duty_cycle
+    
+    def get_duty_cycle_pwm(self):
+        """
+        get pwm duty cycle
+        Args:
+            N/A
+        Return:
+            duty_cycle (float): duty cycle value from 0 to 1.0
+        """
+        return self.pwm.duty_cycle
 
     def set_polarity_pwm(self, polarity: str = None):
         """
@@ -69,6 +89,26 @@ class PwmDevice:
             N/A
         """
         self.pwm.polarity = polarity
+    
+    def get_polarity_pwm(self):
+        """
+        get pwm polarity
+        Args:
+            N/A
+        Return:
+            polarity (str): "Normal" or "Inversed"
+        """
+        return self.pwm.polarity
+    
+    def get_enabled_pwm(self):
+        """
+        Get pwm output state
+        Args:
+            N/A
+        Return:
+            enabled (bool): True enabled, False, disabled
+        """
+        return self.pwm.enabled
 
     def close_pwm(self):
         """Close pwm connection"""
