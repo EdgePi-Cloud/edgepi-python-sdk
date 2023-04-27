@@ -144,29 +144,30 @@ class ADCState:
             "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
             "adc2_ref_inp": self.__get_state(ADCProperties.ADC2_REFMUX).code,
         }
-
+# TODO: rather than passing boolean, return the mode enum, the state of RTD mode config
     def __get_rtd_state(self):
         """
         Get on/off RTD state.
         """
+        # TODO: addd explanation for NONE return type
         # This is assuming, idac_1_mux - adc2_ref_inp are modified only when RTD is enabled.
         # compare the current rtd_state to RTDMode.RTD_OFF.value dictionary. If it doesn't match,
         # it means RTD is enabled
         rtd_state = self.__get_current_rtd_state()
         is_rtd_off = all(rtd_state.get(key) == value for key, value in RTDModes.RTD_OFF.value.items())
         if is_rtd_off:
-            self.adcnum_rtd = None
+            # self.adcnum_rtd = None
             return not is_rtd_off
         
         if all(rtd_state.get(key) == value for key, value in (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value).items()):
-            self.adcnum_rtd = ADCNum.ADC_1
+            # self.adcnum_rtd = ADCNum.ADC_1
             return True
 
         if all(rtd_state.get(key) == value for key, value in (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value).items()):
-            self.adcnum_rtd = ADCNum.ADC_2
+            # self.adcnum_rtd = ADCNum.ADC_2
             return True
 
-        self.adcnum_rtd = None
+        # self.adcnum_rtd = None
         return False
 
 
@@ -850,6 +851,7 @@ class EdgePiADC(SPI):
                                     {name_of_config : op_codes}
         """
         if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
+            # TODO:compare to enum instead of actual number
             updates = RTDModes.RTD_ON.value |\
             (ADC2RtdConfig.OFF.value if adc_num.value.id_num ==1 else ADC1RtdConfig.OFF.value) |\
             (ADC1RtdConfig.ON.value if adc_num.value.id_num ==1 else ADC2RtdConfig.ON.value)
