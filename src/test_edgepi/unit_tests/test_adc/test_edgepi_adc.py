@@ -78,7 +78,7 @@ def fixture_adc(mocker):
     )
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on",
-                 return_value=RTDModes.RTD_OFF)
+                 return_value=[False, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
@@ -609,7 +609,7 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on",
-                 return_value=RTDModes.RTD_OFF)
+                 return_value=[False, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
     adc = EdgePiADC()
     mocker.patch(
@@ -643,58 +643,58 @@ def test_set_adc_reference(reference_config, pin_name, adc):
 
 
 @pytest.mark.parametrize(
-    "updates, rtd_on, err",
+    "updates, rtd_state, err",
     [
         # RTD related setting: RTD1 ON (note: values are irrelevant, only key matters)
-        ({"adc_1_analog_in": CH.AIN0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"adc_1_mux_n": CH.AIN0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_1_mux": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_2_mux": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_1_mag": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_2_mag": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"pos_ref_inp": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"neg_ref_inp": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
+        ({"adc_1_analog_in": CH.AIN0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"adc_1_mux_n": CH.AIN0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"idac_1_mux": 0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"idac_2_mux": 0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"idac_1_mag": 0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"idac_2_mag": 0}, [True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"pos_ref_inp": 0},[True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
+        ({"neg_ref_inp": 0},[True, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         # RTD related setting: RTD2 ON (note: values are irrelevant, only key matters)
-        ({"adc_2_analog_in": CH.AIN0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"adc_2_mux_n": CH.AIN0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_1_mux": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_2_mux": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_1_mag": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"idac_2_mag": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
-        ({"adc2_ref_inp": 0}, RTDModes.RTD_ON, pytest.raises(RTDEnabledError)),
+        ({"adc_2_analog_in": CH.AIN0},[True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"adc_2_mux_n": CH.AIN0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"idac_1_mux": 0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"idac_2_mux": 0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"idac_1_mag": 0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"idac_2_mag": 0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
+        ({"adc2_ref_inp": 0}, [True, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         # ADC2 related setting: RTD1 ON (note: values are irrelevant, only key matters)
-        ({"adc_2_analog_in": CH.AIN0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc_2_mux_n": CH.AIN0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc2_ref_inp": 0}, RTDModes.RTD_ON, does_not_raise()),
+        ({"adc_2_analog_in": CH.AIN0}, [True, ADCNum.ADC_1], does_not_raise()),
+        ({"adc_2_mux_n": CH.AIN0}, [True, ADCNum.ADC_1], does_not_raise()),
+        ({"adc2_ref_inp": 0}, [True, ADCNum.ADC_1], does_not_raise()),
         # ADC1 related setting: RTD2 ON (note: values are irrelevant, only key matters)
-        ({"adc_1_analog_in": CH.AIN0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc_1_mux_n": CH.AIN0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"pos_ref_inp": 0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"neg_ref_inp": 0}, RTDModes.RTD_ON, does_not_raise()),
+        ({"adc_1_analog_in": CH.AIN0}, [True, ADCNum.ADC_2], does_not_raise()),
+        ({"adc_1_mux_n": CH.AIN0}, [True, ADCNum.ADC_2], does_not_raise()),
+        ({"pos_ref_inp": 0}, [True, ADCNum.ADC_2], does_not_raise()),
+        ({"neg_ref_inp": 0}, [True, ADCNum.ADC_2], does_not_raise()),
         # RTD related setting: RTD OFF
-        ({"adc_1_analog_in": CH.AIN0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"adc_1_mux_n": CH.AIN0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"idac_1_mux": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"idac_2_mux": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"idac_1_mag": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"idac_2_mag": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"pos_ref_inp": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"neg_ref_inp": 0}, RTDModes.RTD_OFF, does_not_raise()),
+        ({"adc_1_analog_in": CH.AIN0}, [False, None], does_not_raise()),
+        ({"adc_1_mux_n": CH.AIN0}, [False, None], does_not_raise()),
+        ({"idac_1_mux": 0}, [False, None], does_not_raise()),
+        ({"idac_2_mux": 0}, [False, None], does_not_raise()),
+        ({"idac_1_mag": 0}, [False, None], does_not_raise()),
+        ({"idac_2_mag": 0}, [False, None], does_not_raise()),
+        ({"pos_ref_inp": 0}, [False, None], does_not_raise()),
+        ({"neg_ref_inp": 0}, [False, None], does_not_raise()),
         # non-RTD related setting: RTD ON
-        ({"adc_1_data_rate": ConvMode.PULSE}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc_2_data_rate": 0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"conversion_mode": 0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc_1_data_rate": ConvMode.PULSE}, RTDModes.RTD_ON, does_not_raise()),
-        ({"adc_2_data_rate": 0}, RTDModes.RTD_ON, does_not_raise()),
-        ({"conversion_mode": 0}, RTDModes.RTD_ON, does_not_raise()),
+        ({"adc_1_data_rate": ConvMode.PULSE}, [True, ADCNum.ADC_1], does_not_raise()),
+        ({"adc_2_data_rate": 0}, [True, ADCNum.ADC_1], does_not_raise()),
+        ({"conversion_mode": 0}, [True, ADCNum.ADC_1], does_not_raise()),
+        ({"adc_1_data_rate": ConvMode.PULSE}, [True, ADCNum.ADC_2], does_not_raise()),
+        ({"adc_2_data_rate": 0}, [True, ADCNum.ADC_2], does_not_raise()),
+        ({"conversion_mode": 0}, [True, ADCNum.ADC_2], does_not_raise()),
         # non-RTD related setting: RTD OFF
-        ({"adc_1_data_rate": ConvMode.PULSE}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"adc_2_data_rate": 0}, RTDModes.RTD_OFF, does_not_raise()),
-        ({"conversion_mode": 0}, RTDModes.RTD_OFF, does_not_raise()),
+        ({"adc_1_data_rate": ConvMode.PULSE}, [False, None], does_not_raise()),
+        ({"adc_2_data_rate": 0}, [False, None], does_not_raise()),
+        ({"conversion_mode": 0}, [False, None], does_not_raise()),
     ],
 )
-def test_validate_no_rtd_conflict(mocker, updates, rtd_on, err, adc):
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=rtd_on)
+def test_validate_no_rtd_conflict(mocker, updates, rtd_state, err, adc):
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=rtd_state)
     with err:
         adc._EdgePiADC__validate_no_rtd_conflict(updates)
 

@@ -145,20 +145,29 @@ class ADCState:
             "adc2_ref_inp": self.__get_state(ADCProperties.ADC2_REFMUX).code,
         }
 
-# TODO Revert back to pass boolean, have another state 
     def __get_rtd_state(self):
         """
         Get on/off RTD state.
         """
+        # This is assuming, idac_1_mux - adc2_ref_inp are modified only when RTD is enabled.
+        # compare the current rtd_state to RTDMode.RTD_OFF.value dictionary. If it doesn't match,
+        # it means RTD is enabled
         rtd_state = self.__get_current_rtd_state()
+        is_rtd_off = all(rtd_state.get(key) == value for key, value in RTDModes.RTD_OFF.value.items())
+        if is_rtd_off:
+            self.adcnum_rtd = None
+            return not is_rtd_off
+        
+        if all(rtd_state.get(key) == value for key, value in (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value).items()):
+            self.adcnum_rtd = ADCNum.ADC_1
+            return True
 
-        if ADC2REFMUX.AIN4_AIN5.value == rtd_state["adc2_ref_inp"].value:
-            return RTDModes.RTD2_ON
+        if all(rtd_state.get(key) == value for key, value in (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value).items()):
+            self.adcnum_rtd = ADCNum.ADC_2
+            return True
 
-        if REFMUX.POS_REF_EXT_AIN4.value == rtd_state["pos_ref_inp"].value:
-            return RTDModes.RTD1_ON
-
-        return RTDModes.RTD_OFF
+        self.adcnum_rtd = None
+        return False
 
 
 class ADCStateMissingMap(Exception):
@@ -583,7 +592,7 @@ class EdgePiADC(SPI):
             `float`: RTD measured temperature (°C)
         """
         state = self.get_state()
-        adc_num = ADCNum.ADC_1 if state.rtd_on == RTDModes.RTD1_ON else ADCNum.ADC_2
+        adc_num = ADCNum.ADC_1 if state.adcnum_rtd else ADCNum.ADC_2
         if adc_num == ADCNum.ADC_1:
             self.__check_adc_1_conv_mode(state)
         self.__continuous_time_delay(adc_num, state)
@@ -645,7 +654,7 @@ class EdgePiADC(SPI):
         state = self.get_state()
         self.__enforce_pulse_mode(state)
 
-        adc_num = ADCNum.ADC_1 if state.rtd_on == RTDModes.RTD1_ON else ADCNum.ADC_2
+        adc_num = ADCNum.ADC_1 if state.adcnum_rtd else ADCNum.ADC_2
         # send command to trigger conversion
         self.start_conversions(adc_num)
 
@@ -703,9 +712,11 @@ class EdgePiADC(SPI):
         ADC channels are available for reading.
 
         Returns:
-            (RTDMode): RTDMode.RTD1_ON, RTDMode.RTD2_ON or RTDMode.RTD_OFF
+            rtd_on (bool): True, enabled, False, disabled
+            adcnum_rtd (ADCNum): None, no adc attached to RTD, ADCNum.ADC1 or ADCNum.ADC1
         """
-        return self.get_state().rtd_on
+        state = self.get_state()
+        return state.rtd_on, state.adcnum_rtd
 
     # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
     # Case 1: user sets to adc_x read ch_x -> mux_n auto mapped to AINCOM
@@ -752,7 +763,7 @@ class EdgePiADC(SPI):
         # allowed channels depend on RTD_EN status
         if not override_rtd_validation:
             channels = list(args.values())
-            rtd_enabled = not (self.__is_rtd_on() == RTDModes.RTD_OFF)
+            rtd_enabled, _ = self.__is_rtd_on()
             validate_channels_allowed(channels, rtd_enabled)
 
         adc_mux_updates = {
@@ -801,12 +812,14 @@ class EdgePiADC(SPI):
         Raises:
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
-        rtd_state = self.__is_rtd_on()
-        if rtd_state == RTDModes.RTD_OFF:
+        rtd_state, adc_num = self.__is_rtd_on()
+        if not rtd_state:
             return
 
         # rtd_properties RTDModes.RTD1_ON or RTDModes.RTD2_ON
-        rtd_properties = rtd_state.value.keys()
+        rtd_properties = (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value)\
+                         if adc_num == ADCNum.ADC_1 else                 \
+                         (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
@@ -864,8 +877,10 @@ class EdgePiADC(SPI):
         RTD mode here, call either `read_voltage` or `single_sample`, depending on which
         conversion mode ADC1 is currently configured to.
 
+        NOTE: This function enforces only one ADC to be attached to RTD circuit
+
         Args:
-            `enable` (bool): True to enable RTD, False to disable
+            `set_rtd` (bool): True to enable RTD, False to disable
         """
         if set_rtd:
             # check if adc_2 is reading RTD pins, remap channels if needed

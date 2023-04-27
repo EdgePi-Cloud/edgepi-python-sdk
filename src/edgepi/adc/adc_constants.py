@@ -350,6 +350,8 @@ class ADC1RtdConfig(Enum):
     OFF = {
         "adc_1_analog_in": ADCChannel.FLOAT,
         "adc_1_mux_n": ADCChannel.AINCOM,
+        "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
+        "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
     }
 
 class ADC2RtdConfig(Enum):
@@ -362,6 +364,7 @@ class ADC2RtdConfig(Enum):
     OFF = {
         "adc_2_analog_in": ADCChannel.FLOAT,
         "adc_2_mux_n": ADCChannel.AINCOM,
+        "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
 
 class AllowedChannels(Enum):
