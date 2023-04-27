@@ -76,7 +76,7 @@ def test_edgepi_gpio_clear_pin_state(mocker, pin_name, mock_value, error):
 
 @pytest.mark.parametrize("pin_name, mock_value, result, error",
                         [(GpioPins.DIN1.value,[None, None], True, does_not_raise()),
-                         (GpioPins.DOUT1.value,[None, None], False, does_not_raise()),
+                         (GpioPins.DOUT1.value,[None, False], False, does_not_raise()),
                          (GpioPins.AO_EN1.value,[None, False], False, does_not_raise()),
                          (None, [None, None], None, pytest.raises(PinNameNoneError)),
                          ("Does not exits",[None, None], None, pytest.raises(PinNameNotFound))])

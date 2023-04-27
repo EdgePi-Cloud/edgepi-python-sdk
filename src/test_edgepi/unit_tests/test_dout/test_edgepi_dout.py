@@ -10,7 +10,6 @@ if sys.platform != 'linux':
 from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.gpio.gpio_configs import DOUTPins
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, InvalidPinName
 
 @pytest.mark.parametrize("pin_name, state, error",
@@ -34,19 +33,15 @@ from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, Inv
                          (None, False, pytest.raises(InvalidPinName)),
                          (GpioPins.DIN1, False, pytest.raises(InvalidPinName))])
 def test_edgepi_digital_output_state(mocker, pin_name, state, error):
-    gpio_chip=mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.write_gpio_pin_state")
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     dout = EdgePiDigitalOutput()
     with error:
         dout.digital_output_state(pin_name, state)
-        if pin_name.value in [DOUTPins.DOUT1.value,DOUTPins.DOUT2.value]:
-            gpio_chip.assert_called_once_with(pin_name.value, state)
+        if state:
+            expander_set.assert_called_once_with(pin_name.value)
         else:
-            if state:
-                expander_set.assert_called_once_with(pin_name.value)
-            else:
-                expander_clear.assert_called_once_with(pin_name.value)
+            expander_clear.assert_called_once_with(pin_name.value)
 
 @pytest.mark.parametrize("pin_name, direction, error",
                         [(GpioPins.DOUT1, True, does_not_raise()),
@@ -69,16 +64,12 @@ def test_edgepi_digital_output_state(mocker, pin_name, state, error):
                          (None, False, pytest.raises(InvalidPinName)),
                          (GpioPins.DIN1, False, pytest.raises(InvalidPinName))])
 def test_edgepi_digital_output_direction(mocker, pin_name, direction, error):
-    gpio_chip=mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_gpio_pin_dir")
     exp_dir_in = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_in")
     exp_dir_out = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_out")
     dout = EdgePiDigitalOutput()
     with error:
         dout.digital_output_direction(pin_name, direction)
-        if pin_name.value in [DOUTPins.DOUT1.value,DOUTPins.DOUT2.value]:
-            gpio_chip.assert_called_once_with(pin_name.value, direction)
+        if direction:
+            exp_dir_in.assert_called_once_with(pin_name.value)
         else:
-            if direction:
-                exp_dir_in.assert_called_once_with(pin_name.value)
-            else:
-                exp_dir_out.assert_called_once_with(pin_name.value)
+            exp_dir_out.assert_called_once_with(pin_name.value)

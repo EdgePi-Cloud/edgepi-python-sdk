@@ -101,15 +101,18 @@ class GpioConfigs(Enum):
                          device = 'gpiochip0',
                          num_pins = 8,
                          dev_path = "/dev/gpiochip0")
-    DOUT1 = GpioChipConfig(name = 'dout1',
-                          device = 'gpiochip0',
-                          num_pins = 2,
-                          dev_path = "/dev/gpiochip0")
-    DOUT2 = GpioExpanderConfig(name = 'dout2',
+    DOUT = GpioExpanderConfig(name = 'dout',
                                device='i2c',
-                               num_pins=6,
+                               num_pins=8,
                                dir='out',
                                port='A',
+                               address=GpioExpanderAddress.EXP_TWO.value,
+                               dev_path='/dev/i2c-10')
+    PWM = GpioExpanderConfig(name = 'pwm',
+                               device='i2c',
+                               num_pins=2,
+                               dir='out',
+                               port='B',
                                address=GpioExpanderAddress.EXP_TWO.value,
                                dev_path='/dev/i2c-10')
 
@@ -238,17 +241,16 @@ class DOUTPins(Enum):
     DOUT7 = 'DOUT7'
     DOUT8 = 'DOUT8'
 
-
-_list_of_DOUT_cpu_gpios =  [
-    DOUTPins.DOUT1.value, DOUTPins.DOUT2.value
-]
-
 _list_of_DOUT_expander_gpios =[
     None, None,
     DOUTPins.DOUT8.value, DOUTPins.DOUT7.value,
     DOUTPins.DOUT6.value, DOUTPins.DOUT5.value,
     DOUTPins.DOUT4.value, DOUTPins.DOUT3.value]
 
+class PWMPins(Enum):
+    "PWM Enable Pin Names"
+    PWM1 = "PWM1"
+    PWM2 = "PWM2"
 
 def _generate_DAC_pins(): #pylint: disable=C0103
     ''' Generates a list I2cPinInfo dataclasses for DAC pins
@@ -355,18 +357,6 @@ def _generate_DIN_pins(): #pylint: disable=C0103
         pin_dict[pin] = GpioChipPinInfo(dir = "in", bias = "pull_down")
     return pin_dict
 
-def _generate_DOUT_cpu_pins(): #pylint: disable=C0103
-    """
-        Args:
-            N/A
-        Returns:
-        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
-    """
-    pin_dict = {}
-    for pin in _list_of_DOUT_cpu_gpios:
-        pin_dict[pin] = GpioChipPinInfo(dir = "out", bias = "pull_down")
-    return pin_dict
-
 def _generate_DOUT_expander_pins(): #pylint: disable=C0103
     """
         Args:
@@ -384,8 +374,39 @@ def _generate_DOUT_expander_pins(): #pylint: disable=C0103
                                           dir_out_code.value,
                                           dir_in_code.value,
                                           GpioExpanderAddress.EXP_TWO.value)})
+    pin_dict.update({DOUTPins.DOUT1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_4.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_4.value,
+                                                      GpioBPinDirOut.PIN4_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN4_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
+
+    pin_dict.update({DOUTPins.DOUT2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_5.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_5.value,
+                                                      GpioBPinDirOut.PIN5_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN5_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
     return pin_dict
 
+def _generate_PWM_expander_pins(): #pylint: disable=C0103
+    """
+        Args:
+            N/A
+        Returns:
+        a dictionary of dataclass with gpio information, {'pin_name' : pin_info_dataclass}
+    """
+    pin_dict = {}
+    pin_dict.update({PWMPins.PWM1.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_6.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_6.value,
+                                                      GpioBPinDirOut.PIN6_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN6_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
+
+    pin_dict.update({PWMPins.PWM2.value : I2cPinInfo(GpioBOutputSet.SET_OUTPUT_7.value,
+                                                      GpioBOutputClear.CLEAR_OUTPUT_7.value,
+                                                      GpioBPinDirOut.PIN7_DIR_OUT.value,
+                                                      GpioBPinDirIn.PIN7_DIR_IN.value,
+                                                      GpioExpanderAddress.EXP_TWO.value)})
+    return pin_dict
 
 # This function is used inside unit testing
 def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
@@ -408,10 +429,10 @@ def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
         pin_dict = _generate_RELAY_pins()
     elif config.name == GpioConfigs.DIN.value.name:
         pin_dict = _generate_DIN_pins()
-    elif config.name == GpioConfigs.DOUT1.value.name:
-        pin_dict = _generate_DOUT_cpu_pins()
-    elif config.name == GpioConfigs.DOUT2.value.name:
+    elif config.name == GpioConfigs.DOUT.value.name:
         pin_dict = _generate_DOUT_expander_pins()
+    elif config.name == GpioConfigs.PWM.value.name:
+        pin_dict = _generate_PWM_expander_pins()
     return pin_dict
 
 def generate_expander_pin_info():
@@ -428,6 +449,7 @@ def generate_expander_pin_info():
     pin_dict.update(_generate_RELAY_pins())
     pin_dict.update(_generate_LED_pins())
     pin_dict.update(_generate_DOUT_expander_pins())
+    pin_dict.update(_generate_PWM_expander_pins())
     return pin_dict
 
 def generate_gpiochip_pin_info():
@@ -439,5 +461,4 @@ def generate_gpiochip_pin_info():
     '''
     pin_dict = {}
     pin_dict.update(_generate_DIN_pins())
-    pin_dict.update(_generate_DOUT_cpu_pins())
     return pin_dict
