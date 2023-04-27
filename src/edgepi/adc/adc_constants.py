@@ -323,44 +323,11 @@ class ADC2REFMUX(Enum):
 
 class RTDModes(Enum):
     "ADC.__config args for for turning RTD mode on/off"
-    # TODO: looks like it has 5 modes, instead handle the differences in two separate function and reduce the list to 2 enums
-    RTD1_ON = {
-        "adc_1_analog_in": ADCChannel.AIN7,
-        "adc_1_mux_n": ADCChannel.AIN6,
+    RTD_ON = {
         "idac_1_mux": IDACMUX.IDAC1_AIN8,
         "idac_2_mux": IDACMUX.IDAC2_AIN9,
         "idac_1_mag": IDACMAG.IDAC1_500,
         "idac_2_mag": IDACMAG.IDAC2_500,
-        "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
-        "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN5,
-    }
-    RTD1_OFF = {
-        "adc_1_analog_in": ADCChannel.FLOAT,
-        "adc_1_mux_n": ADCChannel.AINCOM,
-        "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
-        "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
-        "idac_1_mag": IDACMAG.IDAC1_OFF,
-        "idac_2_mag": IDACMAG.IDAC2_OFF,
-        "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
-        "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
-    }
-    RTD2_ON = {
-        "adc_2_analog_in": ADCChannel.AIN7,
-        "adc_2_mux_n": ADCChannel.AIN6,
-        "idac_1_mux": IDACMUX.IDAC1_AIN8,
-        "idac_2_mux": IDACMUX.IDAC2_AIN9,
-        "idac_1_mag": IDACMAG.IDAC1_500,
-        "idac_2_mag": IDACMAG.IDAC2_500,
-        "adc2_ref_inp": ADC2REFMUX.AIN4_AIN5,
-    }
-    RTD2_OFF = {
-        "adc_2_analog_in": ADCChannel.FLOAT,
-        "adc_2_mux_n": ADCChannel.AINCOM,
-        "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
-        "idac_2_mux": IDACMUX.IDAC2_NO_CONNECT,
-        "idac_1_mag": IDACMAG.IDAC1_OFF,
-        "idac_2_mag": IDACMAG.IDAC2_OFF,
-        "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
     RTD_OFF = {
         "idac_1_mux": IDACMUX.IDAC1_NO_CONNECT,
@@ -372,6 +339,30 @@ class RTDModes(Enum):
         "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
 
+class ADC1RtdConfig(Enum):
+    "ADC1.__config args for for turning RTD mode on/off"
+    ON = {
+        "adc_1_analog_in": ADCChannel.AIN7,
+        "adc_1_mux_n": ADCChannel.AIN6,
+        "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
+        "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN5,
+    }
+    OFF = {
+        "adc_1_analog_in": ADCChannel.FLOAT,
+        "adc_1_mux_n": ADCChannel.AINCOM,
+    }
+
+class ADC2RtdConfig(Enum):
+    "ADC2.__config args for for turning RTD mode on/off"
+    ON = {
+        "adc_2_analog_in": ADCChannel.AIN7,
+        "adc_2_mux_n": ADCChannel.AIN6,
+        "adc2_ref_inp": ADC2REFMUX.AIN4_AIN5,
+    }
+    OFF = {
+        "adc_2_analog_in": ADCChannel.FLOAT,
+        "adc_2_mux_n": ADCChannel.AINCOM,
+    }
 
 class AllowedChannels(Enum):
     """Available channels for reading depend on whether RTD is enabled or not"""

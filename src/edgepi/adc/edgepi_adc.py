@@ -8,7 +8,6 @@ import logging
 import time
 
 
-from bitstring import pack
 from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
@@ -33,6 +32,8 @@ from edgepi.adc.adc_constants import (
     REFMUX,
     ADC2REFMUX,
     RTDModes,
+    ADC1RtdConfig,
+    ADC2RtdConfig,
     AllowedChannels,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
@@ -267,7 +268,7 @@ class EdgePiADC(SPI):
         Restore ADC to custom EdgePi configuration
         """
         # turn RTD off to allow updates in case RTD is on
-        self.rtd_mode(enable=False)
+        self.rtd_mode(set_rtd=False)
         self.__config(
             adc_1_analog_in=CH.FLOAT,
             adc_2_analog_in=CH.FLOAT,
@@ -812,7 +813,51 @@ class EdgePiADC(SPI):
                     f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
 
-    def rtd_mode(self, enable: bool, adc_num: ADCNum = ADCNum.ADC_2):
+    def __check_adc_pins(self):
+        """
+        check pin mux of each adc
+        Args:
+            N/A
+        Return:
+            channels
+        """
+        state = self.get_state()
+        adc_1_muxs = [state.adc_1.mux_n.code.value, state.adc_1.mux_p.code.value]
+        adc_2_muxs = [state.adc_2.mux_n.code.value, state.adc_2.mux_p.code.value]
+        return adc_1_muxs, adc_2_muxs
+
+    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum):
+        """
+        generate update config dictionary to send to the config method
+        Args:
+            muxs (list): list of input multiplexer value [negative input, positive input]
+            adc_num (ADCNum): ADC number
+        Return:
+            updates (dictionary): configuration dictionary for enabling RTD
+        """
+        if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
+            updates = RTDModes.RTD_ON.value |\
+            (ADC2RtdConfig.OFF.value if adc_num.value.id_num ==1 else ADC1RtdConfig.OFF.value) |\
+            (ADC1RtdConfig.ON.value if adc_num.value.id_num ==1 else ADC2RtdConfig.ON.value)
+        else:
+            updates = RTDModes.RTD_ON.value |\
+            (ADC1RtdConfig.ON.value if adc_num.value.id_num ==1 else ADC2RtdConfig.ON.value)
+        return updates
+
+
+    def __get_rtd_off_update_config(self, adc_num: ADCNum):
+        """
+        generate update config dictionary to send to the config method
+        Args:
+            adc_num (ADCNum): ADC number
+        Return:
+            updates (dictionary): configuration dictionary for disabling RTD
+        """
+        updates = RTDModes.RTD_OFF.value |\
+        (ADC1RtdConfig.OFF.value if adc_num.value.id_num ==1 else ADC2RtdConfig.OFF.value)
+        return updates
+
+    def rtd_mode(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
         """
         Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
         if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
@@ -822,38 +867,16 @@ class EdgePiADC(SPI):
         Args:
             `enable` (bool): True to enable RTD, False to disable
         """
-        # TODO: separate into two function which handles the update parameter according to ADCNums
-        if enable and adc_num == ADCNum.ADC_1:
+        if set_rtd:
             # check if adc_2 is reading RTD pins, remap channels if needed
-            mux_reg = self.__get_register_map()
-            adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
-            muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
-            # If adc_2 is reading RTD pins, map adc_mux to float
-            if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
-                updates = RTDModes.RTD1_ON.value | {
-                    "adc_2_analog_in": CH.FLOAT,
-                    "adc_2_mux_n": CH.AINCOM,
-                }
-            else:
-                updates = RTDModes.RTD1_ON.value
-            self.__set_rtd_pin(enable)
-        elif enable and adc_num == ADCNum.ADC_2:
-            # Read ADC1 mux pin
-            mux_reg = self.__get_register_map()
-            adc1_mux = pack("uint:8", mux_reg.get(ADCReg.REG_INPMUX.value))
-            muxs = [adc1_mux[:4].uint, adc1_mux[4:].uint]
-            # If adc_1 is reading RTD pins, map adc_mux to float
-            if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
-                updates = RTDModes.RTD2_ON.value | {
-                    "adc_1_analog_in": CH.FLOAT,
-                    "adc_1_mux_n": CH.AINCOM,
-                }
-            else:
-                updates = RTDModes.RTD2_ON.value
-            self.__set_rtd_pin(enable)
+            mux_1, mux_2 = self.__check_adc_pins()
+            updates = self.__get_rtd_on_update_config(
+                           mux_2 if adc_num.value.id_num == 1 else mux_1, adc_num)
+            # enable RTD pin to re-route internal circuit
+            self.__set_rtd_pin(set_rtd)
         else:
-            updates =RTDModes.RTD1_OFF.value if adc_num == ADCNum.ADC_1 else RTDModes.RTD2_OFF.value
-            self.__set_rtd_pin(enable)
+            updates = self.__get_rtd_off_update_config(adc_num)
+            self.__set_rtd_pin(set_rtd)
 
         self.__config(**updates, override_rtd_validation=True)
 

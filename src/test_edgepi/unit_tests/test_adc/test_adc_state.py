@@ -380,7 +380,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x1B,
             },
             "state.rtd_on",
-            RTDModes.RTD1_ON
+            RTDModes.RTD_ON
         ),
         # RTD2 on
         (
@@ -391,7 +391,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_ADC2CFG.value: 0x18
             },
             "state.rtd_on",
-            RTDModes.RTD2_ON,
+            RTDModes.RTD_ON,
         ),
         # RTD2 and RTD1 on
         (
@@ -404,7 +404,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x1B,
             },
             "state.rtd_on",
-            RTDModes.RTD2_ON,
+            RTDModes.RTD_ON,
             #TODO: when both ADCs are attached to RTD, RTD2 is passed
         ),
         # RTD2 and RTD1 OFF
