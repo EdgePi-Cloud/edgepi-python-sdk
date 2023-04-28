@@ -582,7 +582,7 @@ class EdgePiADC(SPI):
         self.__continuous_time_delay(adc_num, state)
 
         _, voltage_code, _ = self.__voltage_read(adc_num)
-
+        print(f"read_rtd_temperature: code {voltage_code}")
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
             voltage_code,
