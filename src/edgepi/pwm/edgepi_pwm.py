@@ -15,7 +15,7 @@ class EdgePiPWM(PwmDevice):
                        polarity: Polarity = None):
         # Control internal mux to enable/disable PWM
         self.gpio = EdgePiGPIO()
-        super().__init__(channel=pwm_num.value.chip, chip=pwm_num.value.chip)
+        super().__init__(channel=pwm_num.value.channel, chip=pwm_num.value.chip)
         self.open_pwm()
         self.freq = freq
         self.duty_cycle = duty_cycle
@@ -101,7 +101,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             enabled (bool): True enabled, False Disabled
         """
-        self.get_enabled_pwm()
+        return self.get_enabled_pwm()
 
     def close(self):
         """
