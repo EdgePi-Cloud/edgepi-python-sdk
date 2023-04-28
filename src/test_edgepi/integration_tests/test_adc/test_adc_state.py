@@ -421,7 +421,7 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
             False,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            None
+            RTDModes.RTD_OFF.value
         ),
         (
             True,
@@ -438,7 +438,7 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
         (
             False,
             ADCNum.ADC_2,
-            "state.rtd_mode",
+            "state.rtd_adc",
             None
         ),
     ],
@@ -747,7 +747,7 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
             False,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            None
+            RTDModes.RTD_OFF.value
         ),
         (
             True,
@@ -764,7 +764,7 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
         (
             False,
             ADCNum.ADC_2,
-            "state.rtd_mode",
+            "state.rtd_adc",
             None
         ),
     ],

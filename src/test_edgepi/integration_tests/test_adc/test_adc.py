@@ -849,14 +849,14 @@ def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
 RTD_ON_ADC1 = RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value
 RTD_ON_ADC2 = RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value
 @pytest.mark.parametrize(
-    "enable, rtd_mode, adc_num",
+    "enable, rtd_mode, adc_num, expected",
     [
-        (True, RTD_ON_ADC1, ADCNum.ADC_1),
-        (True, RTD_ON_ADC2, ADCNum.ADC_2),
-        (False, RTDModes.RTD_OFF.value, None)
+        (True, RTD_ON_ADC1, ADCNum.ADC_1, ADCNum.ADC_1),
+        (True, RTD_ON_ADC2, ADCNum.ADC_2, ADCNum.ADC_2),
+        (False, RTDModes.RTD_OFF.value, ADCNum.ADC_1, None)
     ]
 )
-def test_set_rtd(enable, rtd_mode, adc_num, adc):
+def test_set_rtd(enable, rtd_mode, adc_num, expected, adc):
     adc.set_rtd(set_rtd=enable, adc_num=adc_num)
     assert adc.get_state().rtd_mode == rtd_mode
-    assert adc.get_state().rtd_adc == adc_num
+    assert adc.get_state().rtd_adc == expected
