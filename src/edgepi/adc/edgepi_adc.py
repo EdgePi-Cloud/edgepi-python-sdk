@@ -563,9 +563,10 @@ class EdgePiADC(SPI):
         """
         return self.gpio.read_pin_state(RTDPins.RTD_EN.value)
 
-    def __get_rtd_mode(self):
+    def __get_rtd_state(self):
         """
-        Get RTD mode and the ADC number.
+        Get RTD state this includes the corrent mode (on/off) and the adc type being used
+        (adc1 or adc2).
         Returns:
             rtd_mode (dictionary): RTD mode dictionary {"name of config": op_codes}
             rtd_adc (ADCNum): None, no adc attached to RTD, ADCNum.ADC1 or ADCNum.ADC1
@@ -667,12 +668,13 @@ class EdgePiADC(SPI):
         Raises:
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
-        rtd_state, _ = self.__get_rtd_mode()
-        if rtd_state is None or rtd_state == RTDModes.RTD_OFF.value:
+        rtd_state, adc_num = self.__get_rtd_state()
+        if rtd_state is None or rtd_state == RTDModes.RTD_OFF:
             return
 
         # rtd_properties RTDModes.RTD1_ON or RTDModes.RTD2_ON
-        rtd_properties = rtd_state
+        rtd_properties = rtd_state.value | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else\
+                                           ADC2RtdConfig.ON.value)
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
@@ -721,7 +723,7 @@ class EdgePiADC(SPI):
             updates (dictionary): configuration dictionary for disabling RTD
         """
         updates = RTDModes.RTD_OFF.value |\
-        (ADC1RtdConfig.OFF.value if adc_num.value.id_num ==1 else ADC2RtdConfig.OFF.value)
+        (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
         return updates
 
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
@@ -740,7 +742,7 @@ class EdgePiADC(SPI):
             # check if adc_2 is reading RTD pins, remap channels if needed
             mux_1, mux_2 = self.__check_adc_pins()
             updates = self.__get_rtd_on_update_config(
-                           mux_2 if adc_num.value.id_num == 1 else mux_1, adc_num)
+                           mux_2 if adc_num == ADCNum.ADC_1 else mux_1, adc_num)
             # enable RTD pin to re-route internal circuit
             self.__set_rtd_pin(set_rtd)
         else:

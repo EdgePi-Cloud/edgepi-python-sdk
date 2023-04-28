@@ -7,7 +7,7 @@ from edgepi.adc.adc_constants import (
     ADCNum,
     RTDModes,
     ADC1RtdConfig,
-    ADC2RtdConfig
+    ADC2RtdConfig,
 )
 
 _logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class ADCState:
         self.filter_mode: PropertyValue = self.__get_state(ADCProperties.FILTER_MODE)
         self.status_byte: PropertyValue = self.__get_state(ADCProperties.STATUS_MODE)
         self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
-        self.rtd_mode: RTDModes = self.__get_rtd_state()
+        self.rtd_mode: RTDModes = self.__get_rtd_mode()
         self.rtd_adc: ADCNum = self.__get_rtd_adc_num()
 
     def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
@@ -100,11 +100,12 @@ class ADCState:
             "adc2_ref_inp": self.__get_state(ADCProperties.ADC2_REFMUX).code,
         }
 
-    def __get_rtd_state(self):
+    def __get_rtd_mode(self):
         """
-        Get on/off RTD state.
+        Get on/off RTD mode.
         Returns:
-            RTD
+            RTDModes (Enum): RTD_ON when RTD is on, RTD_OFF, when RTD is off, and None for undefined
+                             configuration.
         """
         # This is assuming, idac_1_mux - adc2_ref_inp are modified only when RTD is enabled.
         # compare the current rtd_state to RTDMode.RTD_OFF.value dictionary. If it doesn't match,
@@ -112,23 +113,31 @@ class ADCState:
         rtd_state = self.__get_current_rtd_state()
         is_rtd_off = all(rtd_state.get(key)== value for key,value in RTDModes.RTD_OFF.value.items())
         if is_rtd_off:
-            return RTDModes.RTD_OFF.value
+            return RTDModes.RTD_OFF
 
         if all(rtd_state.get(key) == value for key, value in\
                (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value).items()):
-            return RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value
+            return RTDModes.RTD_ON
 
         if all(rtd_state.get(key) == value for key, value in\
               (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value).items()):
-            return RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value
+            return RTDModes.RTD_ON
         return None
 
     def __get_rtd_adc_num(self):
         """
         Get the number of ADC that is attached to RTD
         """
-        if self.rtd_mode == (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value):
+        rtd_state = self.__get_current_rtd_state()
+        if self.rtd_mode == RTDModes.RTD_OFF:
+            return None
+
+        if all(rtd_state.get(key) == value for key, value in\
+               (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value).items()):
             return ADCNum.ADC_1
-        if self.rtd_mode == (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value):
+
+        if all(rtd_state.get(key) == value for key, value in\
+              (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value).items()):
             return ADCNum.ADC_2
+
         return None
