@@ -11,12 +11,7 @@ sys.modules["periphery"] = mock.MagicMock()
 # pylint: disable=wrong-import-position, protected-access
 
 import pytest
-from edgepi.adc.edgepi_adc import  (
-    ADCRegisterUpdateError,
-    EdgePiADC,
-    InvalidDifferentialPairError,
-    RTDEnabledError,
-)
+from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import (
     ADC_NUM_REGS,
     ADCReg,
@@ -35,6 +30,11 @@ from edgepi.adc.adc_constants import (
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.adc.edgepi_adc import ADCState
+from edgepi.adc.adc_exceptions import (
+    ADCRegisterUpdateError,
+    RTDEnabledError,
+    InvalidDifferentialPairError
+)
 
 adc_default_vals = [
     0,
