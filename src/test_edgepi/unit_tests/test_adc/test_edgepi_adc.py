@@ -78,7 +78,7 @@ def fixture_adc(mocker):
     )
     # mock RTD as off by default, mock as on if needed
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_mode",
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_state",
                  return_value=[RTDModes.RTD_OFF, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
@@ -608,7 +608,7 @@ def test_validate_updates(mocker, updated_regs, actual_regs, err):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.clear_expander_pin")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__write_register")
     # mock RTD as off by default, mock as on if needed
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_mode",
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_state",
                  return_value=[RTDModes.RTD_OFF, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__is_rtd_on", return_value=False)
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
@@ -647,7 +647,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
     "updates, rtd_state, err",
     [
         # RTD related setting: RTD1 ON (note: values are irrelevant, only key matters)
-        ({"adc_1_analog_in": CH.AIN0},[RTDModes.RTD_ON, ADCNum.ADC_1],pytest.raises(RTDEnabledError)),
+        ({"adc_1_analog_in":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_1],pytest.raises(RTDEnabledError)),
         ({"adc_1_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"idac_1_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"idac_2_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
@@ -656,7 +656,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
         ({"pos_ref_inp": 0},[RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"neg_ref_inp": 0},[RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         # RTD related setting: RTD2 ON (note: values are irrelevant, only key matters)
-        ({"adc_2_analog_in": CH.AIN0},[RTDModes.RTD_ON, ADCNum.ADC_2],pytest.raises(RTDEnabledError)),
+        ({"adc_2_analog_in":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_2],pytest.raises(RTDEnabledError)),
         ({"adc_2_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         ({"idac_1_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         ({"idac_2_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
@@ -695,7 +695,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
     ],
 )
 def test_validate_no_rtd_conflict(mocker, updates, rtd_state, err, adc):
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_mode", return_value=rtd_state)
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_state",return_value=rtd_state)
     with err:
         adc._EdgePiADC__validate_no_rtd_conflict(updates)
 

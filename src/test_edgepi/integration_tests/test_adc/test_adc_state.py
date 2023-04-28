@@ -14,8 +14,6 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     FilterMode,
     RTDModes,
-    ADC1RtdConfig,
-    ADC2RtdConfig
 )
 
 _logger = logging.getLogger(__name__)
@@ -27,9 +25,6 @@ def fixture_adc():
     # turn off to allow configuring RTD properties
     adc.set_rtd(set_rtd=False)
     yield adc
-
-RTD_ON_ADC1 = RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value
-RTD_ON_ADC2 = RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value
 
 @pytest.mark.parametrize(
     "updates, state_property, expected",
@@ -409,19 +404,19 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
             True,
             ADCNum.ADC_1,
             "state.rtd_mode",
-            RTD_ON_ADC1
+            RTDModes.RTD_ON
         ),
         (
             True,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            RTD_ON_ADC2
+            RTDModes.RTD_ON
         ),
         (
             False,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            RTDModes.RTD_OFF.value
+            RTDModes.RTD_OFF
         ),
         (
             True,
@@ -735,19 +730,19 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
             True,
             ADCNum.ADC_1,
             "state.rtd_mode",
-            RTD_ON_ADC1
+            RTDModes.RTD_ON
         ),
         (
             True,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            RTD_ON_ADC2
+            RTDModes.RTD_ON
         ),
         (
             False,
             ADCNum.ADC_2,
             "state.rtd_mode",
-            RTDModes.RTD_OFF.value
+            RTDModes.RTD_OFF
         ),
         (
             True,
