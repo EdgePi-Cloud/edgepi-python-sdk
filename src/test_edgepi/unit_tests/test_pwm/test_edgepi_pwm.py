@@ -5,14 +5,15 @@ import sys
 if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
 import pytest
+from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.pwm.pwm_constants import PWMCh, Polarity
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_dac(mocker):
     mocker_pwm= mocker.patch("edgepi.peripherals.pwm.PWM")
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
-    pwm_dev = EdgePiPWM(PWMCh.PWM_1, 1000, 0.5, Polarity.NORMAL)
+    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
+    pwm_dev = EdgePiPWM(GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL)
     pwm_dev.pwm = mocker_pwm
     yield pwm_dev
 
@@ -20,9 +21,9 @@ def fixture_test_dac(mocker):
 @pytest.mark.parametrize(
     "pwm_num, freq, duty_cycle, polarity, result",
     [
-        (PWMCh.PWM_1, 1000, 0.5, Polarity.NORMAL,
+        (GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL,
          [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip, 1000, 0.5, Polarity.NORMAL]),
-        (PWMCh.PWM_2, 1000, 0.1, Polarity.INVERSED, 
+        (GpioPins.PWM2, 1000, 0.1, Polarity.INVERSED, 
          [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip, 1000, 0.1, Polarity.INVERSED]),
     ],
 )
@@ -30,17 +31,32 @@ def test_pwm_init(mocker, pwm_num, freq, duty_cycle, polarity, result):
     mock_pwm = mocker.patch("edgepi.peripherals.pwm.PWM")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     pwm_dev = EdgePiPWM(pwm_num=pwm_num,freq=freq, duty_cycle=duty_cycle, polarity=polarity)
-    mock_pwm.assert_called_once_with(pwm_num.value.chip, pwm_num.value.channel)
+    mock_pwm.assert_called_once_with(result[1], result[0])
     assert pwm_dev.channel == result[0]
     assert pwm_dev.chip == result[1]
     assert pwm_dev.freq == result[2]
     assert pwm_dev.duty_cycle == result[3]
     assert pwm_dev.polarity == result[4].value
 
-def test_pwm_enable(mocker, pwm_dev):
+@pytest.mark.parametrize(
+    "pwm_num, result",
+    [
+        (GpioPins.PWM1,[GpioPins.AO_EN1.value, GpioPins.DOUT1.value]),
+        (GpioPins.PWM2, [GpioPins.AO_EN2.value, GpioPins.DOUT2.value]),
+    ],
+)
+def test_pwm_enable(mocker, pwm_num, result):
+    mocker_pwm= mocker.patch("edgepi.peripherals.pwm.PWM")
+    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
+    pwm_dev = EdgePiPWM(GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL)
+    pwm_dev.pwm = mocker_pwm
     mock_enable_pwm = mocker.patch("edgepi.peripherals.pwm.PWM.enable")
+    mock_clear_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.clear_pin_state")
+    mock_set_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.set_pin_state")
     pwm_dev.enable()
     mock_enable_pwm.assert_called_once()
+    mock_set_pin.assert_called_with(result[0])
+    mock_clear_pin.assert_has_calls([result[1], pwm_num.value])
 
 
 def test_pwm_disable(mocker, pwm_dev):
