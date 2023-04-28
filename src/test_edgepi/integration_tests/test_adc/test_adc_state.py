@@ -6,12 +6,16 @@ import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_query_lang import ADCProperties
 from edgepi.adc.adc_constants import (
+    ADCNum,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel,
     CheckMode,
     ConvMode,
     FilterMode,
+    RTDModes,
+    ADC1RtdConfig,
+    ADC2RtdConfig
 )
 
 _logger = logging.getLogger(__name__)
@@ -24,6 +28,8 @@ def fixture_adc():
     adc.set_rtd(set_rtd=False)
     yield adc
 
+RTD_ON_ADC1 = RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value
+RTD_ON_ADC2 = RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value
 
 @pytest.mark.parametrize(
     "updates, state_property, expected",
@@ -397,22 +403,48 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
     assert eval(state_property) == expected
 
 @pytest.mark.parametrize(
-    "enable_rtd, state_property, expected",
+    "enable_rtd, adc_num, state_property, expected",
     [
         (
             True,
-            "state.rtd_on",
-            True
+            ADCNum.ADC_1,
+            "state.rtd_mode",
+            RTD_ON_ADC1
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            RTD_ON_ADC2
         ),
         (
             False,
-            "state.rtd_on",
-            False
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            None
+        ),
+        (
+            True,
+            ADCNum.ADC_1,
+            "state.rtd_adc",
+            ADCNum.ADC_1
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            False,
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            None
         ),
     ],
 )
-def test_set_rtd_no_cache(enable_rtd, state_property, expected, adc):
-    adc.set_rtd(set_rtd=enable_rtd)
+def test_set_rtd_no_cache(enable_rtd, adc_num, state_property, expected, adc):
+    adc.set_rtd(set_rtd=enable_rtd, adc_num=adc_num)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
@@ -697,22 +729,48 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
 
 
 @pytest.mark.parametrize(
-    "enable_rtd, state_property, expected",
+    "enable_rtd, adc_num, state_property, expected",
     [
         (
             True,
-            "state.rtd_on",
-            True
+            ADCNum.ADC_1,
+            "state.rtd_mode",
+            RTD_ON_ADC1
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            RTD_ON_ADC2
         ),
         (
             False,
-            "state.rtd_on",
-            False
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            None
+        ),
+        (
+            True,
+            ADCNum.ADC_1,
+            "state.rtd_adc",
+            ADCNum.ADC_1
+        ),
+        (
+            True,
+            ADCNum.ADC_2,
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            False,
+            ADCNum.ADC_2,
+            "state.rtd_mode",
+            None
         ),
     ],
 )
-def test_set_rtd_with_cache(enable_rtd, state_property, expected, adc_cache):
-    adc_cache.set_rtd(set_rtd=enable_rtd)
+def test_set_rtd_with_cache(enable_rtd, adc_num, state_property, expected, adc_cache):
+    adc_cache.set_rtd(set_rtd=enable_rtd, adc_num=adc_num)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc_cache.get_state()
