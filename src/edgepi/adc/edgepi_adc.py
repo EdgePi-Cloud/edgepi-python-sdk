@@ -668,18 +668,19 @@ class EdgePiADC(SPI):
         Raises:
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
-        rtd_state, adc_num = self.__get_rtd_state()
-        if rtd_state is None or rtd_state == RTDModes.RTD_OFF:
-            return
+        rtd_mode, rtd_adc = self.__get_rtd_state()
+        if rtd_mode is None or rtd_mode == RTDModes.RTD_OFF:
+            return None
 
         # rtd_properties RTDModes.RTD1_ON or RTDModes.RTD2_ON
-        rtd_properties = rtd_state.value | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else\
+        rtd_properties = rtd_mode.value | (ADC1RtdConfig.ON.value if rtd_adc == ADCNum.ADC_1 else\
                                            ADC2RtdConfig.ON.value)
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
                     f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
+        return None
 
     def __check_adc_pins(self):
         """
@@ -728,10 +729,7 @@ class EdgePiADC(SPI):
 
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
         """
-        Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
-        if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
-        RTD mode here, call either `read_voltage` or `single_sample`, depending on which
-        conversion mode ADC1 is currently configured to.
+        Enable/Disable RTD with ADC type passed as arguments.
 
         NOTE: This function enforces only one ADC to be attached to RTD circuit
 
@@ -739,8 +737,10 @@ class EdgePiADC(SPI):
             `set_rtd` (bool): True to enable RTD, False to disable
         """
         if set_rtd:
-            # check if adc_2 is reading RTD pins, remap channels if needed
+            # check inputs of both ADCs. Input 5~8 are only available for RTD reading
             mux_1, mux_2 = self.__check_adc_pins()
+            # If inputs on another ADC are one of RTD only inputs, reconfigure the pins them to the
+            # default setting. And get RTD_ON configuration values
             updates = self.__get_rtd_on_update_config(
                            mux_2 if adc_num == ADCNum.ADC_1 else mux_1, adc_num)
             # enable RTD pin to re-route internal circuit
