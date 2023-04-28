@@ -21,6 +21,9 @@ from edgepi.adc.adc_constants import (
     FilterMode,
     StatusByte,
     ADCNum,
+    RTDModes,
+    ADC1RtdConfig,
+    ADC2RtdConfig,
 )
 
 # mock default register values
@@ -379,8 +382,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x0,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -389,8 +392,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x01,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -399,8 +402,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x02,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -409,8 +412,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x03,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -419,8 +422,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x05,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -429,8 +432,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x06,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -439,8 +442,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x07,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -449,8 +452,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x40,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
         (
             {
@@ -459,9 +462,10 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x80,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_OFF.value
         ),
+        # RTD State None
         (
             {
                 ADCReg.REG_INPMUX.value: 0x0,
@@ -469,10 +473,10 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_REFMUX.value: 27,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            None
         ),
-        # RTD ON
+        # RTD ADC1 ON
         (
             {
                 ADCReg.REG_INPMUX.value: 0x76,
@@ -480,9 +484,10 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_REFMUX.value: 27,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC1RtdConfig.ON.value)
         ),
+        # RTD ADC2 ON
         (
             {
                 ADCReg.REG_ADC2MUX.value: 0x76,
@@ -490,8 +495,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -500,8 +505,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+1,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -510,8 +515,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+2,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -520,8 +525,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+3,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -530,8 +535,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+4,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -540,8 +545,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+5,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -550,8 +555,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+6,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -560,8 +565,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+7,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -570,8 +575,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+64,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
         (
             {
@@ -580,8 +585,8 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+128,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            (RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value)
         ),
 
 
@@ -593,7 +598,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x0,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -603,7 +608,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x01,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -613,7 +618,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x02,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -623,7 +628,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x03,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -633,7 +638,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x05,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -643,7 +648,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x06,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -653,7 +658,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x07,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -663,7 +668,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x40,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -673,7 +678,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_REFMUX.value: 0x0,
                 ADCReg.REG_ADC2CFG.value: 0x80,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         (
@@ -683,7 +688,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_REFMUX.value: 27,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             None
         ),
         # Check ADC number for RTD ADC1
@@ -694,7 +699,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_REFMUX.value: 27,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_1
         ),
         # Check ADC number for RTD ADC2
@@ -705,7 +710,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -715,7 +720,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+1,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -725,7 +730,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+2,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -735,7 +740,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+3,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -745,7 +750,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+4,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -755,7 +760,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+5,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -765,7 +770,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+6,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -775,7 +780,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+7,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -785,7 +790,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+64,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
         (
@@ -795,7 +800,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
                 ADCReg.REG_IDACMAG.value: 0x44,
                 ADCReg.REG_ADC2CFG.value: 24+128,
             },
-            "state.adcnum_rtd",
+            "state.rtd_adc",
             ADCNum.ADC_2
         ),
 

@@ -21,7 +21,7 @@ _logger = logging.getLogger(__name__)
 def fixture_adc():
     adc = EdgePiADC(enable_cache=False)
     # turn off to allow configuring RTD properties
-    adc.rtd_mode(set_rtd=False)
+    adc.set_rtd(set_rtd=False)
     yield adc
 
 
@@ -411,8 +411,8 @@ def test_edgepi_state_no_cache(updates, state_property, expected, adc):
         ),
     ],
 )
-def test_rtd_mode_no_cache(enable_rtd, state_property, expected, adc):
-    adc.rtd_mode(set_rtd=enable_rtd)
+def test_set_rtd_no_cache(enable_rtd, state_property, expected, adc):
+    adc.set_rtd(set_rtd=enable_rtd)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc.get_state()
@@ -711,8 +711,8 @@ def test_edgepi_state_with_cache(updates, state_property, expected, adc_cache):
         ),
     ],
 )
-def test_rtd_mode_with_cache(enable_rtd, state_property, expected, adc_cache):
-    adc_cache.rtd_mode(set_rtd=enable_rtd)
+def test_set_rtd_with_cache(enable_rtd, state_property, expected, adc_cache):
+    adc_cache.set_rtd(set_rtd=enable_rtd)
     # pylint: disable=eval-used, unused-variable
     # using eval to access nested attributes of state with dot notation
     state = adc_cache.get_state()
