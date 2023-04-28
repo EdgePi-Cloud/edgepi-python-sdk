@@ -10,7 +10,7 @@ from edgepi.pwm.pwm_constants import PWMCh, Polarity
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
 @pytest.fixture(name="pwm_dev")
-def fixture_test_dac(mocker):
+def fixture_test_pwm(mocker):
     mocker_pwm= mocker.patch("edgepi.peripherals.pwm.PWM")
     mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
     pwm_dev = EdgePiPWM(GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL)
@@ -46,17 +46,18 @@ def test_pwm_init(mocker, pwm_num, freq, duty_cycle, polarity, result):
     ],
 )
 def test_pwm_enable(mocker, pwm_num, result):
-    mocker_pwm= mocker.patch("edgepi.peripherals.pwm.PWM")
-    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
-    pwm_dev = EdgePiPWM(GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL)
+    mocker_pwm = mocker.patch("edgepi.peripherals.pwm.PWM")
+    mocker_gpio = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
+    pwm_dev = EdgePiPWM(pwm_num, 1000, 0.5, Polarity.NORMAL)
     pwm_dev.pwm = mocker_pwm
+    pwm_dev.gpio = mocker_gpio
     mock_enable_pwm = mocker.patch("edgepi.peripherals.pwm.PWM.enable")
     mock_clear_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.clear_pin_state")
     mock_set_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.set_pin_state")
     pwm_dev.enable()
     mock_enable_pwm.assert_called_once()
     mock_set_pin.assert_called_with(result[0])
-    mock_clear_pin.assert_has_calls([result[1], pwm_num.value])
+    mock_clear_pin.assert_has_calls([mock.call(result[1]), mock.call(pwm_num.value)])
 
 
 def test_pwm_disable(mocker, pwm_dev):
@@ -95,15 +96,15 @@ def test_set_duty_cycle_pwm(duty_cycle, pwm_dev):
 
 @pytest.mark.parametrize("expected", [(Polarity.NORMAL),(Polarity.INVERSED)])
 def test_get_polarity_pwm(mocker, expected, pwm_dev):
-    mocker.patch("edgepi.peripherals.pwm.PWM.polarity", return_value = expected)
+    mocker.patch("edgepi.peripherals.pwm.PWM.polarity", return_value = expected.value)
     pol = pwm_dev.get_polarity()
-    assert pol.return_value == expected
+    assert pol.return_value == expected.value
 
 @pytest.mark.parametrize("polarity", [(Polarity.NORMAL),(Polarity.INVERSED)])
 def test_set_polarity_pwm(polarity, pwm_dev):
     pwm_dev.set_polarity(polarity)
     result = pwm_dev.get_polarity()
-    assert result == polarity
+    assert result == polarity.value
 
 @pytest.mark.parametrize("expected", [(True),(False)])
 def test_get_enabled_pwm(mocker, expected, pwm_dev):

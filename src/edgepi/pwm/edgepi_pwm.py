@@ -75,7 +75,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             N/A
         """
-        self.set_polarity_pwm(polarity)
+        self.set_polarity_pwm(polarity.value)
     
     def get_polarity(self):
         """
