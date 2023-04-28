@@ -21,52 +21,87 @@ class EdgePiPWM(PwmDevice):
         self.duty_cycle = duty_cycle
         self.polarity = polarity.value
 
-# TODO: set PWM, change GPIO pins
-# TODO: set freq, duty cycle
-# TODO: close PWM
     def set_frequency(self, frequency: int):
         """
         Set frequency
+        Args:
+            frequency (int): frequency value
+        Returns:
+            N/A
         """
+        self.set_frequency_pwm(frequency)
+
     def get_frequency(self):
         """
         Get frequency
+        Args:
+            N/A
+        Returns:
+            frequency (int): frequency value
         """ 
+        return self.get_frequency_pwm()
 
     def set_dutycycle(self, duty_cycle: float):
         """
-        Set Duty Cycle
+        Set duty_cycle
+        Args:
+            duty_cycle (int): duty_cycle value
+        Returns:
+            N/A
         """
+        self.set_duty_cycle_pwm(duty_cycle)
     
     def get_dutycycle(self):
         """
-        get Duty cycle
-        """
+        Get duty_cycle
+        Args:
+            N/A
+        Returns:
+            duty_cycle (int): duty_cycle value
+        """ 
+        return self.get_duty_cycle_pwm()
 
     def set_polarity(self, polarity: Polarity):
         """
-        Set Duty Cycle
+        Set polarity
+        Args:
+            polarity (int): polarity value
+        Returns:
+            N/A
         """
+        self.set_polarity_pwm(polarity)
     
     def get_polarity(self):
         """
-        get Duty cycle
-        """
+        Get polarity
+        Args:
+            N/A
+        Returns:
+            polarity (int): polarity value
+        """ 
+        return self.get_polarity_pwm()
     
-    def enable_pwm(self):
+    def enable(self):
         """
         Enable pwm output
         """
+        self.enable_pwm()
     
-    def disable_pwm(self):
+    def disable(self):
         """
         Disable pwm output
         """
+        self.disable_pwm()
 
     def get_enabled(self):
         """
         Get enabled state
+        Args:
+            N/A
+        Returns:
+            enabled (bool): True enabled, False Disabled
         """
+        self.get_enabled_pwm()
 
     def close(self):
         """
