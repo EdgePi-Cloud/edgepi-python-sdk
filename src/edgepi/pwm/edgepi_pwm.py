@@ -26,6 +26,9 @@ class EdgePiPWM(PwmDevice):
         self.freq = freq
         self.duty_cycle = duty_cycle
         self.polarity = polarity.value
+        self.set_dutycycle(self.duty_cycle)
+        self.set_frequency(self.freq)
+        self.set_polarity(self.polarity)
 
     def set_frequency(self, frequency: int):
         """
