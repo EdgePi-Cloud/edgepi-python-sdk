@@ -1,6 +1,8 @@
 
 """PWM Module"""
 
+import logging
+
 from edgepi.peripherals.pwm import PwmDevice
 
 from edgepi.gpio.gpio_constants import GpioPins
@@ -17,6 +19,7 @@ class EdgePiPWM(PwmDevice):
                        freq: int = None,
                        duty_cycle: float = None,
                        polarity: Polarity = None):
+        self.log = logging.getLogger(__name__)
         # Control internal mux to enable/disable PWM
         self.pwm_num = pwm_num
         self.gpio = EdgePiGPIO()
@@ -25,7 +28,8 @@ class EdgePiPWM(PwmDevice):
         self.open_pwm()
         self.freq = freq
         self.duty_cycle = duty_cycle
-        self.polarity = polarity.value
+        self.polarity = polarity
+        self.log.info(f"__init__: Setting DC,FEQ,POL = {self.duty_cycle}, {self.freq}, {self.polarity}")
         self.set_dutycycle(self.duty_cycle)
         self.set_frequency(self.freq)
         self.set_polarity(self.polarity)

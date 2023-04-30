@@ -2,7 +2,7 @@
 Module for PWM devices
 """
 
-
+import logging
 from periphery import PWM
 
 
@@ -10,6 +10,7 @@ class PwmDevice:
     """Class for representing a PWM device"""
 
     def __init__(self, chip: int = None, channel: int = None):
+        self.log = logging.getLogger(__name__)
         self.chip = chip
         self.channel = channel
         self.pwm = None

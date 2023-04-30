@@ -24,5 +24,5 @@ class PWMCh(Enum):
 @unique
 class Polarity(Enum):
     """PWM polarity Enum"""
-    NORMAL = "Normal"
-    INVERSED = "Inversed"
+    NORMAL = "normal"
+    INVERSED = "inversed"
