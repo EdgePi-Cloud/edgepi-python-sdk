@@ -16,7 +16,8 @@ from edgepi.adc.adc_constants import (
     IDACMUX,
     IDACMAG,
     REFMUX,
-    DiffMode
+    DiffMode,
+    RTDModes,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -843,15 +844,15 @@ def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
     adc.select_differential(adc_num, diff)
     assert adc._EdgePiADC__read_register(mux_reg) == [mux_reg_val]
 
-
 @pytest.mark.parametrize(
-    "enable",
+    "enable, rtd_mode, adc_num, expected",
     [
-        (True),
-        (False)
+        (True, RTDModes.RTD_ON, ADCNum.ADC_1, ADCNum.ADC_1),
+        (True, RTDModes.RTD_ON, ADCNum.ADC_2, ADCNum.ADC_2),
+        (False, RTDModes.RTD_OFF, ADCNum.ADC_1, None)
     ]
 )
-def test_rtd_mode(enable, adc):
-    # TODO: pass if no error raised for now, check RTD is on once get_state is implemented
-    adc.rtd_mode(enable=enable)
-    assert adc.get_state().rtd_on == enable
+def test_set_rtd(enable, rtd_mode, adc_num, expected, adc):
+    adc.set_rtd(set_rtd=enable, adc_num=adc_num)
+    assert adc.get_state().rtd_mode == rtd_mode
+    assert adc.get_state().rtd_adc == expected

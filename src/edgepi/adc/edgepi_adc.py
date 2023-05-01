@@ -1,15 +1,11 @@
 """ User interface for EdgePi ADC """
 
-
-from dataclasses import dataclass
 from enum import Enum
 from operator import attrgetter
 import logging
 import time
 
-
-from bitstring import pack
-from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
+from edgepi.adc.adc_query_lang import PropertyValue
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
@@ -31,13 +27,16 @@ from edgepi.adc.adc_constants import (
     IDACMUX,
     IDACMAG,
     REFMUX,
+    ADC2REFMUX,
     RTDModes,
+    ADC1RtdConfig,
+    ADC2RtdConfig,
     AllowedChannels,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.gpio.gpio_configs import ADCPins
+from edgepi.gpio.gpio_configs import ADCPins, RTDPins
 from edgepi.utilities.utilities import filter_dict
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
@@ -47,134 +46,17 @@ from edgepi.adc.adc_multiplexers import (
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.adc.adc_state import ADCState
+from edgepi.adc.adc_exceptions import (
+    ADCRegisterUpdateError,
+    VoltageReadError,
+    ContinuousModeError,
+    RTDEnabledError,
+    InvalidDifferentialPairError,
+    CalibKeyMissingError
+)
 
 _logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ADCReadFields:
-    """
-    ADC state properties specific to each of ADC1 and ADC2
-    """
-
-    conversion_mode: PropertyValue
-    data_rate: PropertyValue
-    mux_p: PropertyValue
-    mux_n: PropertyValue
-
-
-class ADCState:
-    """ADC state intended for reading by users"""
-
-    def __init__(self, reg_map: dict):
-        self.__reg_map = reg_map
-        self.adc_1: ADCReadFields = ADCReadFields(
-            self.__get_state(ADCProperties.CONV_MODE),
-            self.__get_state(ADCProperties.DATA_RATE_1),
-            self.__get_state(ADCProperties.ADC1_MUXP),
-            self.__get_state(ADCProperties.ADC1_MUXN),
-        )
-        self.adc_2: ADCReadFields = ADCReadFields(
-            PropertyValue("continuous", ADCProperties.CONV_MODE),
-            self.__get_state(ADCProperties.DATA_RATE_2),
-            self.__get_state(ADCProperties.ADC2_MUXP),
-            self.__get_state(ADCProperties.ADC2_MUXN),
-        )
-        self.filter_mode: PropertyValue = self.__get_state(ADCProperties.FILTER_MODE)
-        self.status_byte: PropertyValue = self.__get_state(ADCProperties.STATUS_MODE)
-        self.checksum_mode: PropertyValue = self.__get_state(ADCProperties.CHECK_MODE)
-        self.rtd_on: bool = self.__get_rtd_state()
-
-    def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
-        """
-        Read the current state of configurable ADC properties
-
-        Args:
-            `adc_property` (ADCProperties): ADC property whose state is to be read
-            `reg_map`: register map formatted as {addx (int): value (int)}
-
-        Returns:
-            `PropertyValue`: information about the current value of this property
-        """
-        # value of this adc_property's register
-        reg_value = self.__reg_map[adc_property.value.addx]
-
-        # get value of bits corresponding to this property by letting through only the bits
-        # that were "masked" when setting this property (clear all bits except the property bits)
-        adc_property_bits = (~adc_property.value.mask) & reg_value
-
-        # name of current value of this adc_property
-        adc_property_value = adc_property.value.values[adc_property_bits]
-        _logger.debug(
-            (
-                f"query_state: query_property='{adc_property}',"
-                " adc_property_bits={hex(adc_property_bits)},"
-                f" adc_property_value='{adc_property_value}'"
-            )
-        )
-
-        return adc_property_value
-
-    def __get_state(self, adc_property: ADCProperties) -> PropertyValue:
-        """
-        Read the current state of configurable ADC properties
-
-        Args:
-            `adc_property` (ADCProperties): ADC property whose state is to be read
-
-        Returns:
-            `PropertyValue`: information about the current value of this mode
-        """
-        return self.__query_state(adc_property)
-
-    def __get_current_rtd_state(self) -> dict[str, PropertyValue]:
-        return {
-            "adc_1_analog_in": self.adc_1.mux_p.code,
-            "adc_1_mux_n": self.adc_1.mux_n.code,
-            "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
-            "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX).code,
-            "idac_1_mag": self.__get_state(ADCProperties.IDAC1_MAG).code,
-            "idac_2_mag": self.__get_state(ADCProperties.IDAC2_MAG).code,
-            "pos_ref_inp": self.__get_state(ADCProperties.REFMUX_POS).code,
-            "neg_ref_inp": self.__get_state(ADCProperties.REFMUX_NEG).code,
-        }
-
-    def __get_rtd_state(self) -> bool:
-        """
-        Get on/off RTD state.
-        """
-        return self.__get_current_rtd_state() == RTDModes.RTD_ON.value
-
-
-class ADCStateMissingMap(Exception):
-    """ "Raised if ADCState.get_map() is called before ADCState has been assigned a cached state"""
-
-
-class ADCRegisterUpdateError(Exception):
-    """Raised when a register update fails to set register to expected value"""
-
-
-class VoltageReadError(Exception):
-    """Raised if a voltage read fails to return the expected number of bytes"""
-
-
-class ContinuousModeError(Exception):
-    """Raised when `read_voltage` is called and ADC is not in CONTINUOUS conversion mode"""
-
-
-class RTDEnabledError(Exception):
-    """Raised when user attempts to set ADC configuration that conflicts with RTD mode"""
-
-
-class InvalidDifferentialPairError(Exception):
-    """
-    Raised when calibration values are attempted to be retrieved for an invalid Differential
-    read pair
-    """
-
-
-class CalibKeyMissingError(Exception):
-    """Raised when calibration values are missing from EEPROM dictionary"""
 
 
 class EdgePiADC(SPI):
@@ -253,7 +135,7 @@ class EdgePiADC(SPI):
         Restore ADC to custom EdgePi configuration
         """
         # turn RTD off to allow updates in case RTD is on
-        self.rtd_mode(enable=False)
+        self.set_rtd(set_rtd=False)
         self.__config(
             adc_1_analog_in=CH.FLOAT,
             adc_2_analog_in=CH.FLOAT,
@@ -313,11 +195,9 @@ class EdgePiADC(SPI):
         """
         if num_regs < 1:
             raise ValueError("Number of registers to read must be at least 1")
-
         code = self.adc_ops.read_register_command(start_addx.value, num_regs)
         out = self.transfer(code)
         _logger.debug(f"__read_register: received {out}")
-
         # first 2 entries are null bytes
         return out[2:]
 
@@ -333,12 +213,22 @@ class EdgePiADC(SPI):
         """
         if len(data) < 1:
             raise ValueError("Number of registers to write to must be at least 1")
-
         code = self.adc_ops.write_register_command(start_addx.value, data)
         _logger.debug(f"__write_register: sending {code}")
         out = self.transfer(code)
-
         return out
+
+    def __set_rtd_pin(self, enable: bool = False):
+        """
+        Set or clear RTD_EN pin
+        Args:
+            enable (bool): RTD enable flag
+        Return:
+            None
+        """
+        # pylint: disable=expression-not-assigned
+        self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
+        self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
@@ -380,7 +270,6 @@ class EdgePiADC(SPI):
         pulse conversion mode, this method does not need to be called before
         performing reads.
         """
-
         # get state for configs relevant to conversion delay
         state = self.get_state()
         conv_mode = state.adc_1.conversion_mode.code
@@ -401,7 +290,6 @@ class EdgePiADC(SPI):
             )
         )
         self.__send_start_command(adc_num)
-
         # apply delay for first conversion
         time.sleep(conv_delay / 1000)
 
@@ -428,20 +316,14 @@ class EdgePiADC(SPI):
                 (status_byte, voltage_data_bytes, check_byte)
         """
         read_data = self.__read_data(adc_num, ADC_VOLTAGE_READ_LEN)
-
         if len(read_data) - 1 != ADC_VOLTAGE_READ_LEN:
             raise VoltageReadError(
                 f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
             )
-
         status_code = read_data[1]
-
         voltage_code = read_data[2 : (2 + adc_num.value.num_data_bytes)]
-
         check_code = read_data[6]
-
         check_crc(voltage_code, check_code)
-
         return status_code, voltage_code, check_code
 
     @staticmethod
@@ -500,9 +382,8 @@ class EdgePiADC(SPI):
 
         return calibs
 
-    def __continuous_time_delay(self, adc_num: ADCNum):
+    def __continuous_time_delay(self, adc_num: ADCNum, state: ADCState):
         """Compute and enforce continuous conversion time delay"""
-        state = self.get_state()
         # get continuous mode time delay and wait here (delay is needed between each conversion)
         data_rate = (
             state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
@@ -511,9 +392,8 @@ class EdgePiADC(SPI):
 
         time.sleep(delay / 1000)
 
-    def __check_adc_1_conv_mode(self):
+    def __check_adc_1_conv_mode(self, state: ADCState):
         # assert adc is in continuous mode
-        state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.CONTINUOUS:
             raise ContinuousModeError(
                 "ADC1 must be in CONTINUOUS conversion mode in order to call this method."
@@ -531,10 +411,11 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from the indicated ADC
         """
+        state = self.get_state()
         if adc_num == ADCNum.ADC_1:
-            self.__check_adc_1_conv_mode()
+            self.__check_adc_1_conv_mode(state)
 
-        self.__continuous_time_delay(adc_num)
+        self.__continuous_time_delay(adc_num, state)
 
         status_code, voltage_code, _ = self.__voltage_read(adc_num)
 
@@ -557,12 +438,13 @@ class EdgePiADC(SPI):
         Returns:
             `float`: RTD measured temperature (°C)
         """
-        self.__check_adc_1_conv_mode()
+        state = self.get_state()
+        adc_num = state.rtd_adc
+        if adc_num == ADCNum.ADC_1:
+            self.__check_adc_1_conv_mode(state)
+        self.__continuous_time_delay(adc_num, state)
 
-        self.__continuous_time_delay(ADCNum.ADC_1)
-
-        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
-
+        _, voltage_code, _ = self.__voltage_read(adc_num)
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
             voltage_code,
@@ -571,9 +453,8 @@ class EdgePiADC(SPI):
             self.rtd_sensor_resistance_variation
         )
 
-    def __enforce_pulse_mode(self):
+    def __enforce_pulse_mode(self, state: ADCState):
         # assert adc is in PULSE mode (check ADCState) -> set to PULSE if not
-        state = self.get_state()
         if state.adc_1.conversion_mode.code != ConvMode.PULSE:
             self.__config(conversion_mode=ConvMode.PULSE)
 
@@ -587,7 +468,8 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from ADC1
         """
-        self.__enforce_pulse_mode()
+        state = self.get_state()
+        self.__enforce_pulse_mode(state)
 
         # send command to trigger conversion
         self.start_conversions(ADCNum.ADC_1)
@@ -615,13 +497,16 @@ class EdgePiADC(SPI):
         Returns:
             `float`: RTD measured temperature (°C)
         """
-        self.__enforce_pulse_mode()
+        state = self.get_state()
+        adc_num = state.rtd_adc
+        if adc_num == ADCNum.ADC_1:
+            self.__enforce_pulse_mode(state)
 
         # send command to trigger conversion
-        self.start_conversions(ADCNum.ADC_1)
+        self.start_conversions(adc_num)
 
         # send command to read conversion data.
-        _, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+        _, voltage_code, _ = self.__voltage_read(adc_num)
 
         # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
@@ -670,20 +555,24 @@ class EdgePiADC(SPI):
 
     def __is_rtd_on(self):
         """
-        Get state of RTD_EN pin (on/off), to use for deciding which
-        ADC channels are available for reading.
-
-        Returns:
-            `bool`: True if RTD_EN pin is on, False otherwise
+        Check whether the RTD is enabled or disabled
+        Args:
+            N/A
+        Return:
+            rtd_pin_state (bool): True RTD enabled, False RTD disabled
         """
-        # TODO: this should use self.get_state() instead
-        _logger.debug("__is_rtd_on: Checking RTD status")
-        idac_reg = self.__get_register_map()
-        idac_mag = pack("uint:8", idac_reg.get(ADCReg.REG_IDACMAG.value))
-        idac_1 = idac_mag[4:].uint
-        status = idac_1 != 0x0
-        _logger.debug(f"__is_rtd_on: RTD enabled: {status}")
-        return status
+        return self.gpio.read_pin_state(RTDPins.RTD_EN.value)
+
+    def __get_rtd_state(self):
+        """
+        Get RTD state this includes the corrent mode (on/off) and the adc type being used
+        (adc1 or adc2).
+        Returns:
+            rtd_mode (dictionary): RTD mode dictionary {"name of config": op_codes}
+            rtd_adc (ADCNum): None, no adc attached to RTD, ADCNum.ADC1 or ADCNum.ADC1
+        """
+        state = self.get_state()
+        return state.rtd_mode, state.rtd_adc
 
     # by default set mux_n's to AINCOM. For diff_mode and rtd_mode, pass in custom mapping.
     # Case 1: user sets to adc_x read ch_x -> mux_n auto mapped to AINCOM
@@ -769,7 +658,7 @@ class EdgePiADC(SPI):
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
 
-    def __validate_no_rtd_conflict(self, updates: dict):
+    def  __validate_no_rtd_conflict(self, updates: dict):
         """
         Checks no RTD related properties are being updated if RTD mode is enabled
 
@@ -779,42 +668,86 @@ class EdgePiADC(SPI):
         Raises:
             `RTDEnabledError`: if RTD is enabled and an RTD related property is in updates
         """
-        # ADC2 channel setting conflicts with RTD handled during channel mapping
-        if not self.__is_rtd_on():
-            return
+        rtd_mode, rtd_adc = self.__get_rtd_state()
+        if rtd_mode is None or rtd_mode == RTDModes.RTD_OFF:
+            return None
 
-        rtd_properties = RTDModes.RTD_ON.value.keys()
+        # rtd_properties RTDModes.RTD1_ON or RTDModes.RTD2_ON
+        rtd_properties = rtd_mode.value | (ADC1RtdConfig.ON.value if rtd_adc == ADCNum.ADC_1 else\
+                                           ADC2RtdConfig.ON.value)
         for update in updates:
             if update in rtd_properties:
                 raise RTDEnabledError(
                     f"ADC property '{update}' cannot be updated while RTD is enabled"
                 )
+        return None
 
-    def rtd_mode(self, enable: bool):
+    def __check_adc_pins(self):
         """
-        Enable or disable RTD. Note, this will reconfigure ADC2 to read FLOAT input channel
-        if ADC2 is configured to read RTD pins AIN4-AIN7. To read RTD values aftering enabling
-        RTD mode here, call either `read_voltage` or `single_sample`, depending on which
-        conversion mode ADC1 is currently configured to.
+        check pin mux of each adc
+        Args:
+            N/A
+        Return:
+            channels
+        """
+        state = self.get_state()
+        adc_1_muxs = [state.adc_1.mux_n.code.value, state.adc_1.mux_p.code.value]
+        adc_2_muxs = [state.adc_2.mux_n.code.value, state.adc_2.mux_p.code.value]
+        return adc_1_muxs, adc_2_muxs
+
+    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum):
+        """
+        generate a dictionary of config parameters to enable RTD using specified ADC
+        Args:
+            muxs (list): list of input multiplexer of other ADC [negative input, positive input]
+            adc_num (ADCNum): ADC to read RTD
+        Return:
+            updates (dictionary): configuration dictionary for enabling RTD
+                                    {name_of_config : op_codes}
+        """
+        if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
+            updates = RTDModes.RTD_ON.value |\
+            (ADC2RtdConfig.OFF.value if adc_num == ADCNum.ADC_1 else ADC1RtdConfig.OFF.value) |\
+            (ADC1RtdConfig.ON.value if adc_num ==ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
+        else:
+            updates = RTDModes.RTD_ON.value |\
+            (ADC1RtdConfig.ON.value if adc_num ==ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
+        return updates
+
+
+    def __get_rtd_off_update_config(self, adc_num: ADCNum):
+        """
+        generate update config dictionary to send to the config method
+        Args:
+            adc_num (ADCNum): ADC number
+        Return:
+            updates (dictionary): configuration dictionary for disabling RTD
+        """
+        updates = RTDModes.RTD_OFF.value |\
+        (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
+        return updates
+
+    def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
+        """
+        Enable/Disable RTD with ADC type passed as arguments.
+
+        NOTE: This function enforces only one ADC to be attached to RTD circuit
 
         Args:
-            `enable` (bool): True to enable RTD, False to disable
+            `set_rtd` (bool): True to enable RTD, False to disable
         """
-        # TODO: enable RTD_EN switching pin
-        if enable:
-            # check if adc_2 is reading RTD pins, remap channels if needed
-            mux_reg = self.__get_register_map()
-            adc2_mux = pack("uint:8", mux_reg.get(ADCReg.REG_ADC2MUX.value))
-            muxs = [adc2_mux[:4].uint, adc2_mux[4:].uint]
-            if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
-                updates = RTDModes.RTD_ON.value | {
-                    "adc_2_analog_in": CH.FLOAT,
-                    "adc_2_mux_n": CH.AINCOM,
-                }
-            else:
-                updates = RTDModes.RTD_ON.value
+        if set_rtd:
+            # check inputs of both ADCs. Input 5~8 are only available for RTD reading
+            mux_1, mux_2 = self.__check_adc_pins()
+            # If inputs on another ADC are one of RTD only inputs, reconfigure the pins them to the
+            # default setting. And get RTD_ON configuration values
+            updates = self.__get_rtd_on_update_config(
+                           mux_2 if adc_num == ADCNum.ADC_1 else mux_1, adc_num)
+            # enable RTD pin to re-route internal circuit
+            self.__set_rtd_pin(set_rtd)
         else:
-            updates = RTDModes.RTD_OFF.value
+            updates = self.__get_rtd_off_update_config(adc_num)
+            self.__set_rtd_pin(set_rtd)
 
         self.__config(**updates, override_rtd_validation=True)
 
@@ -859,6 +792,7 @@ class EdgePiADC(SPI):
         idac_2_mag: IDACMAG = None,
         pos_ref_inp: REFMUX = None,
         neg_ref_inp: REFMUX = None,
+        adc2_ref_inp: ADC2REFMUX = None,
         override_updates_validation: bool = False,
         override_rtd_validation: bool = False,
     ):
