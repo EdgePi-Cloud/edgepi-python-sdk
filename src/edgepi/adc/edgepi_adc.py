@@ -561,7 +561,11 @@ class EdgePiADC(SPI):
         Return:
             rtd_pin_state (bool): True RTD enabled, False RTD disabled
         """
-        return self.gpio.read_pin_state(RTDPins.RTD_EN.value)
+        pin_state = self.gpio.read_pin_state(RTDPins.RTD_EN.value)
+        pin_dir = self.gpio.get_pin_direction(RTDPins.RTD_EN.value)
+        if pin_state and not pin_dir:
+            return True
+        return False
 
     def __get_rtd_state(self):
         """

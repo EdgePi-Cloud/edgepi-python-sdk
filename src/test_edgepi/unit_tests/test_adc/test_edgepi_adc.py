@@ -1031,3 +1031,21 @@ def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, ad
 def test__is_data_ready(mocker,adc_num, mock_val, expected, adc):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.transfer", return_value = mock_val)
     assert expected == adc._EdgePiADC__is_data_ready(adc_num)
+
+@pytest.mark.parametrize("mock_value, result",
+                    [
+                        ([True, False],True),
+                        ([False, False],False),
+                        ([False, True],False),
+                        ([True, True],False),
+                    ]
+)
+def test__is_rtd_on(mocker, mock_value, result):
+    # mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__config")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.set_adc_reference")
+    adc = EdgePiADC()
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.read_pin_state", return_value=mock_value[0])
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.get_pin_direction", return_value=mock_value[1])
+    assert adc._EdgePiADC__is_rtd_on() == result
