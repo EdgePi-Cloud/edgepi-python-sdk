@@ -26,7 +26,7 @@ In continuous conversion mode, sampling events occur automatically. However, aft
 to perform continuous conversion, the user must send a command to start the conversions, and
 sampling data must also be manually by the user.
 ```python
-from edgepi.dac.edgepi_adc import EdgePiADC
+from edgepi.adc.edgepi_adc import EdgePiADC
 from edgepi.adc.adc_constants import ADCChannel, ConvMode
 
 # initialize ADC

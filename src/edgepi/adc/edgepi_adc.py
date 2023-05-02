@@ -78,10 +78,6 @@ class EdgePiADC(SPI):
     RTD_SENSOR_RESISTANCE = 100 # RTD sensor resistance value (Ohms)
     RTD_SENSOR_RESISTANCE_VARIATION = 0.385 # RTD sensor resistance variation (Ohms/°C)
 
-    # TODO: this should be part of eeprom_data. Retrieve from eeprom_data in calling
-    # functions when available
-    r_ref = 1326.20
-
     def __init__(
         self,
         enable_cache: bool = False,
@@ -106,6 +102,7 @@ class EdgePiADC(SPI):
         eeprom = EdgePiEEPROM()
         eeprom_data  = eeprom.get_edgepi_reserved_data()
         self.adc_calib_params = eeprom_data.adc_calib_params
+        self.r_ref = eeprom_data.rtd_hw_params[0]
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
