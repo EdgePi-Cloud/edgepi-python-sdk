@@ -5,7 +5,7 @@ import logging
 from time import sleep
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode
+from edgepi.adc.adc_constants import AnalogIn, ADCNum, DiffMode
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
@@ -22,14 +22,14 @@ WRITE_READ_DELAY = 0.1
 
 
 _ch_map = {
-    0: (ADCChannel.AIN0, DACChannel.AOUT1),
-    1: (ADCChannel.AIN1, DACChannel.AOUT2),
-    2: (ADCChannel.AIN2, DACChannel.AOUT3),
-    3: (ADCChannel.AIN3, DACChannel.AOUT4),
-    4: (ADCChannel.AIN4, DACChannel.AOUT5),
-    5: (ADCChannel.AIN5, DACChannel.AOUT6),
-    6: (ADCChannel.AIN6, DACChannel.AOUT7),
-    7: (ADCChannel.AIN7, DACChannel.AOUT8),
+    0: (AnalogIn.AIN1, DACChannel.AOUT1),
+    1: (AnalogIn.AIN2, DACChannel.AOUT2),
+    2: (AnalogIn.AIN3, DACChannel.AOUT3),
+    3: (AnalogIn.AIN4, DACChannel.AOUT4),
+    4: (AnalogIn.AIN5, DACChannel.AOUT5),
+    5: (AnalogIn.AIN6, DACChannel.AOUT6),
+    6: (AnalogIn.AIN7, DACChannel.AOUT7),
+    7: (AnalogIn.AIN8, DACChannel.AOUT8),
 }
 
 
@@ -135,14 +135,14 @@ def _measure_voltage_differential(
 
 
 _diff_ch_map = {
-    ADCChannel.AIN0: DACChannel.AOUT1,
-    ADCChannel.AIN1: DACChannel.AOUT2,
-    ADCChannel.AIN2: DACChannel.AOUT3,
-    ADCChannel.AIN3: DACChannel.AOUT4,
-    ADCChannel.AIN4: DACChannel.AOUT5,
-    ADCChannel.AIN5: DACChannel.AOUT6,
-    ADCChannel.AIN6: DACChannel.AOUT7,
-    ADCChannel.AIN7: DACChannel.AOUT8,
+    AnalogIn.AIN1: DACChannel.AOUT1,
+    AnalogIn.AIN2: DACChannel.AOUT2,
+    AnalogIn.AIN3: DACChannel.AOUT3,
+    AnalogIn.AIN4: DACChannel.AOUT4,
+    AnalogIn.AIN5: DACChannel.AOUT5,
+    AnalogIn.AIN6: DACChannel.AOUT6,
+    AnalogIn.AIN7: DACChannel.AOUT7,
+    AnalogIn.AIN8: DACChannel.AOUT8,
 }
 
 
