@@ -15,9 +15,9 @@ _logger = logging.getLogger(__name__)
 
 NUM_CHANNELS = 8
 READS_PER_WRITE = 1
-RW_ERROR = 1e-3 # TODO: change to mV
+RW_ERROR = 1e-1 # TODO: change to mV
 MAX_VOLTAGE = 5.0
-VOLTAGE_STEP = 0.01
+VOLTAGE_STEP = 1.0
 WRITE_READ_DELAY = 0.1
 
 
