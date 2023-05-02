@@ -65,6 +65,18 @@ class ADCReg(Enum):
     REG_ADC2FSC0 = 0x19
     REG_ADC2FSC1 = 0x1A
 
+@unique
+class AnalogIn(Enum):
+    """EdgePi Analog Input Number"""
+
+    AIN1 = 0
+    AIN2 = 1
+    AIN3 = 2
+    AIN4 = 3
+    AIN5 = 4
+    AIN6 = 5
+    AIN7 = 6
+    AIN8 = 7
 
 @unique
 class ADCChannel(Enum):

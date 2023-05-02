@@ -32,6 +32,7 @@ from edgepi.adc.adc_constants import (
     ADC1RtdConfig,
     ADC2RtdConfig,
     AllowedChannels,
+    AnalogIn,
 )
 from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
 from edgepi.utilities.crc_8_atm import check_crc
@@ -77,6 +78,17 @@ class EdgePiADC(SPI):
     # default RTD model-dependent hardware constants
     RTD_SENSOR_RESISTANCE = 100 # RTD sensor resistance value (Ohms)
     RTD_SENSOR_RESISTANCE_VARIATION = 0.385 # RTD sensor resistance variation (Ohms/°C)
+
+    __analog_in_to_adc_in_map = {
+        AnalogIn.AIN1: CH.AIN0,
+        AnalogIn.AIN2: CH.AIN1,
+        AnalogIn.AIN3: CH.AIN2,
+        AnalogIn.AIN4: CH.AIN3,
+        AnalogIn.AIN5: CH.AIN4,
+        AnalogIn.AIN6: CH.AIN5,
+        AnalogIn.AIN7: CH.AIN6,
+        AnalogIn.AIN8: CH.AIN7
+    }
 
     def __init__(
         self,
@@ -442,7 +454,7 @@ class EdgePiADC(SPI):
         self.__continuous_time_delay(adc_num, state)
 
         _, voltage_code, _ = self.__voltage_read(adc_num)
-        # TODO: get RTD calibs from eeprom once added
+
         return code_to_temperature(
             voltage_code,
             self.r_ref,
@@ -505,7 +517,6 @@ class EdgePiADC(SPI):
         # send command to read conversion data.
         _, voltage_code, _ = self.__voltage_read(adc_num)
 
-        # TODO: get RTD calibs from eeprom once added
         return code_to_temperature(
             voltage_code,
             self.r_ref,
@@ -894,9 +905,9 @@ class EdgePiADC(SPI):
 
     def set_config(
         self,
-        adc_1_analog_in: CH = None,
+        adc_1_analog_in: AnalogIn = None,
         adc_1_data_rate: ADC1DataRate = None,
-        adc_2_analog_in: CH = None,
+        adc_2_analog_in: AnalogIn = None,
         adc_2_data_rate: ADC2DataRate = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
@@ -906,9 +917,9 @@ class EdgePiADC(SPI):
         Configure user accessible ADC settings, either collectively or individually.
 
         Args:
-            `adc_1_analog_in` (ADCChannel): the input voltage channel to measure via ADC1
+            `adc_1_analog_in` (AnalogIn): the input voltage channel to measure via ADC1
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
-            `adc_2_analog_in` (ADCChannel): the input voltage channel to measure via ADC2
+            `adc_2_analog_in` (AnalogIn): the input voltage channel to measure via ADC2
             `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second
             `filter_mode` (FilterMode): filter mode for ADC1.
                 Note this affects data rate. Please refer to module documentation
@@ -917,6 +928,11 @@ class EdgePiADC(SPI):
             `override_updates_validation` (bool): set to True to skip update validation
         """
         # pylint: disable=unused-argument
+
+        if adc_1_analog_in is not None:
+            adc_1_analog_in = self.__analog_in_to_adc_in_map[adc_1_analog_in]
+        if adc_2_analog_in is not None:
+            adc_2_analog_in = self.__analog_in_to_adc_in_map[adc_2_analog_in]
 
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
