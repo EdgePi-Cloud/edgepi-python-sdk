@@ -29,6 +29,7 @@ class PwmDevice:
         Return:
             N/A
         """
+        self.log.info("Enabling PWM")
         self.pwm.enable()
 
     def disable_pwm(self):

@@ -103,6 +103,7 @@ class EdgePiPWM(PwmDevice):
         self.gpio.clear_pin_state(GpioPins.DOUT1.value if self.pwm_num==GpioPins.PWM1 else\
                                 GpioPins.DOUT2.value)
         self.gpio.clear_pin_state(self.pwm_num.value)
+        self.log.info("Enabling PWM")
         self.enable_pwm()
     
     def disable(self):

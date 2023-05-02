@@ -66,3 +66,10 @@ def test_set_polarity_pwm(pwm_dev):
     pwm_dev.set_polarity(Polarity.INVERSED)
     result = pwm_dev.get_polarity()
     assert result != init_pol
+
+def test_enable(pwm_dev):
+    pwm_dev.enable()
+
+def test_disable(pwm_dev):
+    pwm_dev.disable()
+    
