@@ -931,8 +931,8 @@ class EdgePiADC(SPI):
         """
         # pylint: disable=possibly-unused-variable
         # pylint: disable=unused-argument
-        adc_1_ch  = self.__analog_in_to_adc_in_map[adc_1_analog_in]
-        adc_2_ch  = self.__analog_in_to_adc_in_map[adc_2_analog_in]
+        adc_1_ch  = self.__analog_in_to_adc_in_map.get(adc_1_analog_in)
+        adc_2_ch  = self.__analog_in_to_adc_in_map.get(adc_2_analog_in)
 
         args = filter_dict_list_key_val(locals(),
                                         ["self", "adc_1_analog_in", "adc_1_analog_in"],
