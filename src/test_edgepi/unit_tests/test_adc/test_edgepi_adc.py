@@ -98,34 +98,31 @@ def test_read_registers_to_map(mocker, adc):
         assert reg_dict[i] == adc_default_vals[i]
 
 
-def test_set_config(adc):
-    adc.set_config(adc_1_analog_in = AnalogIn.AIN1, adc_2_analog_in = AnalogIn.AINCOM)
-
 @pytest.mark.parametrize(
     "reg_updates, args, update_vals",
     [
         # set adc1 analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN4},
+            {"adc_1_ch": CH.AIN4},
             {ADCReg.REG_INPMUX.value: 0x4A},
         ),
         # set adc2 analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_2_analog_in": CH.AIN5},
+            {"adc_2_ch": CH.AIN5},
             {ADCReg.REG_ADC2MUX.value: 0x5A},
         ),
         # set adc analog_in to same pin
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_2_analog_in": CH.AIN2},
+            {"adc_2_ch": CH.AIN2},
             {ADCReg.REG_ADC2MUX.value: 0x2A},
         ),
         # set both adc analog_in
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN7, "adc_2_analog_in": CH.AIN5},
+            {"adc_1_ch": CH.AIN7, "adc_2_ch": CH.AIN5},
             {ADCReg.REG_INPMUX.value: 0x7A, ADCReg.REG_ADC2MUX.value: 0x5A},
         ),
         # set all mux pins
@@ -134,45 +131,45 @@ def test_set_config(adc):
             {
                 "adc_1_mux_n": CH.AIN7,
                 "adc_2_mux_n": CH.AIN0,
-                "adc_1_analog_in": CH.AIN6,
-                "adc_2_analog_in": CH.AIN5,
+                "adc_1_ch": CH.AIN6,
+                "adc_2_ch": CH.AIN5,
             },
             {ADCReg.REG_INPMUX.value: 0x67, ADCReg.REG_ADC2MUX.value: 0x50},
         ),
         # set adc1 analog_in to pin in use on adc2
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN2},
+            {"adc_1_ch": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x2A},
         ),
         # set mux pins to same pin on different adc's
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN2, "adc_2_analog_in": CH.AIN2},
+            {"adc_1_ch": CH.AIN2, "adc_2_ch": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x2A, ADCReg.REG_ADC2MUX.value: 0x2A},
         ),
         # set adc1 analog_in to same pin as mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN1},
+            {"adc_1_ch": CH.AIN1},
             {ADCReg.REG_INPMUX.value: 0x1A},
         ),
         # set adc2 analog_in to same pin as mux_n
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x33},
-            {"adc_2_analog_in": CH.AIN3},
+            {"adc_2_ch": CH.AIN3},
             {ADCReg.REG_ADC2MUX.value: 0x3A},
         ),
         # set adc 1 mux_n and mux_p to same pin
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.AIN2, "adc_1_mux_n": CH.AIN2},
+            {"adc_1_ch": CH.AIN2, "adc_1_mux_n": CH.AIN2},
             {ADCReg.REG_INPMUX.value: 0x22},
         ),
         # set adc 1 mux_n and mux_p to float mode
         (
             {ADCReg.REG_INPMUX.value: 0x01, ADCReg.REG_ADC2MUX.value: 0x23},
-            {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.FLOAT},
+            {"adc_1_ch": CH.FLOAT, "adc_1_mux_n": CH.FLOAT},
             {ADCReg.REG_INPMUX.value: 0xFF},
         ),
         # set idac_1_mux and idac_2_mux
@@ -651,7 +648,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
     "updates, rtd_state, err",
     [
         # RTD related setting: RTD1 ON (note: values are irrelevant, only key matters)
-        ({"adc_1_analog_in":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_1],pytest.raises(RTDEnabledError)),
+        ({"adc_1_ch":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_1],pytest.raises(RTDEnabledError)),
         ({"adc_1_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"idac_1_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"idac_2_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
@@ -660,7 +657,7 @@ def test_set_adc_reference(reference_config, pin_name, adc):
         ({"pos_ref_inp": 0},[RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         ({"neg_ref_inp": 0},[RTDModes.RTD_ON, ADCNum.ADC_1], pytest.raises(RTDEnabledError)),
         # RTD related setting: RTD2 ON (note: values are irrelevant, only key matters)
-        ({"adc_2_analog_in":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_2],pytest.raises(RTDEnabledError)),
+        ({"adc_2_ch":CH.AIN0},[RTDModes.RTD_ON,ADCNum.ADC_2],pytest.raises(RTDEnabledError)),
         ({"adc_2_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         ({"idac_1_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         ({"idac_2_mux": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
@@ -668,16 +665,16 @@ def test_set_adc_reference(reference_config, pin_name, adc):
         ({"idac_2_mag": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         ({"adc2_ref_inp": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], pytest.raises(RTDEnabledError)),
         # ADC2 related setting: RTD1 ON (note: values are irrelevant, only key matters)
-        ({"adc_2_analog_in": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_1], does_not_raise()),
+        ({"adc_2_ch": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_1], does_not_raise()),
         ({"adc_2_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_1], does_not_raise()),
         ({"adc2_ref_inp": 0}, [RTDModes.RTD_ON, ADCNum.ADC_1], does_not_raise()),
         # ADC1 related setting: RTD2 ON (note: values are irrelevant, only key matters)
-        ({"adc_1_analog_in": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_2], does_not_raise()),
+        ({"adc_1_ch": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_2], does_not_raise()),
         ({"adc_1_mux_n": CH.AIN0}, [RTDModes.RTD_ON, ADCNum.ADC_2], does_not_raise()),
         ({"pos_ref_inp": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], does_not_raise()),
         ({"neg_ref_inp": 0}, [RTDModes.RTD_ON, ADCNum.ADC_2], does_not_raise()),
         # RTD related setting: RTD OFF
-        ({"adc_1_analog_in": CH.AIN0}, [RTDModes.RTD_OFF, None], does_not_raise()),
+        ({"adc_1_ch": CH.AIN0}, [RTDModes.RTD_OFF, None], does_not_raise()),
         ({"adc_1_mux_n": CH.AIN0}, [RTDModes.RTD_OFF, None], does_not_raise()),
         ({"idac_1_mux": 0}, [RTDModes.RTD_OFF, None], does_not_raise()),
         ({"idac_2_mux": 0}, [RTDModes.RTD_OFF, None], does_not_raise()),
@@ -707,16 +704,16 @@ def test_validate_no_rtd_conflict(mocker, updates, rtd_state, err, adc):
 @pytest.mark.parametrize(
     "adc_num, diff_mode, config_calls",
     [
-        (ADCNum.ADC_1, DiffMode.DIFF_1, {"adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AIN1}),
-        (ADCNum.ADC_2, DiffMode.DIFF_1, {"adc_2_analog_in": CH.AIN0, "adc_2_mux_n": CH.AIN1}),
-        (ADCNum.ADC_1, DiffMode.DIFF_2, {"adc_1_analog_in": CH.AIN2, "adc_1_mux_n": CH.AIN3}),
-        (ADCNum.ADC_2, DiffMode.DIFF_2, {"adc_2_analog_in": CH.AIN2, "adc_2_mux_n": CH.AIN3}),
-        (ADCNum.ADC_1, DiffMode.DIFF_3, {"adc_1_analog_in": CH.AIN4, "adc_1_mux_n": CH.AIN5}),
-        (ADCNum.ADC_2, DiffMode.DIFF_3, {"adc_2_analog_in": CH.AIN4, "adc_2_mux_n": CH.AIN5}),
-        (ADCNum.ADC_1, DiffMode.DIFF_4, {"adc_1_analog_in": CH.AIN6, "adc_1_mux_n": CH.AIN7}),
-        (ADCNum.ADC_2, DiffMode.DIFF_4, {"adc_2_analog_in": CH.AIN6, "adc_2_mux_n": CH.AIN7}),
-        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {"adc_1_analog_in": CH.FLOAT, "adc_1_mux_n": CH.AINCOM}),
-        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {"adc_2_analog_in": CH.FLOAT, "adc_2_mux_n": CH.AINCOM}),
+        (ADCNum.ADC_1, DiffMode.DIFF_1, {"adc_1_ch": CH.AIN0, "adc_1_mux_n": CH.AIN1}),
+        (ADCNum.ADC_2, DiffMode.DIFF_1, {"adc_2_ch": CH.AIN0, "adc_2_mux_n": CH.AIN1}),
+        (ADCNum.ADC_1, DiffMode.DIFF_2, {"adc_1_ch": CH.AIN2, "adc_1_mux_n": CH.AIN3}),
+        (ADCNum.ADC_2, DiffMode.DIFF_2, {"adc_2_ch": CH.AIN2, "adc_2_mux_n": CH.AIN3}),
+        (ADCNum.ADC_1, DiffMode.DIFF_3, {"adc_1_ch": CH.AIN4, "adc_1_mux_n": CH.AIN5}),
+        (ADCNum.ADC_2, DiffMode.DIFF_3, {"adc_2_ch": CH.AIN4, "adc_2_mux_n": CH.AIN5}),
+        (ADCNum.ADC_1, DiffMode.DIFF_4, {"adc_1_ch": CH.AIN6, "adc_1_mux_n": CH.AIN7}),
+        (ADCNum.ADC_2, DiffMode.DIFF_4, {"adc_2_ch": CH.AIN6, "adc_2_mux_n": CH.AIN7}),
+        (ADCNum.ADC_1, DiffMode.DIFF_OFF, {"adc_1_ch": CH.FLOAT, "adc_1_mux_n": CH.AINCOM}),
+        (ADCNum.ADC_2, DiffMode.DIFF_OFF, {"adc_2_ch": CH.FLOAT, "adc_2_mux_n": CH.AINCOM}),
     ],
 )
 def test_select_differential(mocker, adc_num, diff_mode, config_calls, adc):
@@ -861,8 +858,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
     [
         (
             {
-                'adc_1_analog_in': None,
-                'adc_2_analog_in': None,
+                'adc_1_ch': None,
+                'adc_2_ch': None,
                 'adc_1_mux_n': None,
                 'adc_2_mux_n': None,
             },
@@ -876,8 +873,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
         ),
         (
             {
-                'adc_1_analog_in': CH.AIN0,
-                'adc_2_analog_in': None,
+                'adc_1_ch': CH.AIN0,
+                'adc_2_ch': None,
                 'adc_1_mux_n': None,
                 'adc_2_mux_n': None,
             },
@@ -887,8 +884,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
         ),
         (
             {
-                'adc_1_analog_in': None,
-                'adc_2_analog_in': CH.AIN0,
+                'adc_1_ch': None,
+                'adc_2_ch': CH.AIN0,
                 'adc_1_mux_n': None,
                 'adc_2_mux_n': None,
             },
@@ -898,8 +895,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
         ),
         (
             {
-                'adc_1_analog_in': None,
-                'adc_2_analog_in': None,
+                'adc_1_ch': None,
+                'adc_2_ch': None,
                 'adc_1_mux_n': CH.AIN0,
                 'adc_2_mux_n': None,
             },
@@ -909,8 +906,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
         ),
         (
             {
-                'adc_1_analog_in': None,
-                'adc_2_analog_in': None,
+                'adc_1_ch': None,
+                'adc_2_ch': None,
                 'adc_1_mux_n': None,
                 'adc_2_mux_n': CH.AIN0,
             },
@@ -920,8 +917,8 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
         ),
         (
             {
-                'adc_1_analog_in': CH.AIN0,
-                'adc_2_analog_in': CH.AIN1,
+                'adc_1_ch': CH.AIN0,
+                'adc_2_ch': CH.AIN1,
                 'adc_1_mux_n': CH.AIN2,
                 'adc_2_mux_n': CH.AIN3,
             },

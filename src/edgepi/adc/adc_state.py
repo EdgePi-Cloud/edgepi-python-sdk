@@ -87,9 +87,9 @@ class ADCState:
 
     def __get_current_rtd_state(self) -> dict[str, PropertyValue]:
         return {
-            "adc_1_analog_in": self.adc_1.mux_p.code,
+            "adc_1_ch": self.adc_1.mux_p.code,
             "adc_1_mux_n": self.adc_1.mux_n.code,
-            "adc_2_analog_in": self.adc_2.mux_p.code,
+            "adc_2_ch": self.adc_2.mux_p.code,
             "adc_2_mux_n": self.adc_2.mux_n.code,
             "idac_1_mux": self.__get_state(ADCProperties.IDAC1_MUX).code,
             "idac_2_mux": self.__get_state(ADCProperties.IDAC2_MUX).code,

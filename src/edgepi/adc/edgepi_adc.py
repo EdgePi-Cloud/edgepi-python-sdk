@@ -38,7 +38,7 @@ from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins, RTDPins
-from edgepi.utilities.utilities import filter_dict
+from edgepi.utilities.utilities import filter_dict, filter_dict_list_key_val
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
@@ -148,8 +148,8 @@ class EdgePiADC(SPI):
         # turn RTD off to allow updates in case RTD is on
         self.set_rtd(set_rtd=False)
         self.__config(
-            adc_1_analog_in=CH.FLOAT,
-            adc_2_analog_in=CH.FLOAT,
+            adc_1_ch=CH.FLOAT,
+            adc_2_ch=CH.FLOAT,
             adc_1_mux_n=CH.AINCOM,
             adc_2_mux_n=CH.AINCOM,
             checksum_mode=CheckMode.CHECK_BYTE_CRC,
@@ -627,8 +627,7 @@ class EdgePiADC(SPI):
 
         # no multiplexer config to update
         # TODO: refactor filter_dict to take list arg
-        args = filter_dict(locals(), "self", None)
-        args = filter_dict(args, "override_rtd_validation")
+        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], None)
         if not args:
             return []
 
@@ -663,11 +662,11 @@ class EdgePiADC(SPI):
         mux_n = diff_mode.value.mux_n
         mux_properties = {
             ADCNum.ADC_1: {
-                "adc_1_analog_in": mux_p,
+                "adc_1_ch": mux_p,
                 "adc_1_mux_n": mux_n,
             },
             ADCNum.ADC_2: {
-                "adc_2_analog_in": mux_p,
+                "adc_2_ch": mux_p,
                 "adc_2_mux_n": mux_n,
             },
         }
@@ -779,8 +778,8 @@ class EdgePiADC(SPI):
             `dict`: input multiplexer args formatted as {'mux_name': value}
         """
         mux_arg_names = {
-            "adc_1_analog_in": "adc_1_mux_p",
-            "adc_2_analog_in": "adc_2_mux_p",
+            "adc_1_ch": "adc_1_mux_p",
+            "adc_2_ch": "adc_2_mux_p",
             "adc_1_mux_n": "adc_1_mux_n",
             "adc_2_mux_n": "adc_2_mux_n",
         }
@@ -792,8 +791,8 @@ class EdgePiADC(SPI):
 
     def __config(
         self,
-        adc_1_analog_in: CH = None,
-        adc_2_analog_in: CH = None,
+        adc_1_ch: CH = None,
+        adc_2_ch: CH = None,
         adc_1_mux_n: CH = None,
         adc_2_mux_n: CH = None,
         adc_1_data_rate: ADC1DataRate = None,
@@ -818,8 +817,8 @@ class EdgePiADC(SPI):
         `set_config()` for modifying settings instead.
 
         Args:
-            `adc_1_analog_in` (ADCChannel): input voltage channel to map to ADC1 mux_p
-            `adc_2_analog_in` (ADCChannel): input voltage channel to map to ADC2 mux_p
+            `adc_1_ch` (ADCChannel): input voltage channel to map to ADC1 mux_p
+            `adc_2_ch` (ADCChannel): input voltage channel to map to ADC2 mux_p
             `adc_1_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
@@ -931,12 +930,13 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
             `override_updates_validation` (bool): set to True to skip update validation
         """
-        # pylint: disable=unused-argument
+        # pylint: disable=possibly-unused-argument
+        adc_1_ch  = self.__analog_in_to_adc_in_map[adc_1_analog_in]
+        adc_2_ch  = self.__analog_in_to_adc_in_map[adc_2_analog_in]
 
-        adc_1_analog_in  = self.__analog_in_to_adc_in_map[adc_1_analog_in]
-        adc_2_analog_in  = self.__analog_in_to_adc_in_map[adc_2_analog_in]
-
-        args = filter_dict(locals(), "self", None)
+        args = filter_dict_list_key_val(locals(),
+                                        ["self", "adc_1_analog_in", "adc_1_analog_in"],
+                                        None)
         self.__config(**args)
 
     def get_state(self, override_cache: bool = False) -> ADCState:
