@@ -26,6 +26,7 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     ADC1RtdConfig,
     ADC2RtdConfig,
+    AnalogIn,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
@@ -96,6 +97,9 @@ def test_read_registers_to_map(mocker, adc):
     for i in range(ADC_NUM_REGS):
         assert reg_dict[i] == adc_default_vals[i]
 
+
+def test_set_config(adc):
+    adc.set_config(adc_1_analog_in = AnalogIn.AIN1, adc_2_analog_in = AnalogIn.AINCOM)
 
 @pytest.mark.parametrize(
     "reg_updates, args, update_vals",

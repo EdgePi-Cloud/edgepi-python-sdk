@@ -104,12 +104,10 @@ def code_to_temperature(
     """
     code_bits = bitstring_from_list(code)
 
-    # refer to https://github.com/osensa/edgepi-python-sdk/issues/159 for computation details
-    if adc_num == ADCNum.ADC_1:
-        r_rtd = code_bits.uint / (2 ** 30) * ref_resistance
-    else:
-        r_rtd = code_bits.uint / (2 ** 22) * ref_resistance
-
+    # refer to Three-Wire RTD Measurement, Low-Side Reference
+    # https://www.ti.com/lit/an/sbaa275a/sbaa275a.pdf?ts=1683111690519&ref_url=https%253A%252F%252Fduckduckgo.com%252F
+    number_of_bits = 30 if adc_num == ADCNum.ADC_1 else 22
+    r_rtd = code_bits.uint / (2 ** number_of_bits) * ref_resistance
     temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
     _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")
 

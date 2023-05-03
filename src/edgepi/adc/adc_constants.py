@@ -77,6 +77,8 @@ class AnalogIn(Enum):
     AIN6 = 5
     AIN7 = 6
     AIN8 = 7
+    AINCOM = 10
+    FLOAT = 0xF
 
 @unique
 class ADCChannel(Enum):

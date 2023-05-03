@@ -13,7 +13,7 @@ from edgepi.adc.adc_constants import AnalogIn, ConvMode
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
-# configure ADC to sample A/DIN 1 (Refere the label on the enclosure)
+# configure ADC to sample A-IN 1 (Refer to the EdgePi label for details)
 edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.PULSE)
 
 # trigger sampling event
@@ -32,7 +32,7 @@ from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
-# configure ADC to sample input pin 4 (the input pins are 0-indexed)
+# configure ADC to sample A-IN 1 (Refer to the EdgePi label for details)
 edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.CONTINUOUS)
 
 # send command to start automatic conversions

@@ -87,7 +87,9 @@ class EdgePiADC(SPI):
         AnalogIn.AIN5: CH.AIN4,
         AnalogIn.AIN6: CH.AIN5,
         AnalogIn.AIN7: CH.AIN6,
-        AnalogIn.AIN8: CH.AIN7
+        AnalogIn.AIN8: CH.AIN7,
+        AnalogIn.AINCOM : CH.AINCOM,
+        AnalogIn.FLOAT : CH.FLOAT
     }
 
     def __init__(
@@ -931,10 +933,8 @@ class EdgePiADC(SPI):
         """
         # pylint: disable=unused-argument
 
-        if adc_1_analog_in is not None:
-            adc_1_analog_in = self.__analog_in_to_adc_in_map[adc_1_analog_in]
-        if adc_2_analog_in is not None:
-            adc_2_analog_in = self.__analog_in_to_adc_in_map[adc_2_analog_in]
+        adc_1_analog_in  = self.__analog_in_to_adc_in_map[adc_1_analog_in]
+        adc_2_analog_in  = self.__analog_in_to_adc_in_map[adc_2_analog_in]
 
         args = filter_dict(locals(), "self", None)
         self.__config(**args)
