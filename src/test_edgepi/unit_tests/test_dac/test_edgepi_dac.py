@@ -351,6 +351,20 @@ def test_set_gain_gain(mocker, set_gain, auto_code_change, mocker_values, result
         set_dac_gain.assert_called_once_with("DAC_GAIN") if set_gain \
             else clear_dac_gain.assert_called_once_with("DAC_GAIN")
 
+@pytest.mark.parametrize("mock_val, result", [([True,True], False),
+                                                ([True,False], True),
+                                                ([False,True], False),
+                                                ([False,False], False),
+                                                ])
+def test__get_gain_state(mocker, mock_val, result):
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM")
+    # mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
+    dac = EdgePiDAC()
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.read_pin_state", return_value = mock_val[0])
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.get_pin_direction", return_value = mock_val[1])
+    dac_gain = dac._EdgePiDAC__get_gain_state()
+    assert dac_gain == result
+
 @pytest.mark.parametrize("mock_val, analog_out, code, voltage, gain, result",
     [([0xA1,0x69, 0xDF, True], CH.AOUT8, True, True, True, [27103, 2.116, True]),
     ([0xA1,0x69, 0xDF, False], CH.AOUT7, True, True, True, [27103, 2.116, False]),
@@ -366,6 +380,8 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.read_pin_state", return_value = mock_val[3])
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val[0:3])
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC._EdgePiDAC__get_gain_state",
+                  side_effect=result[2])
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
