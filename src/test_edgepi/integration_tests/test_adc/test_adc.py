@@ -16,7 +16,8 @@ from edgepi.adc.adc_constants import (
     IDACMUX,
     IDACMAG,
     REFMUX,
-    DiffMode
+    DiffMode,
+    RTDModes,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -36,7 +37,7 @@ def fixture_adc():
         # EdgePI ADC defaults: adc_1_mux_p = AIN0, adc_1_mux_n = AINCOM
         (
             {
-                "adc_1_analog_in": CH.AIN0,
+                "adc_1_ch": CH.AIN0,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x0A,
@@ -44,7 +45,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN1,
+                "adc_1_ch": CH.AIN1,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x1A,
@@ -52,7 +53,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN2,
+                "adc_1_ch": CH.AIN2,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
@@ -60,7 +61,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN3,
+                "adc_1_ch": CH.AIN3,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x3A,
@@ -68,7 +69,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN4,
+                "adc_1_ch": CH.AIN4,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x4A,
@@ -76,7 +77,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN5,
+                "adc_1_ch": CH.AIN5,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x5A,
@@ -84,7 +85,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN6,
+                "adc_1_ch": CH.AIN6,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x6A,
@@ -92,7 +93,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN7,
+                "adc_1_ch": CH.AIN7,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x7A,
@@ -100,7 +101,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AINCOM,
+                "adc_1_ch": CH.AINCOM,
             },
             {
                 ADCReg.REG_INPMUX.value: 0xAA,
@@ -108,7 +109,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.FLOAT,
+                "adc_1_ch": CH.FLOAT,
             },
             {
                 ADCReg.REG_INPMUX.value: 0xFA,
@@ -116,7 +117,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN0, "adc_1_mux_n": CH.AIN0,
+                "adc_1_ch": CH.AIN0, "adc_1_mux_n": CH.AIN0,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x0,
@@ -125,7 +126,7 @@ def fixture_adc():
         # EdgePI ADC defaults: adc_2_mux_p = AIN0, adc_2_mux_n = AIN1
         (
             {
-                "adc_2_analog_in": CH.AIN0,
+                "adc_2_ch": CH.AIN0,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x0A,
@@ -133,7 +134,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN1,
+                "adc_2_ch": CH.AIN1,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x1A,
@@ -141,7 +142,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN2,
+                "adc_2_ch": CH.AIN2,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x2A,
@@ -149,7 +150,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN3,
+                "adc_2_ch": CH.AIN3,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x3A,
@@ -157,7 +158,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN4,
+                "adc_2_ch": CH.AIN4,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x4A,
@@ -165,7 +166,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN5,
+                "adc_2_ch": CH.AIN5,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x5A,
@@ -173,7 +174,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN6,
+                "adc_2_ch": CH.AIN6,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x6A,
@@ -181,7 +182,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AIN7,
+                "adc_2_ch": CH.AIN7,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0x7A,
@@ -189,7 +190,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.AINCOM,
+                "adc_2_ch": CH.AINCOM,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0xAA,
@@ -197,7 +198,7 @@ def fixture_adc():
         ),
         (
             {
-                "adc_2_analog_in": CH.FLOAT,
+                "adc_2_ch": CH.FLOAT,
             },
             {
                 ADCReg.REG_ADC2MUX.value: 0xFA,
@@ -205,8 +206,8 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN1,
-                "adc_2_analog_in": CH.AIN2,
+                "adc_1_ch": CH.AIN1,
+                "adc_2_ch": CH.AIN2,
                 "adc_1_mux_n": CH.AIN3,
                 "adc_2_mux_n": CH.AIN4,
             },
@@ -217,8 +218,8 @@ def fixture_adc():
         ),
         (
             {
-                "adc_1_analog_in": CH.AIN2,
-                "adc_2_analog_in": CH.AIN2,
+                "adc_1_ch": CH.AIN2,
+                "adc_2_ch": CH.AIN2,
             },
             {
                 ADCReg.REG_INPMUX.value: 0x2A,
@@ -774,7 +775,7 @@ def test_config(args, updated_vals, adc):
 def test_voltage_individual(ch, adc):
     adc._EdgePiADC__config(
         conversion_mode=ConvMode.PULSE,
-        adc_1_analog_in=ch,
+        adc_1_ch=ch,
         adc_1_data_rate=ADC1DataRate.SPS_20,
     )
     out = adc.single_sample()
@@ -808,12 +809,12 @@ def test_voltage_continuous(adc_num, ch, adc):
         if adc_num == ADCNum.ADC_1:
             adc._EdgePiADC__config(
                 conversion_mode=ConvMode.CONTINUOUS,
-                adc_1_analog_in=ch,
+                adc_1_ch=ch,
                 adc_1_data_rate=ADC1DataRate.SPS_100
             )
         else:
             adc._EdgePiADC__config(
-                adc_2_analog_in=ch,
+                adc_2_ch=ch,
                 adc_2_data_rate=ADC2DataRate.SPS_100
             )
         adc.start_conversions(adc_num)
@@ -843,15 +844,15 @@ def test_select_differential(adc_num, diff, mux_reg, mux_reg_val, adc):
     adc.select_differential(adc_num, diff)
     assert adc._EdgePiADC__read_register(mux_reg) == [mux_reg_val]
 
-
 @pytest.mark.parametrize(
-    "enable",
+    "enable, rtd_mode, adc_num, expected",
     [
-        (True),
-        (False)
+        (True, RTDModes.RTD_ON, ADCNum.ADC_1, ADCNum.ADC_1),
+        (True, RTDModes.RTD_ON, ADCNum.ADC_2, ADCNum.ADC_2),
+        (False, RTDModes.RTD_OFF, ADCNum.ADC_1, None)
     ]
 )
-def test_rtd_mode(enable, adc):
-    # TODO: pass if no error raised for now, check RTD is on once get_state is implemented
-    adc.rtd_mode(enable=enable)
-    assert adc.get_state().rtd_on == enable
+def test_set_rtd(enable, rtd_mode, adc_num, expected, adc):
+    adc.set_rtd(set_rtd=enable, adc_num=adc_num)
+    assert adc.get_state().rtd_mode == rtd_mode
+    assert adc.get_state().rtd_adc == expected

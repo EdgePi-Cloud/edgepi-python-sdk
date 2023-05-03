@@ -9,7 +9,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 # pylint: disable=wrong-import-position
 # mocked periphery module needs to be placed above
-from edgepi.adc.edgepi_adc import ADCState
+from edgepi.adc.adc_state import ADCState
 from edgepi.adc.adc_query_lang import ADCProperties
 from edgepi.adc.adc_constants import (
     ADC1DataRate,
@@ -20,8 +20,9 @@ from edgepi.adc.adc_constants import (
     ConvMode,
     FilterMode,
     StatusByte,
+    ADCNum,
+    RTDModes
 )
-
 # mock default register values
 ADC_REGS = {
     ADCReg.REG_ID.value: 0x0,
@@ -370,39 +371,437 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.filter_mode",
             ADCProperties.FILTER_MODE.value.values[FilterMode.FIR.value.op_code],
         ),
-        # RTD on
+        # RTD OFF
         (
             {
-                ADCReg.REG_INPMUX.value: 0x56,
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x0,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x01,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x02,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x03,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x05,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x06,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x07,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x40,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x80,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_OFF
+        ),
+        # RTD State None
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0x0,
                 ADCReg.REG_IDACMUX.value: 0x98,
                 ADCReg.REG_IDACMAG.value: 0x44,
-                ADCReg.REG_REFMUX.value: 0b00011100,
+                ADCReg.REG_REFMUX.value: 27,
             },
-            "state.rtd_on",
-            True
+            "state.rtd_mode",
+            None
         ),
-        # RTD off
+        # RTD ADC1 ON
         (
             {
-                ADCReg.REG_INPMUX.value: 0xFA,
-                ADCReg.REG_IDACMUX.value: 0xBB,
-                ADCReg.REG_IDACMAG.value: 0x00,
-                ADCReg.REG_REFMUX.value: 0x00,
-            },
-            "state.rtd_on",
-            False
-        ),
-        # RTD improperly configured
-        (
-            {
-                ADCReg.REG_INPMUX.value: 0x56,
+                ADCReg.REG_INPMUX.value: 0x76,
                 ADCReg.REG_IDACMUX.value: 0x98,
-                ADCReg.REG_IDACMAG.value: 0x48,
-                ADCReg.REG_REFMUX.value: 0b00011100,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_REFMUX.value: 27,
             },
-            "state.rtd_on",
-            False
+            "state.rtd_mode",
+            RTDModes.RTD_ON
         ),
+        # RTD ADC2 ON
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+1,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+2,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+3,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+4,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+5,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+6,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+7,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+64,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+128,
+            },
+            "state.rtd_mode",
+            RTDModes.RTD_ON
+        ),
+
+
+        # Check ADC number for RTD None
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x0,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x01,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x02,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x03,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x05,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x06,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x07,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x40,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_IDACMUX.value: 0xBB,
+                ADCReg.REG_IDACMAG.value: 0x0,
+                ADCReg.REG_REFMUX.value: 0x0,
+                ADCReg.REG_ADC2CFG.value: 0x80,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0x0,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_REFMUX.value: 27,
+            },
+            "state.rtd_adc",
+            None
+        ),
+        # Check ADC number for RTD ADC1
+        (
+            {
+                ADCReg.REG_INPMUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_REFMUX.value: 27,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_1
+        ),
+        # Check ADC number for RTD ADC2
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+1,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+2,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+3,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+4,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+5,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+6,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+7,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+64,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+        (
+            {
+                ADCReg.REG_ADC2MUX.value: 0x76,
+                ADCReg.REG_IDACMUX.value: 0x98,
+                ADCReg.REG_IDACMAG.value: 0x44,
+                ADCReg.REG_ADC2CFG.value: 24+128,
+            },
+            "state.rtd_adc",
+            ADCNum.ADC_2
+        ),
+
+
         # ADC1 Data Rate
         (
             {ADCReg.REG_MODE2.value: 0x00},
@@ -505,7 +904,7 @@ def _apply_register_updates(reg_map: dict, updates: dict):
             "state.adc_2.data_rate",
             ADCProperties.DATA_RATE_2.value.values[ADC2DataRate.SPS_800.value.op_code],
         ),
-    ],
+    ]
 )
 def test_adc_state_init(updates, state_property, expected):
     reg_map = deepcopy(ADC_REGS)

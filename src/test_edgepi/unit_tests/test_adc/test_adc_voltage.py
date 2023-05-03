@@ -105,13 +105,12 @@ def test__adc_voltage_to_input_voltage(code, voltage, num_bytes):
            voltage * (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
 
 @pytest.mark.parametrize(
-    "code, ref_resistance, temp_offset, rtd_conv_constant",
+    "code, ref_resistance, temp_offset, rtd_conv_constant, adc_num, expected",
     [
-        ([51, 16, 126, 166], 1326.20, 100, 0.385),
-        ([0x8, 0x43, 0x1C, 0x45], 1326.20, 100, 0.385),
+        ([0x03, 0x85, 0x1E, 0xB8], 2000, 100, 0.385, ADCNum.ADC_1, 25.97),
+        ([0x03, 0x85, 0x1E], 2000, 100, 0.385, ADCNum.ADC_2, 25.97),
     ]
 )
-def test_code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant):
-    # TODO: add check for expected value later if any values are known. No errors raised
-    # is good enough for now.
-    code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant)
+def test_code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num,expected):
+    temperature = code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num)
+    assert expected == pytest.approx(temperature, 0.001)
