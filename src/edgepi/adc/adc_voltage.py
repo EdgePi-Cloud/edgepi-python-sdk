@@ -4,7 +4,7 @@
 import logging
 
 from bitstring import BitArray
-from edgepi.adc.adc_constants import ADCReadInfo
+from edgepi.adc.adc_constants import ADCReadInfo, ADCNum
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list
 
@@ -84,7 +84,8 @@ def code_to_temperature(
     code: list[int],
     ref_resistance: float,
     rtd_sensor_resistance: float,
-    rtd_sensor_resistance_variation: float
+    rtd_sensor_resistance_variation: float,
+    adc_num: ADCNum
     ) -> float:
     """
     Converts ADC voltage read digital code to temperature. Intended for use in RTD sampling.
@@ -104,7 +105,11 @@ def code_to_temperature(
     code_bits = bitstring_from_list(code)
 
     # refer to https://github.com/osensa/edgepi-python-sdk/issues/159 for computation details
-    r_rtd = code_bits.uint / (2 ** 30) * ref_resistance
+    if adc_num == ADCNum.ADC_1:
+        r_rtd = code_bits.uint / (2 ** 30) * ref_resistance
+    else:
+        r_rtd = code_bits.uint / (2 ** 22) * ref_resistance
+    
 
     temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
     _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")

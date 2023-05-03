@@ -7,14 +7,14 @@ Note, the EdgePi ADC can be used with two different sampling modes: pulse conver
 ### Reading Voltage from Analog Input Pin: Pulse Conversion Mode
 In pulse conversion mode, a sampling event must be manually triggered. This can be achieved as follows.
 ```python
-from edgepi.dac.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ConvMode
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import AnalogIn, ConvMode
 
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
-# configure ADC to sample input pin 4 (the input pins are 0-indexed)
-edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.PULSE)
+# configure ADC to sample A/DIN 1 (Refere the label on the enclosure)
+edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.PULSE)
 
 # trigger sampling event
 out = edgepi_adc.single_sample()
@@ -27,26 +27,76 @@ to perform continuous conversion, the user must send a command to start the conv
 sampling data must also be manually by the user.
 ```python
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ConvMode
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum
 
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
 # configure ADC to sample input pin 4 (the input pins are 0-indexed)
-edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.CONTINUOUS)
+edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.CONTINUOUS)
 
 # send command to start automatic conversions
-edgepi_adc.start_conversions()
+edgepi_adc.start_conversions(ADCNum.ADC_1)
 
 # perform 10 voltage reads
 for _ in range(10):
-  out = edgepi_adc.read_voltage()
+  out = edgepi_adc.read_voltage(ADCNum.ADC_1)
   print(out)
   
 # stop automatic conversions
-edgepi_adc.stop_conversions()
+edgepi_adc.stop_conversions(ADCNum.ADC_1)
 ```
 ___
+
+### Reading RTD Measurements: Pulse Conversion Mode
+Input 4-8 can be configured to read three-leaded RTD sensor.
+```python
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum
+
+# initialize ADC
+edgepi_adc = EdgePiADC()
+
+edgepi_adc.set_config(conversion_mode=ConvMode.PULSE)
+# Both ADC_1 and ADC_2 are available but only one of them is used at a time. It uses ADC_2 by default
+edgepi_adc.set_rtd(True, ADCNum.ADC_2)
+
+# trigger sampling event
+edgepi_adc.single_sample_rtd()
+
+# Disable RTD
+edgepi_adc.set_rtd(False, ADCNum.ADC_2)
+
+```
+### Reading RTD Measurements: Continuous Conversion Mode
+Input 4-8 can be configured to read three-leaded RTD sensor.
+```python
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum
+
+# initialize ADC
+edgepi_adc = EdgePiADC()
+
+edgepi_adc.set_config(conversion_mode=ConvMode.CONTINUOUS)
+# Both ADC_1 and ADC_2 are available but only one of them is used at a time
+edgepi_adc.set_rtd(True, ADCNum.ADC_2)
+
+# send command to start automatic conversions
+edgepi_adc.start_conversions(ADCNum.ADC_2)
+
+# perform 10 voltage reads
+for _ in range(10):
+  out = edgepi_adc.read_rtd_temperature()
+  print(out)
+  
+# stop automatic conversions
+edgepi_adc.stop_conversions(ADCNum.ADC_2)
+# Disable RTD
+edgepi_adc.set_rtd(False, ADCNum.ADC_2)
+
+```
+___
+
 ## Using ADC Module
 This section introduces ADC functionality available to users.
 

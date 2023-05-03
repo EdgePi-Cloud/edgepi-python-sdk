@@ -521,7 +521,8 @@ class EdgePiADC(SPI):
             voltage_code,
             self.r_ref,
             self.rtd_sensor_resistance,
-            self.rtd_sensor_resistance_variation
+            self.rtd_sensor_resistance_variation,
+            adc_num
         )
 
     def reset(self):
