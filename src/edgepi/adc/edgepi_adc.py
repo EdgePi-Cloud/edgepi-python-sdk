@@ -626,8 +626,7 @@ class EdgePiADC(SPI):
             adc_2_mux_n = None
 
         # no multiplexer config to update
-        # TODO: refactor filter_dict to take list arg
-        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], None)
+        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], [None])
         if not args:
             return []
 
@@ -930,13 +929,14 @@ class EdgePiADC(SPI):
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
             `override_updates_validation` (bool): set to True to skip update validation
         """
-        # pylint: disable=possibly-unused-argument
+        # pylint: disable=possibly-unused-variable
+        # pylint: disable=unused-argument
         adc_1_ch  = self.__analog_in_to_adc_in_map[adc_1_analog_in]
         adc_2_ch  = self.__analog_in_to_adc_in_map[adc_2_analog_in]
 
         args = filter_dict_list_key_val(locals(),
                                         ["self", "adc_1_analog_in", "adc_1_analog_in"],
-                                        None)
+                                        [None])
         self.__config(**args)
 
     def get_state(self, override_cache: bool = False) -> ADCState:

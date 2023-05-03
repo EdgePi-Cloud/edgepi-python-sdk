@@ -26,7 +26,6 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     ADC1RtdConfig,
     ADC2RtdConfig,
-    AnalogIn,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
