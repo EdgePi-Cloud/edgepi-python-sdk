@@ -381,7 +381,7 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.read_pin_state", return_value = mock_val[3])
     mocker.patch("edgepi.peripherals.spi.SpiDevice.transfer", return_value=mock_val[0:3])
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC._EdgePiDAC__get_gain_state",
-                  side_effect=[mock_val[3] if gain == True else result[2], mock_val[3]])
+                  side_effect=[mock_val[3] if gain is True else result[2], mock_val[3]])
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
