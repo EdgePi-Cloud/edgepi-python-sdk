@@ -289,8 +289,12 @@ class EdgePiDAC(spi):
         Return:
             gain_state (bool): True - gain enalbed, False - gain disabled
         """
-        _, _, gain_state = self.get_state(gain=True)
-        return gain_state
+
+        pin_state = self.gpio.read_pin_state(GainPin.DAC_GAIN.value)
+        pin_dir = self.gpio.get_pin_direction(GainPin.DAC_GAIN.value)
+        if pin_state and not pin_dir:
+            return True
+        return False
 
     def get_state(self, analog_out: DACChannel = None,
                         code: bool = None,
@@ -314,7 +318,7 @@ class EdgePiDAC(spi):
         """
         code_val = self.channel_readback(analog_out) if code else None
         voltage_val = self.compute_expected_voltage(analog_out) if voltage else None
-        gain_state = self.gpio.read_pin_state(GainPin.DAC_GAIN.value) if gain else None
+        gain_state = self.__get_gain_state() if gain else None
         self.log.debug(f":get_state: state of {analog_out} code {code_val},"
                        f"expected {voltage_val}, dac_gain {gain_state}")
         return code_val, voltage_val, gain_state
