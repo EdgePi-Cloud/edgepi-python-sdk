@@ -65,6 +65,20 @@ class ADCReg(Enum):
     REG_ADC2FSC0 = 0x19
     REG_ADC2FSC1 = 0x1A
 
+@unique
+class AnalogIn(Enum):
+    """EdgePi Analog Input Number"""
+
+    AIN1 = 0
+    AIN2 = 1
+    AIN3 = 2
+    AIN4 = 3
+    AIN5 = 4
+    AIN6 = 5
+    AIN7 = 6
+    AIN8 = 7
+    AINCOM = 10
+    FLOAT = 0xF
 
 @unique
 class ADCChannel(Enum):
@@ -342,13 +356,13 @@ class RTDModes(Enum):
 class ADC1RtdConfig(Enum):
     "ADC1.__config args for for turning RTD mode on/off"
     ON = {
-        "adc_1_analog_in": ADCChannel.AIN7,
+        "adc_1_ch": ADCChannel.AIN7,
         "adc_1_mux_n": ADCChannel.AIN6,
         "pos_ref_inp": REFMUX.POS_REF_EXT_AIN4,
         "neg_ref_inp": REFMUX.NEG_REF_EXT_AIN5,
     }
     OFF = {
-        "adc_1_analog_in": ADCChannel.FLOAT,
+        "adc_1_ch": ADCChannel.FLOAT,
         "adc_1_mux_n": ADCChannel.AINCOM,
         "pos_ref_inp": REFMUX.POS_REF_INT_2P5,
         "neg_ref_inp": REFMUX.NEG_REF_INT_2P5,
@@ -357,12 +371,12 @@ class ADC1RtdConfig(Enum):
 class ADC2RtdConfig(Enum):
     "ADC2.__config args for for turning RTD mode on/off"
     ON = {
-        "adc_2_analog_in": ADCChannel.AIN7,
+        "adc_2_ch": ADCChannel.AIN7,
         "adc_2_mux_n": ADCChannel.AIN6,
         "adc2_ref_inp": ADC2REFMUX.AIN4_AIN5,
     }
     OFF = {
-        "adc_2_analog_in": ADCChannel.FLOAT,
+        "adc_2_ch": ADCChannel.FLOAT,
         "adc_2_mux_n": ADCChannel.AINCOM,
         "adc2_ref_inp": ADC2REFMUX.INTERNAL_2P5,
     }
