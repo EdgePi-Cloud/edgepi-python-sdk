@@ -9,6 +9,16 @@ class InvalidPinName(Exception):
     """Raised invalid pin name"""
 
 class EdgePiDigitalOutput():
+    _dout_aout_pair = {
+        GpioPins.DOUT1 : GpioPins.AO_EN1,
+        GpioPins.DOUT2 : GpioPins.AO_EN2,
+        GpioPins.DOUT3 : GpioPins.AO_EN3,
+        GpioPins.DOUT4 : GpioPins.AO_EN4,
+        GpioPins.DOUT5 : GpioPins.AO_EN5,
+        GpioPins.DOUT6 : GpioPins.AO_EN6,
+        GpioPins.DOUT7 : GpioPins.AO_EN7,
+        GpioPins.DOUT8 : GpioPins.AO_EN8,
+    }
     """handling digital output"""
     def __init__(self):
         # To limit access to input functionality, using composition rather than inheritance
@@ -25,6 +35,7 @@ class EdgePiDigitalOutput():
             raise ValueError(f'Invalid state passed: {state}')
         if pin_name is None or pin_name.value not in [pins.value for pins in DOUTPins]:
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
+        self.gpio.clear_pin_state(self._dout_aout_pair[pin_name].value)
         if state:
             self.gpio.set_pin_state(pin_name.value)
         else:
