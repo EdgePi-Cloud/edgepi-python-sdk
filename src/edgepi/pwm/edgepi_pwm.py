@@ -9,7 +9,7 @@ from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.pwm.pwm_constants import PWMCh, Polarity
 
-class EdgePiPWM(PwmDevice):
+class EdgePiPWM():
 
     __pwm_pin_to_channel = {GpioPins.PWM1 : PWMCh.PWM_1,
                             GpioPins.PWM2 : PWMCh.PWM_2}
@@ -20,9 +20,14 @@ class EdgePiPWM(PwmDevice):
         # Control internal mux to enable/disable PWM
         self.pwm_num = pwm_num
         self.gpio = EdgePiGPIO()
-        super().__init__(channel=self.__pwm_pin_to_channel[pwm_num].value.channel, 
+        self.pwm = PwmDevice(channel=self.__pwm_pin_to_channel[pwm_num].value.channel, 
                          chip=self.__pwm_pin_to_channel[pwm_num].value.chip)
-        self.open_pwm()
+        self.channel = self.__pwm_pin_to_channel[pwm_num].value.channel
+        self.chip = self.__pwm_pin_to_channel[pwm_num].value.chip
+        self.freq = None
+        self.duty_cycle = None
+        self.polarity = None
+        self.pwm.open_pwm()
 
     def set_frequency(self, frequency: int):
         """
@@ -32,7 +37,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             N/A
         """
-        self.set_frequency_pwm(frequency)
+        self.pwm.set_frequency_pwm(frequency)
 
     def get_frequency(self):
         """
@@ -42,9 +47,9 @@ class EdgePiPWM(PwmDevice):
         Returns:
             frequency (int): frequency value
         """ 
-        return self.get_frequency_pwm()
+        return self.pwm.get_frequency_pwm()
 
-    def set_dutycycle(self, duty_cycle: float):
+    def set_duty_cycle(self, duty_cycle: float):
         """
         Set duty_cycle
         Args:
@@ -52,9 +57,9 @@ class EdgePiPWM(PwmDevice):
         Returns:
             N/A
         """
-        self.set_duty_cycle_pwm(duty_cycle)
+        self.pwm.set_duty_cycle_pwm(duty_cycle)
     
-    def get_dutycycle(self):
+    def get_duty_cycle(self):
         """
         Get duty_cycle
         Args:
@@ -62,7 +67,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             duty_cycle (int): duty_cycle value
         """ 
-        return self.get_duty_cycle_pwm()
+        return self.pwm.get_duty_cycle_pwm()
 
     def set_polarity(self, polarity: Polarity):
         """
@@ -72,7 +77,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             N/A
         """
-        self.set_polarity_pwm(polarity.value)
+        self.pwm.set_polarity_pwm(polarity.value)
     
     def get_polarity(self):
         """
@@ -82,7 +87,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             polarity (int): polarity value
         """ 
-        return self.get_polarity_pwm()
+        return self.pwm.get_polarity_pwm()
     
     def enable(self):
         """
@@ -94,13 +99,13 @@ class EdgePiPWM(PwmDevice):
                                 GpioPins.DOUT2.value)
         self.gpio.clear_pin_state(self.pwm_num.value)
         self.log.info("Enabling PWM")
-        self.enable_pwm()
+        self.pwm.enable_pwm()
     
     def disable(self):
         """
         Disable pwm output
         """
-        self.disable_pwm()
+        self.pwm.disable_pwm()
         self.gpio.set_pin_state(self.pwm_num.value)
 
     def get_enabled(self):
@@ -111,7 +116,7 @@ class EdgePiPWM(PwmDevice):
         Returns:
             enabled (bool): True enabled, False Disabled
         """
-        return self.get_enabled_pwm()
+        return self.pwm.get_enabled_pwm()
 
     def close(self):
         """
@@ -121,4 +126,4 @@ class EdgePiPWM(PwmDevice):
         Returns:
             N/A
         """
-        self.close_pwm()
+        self.pwm.close_pwm()
