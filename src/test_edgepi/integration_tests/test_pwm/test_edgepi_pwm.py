@@ -11,25 +11,25 @@ _logger = logging.getLogger(__name__)
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_pwm():
-    pwm_dev = EdgePiPWM(GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL)
+    pwm_dev = EdgePiPWM(GpioPins.PWM1)
+    pwm_dev.set_frequency(1000)
+    pwm_dev.set_duty_cycle(0.5)
+    pwm_dev.set_polarity(Polarity.NORMAL)
     yield pwm_dev
 
 @pytest.mark.parametrize(
-    "pwm_num, freq, duty_cycle, polarity, result",
+    "pwm_num, result",
     [
-        (GpioPins.PWM1, 1000, 0.5, Polarity.NORMAL,
-         [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip, 1000, 0.5, Polarity.NORMAL]),
-        (GpioPins.PWM2, 1000, 0.1, Polarity.INVERSED, 
-         [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip, 1000, 0.1, Polarity.INVERSED]),
+        (GpioPins.PWM1,
+         [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
+        (GpioPins.PWM2, 
+         [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
-def test_pwm_init(pwm_num, freq, duty_cycle, polarity, result):
-    pwm_dev = EdgePiPWM(pwm_num=pwm_num,freq=freq, duty_cycle=duty_cycle, polarity=polarity)
+def test_pwm_init(pwm_num, result):
+    pwm_dev = EdgePiPWM(pwm_num=pwm_num)
     assert pwm_dev.channel == result[0]
     assert pwm_dev.chip == result[1]
-    assert pwm_dev.freq == result[2]
-    assert pwm_dev.duty_cycle == result[3]
-    assert pwm_dev.polarity.value == result[4].value
     pwm_dev.close()
 
 def test_get_frequency_pwm(pwm_dev):
@@ -48,28 +48,38 @@ def test_set_frequency_pwm(freq, pwm_dev):
 # TODO:When set frequncy test is called before get duty cycle pwm, the duty cycle value chagnes
 # However when it is called individually, it is working as expectd.
 def test_get_duty_cycle_pwm(pwm_dev):
-    dc = pwm_dev.get_dutycycle()
+    dc = pwm_dev.get_duty_cycle()
     assert dc == 0.5
+    pwm_dev.close()
 
 def test_set_duty_cycle_pwm(pwm_dev):
-    init_duty_cycle = pwm_dev.get_dutycycle()
-    pwm_dev.set_dutycycle(0.6)
-    result = pwm_dev.get_dutycycle()
+    init_duty_cycle = pwm_dev.get_duty_cycle()
+    pwm_dev.set_duty_cycle(0.6)
+    result = pwm_dev.get_duty_cycle()
     assert result != init_duty_cycle
+    pwm_dev.close()
 
 def test_get_polarity_pwm(pwm_dev):
     pol = pwm_dev.get_polarity()
     assert pol == Polarity.NORMAL.value
+    pwm_dev.close()
 
 def test_set_polarity_pwm(pwm_dev):
     init_pol = pwm_dev.get_polarity()
     pwm_dev.set_polarity(Polarity.INVERSED)
     result = pwm_dev.get_polarity()
     assert result != init_pol
+    pwm_dev.close()
 
 def test_enable(pwm_dev):
     pwm_dev.enable()
+    assert pwm_dev.get_enabled() == True
+    pwm_dev.close()
+
 
 def test_disable(pwm_dev):
     pwm_dev.disable()
+    assert pwm_dev.get_enabled() == False
+    pwm_dev.close()
+
     

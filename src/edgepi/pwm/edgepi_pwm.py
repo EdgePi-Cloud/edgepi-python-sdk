@@ -24,9 +24,6 @@ class EdgePiPWM():
                          chip=self.__pwm_pin_to_channel[pwm_num].value.chip)
         self.channel = self.__pwm_pin_to_channel[pwm_num].value.channel
         self.chip = self.__pwm_pin_to_channel[pwm_num].value.chip
-        self.freq = None
-        self.duty_cycle = None
-        self.polarity = None
         self.pwm.open_pwm()
 
     def set_frequency(self, frequency: int):

@@ -22,9 +22,9 @@ def fixture_test_pwm(mocker):
     "pwm_num, result",
     [
         (GpioPins.PWM1,
-         [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip, None,None,None]),
+         [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
         (GpioPins.PWM2, 
-         [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip, None,None,None]),
+         [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
 def test_pwm_init(mocker, pwm_num, result):
@@ -34,9 +34,6 @@ def test_pwm_init(mocker, pwm_num, result):
     mock_pwm.assert_called_once_with(result[1], result[0])
     assert pwm_dev.channel == result[0]
     assert pwm_dev.chip == result[1]
-    assert pwm_dev.freq == result[2]
-    assert pwm_dev.duty_cycle == result[3]
-    assert pwm_dev.polarity == result[4]
 
 @pytest.mark.parametrize(
     "pwm_num, result",
