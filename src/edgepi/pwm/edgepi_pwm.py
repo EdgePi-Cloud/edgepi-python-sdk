@@ -15,10 +15,7 @@ class EdgePiPWM(PwmDevice):
                             GpioPins.PWM2 : PWMCh.PWM_2}
 
     """handling PWM output"""
-    def __init__(self, pwm_num: GpioPins,
-                       freq: int = None,
-                       duty_cycle: float = None,
-                       polarity: Polarity = None):
+    def __init__(self, pwm_num: GpioPins):
         self.log = logging.getLogger(__name__)
         # Control internal mux to enable/disable PWM
         self.pwm_num = pwm_num
@@ -26,13 +23,6 @@ class EdgePiPWM(PwmDevice):
         super().__init__(channel=self.__pwm_pin_to_channel[pwm_num].value.channel, 
                          chip=self.__pwm_pin_to_channel[pwm_num].value.chip)
         self.open_pwm()
-        self.freq = freq
-        self.duty_cycle = duty_cycle
-        self.polarity = polarity
-        self.log.info(f"__init__: Setting DC,FEQ,POL = {self.duty_cycle}, {self.freq}, {self.polarity}")
-        self.set_dutycycle(self.duty_cycle)
-        self.set_frequency(self.freq)
-        self.set_polarity(self.polarity)
 
     def set_frequency(self, frequency: int):
         """

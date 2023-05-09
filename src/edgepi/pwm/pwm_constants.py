@@ -18,8 +18,8 @@ class PWMChSysfs:
 @unique
 class PWMCh(Enum):
     """PWM Channel Enum"""
-    PWM_1 = PWMChSysfs(chip=0, channel=0)
-    PWM_2 = PWMChSysfs(chip=0, channel=1)
+    PWM_1 = PWMChSysfs(chip=0, channel=1)
+    PWM_2 = PWMChSysfs(chip=0, channel=0)
 
 @unique
 class Polarity(Enum):
