@@ -12,27 +12,27 @@ import pytest
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, InvalidPinName
 
-@pytest.mark.parametrize("pin_name, state, error",
-                        [(GpioPins.DOUT1, True, does_not_raise()),
-                         (GpioPins.DOUT2, True, does_not_raise()),
-                         (GpioPins.DOUT3, True, does_not_raise()),
-                         (GpioPins.DOUT4, True, does_not_raise()),
-                         (GpioPins.DOUT5, True, does_not_raise()),
-                         (GpioPins.DOUT6, True, does_not_raise()),
-                         (GpioPins.DOUT7, True, does_not_raise()),
-                         (GpioPins.DOUT8, True, does_not_raise()),
-                         (GpioPins.DOUT1, False, does_not_raise()),
-                         (GpioPins.DOUT2, False, does_not_raise()),
-                         (GpioPins.DOUT3, False, does_not_raise()),
-                         (GpioPins.DOUT4, False, does_not_raise()),
-                         (GpioPins.DOUT5, False, does_not_raise()),
-                         (GpioPins.DOUT6, False, does_not_raise()),
-                         (GpioPins.DOUT7, False, does_not_raise()),
-                         (GpioPins.DOUT8, False, does_not_raise()),
-                         (GpioPins.DOUT8, None, pytest.raises(ValueError)),
-                         (None, False, pytest.raises(InvalidPinName)),
-                         (GpioPins.DIN1, False, pytest.raises(InvalidPinName))])
-def test_edgepi_digital_output_state(mocker, pin_name, state, error):
+@pytest.mark.parametrize("pin_name, state, error, aout_clear",
+                        [(GpioPins.DOUT1, True, does_not_raise(), GpioPins.AO_EN1),
+                         (GpioPins.DOUT2, True, does_not_raise(), GpioPins.AO_EN2),
+                         (GpioPins.DOUT3, True, does_not_raise(), GpioPins.AO_EN3),
+                         (GpioPins.DOUT4, True, does_not_raise(), GpioPins.AO_EN4),
+                         (GpioPins.DOUT5, True, does_not_raise(), GpioPins.AO_EN5),
+                         (GpioPins.DOUT6, True, does_not_raise(), GpioPins.AO_EN6),
+                         (GpioPins.DOUT7, True, does_not_raise(), GpioPins.AO_EN7),
+                         (GpioPins.DOUT8, True, does_not_raise(), GpioPins.AO_EN8),
+                         (GpioPins.DOUT1, False, does_not_raise(), GpioPins.AO_EN1),
+                         (GpioPins.DOUT2, False, does_not_raise(), GpioPins.AO_EN2),
+                         (GpioPins.DOUT3, False, does_not_raise(), GpioPins.AO_EN3),
+                         (GpioPins.DOUT4, False, does_not_raise(), GpioPins.AO_EN4),
+                         (GpioPins.DOUT5, False, does_not_raise(), GpioPins.AO_EN5),
+                         (GpioPins.DOUT6, False, does_not_raise(), GpioPins.AO_EN6),
+                         (GpioPins.DOUT7, False, does_not_raise(), GpioPins.AO_EN7),
+                         (GpioPins.DOUT8, False, does_not_raise(), GpioPins.AO_EN8),
+                         (GpioPins.DOUT8, None, pytest.raises(ValueError),None),
+                         (None, False, pytest.raises(InvalidPinName), None),
+                         (GpioPins.DIN1, False, pytest.raises(InvalidPinName), None)])
+def test_edgepi_digital_output_state(mocker, pin_name, state, error, aout_clear):
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     dout = EdgePiDigitalOutput()
@@ -41,7 +41,9 @@ def test_edgepi_digital_output_state(mocker, pin_name, state, error):
         if state:
             expander_set.assert_called_once_with(pin_name.value)
         else:
-            expander_clear.assert_called_once_with(pin_name.value)
+            expander_set.assert_called_once_with(aout_clear.value)
+            expander_clear.assert_has_calls([mocker.call(pin_name.value),
+                                             mocker.call(aout_clear.value)])
 
 @pytest.mark.parametrize("pin_name, direction, error",
                         [(GpioPins.DOUT1, True, does_not_raise()),

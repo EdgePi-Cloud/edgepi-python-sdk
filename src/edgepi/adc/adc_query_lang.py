@@ -10,6 +10,7 @@ from edgepi.adc.adc_constants import (
     IDACMAG,
     IDACMUX,
     REFMUX,
+    ADC2REFMUX,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel,
@@ -327,5 +328,24 @@ class ADCProperties(Enum):
             REFMUX.NEG_REF_INT_VAVSS.value.op_code: PropertyValue(
                 "VAVSS", REFMUX.NEG_REF_INT_VAVSS
             ),
+        },
+    )
+    ADC2_REFMUX = Property(
+        "adc-2-ref-mux",
+        ADCReg.REG_ADC2CFG.value,
+        ADCMasks.RMUXP_BITS.value,
+        {
+            ADC2REFMUX.INTERNAL_2P5.value.op_code: PropertyValue(
+                "2.5 V internal", ADC2REFMUX.INTERNAL_2P5
+            ),
+            ADC2REFMUX.AIN0_AIN1.value.op_code: PropertyValue(
+                "Channel 0 and 1 pair", ADC2REFMUX.AIN0_AIN1
+                ),
+            ADC2REFMUX.AIN2_AIN3.value.op_code: PropertyValue(
+                "Channel 2 and 3 pair", ADC2REFMUX.AIN2_AIN3
+                ),
+            ADC2REFMUX.AIN4_AIN5.value.op_code: PropertyValue(
+                "Channel 4 and 5 pair", ADC2REFMUX.AIN4_AIN5
+                ),
         },
     )
