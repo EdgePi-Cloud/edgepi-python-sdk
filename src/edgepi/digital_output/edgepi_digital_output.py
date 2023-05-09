@@ -41,7 +41,7 @@ class EdgePiDigitalOutput():
         else:
             self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.clear_pin_state(pin_name.value)
-            time.sleep(0.2)
+            time.sleep(0.05)
             self.gpio.clear_pin_state(self._dout_aout_pair[pin_name].value)
 
     def digital_output_direction(self, pin_name: GpioPins = None, direction: bool = None):
