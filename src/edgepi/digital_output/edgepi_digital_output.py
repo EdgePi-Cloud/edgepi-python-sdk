@@ -10,6 +10,8 @@ class InvalidPinName(Exception):
     """Raised invalid pin name"""
 
 class EdgePiDigitalOutput():
+    """handling digital output"""
+
     _dout_aout_pair = {
         GpioPins.DOUT1 : GpioPins.AO_EN1,
         GpioPins.DOUT2 : GpioPins.AO_EN2,
@@ -20,7 +22,6 @@ class EdgePiDigitalOutput():
         GpioPins.DOUT7 : GpioPins.AO_EN7,
         GpioPins.DOUT8 : GpioPins.AO_EN8,
     }
-    """handling digital output"""
     def __init__(self):
         # To limit access to input functionality, using composition rather than inheritance
         self.gpio = EdgePiGPIO()

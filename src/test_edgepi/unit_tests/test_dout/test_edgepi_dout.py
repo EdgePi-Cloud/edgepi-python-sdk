@@ -39,11 +39,11 @@ def test_edgepi_digital_output_state(mocker, pin_name, state, error, aout_clear)
     with error:
         dout.digital_output_state(pin_name, state)
         if state:
-            expander_clear.assert_called_once_with(aout_clear.value)
             expander_set.assert_called_once_with(pin_name.value)
         else:
-            expander_clear.assert_has_calls([mocker.call(aout_clear.value),
-                                             mocker.call(pin_name.value)])
+            expander_set.assert_called_once_with(aout_clear.value)
+            expander_clear.assert_has_calls([mocker.call(pin_name.value),
+                                             mocker.call(aout_clear.value)])
 
 @pytest.mark.parametrize("pin_name, direction, error",
                         [(GpioPins.DOUT1, True, does_not_raise()),
