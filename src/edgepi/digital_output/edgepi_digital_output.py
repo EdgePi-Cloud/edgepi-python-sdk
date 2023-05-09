@@ -40,6 +40,8 @@ class EdgePiDigitalOutput():
         if state:
             self.gpio.set_pin_state(pin_name.value)
         else:
+            # In order to safely switch internal MUX circuit, Analog enable pin must be set and
+            # cleared with a small time delay. This allows overriding AOUT with DOUT
             self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.clear_pin_state(pin_name.value)
             time.sleep(0.05)
