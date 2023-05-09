@@ -45,8 +45,6 @@ def test_set_frequency_pwm(freq, pwm_dev):
     assert result != init_freq
     pwm_dev.close()
 
-# TODO:When set frequncy test is called before get duty cycle pwm, the duty cycle value chagnes
-# However when it is called individually, it is working as expectd.
 def test_get_duty_cycle_pwm(pwm_dev):
     dc = pwm_dev.get_duty_cycle()
     assert dc == 0.5
