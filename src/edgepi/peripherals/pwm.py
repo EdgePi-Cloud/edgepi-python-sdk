@@ -51,7 +51,7 @@ class PwmDevice:
             N/A
         """
         self.pwm.frequency = freq
-    
+
     def get_frequency_pwm(self):
         """
         get pwm frequency
@@ -71,7 +71,7 @@ class PwmDevice:
             N/A
         """
         self.pwm.duty_cycle = duty_cycle
-    
+
     def get_duty_cycle_pwm(self):
         """
         get pwm duty cycle
@@ -91,7 +91,7 @@ class PwmDevice:
             N/A
         """
         self.pwm.polarity = polarity
-    
+
     def get_polarity_pwm(self):
         """
         get pwm polarity
@@ -101,7 +101,7 @@ class PwmDevice:
             polarity (str): "Normal" or "Inversed"
         """
         return self.pwm.polarity
-    
+
     def get_enabled_pwm(self):
         """
         Get pwm output state

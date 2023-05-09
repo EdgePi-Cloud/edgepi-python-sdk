@@ -13,7 +13,7 @@ class PWMChSysfs:
     """
     chip: int = None
     channel: int =None
-    
+
 
 @unique
 class PWMCh(Enum):

@@ -23,7 +23,7 @@ def fixture_test_pwm(mocker):
     [
         (GpioPins.PWM1,
          [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
-        (GpioPins.PWM2, 
+        (GpioPins.PWM2,
          [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
@@ -82,8 +82,8 @@ def test_set_frequency_pwm(mocker, freq, pwm_dev):
 @pytest.mark.parametrize("expected", [(0.5),(0.4),(0.3),(0.2),(0.1),(0.6),(0.7),(0.8),(0.9),(1)])
 def test_get_duty_cycle_pwm(mocker, expected, pwm_dev):
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = expected)
-    dc = pwm_dev.get_duty_cycle()
-    assert dc == expected
+    duty_cycle = pwm_dev.get_duty_cycle()
+    assert duty_cycle == expected
 
 @pytest.mark.parametrize("duty_cycle", [(0.5),(0.4),(0.3),(0.2),(0.1),(0.6),(0.7),(0.8),(0.9),(1)])
 def test_set_duty_cycle_pwm(mocker, duty_cycle, pwm_dev):

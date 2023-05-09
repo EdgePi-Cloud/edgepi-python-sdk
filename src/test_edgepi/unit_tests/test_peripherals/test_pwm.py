@@ -25,7 +25,7 @@ def test_pwm_init(chip, channel, result):
     pwm_dev = PwmDevice(chip=chip, channel=channel)
     assert pwm_dev.chip == result[0]
     assert pwm_dev.channel == result[1]
-    assert pwm_dev.pwm == result[2]  
+    assert pwm_dev.pwm == result[2]
 
 def test_pwm_open(mocker, pwm_dev):
     mock_pwm = mocker.patch("edgepi.peripherals.pwm.PWM")
@@ -86,8 +86,8 @@ def test_get_duty_cycle_pwm(mocker, expected, pwm_dev):
     pwm_dev.open_pwm()
     pwm_dev.pwm = mock_pwm
     mock_pwm.assert_called_once_with(0, 1)
-    dc = pwm_dev.get_duty_cycle_pwm()
-    assert dc.return_value == expected
+    duty_cycle = pwm_dev.get_duty_cycle_pwm()
+    assert duty_cycle.return_value == expected
 
 @pytest.mark.parametrize("duty_cycle", [(0.5),(0.4),(0.3),(0.2),(0.1),(0.6),(0.7),(0.8),(0.9),(1)])
 def test_set_duty_cycle_pwm(mocker, duty_cycle, pwm_dev):

@@ -22,7 +22,7 @@ def fixture_test_pwm():
     [
         (GpioPins.PWM1,
          [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
-        (GpioPins.PWM2, 
+        (GpioPins.PWM2,
          [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
@@ -46,8 +46,8 @@ def test_set_frequency_pwm(freq, pwm_dev):
     pwm_dev.close()
 
 def test_get_duty_cycle_pwm(pwm_dev):
-    dc = pwm_dev.get_duty_cycle()
-    assert dc == 0.5
+    duty_cycle = pwm_dev.get_duty_cycle()
+    assert duty_cycle == 0.5
     pwm_dev.close()
 
 def test_set_duty_cycle_pwm(pwm_dev):
@@ -71,13 +71,11 @@ def test_set_polarity_pwm(pwm_dev):
 
 def test_enable(pwm_dev):
     pwm_dev.enable()
-    assert pwm_dev.get_enabled() == True
+    assert pwm_dev.get_enabled() is True
     pwm_dev.close()
 
 
 def test_disable(pwm_dev):
     pwm_dev.disable()
-    assert pwm_dev.get_enabled() == False
+    assert pwm_dev.get_enabled() is False
     pwm_dev.close()
-
-    
