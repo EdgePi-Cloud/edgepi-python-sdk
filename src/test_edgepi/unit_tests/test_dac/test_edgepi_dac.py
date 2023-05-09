@@ -232,11 +232,13 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
                           (CH.AOUT7, 2.123, True, [13913]),
                           (CH.AOUT6, 2.123, True, [13913]),
                           (CH.AOUT5, 2.123, True, [13913]),
-                          (CH.AOUT5, 9.999, True, [65529]),
-                          (CH.AOUT4, 2.123, False, [27827]),
-                          (CH.AOUT3, 2.123, False, [27827]),
-                          (CH.AOUT2, 2.123, False, [27827]),
-                          (CH.AOUT1, 2.123, False, [27827])
+                          (CH.AOUT5, 9.999, True, [65528]),
+                          (CH.AOUT5, 10.000, True, [65535]),
+                          (CH.AOUT5, 5.000, False, [65535]),
+                          (CH.AOUT4, 2.123, False, [27826]),
+                          (CH.AOUT3, 2.123, False, [27826]),
+                          (CH.AOUT2, 2.123, False, [27826]),
+                          (CH.AOUT1, 2.123, False, [27826])
                         ])
 def test_write_voltage(mocker,analog_out, voltage, mock_value, result, dac_mock_periph):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC._EdgePiDAC__get_gain_state",
