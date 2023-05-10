@@ -233,6 +233,8 @@ def test_send_to_gpio_pins_raises(analog_out, voltage, dac):
                           (CH.AOUT6, 2.123, True, [13913]),
                           (CH.AOUT5, 2.123, True, [13913]),
                           (CH.AOUT5, 9.999, True, [65528]),
+                          (CH.AOUT5, 0, True, [0]),
+                          (CH.AOUT5, 0, False, [0]),
                           (CH.AOUT5, 10.000, True, [65535]),
                           (CH.AOUT5, 5.000, False, [65535]),
                           (CH.AOUT4, 2.123, False, [27826]),
