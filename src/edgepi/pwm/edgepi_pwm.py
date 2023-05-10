@@ -7,7 +7,14 @@ from edgepi.peripherals.pwm import PwmDevice
 
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.pwm.pwm_constants import PWMCh, Polarity
+from edgepi.pwm.pwm_constants import (
+    PWMCh,
+    Polarity,
+    PWM_MAX_FREQ,
+    PWM_MIN_FREQ,
+    PWM_MAX_DUTY_CYCLE,
+    PWM_MIN_DUTY_CYCLE,
+)
 
 class EdgePiPWM():
     """PWM module to provide PWM signal"""
@@ -26,6 +33,13 @@ class EdgePiPWM():
         self.chip = self.__pwm_pin_to_channel[pwm_num].value.chip
         self.pwm.open_pwm()
 
+    def __check_range(self, target, range_min, range_max) -> bool:
+        """Validates target is in range between a min and max value"""
+        if range_min <= target <= range_max:
+            return True
+
+        raise ValueError(f"Target {target} is out of range ")
+
     def set_frequency(self, frequency: int):
         """
         Set frequency
@@ -34,6 +48,7 @@ class EdgePiPWM():
         Returns:
             N/A
         """
+        self.__check_range(frequency, PWM_MIN_FREQ, PWM_MAX_FREQ)
         self.pwm.set_frequency_pwm(frequency)
 
     def get_frequency(self):
@@ -46,7 +61,7 @@ class EdgePiPWM():
         """
         return self.pwm.get_frequency_pwm()
 
-    def set_duty_cycle(self, duty_cycle: float):
+    def set_duty_cycle(self, duty_cycle: int):
         """
         Set duty_cycle
         Args:
@@ -54,6 +69,8 @@ class EdgePiPWM():
         Returns:
             N/A
         """
+        self.__check_range(duty_cycle, PWM_MIN_DUTY_CYCLE, PWM_MAX_DUTY_CYCLE)
+        duty_cycle = duty_cycle/100.0
         self.pwm.set_duty_cycle_pwm(duty_cycle)
 
     def get_duty_cycle(self):
@@ -64,7 +81,7 @@ class EdgePiPWM():
         Returns:
             duty_cycle (int): duty_cycle value
         """
-        return self.pwm.get_duty_cycle_pwm()
+        return int(self.pwm.get_duty_cycle_pwm() * 100)
 
     def set_polarity(self, polarity: Polarity):
         """

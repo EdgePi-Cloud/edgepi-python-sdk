@@ -4,6 +4,7 @@ from unittest import mock
 import sys
 if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
+from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.pwm.pwm_constants import PWMCh, Polarity
@@ -34,6 +35,26 @@ def test_pwm_init(mocker, pwm_num, result):
     mock_pwm.assert_called_once_with(result[1], result[0])
     assert pwm_dev.channel == result[0]
     assert pwm_dev.chip == result[1]
+
+@pytest.mark.parametrize("target, min_range, max_range, error",
+                         [(0, 0, 100, does_not_raise()),
+                          (10, 0, 100, does_not_raise()),
+                          (50, 0, 100, does_not_raise()),
+                          (70, 0, 100, does_not_raise()),
+                          (100, 0, 100, does_not_raise()),
+                          (101, 0, 100, pytest.raises(ValueError)),
+                          (-1, 0, 100, pytest.raises(ValueError)),
+                          (1000, 1000, 10000, does_not_raise()),
+                          (2000, 1000, 10000, does_not_raise()),
+                          (5000, 1000, 10000, does_not_raise()),
+                          (10000, 1000, 10000, does_not_raise()),
+                          (999, 1000, 10000, pytest.raises(ValueError)),
+                          (10001, 1000, 10000, pytest.raises(ValueError)),
+                          ])
+def test__check_range(target, min_range, max_range, error, pwm_dev):
+    with error:
+        # pylint: disable=protected-access
+        assert pwm_dev._EdgePiPWM__check_range(target, min_range, max_range) is True
 
 @pytest.mark.parametrize(
     "pwm_num, result",
@@ -79,19 +100,19 @@ def test_set_frequency_pwm(mocker, freq, pwm_dev):
     set_freq_mock.assert_called_once_with(freq)
     assert result == freq
 
-@pytest.mark.parametrize("expected", [(0.5),(0.4),(0.3),(0.2),(0.1),(0.6),(0.7),(0.8),(0.9),(1)])
+@pytest.mark.parametrize("expected", [(50),(40),(30),(20),(10),(60),(70),(80),(90),(100)])
 def test_get_duty_cycle_pwm(mocker, expected, pwm_dev):
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = expected)
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = expected/100)
     duty_cycle = pwm_dev.get_duty_cycle()
     assert duty_cycle == expected
 
-@pytest.mark.parametrize("duty_cycle", [(0.5),(0.4),(0.3),(0.2),(0.1),(0.6),(0.7),(0.8),(0.9),(1)])
+@pytest.mark.parametrize("duty_cycle", [(50),(40),(30),(20),(10),(60),(70),(80),(90),(100)])
 def test_set_duty_cycle_pwm(mocker, duty_cycle, pwm_dev):
     set_dc_mock = mocker.patch("edgepi.peripherals.pwm.PwmDevice.set_duty_cycle_pwm")
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = duty_cycle)
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value=duty_cycle/100)
     pwm_dev.set_duty_cycle(duty_cycle)
     result = pwm_dev.get_duty_cycle()
-    set_dc_mock.assert_called_once_with(duty_cycle)
+    set_dc_mock.assert_called_once_with(duty_cycle/100)
     assert result == duty_cycle
 
 @pytest.mark.parametrize("expected", [(Polarity.NORMAL),(Polarity.INVERSED)])

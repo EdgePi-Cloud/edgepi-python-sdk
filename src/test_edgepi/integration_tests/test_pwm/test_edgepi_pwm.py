@@ -47,12 +47,12 @@ def test_set_frequency_pwm(freq, pwm_dev):
 
 def test_get_duty_cycle_pwm(pwm_dev):
     duty_cycle = pwm_dev.get_duty_cycle()
-    assert duty_cycle == 0.5
+    assert duty_cycle == 50
     pwm_dev.close()
 
 def test_set_duty_cycle_pwm(pwm_dev):
     init_duty_cycle = pwm_dev.get_duty_cycle()
-    pwm_dev.set_duty_cycle(0.6)
+    pwm_dev.set_duty_cycle(60)
     result = pwm_dev.get_duty_cycle()
     assert result != init_duty_cycle
     pwm_dev.close()

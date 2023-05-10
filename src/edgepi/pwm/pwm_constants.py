@@ -26,3 +26,8 @@ class Polarity(Enum):
     """PWM polarity Enum"""
     NORMAL = "normal"
     INVERSED = "inversed"
+
+PWM_MAX_FREQ = 10000
+PWM_MIN_FREQ = 1000
+PWM_MAX_DUTY_CYCLE = 100
+PWM_MIN_DUTY_CYCLE = 0
