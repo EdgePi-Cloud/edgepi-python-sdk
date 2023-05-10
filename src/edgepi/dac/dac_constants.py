@@ -51,7 +51,7 @@ class EdgePiDacCalibrationConstants(Enum):
     """EdgePi DAC calibration constants"""
 
     V_RANGE = 5.0000
-    RANGE = 65536
+    RANGE = 65535
     DAC_GAIN_FACTOR = 2
 
 

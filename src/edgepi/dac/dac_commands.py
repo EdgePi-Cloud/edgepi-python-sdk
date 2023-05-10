@@ -24,7 +24,7 @@ class DACCommands:
     def generate_write_and_update_command(self, ch: int, data: int) -> list:
         """Construct a write and update command"""
         self.check_range(ch, 0, NUM_PINS-1)
-        self.check_range(data, 0, CALIB_CONSTS.RANGE.value-1)
+        self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
     def __voltage_to_float_code(self, ch: int, expected: float, dac_gain: int = 1):
