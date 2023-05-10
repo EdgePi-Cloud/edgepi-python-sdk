@@ -14,7 +14,7 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 edgepi_dac = EdgePiDAC()
 
 # setting DAC range 0-5V
-edgepi_dac.toggle_dac_gain(False)
+edgepi_dac.set_dac_gain(False)
 
 # write voltage value of 3.3 V to analog out pin number 1
 edgepi_dac.write_voltage(Ch.AOUT1, 3.3)
