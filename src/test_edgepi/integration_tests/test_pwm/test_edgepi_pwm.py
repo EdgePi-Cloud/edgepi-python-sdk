@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 def fixture_test_pwm():
     pwm_dev = EdgePiPWM(GpioPins.PWM1)
     pwm_dev.set_frequency(1000)
-    pwm_dev.set_duty_cycle(0.5)
+    pwm_dev.set_duty_cycle(50)
     pwm_dev.set_polarity(Polarity.NORMAL)
     yield pwm_dev
 
