@@ -38,7 +38,7 @@ class EdgePiPWM():
         if range_min <= target <= range_max:
             return True
 
-        raise ValueError(f"Target {target} is out of range ")
+        raise ValueError(f"Target {target} is out of range: {range_min} <-> {range_max} ")
 
     def set_frequency(self, frequency: int):
         """
@@ -65,13 +65,13 @@ class EdgePiPWM():
         """
         Set duty_cycle
         Args:
-            duty_cycle (int): duty_cycle value
+            duty_cycle (int): duty_cycle value in percentage, this is divided by 100 and sent to the
+            PWM device file
         Returns:
             N/A
         """
         self.__check_range(duty_cycle, PWM_MIN_DUTY_CYCLE, PWM_MAX_DUTY_CYCLE)
-        duty_cycle = duty_cycle/100.0
-        self.pwm.set_duty_cycle_pwm(duty_cycle)
+        self.pwm.set_duty_cycle_pwm(duty_cycle/100)
 
     def get_duty_cycle(self):
         """
@@ -79,7 +79,7 @@ class EdgePiPWM():
         Args:
             N/A
         Returns:
-            duty_cycle (int): duty_cycle value
+            duty_cycle (int): duty_cycle value in percentage
         """
         return int(self.pwm.get_duty_cycle_pwm() * 100)
 
