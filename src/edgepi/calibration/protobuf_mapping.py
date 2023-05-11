@@ -173,28 +173,28 @@ class EdgePiEEPROMData:
         proto_buf.client_id_data = self.client_id_data
         proto_buf.thing_id = self.thing_id
 
-    def pack_dataclass(self, proto_buf: EepromLayout, message_feild: MessageFieldNumber):
+    def pack_dataclass(self, proto_buf: EepromLayout, message_field: MessageFieldNumber):
         """
         Function to populate current dictionary value to proto buffer message
         Args:
             proto_buf (EepromLayout): protobuffer layout
-            message_feild (Enum): message filed number to populate
+            message_field (Enum): message filed number to populate
         # """
-        if message_feild == MessageFieldNumber.DAC:
+        if message_field == MessageFieldNumber.DAC:
             self.pack_dac_calib(proto_buf.dac)
-        elif message_feild == MessageFieldNumber.ADC:
+        elif message_field == MessageFieldNumber.ADC:
             self.pack_adc_calib(proto_buf.adc)
-        elif message_feild == MessageFieldNumber.RTD:
+        elif message_field == MessageFieldNumber.RTD:
             self.pack_rtd_calib(proto_buf.rtd)
             self.pack_rtd_hw(proto_buf.rtd)
-        elif message_feild == MessageFieldNumber.TC:
+        elif message_field == MessageFieldNumber.TC:
             self.pack_tc_calib(proto_buf.tc)
             self.pack_tc_hw(proto_buf.tc)
-        elif message_feild == MessageFieldNumber.CONFIGS_KEY:
+        elif message_field == MessageFieldNumber.CONFIGS_KEY:
             self.pack_config_key(proto_buf.config_key)
-        elif message_feild == MessageFieldNumber.DATA_KEY:
+        elif message_field == MessageFieldNumber.DATA_KEY:
             self.pack_data_key(proto_buf.data_key)
-        elif message_feild in (MessageFieldNumber.MODEL,\
+        elif message_field in (MessageFieldNumber.MODEL,\
                                MessageFieldNumber.CLIENT_ID,\
                                MessageFieldNumber.SERIAL):
             self.pack_product_info(proto_buf)
