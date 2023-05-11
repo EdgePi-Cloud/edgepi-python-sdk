@@ -28,7 +28,9 @@ class EdgePiEEPROMData:
     data_key (Keys): dataclass
     serial (str)
     model (str)
-    client_id (str)
+    client_id_config (str)
+    client_id_data (str)
+    thing_id (str)
     """
 
     def __init__(self, data_to_unpack: EepromLayout = None):
@@ -42,7 +44,9 @@ class EdgePiEEPROMData:
         self.data_key = self.keys_to_dataclass(data_to_unpack.data_key)
         self.serial = data_to_unpack.serial_number
         self.model = data_to_unpack.model
-        self.client_id = data_to_unpack.client_id
+        self.client_id_config = data_to_unpack.client_id_config
+        self.client_id_data = data_to_unpack.client_id_data
+        self.thing_id = data_to_unpack.thing_id
 
     def calib_message_to_dict(self, data_to_unpack: EepromLayout = None):
         """
@@ -165,7 +169,9 @@ class EdgePiEEPROMData:
         """
         proto_buf.serial_number = self.serial
         proto_buf.model = self.model
-        proto_buf.client_id = self.client_id
+        proto_buf.client_id_config = self.client_id_config
+        proto_buf.client_id_data = self.client_id_data
+        proto_buf.thing_id = self.thing_id
 
     def pack_dataclass(self, proto_buf: EepromLayout, message_feild: MessageFieldNumber):
         """
