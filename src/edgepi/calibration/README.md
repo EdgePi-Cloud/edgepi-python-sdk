@@ -1,4 +1,4 @@
-# EdgePi DAC Module User Guide
+# EdgePi EEPROM Module User Guide
 ___
 ## Quick Use Example
 
@@ -19,6 +19,5 @@ edgepi_eeprom_data.client_id = "this is new client id"
 
 # Write to osena eeprom with changed client id value
 edgepi_eeprom.set_edgepi_reserved_data(edgepi_eeprom_data, MessageFieldNumber.ALL)
-
 
 ```
