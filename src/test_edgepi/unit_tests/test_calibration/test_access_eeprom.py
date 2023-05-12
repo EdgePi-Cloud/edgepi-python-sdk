@@ -205,7 +205,9 @@ def test_get_edgepi_reserved_data(mocker, eeprom):
         assert value == pytest.approx(rtd_dict_hw[key])
     assert eeprom_data.serial == '20221110-021'
     assert eeprom_data.model == 'EdgePi-Bearbone'
-    assert eeprom_data.client_id == 'SO-2022-1023'
+    assert eeprom_data.client_id_config == 'client-id__shadow'
+    assert eeprom_data.client_id_data == 'client-id'
+    assert eeprom_data.thing_id == 'thing-id'
     assert eeprom_data.config_key.certificate == KEYS
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS

@@ -90,7 +90,9 @@ def test_edgepi_eeprom_data():
         assert value == pytest.approx(rtd_dict_hw[key])
     assert eeprom_data.serial == '20221110-021'
     assert eeprom_data.model == 'EdgePi-Bearbone'
-    assert eeprom_data.client_id == 'SO-2022-1023'
+    assert eeprom_data.client_id_config == 'client-id__shadow'
+    assert eeprom_data.client_id_data == 'client-id'
+    assert eeprom_data.thing_id == 'thing-id'
     assert eeprom_data.config_key.certificate == KEYS
     assert eeprom_data.config_key.private == KEYS
     assert eeprom_data.data_key.certificate == KEYS
@@ -133,7 +135,9 @@ def test_edgepi_protobuf_pack_data(msg):
     change_data.config_key.private = "config_private"
     change_data.data_key.certificate = "data_certificate"
     change_data.data_key.private = "data_private"
-    change_data.client_id = "This is new id"
+    change_data.client_id_config = "This is new client id config"
+    change_data.client_id_data = "This is new client id data"
+    change_data.thing_id = "This is new thing id"
     change_data.model = "This is new model"
     change_data.serial = "this is new serial number"
     change_data.pack_dataclass(changed_memory_map, msg)
