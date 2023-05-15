@@ -24,5 +24,7 @@ message EepromLayout{
   AwsKey data_key =6;
   string serial_number = 7;
   string model = 8;
-  string client_id = 9;
+  string client_id_config = 9;
+  string client_id_data = 10;
+  string thing_id = 11;
 }
