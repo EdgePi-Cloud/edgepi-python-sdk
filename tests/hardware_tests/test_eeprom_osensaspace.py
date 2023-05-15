@@ -14,7 +14,6 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 import pytest
 from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
-from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac():
