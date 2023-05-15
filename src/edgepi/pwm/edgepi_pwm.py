@@ -5,10 +5,11 @@ import logging
 
 from edgepi.peripherals.pwm import PwmDevice
 
-from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
+from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.pwm.pwm_constants import (
     PWMCh,
+    PWMPins,
     Polarity,
     PWM_MAX_FREQ,
     PWM_MIN_FREQ,
@@ -18,11 +19,11 @@ from edgepi.pwm.pwm_constants import (
 
 class EdgePiPWM():
     """PWM module to provide PWM signal"""
-    __pwm_pin_to_channel = {GpioPins.PWM1 : PWMCh.PWM_1,
-                            GpioPins.PWM2 : PWMCh.PWM_2}
+    __pwm_pin_to_channel = {PWMPins.PWM1 : PWMCh.PWM_1,
+                            PWMPins.PWM2 : PWMCh.PWM_2}
 
     """handling PWM output"""
-    def __init__(self, pwm_num: GpioPins):
+    def __init__(self, pwm_num: PWMPins):
         self.log = logging.getLogger(__name__)
         # Control internal mux to enable/disable PWM
         self.pwm_num = pwm_num
@@ -107,9 +108,9 @@ class EdgePiPWM():
         """
         Enable pwm output
         """
-        self.gpio.set_pin_state(GpioPins.AO_EN1.value if self.pwm_num==GpioPins.PWM1 else\
+        self.gpio.set_pin_state(GpioPins.AO_EN1.value if self.pwm_num==PWMPins.PWM1 else\
                                 GpioPins.AO_EN2.value)
-        self.gpio.clear_pin_state(GpioPins.DOUT1.value if self.pwm_num==GpioPins.PWM1 else\
+        self.gpio.clear_pin_state(GpioPins.DOUT1.value if self.pwm_num==PWMPins.PWM1 else\
                                 GpioPins.DOUT2.value)
         self.gpio.clear_pin_state(self.pwm_num.value)
         self.log.info("Enabling PWM")

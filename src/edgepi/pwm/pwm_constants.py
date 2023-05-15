@@ -14,6 +14,12 @@ class PWMChSysfs:
     chip: int = None
     channel: int =None
 
+@unique
+class PWMPins(Enum):
+    """GPIO Pin Names"""
+
+    PWM1 = 'PWM1'
+    PWM2 = 'PWM2'
 
 @unique
 class PWMCh(Enum):

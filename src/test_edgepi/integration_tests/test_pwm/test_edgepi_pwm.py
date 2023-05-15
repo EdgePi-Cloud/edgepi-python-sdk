@@ -3,15 +3,14 @@
 import logging
 import pytest
 
-from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.pwm.pwm_constants import PWMCh, Polarity
+from edgepi.pwm.pwm_constants import PWMCh, Polarity, PWMPins
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
 _logger = logging.getLogger(__name__)
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_pwm():
-    pwm_dev = EdgePiPWM(GpioPins.PWM1)
+    pwm_dev = EdgePiPWM(PWMPins.PWM1)
     pwm_dev.set_frequency(1000)
     pwm_dev.set_duty_cycle(50)
     pwm_dev.set_polarity(Polarity.NORMAL)
@@ -20,9 +19,9 @@ def fixture_test_pwm():
 @pytest.mark.parametrize(
     "pwm_num, result",
     [
-        (GpioPins.PWM1,
+        (PWMPins.PWM1,
          [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
-        (GpioPins.PWM2,
+        (PWMPins.PWM2,
          [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
