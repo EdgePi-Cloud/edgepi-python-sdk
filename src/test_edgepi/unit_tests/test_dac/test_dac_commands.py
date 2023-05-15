@@ -9,17 +9,21 @@ import pytest
 from edgepi.dac.dac_constants import DACChannel as CH
 from edgepi.dac.dac_commands import DACCommands
 from edgepi.dac.dac_constants import EdgePiDacCalibrationConstants as CALIB_CONSTS, PowerMode
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
-from test_edgepi.unit_tests.test_calibration.read_serialized import read_binfile
+from edgepi.calibration.calibration_constants import CalibParam
+
+dummy_calib_param_dict = {0:CalibParam(gain=1,offset=0),
+                          1:CalibParam(gain=1,offset=0),
+                          2:CalibParam(gain=1,offset=0),
+                          3:CalibParam(gain=1,offset=0),
+                          4:CalibParam(gain=1,offset=0),
+                          5:CalibParam(gain=1,offset=0),
+                          6:CalibParam(gain=1,offset=0),
+                          7:CalibParam(gain=1,offset=0)}
 
 @pytest.fixture(name="dac_ops")
 def fixture_test_dac_ops(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
-                  return_value = read_binfile())
-    eeprom = EdgePiEEPROM()
-    eeprom_data  = eeprom.get_edgepi_reserved_data()
-    dac_calib_params = eeprom_data.dac_calib_params
+    dac_calib_params = dummy_calib_param_dict
     dac_ops = DACCommands(dac_calib_params)
     return dac_ops
 
@@ -111,7 +115,13 @@ def test_dac_generate_write_and_update_command(a, b, c, dac_ops):
 
 
 @pytest.mark.parametrize("ch, expected, dac_gain, result",
-                        [(1, 2.345, 1, 30293), (0, 2.345, 2, 15221), (3, 2.345, 1, 30229)])
+                        [(1, 2.345, 1, 30736),
+                         (1, 0, 1, 0),
+                         (1, 5.0, 1, 65535),
+                         (0, 2.345, 2, 15368),
+                         (0, 0, 2, 0),
+                         (0, 10, 2, 65535),
+                         (3, 2.345, 1, 30736)])
 def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
     assert dac_ops.voltage_to_code(ch, expected, dac_gain) == result
 
@@ -119,9 +129,13 @@ def test_dac_voltage_to_code(ch, expected, dac_gain, result, dac_ops):
 @pytest.mark.parametrize(
     "ch, code, dac_gain, result",
     [
-        (1, 33798, 1, 2.619),
-        (0, 33798, 2, 5.263),
-        (3, 33798, 1, 2.624),
+        (1, 0, 1, 0),
+        (1, 33798, 1, 2.579),
+        (1, 65535, 1, 5),
+        (0, 33798, 2, 5.157),
+        (0, 0, 2, 0),
+        (0, 65535, 2, 10),
+        (3, 33798, 1, 2.579),
     ],
 )
 def test_dac_code_to_voltage(ch, code, dac_gain, result, dac_ops):
