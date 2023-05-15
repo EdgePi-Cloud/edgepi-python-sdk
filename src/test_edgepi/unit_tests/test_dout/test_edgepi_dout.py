@@ -75,3 +75,25 @@ def test_edgepi_digital_output_direction(mocker, pin_name, direction, error):
             exp_dir_in.assert_called_once_with(pin_name.value)
         else:
             exp_dir_out.assert_called_once_with(pin_name.value)
+
+
+
+@pytest.mark.parametrize("pin_name, mock_vals",
+                        [(GpioPins.DOUT1,[True, False]),
+                         (GpioPins.DOUT2,[True, True]),
+                         (GpioPins.DOUT3,[False, False]),
+                         (GpioPins.DOUT4,[False, True]),
+                         (GpioPins.DOUT5,[True, False]),
+                         (GpioPins.DOUT6,[True, True]),
+                         (GpioPins.DOUT7,[False, False]),
+                         (GpioPins.DOUT8,[False, True]),
+                         ])
+def test_get_state(mocker, pin_name, mock_vals):
+    mock_state = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_pin_state",
+                               return_value = mock_vals[0])
+    mock_direction = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction",
+                                   return_value = mock_vals[1])
+    dout= EdgePiDigitalOutput()
+    gpio_stat, gpio_dir = dout.get_state(pin_name)
+    assert gpio_stat == mock_state.return_value
+    assert gpio_dir == mock_direction.return_value
