@@ -8,7 +8,7 @@ The EdgePi has an array of eight programmable LED lights. The LED module allows 
 This code example demonstrates how to use the LED module to turn an LED on and off:
 ```python
 from edgepi.led.edgepi_leds import EdgePiLED
-from edgepi.gpio.gpio_configs import LEDPins
+from edgepi.led.led_constants import LEDPins
 
 leds = EdgePiLED()
 

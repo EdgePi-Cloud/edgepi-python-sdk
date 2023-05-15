@@ -2,7 +2,7 @@
 
 import pytest
 
-from edgepi.gpio.gpio_configs import LEDPins
+from edgepi.led.led_constants import LEDPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.led.edgepi_leds import EdgePiLED
 
