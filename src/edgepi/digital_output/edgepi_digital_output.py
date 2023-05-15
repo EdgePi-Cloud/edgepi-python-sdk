@@ -29,7 +29,7 @@ class EdgePiDigitalOutput():
         """
         change the output state of the pin to the state passed as argument
         Args:
-            pin_name (DoutPins): GpioPin enums
+            pin_name (DoutPins): DoutPins enums
             state (bool): True = output high, False, output low
         """
         if state is None:
@@ -50,7 +50,7 @@ class EdgePiDigitalOutput():
         """
         change the output state of the pin to the state passed as argument
         Args:
-            pin_name (DoutPins): GpioPin enums
+            pin_name (DoutPins): DoutPins enums
             state (bool): True = direction input, False = direction output
         """
         if direction is None:
@@ -62,16 +62,16 @@ class EdgePiDigitalOutput():
         else:
             self.gpio.set_pin_direction_out(pin_name.value)
 
-    def get_state(self, pin_name: GpioPins = None):
+    def get_state(self, pin_name: DoutPins = None):
         """
         Get the current state of the specified pin
         Args:
-            pin_name (GpioPins): GpioPin enums
+            pin_name (DoutPins): DoutPins enums
         Returns:
             state (Bool): True High, False, Low
             direction (Bool): True Input, False Output
         """
-        if pin_name is None or pin_name.value not in [pins.value for pins in DOUTPins]:
+        if pin_name is None or pin_name.value not in [pins.value for pins in DoutPins]:
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
         state = self.gpio.read_pin_state(pin_name.value)
         direction = self.gpio.get_pin_direction(pin_name.value)
