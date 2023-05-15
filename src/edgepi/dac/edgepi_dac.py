@@ -15,6 +15,7 @@ from edgepi.dac.dac_constants import (
     EdgePiDacCom as COM,
     EdgePiDacCalibrationConstants as CalibConst,
     AOPins,
+    DOPins,
     GainPin
 )
 from edgepi.peripherals.spi import SpiDevice as spi
@@ -39,14 +40,14 @@ class EdgePiDAC(spi):
 
     # analog_out number to DOUT pin pair
     __analog_to_digital_pin_map = {
-        DACChannel.AOUT1.value: GpioPins.DOUT1,
-        DACChannel.AOUT2.value: GpioPins.DOUT2,
-        DACChannel.AOUT3.value: GpioPins.DOUT3,
-        DACChannel.AOUT4.value: GpioPins.DOUT4,
-        DACChannel.AOUT5.value: GpioPins.DOUT5,
-        DACChannel.AOUT6.value: GpioPins.DOUT6,
-        DACChannel.AOUT7.value: GpioPins.DOUT7,
-        DACChannel.AOUT8.value: GpioPins.DOUT8,
+        DACChannel.AOUT1.value: DOPins.DOUT1,
+        DACChannel.AOUT2.value: DOPins.DOUT2,
+        DACChannel.AOUT3.value: DOPins.DOUT3,
+        DACChannel.AOUT4.value: DOPins.DOUT4,
+        DACChannel.AOUT5.value: DOPins.DOUT5,
+        DACChannel.AOUT6.value: DOPins.DOUT6,
+        DACChannel.AOUT7.value: DOPins.DOUT7,
+        DACChannel.AOUT8.value: DOPins.DOUT8,
     }
 
 
