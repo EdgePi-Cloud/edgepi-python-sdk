@@ -19,8 +19,8 @@ def test_output_high(pin_name):
     dout=EdgePiDigitalOutput()
     dout.digital_output_state(pin_name, True)
     time.sleep(1)
-    stat, _ = dout.get_state(pin_name)
-    assert stat == True
+    gpio_stat, _ = dout.get_state(pin_name)
+    assert gpio_stat is True
 
 @pytest.mark.parametrize("pin_name", [
     (GpioPins.DOUT1),
@@ -36,8 +36,8 @@ def test_output_low(pin_name):
     dout=EdgePiDigitalOutput()
     dout.digital_output_state(pin_name, False)
     time.sleep(1)
-    stat, _ = dout.get_state(pin_name)
-    assert stat == False
+    gpio_stat, _ = dout.get_state(pin_name)
+    assert gpio_stat is False
 
 @pytest.mark.parametrize("pin_name", [
     (GpioPins.DOUT1),
@@ -53,8 +53,8 @@ def test_direction_in(pin_name):
     dout=EdgePiDigitalOutput()
     dout.digital_output_direction(pin_name, True)
     time.sleep(1)
-    _, dir = dout.get_state(pin_name)
-    assert dir == True
+    _, gpio_dir = dout.get_state(pin_name)
+    assert gpio_dir is True
 
 @pytest.mark.parametrize("pin_name", [
     (GpioPins.DOUT1),
@@ -70,5 +70,5 @@ def test_direction_out(pin_name):
     dout=EdgePiDigitalOutput()
     dout.digital_output_direction(pin_name, False)
     time.sleep(1)
-    _, dir = dout.get_state(pin_name)
-    assert dir == False
+    _, gpio_dir = dout.get_state(pin_name)
+    assert gpio_dir is False

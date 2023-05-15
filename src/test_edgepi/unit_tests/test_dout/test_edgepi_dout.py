@@ -89,9 +89,11 @@ def test_edgepi_digital_output_direction(mocker, pin_name, direction, error):
                          (GpioPins.DOUT8,[False, True]),
                          ])
 def test_get_state(mocker, pin_name, mock_vals):
-    mock_state = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_pin_state", return_value = mock_vals[0])
-    mock_direction = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction", return_value = mock_vals[1])
+    mock_state = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_pin_state",
+                               return_value = mock_vals[0])
+    mock_direction = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction",
+                                   return_value = mock_vals[1])
     dout= EdgePiDigitalOutput()
-    stat, dir = dout.get_state(pin_name)
-    assert stat == mock_state.return_value
-    assert dir == mock_direction.return_value
+    gpio_stat, gpio_dir = dout.get_state(pin_name)
+    assert gpio_stat == mock_state.return_value
+    assert gpio_dir == mock_direction.return_value
