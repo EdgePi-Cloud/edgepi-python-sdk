@@ -15,14 +15,14 @@ def fixture_gpio():
     return EdgePiGPIO()
 
 @pytest.mark.parametrize('led_name', [
-    (LEDPins.LED_OVR1),
-    (LEDPins.LED_OVR2),
-    (LEDPins.LED_OVR3),
-    (LEDPins.LED_OVR4),
-    (LEDPins.LED_OVR5),
-    (LEDPins.LED_OVR6),
-    (LEDPins.LED_OVR7),
-    (LEDPins.LED_OVR8),
+    (LEDPins.LED1),
+    (LEDPins.LED2),
+    (LEDPins.LED3),
+    (LEDPins.LED4),
+    (LEDPins.LED5),
+    (LEDPins.LED6),
+    (LEDPins.LED7),
+    (LEDPins.LED8),
 ])
 def test_turn_led_on(led_name, led, gpio):
     led.turn_led_on(led_name)
@@ -31,14 +31,14 @@ def test_turn_led_on(led_name, led, gpio):
 
 
 @pytest.mark.parametrize('led_name', [
-    (LEDPins.LED_OVR1),
-    (LEDPins.LED_OVR2),
-    (LEDPins.LED_OVR3),
-    (LEDPins.LED_OVR4),
-    (LEDPins.LED_OVR5),
-    (LEDPins.LED_OVR6),
-    (LEDPins.LED_OVR7),
-    (LEDPins.LED_OVR8),
+    (LEDPins.LED1),
+    (LEDPins.LED2),
+    (LEDPins.LED3),
+    (LEDPins.LED4),
+    (LEDPins.LED5),
+    (LEDPins.LED6),
+    (LEDPins.LED7),
+    (LEDPins.LED8),
 ])
 def test_turn_led_off(led_name, led, gpio):
     led.turn_led_off(led_name)
@@ -47,14 +47,14 @@ def test_turn_led_off(led_name, led, gpio):
 
 
 @pytest.mark.parametrize('led_name', [
-    (LEDPins.LED_OVR1),
-    (LEDPins.LED_OVR2),
-    (LEDPins.LED_OVR3),
-    (LEDPins.LED_OVR4),
-    (LEDPins.LED_OVR5),
-    (LEDPins.LED_OVR6),
-    (LEDPins.LED_OVR7),
-    (LEDPins.LED_OVR8),
+    (LEDPins.LED1),
+    (LEDPins.LED2),
+    (LEDPins.LED3),
+    (LEDPins.LED4),
+    (LEDPins.LED5),
+    (LEDPins.LED6),
+    (LEDPins.LED7),
+    (LEDPins.LED8),
 ])
 def test_get_led_state(led_name, led):
     led.turn_led_on(led_name)
@@ -66,14 +66,14 @@ def test_get_led_state(led_name, led):
 
 
 @pytest.mark.parametrize('led_name', [
-    (LEDPins.LED_OVR1),
-    (LEDPins.LED_OVR2),
-    (LEDPins.LED_OVR3),
-    (LEDPins.LED_OVR4),
-    (LEDPins.LED_OVR5),
-    (LEDPins.LED_OVR6),
-    (LEDPins.LED_OVR7),
-    (LEDPins.LED_OVR8),
+    (LEDPins.LED1),
+    (LEDPins.LED2),
+    (LEDPins.LED3),
+    (LEDPins.LED4),
+    (LEDPins.LED5),
+    (LEDPins.LED6),
+    (LEDPins.LED7),
+    (LEDPins.LED8),
 ])
 def test_toggle_led(led_name, led):
     led.turn_led_on(led_name)

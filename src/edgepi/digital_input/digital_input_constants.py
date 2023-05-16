@@ -5,7 +5,7 @@ from enum import Enum, unique
 
 @unique
 class DinPins(Enum):
-    """GPIO Pin Names"""
+    """Digital Input Gpio Pin Names"""
 
     DIN1 = 'DIN1'
     DIN2 = 'DIN2'

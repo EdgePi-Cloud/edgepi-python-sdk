@@ -2,7 +2,8 @@
 """Digital Output Module"""
 
 import time
-from edgepi.digital_output.digital_output_constants import AoutPins, DoutPins
+from edgepi.gpio.gpio_constants import GpioPins
+from edgepi.digital_output.digital_output_constants import DoutPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 class InvalidPinName(Exception):
@@ -12,14 +13,14 @@ class EdgePiDigitalOutput():
     """handling digital output"""
 
     _dout_aout_pair = {
-        DoutPins.DOUT1 : AoutPins.AO_EN1,
-        DoutPins.DOUT2 : AoutPins.AO_EN2,
-        DoutPins.DOUT3 : AoutPins.AO_EN3,
-        DoutPins.DOUT4 : AoutPins.AO_EN4,
-        DoutPins.DOUT5 : AoutPins.AO_EN5,
-        DoutPins.DOUT6 : AoutPins.AO_EN6,
-        DoutPins.DOUT7 : AoutPins.AO_EN7,
-        DoutPins.DOUT8 : AoutPins.AO_EN8,
+        DoutPins.DOUT1 : GpioPins.AO_EN1,
+        DoutPins.DOUT2 : GpioPins.AO_EN2,
+        DoutPins.DOUT3 : GpioPins.AO_EN3,
+        DoutPins.DOUT4 : GpioPins.AO_EN4,
+        DoutPins.DOUT5 : GpioPins.AO_EN5,
+        DoutPins.DOUT6 : GpioPins.AO_EN6,
+        DoutPins.DOUT7 : GpioPins.AO_EN7,
+        DoutPins.DOUT8 : GpioPins.AO_EN8,
     }
     def __init__(self):
         # To limit access to input functionality, using composition rather than inheritance
