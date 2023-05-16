@@ -2,17 +2,17 @@
 
 import pytest
 from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput
-from edgepi.gpio.gpio_constants import GpioPins
+from edgepi.digital_input.digital_input_constants import DinPins
 
 @pytest.mark.parametrize("pin_name", [
-    (GpioPins.DIN1),
-    (GpioPins.DIN2),
-    (GpioPins.DIN3),
-    (GpioPins.DIN4),
-    (GpioPins.DIN5),
-    (GpioPins.DIN6),
-    (GpioPins.DIN7),
-    (GpioPins.DIN8),
+    (DinPins.DIN1),
+    (DinPins.DIN2),
+    (DinPins.DIN3),
+    (DinPins.DIN4),
+    (DinPins.DIN5),
+    (DinPins.DIN6),
+    (DinPins.DIN7),
+    (DinPins.DIN8),
 ])
 def test_input_state(pin_name):
     din=EdgePiDigitalInput()

@@ -9,6 +9,7 @@ if sys.platform != 'linux':
 
 from contextlib import nullcontext as does_not_raise
 import pytest
+from edgepi.digital_input.digital_input_constants import DinPins
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput, InvalidPinName
 
@@ -18,22 +19,22 @@ def fixture_test_dac(mocker):
     yield EdgePiDigitalInput()
 
 @pytest.mark.parametrize("pin_name, mock_value, result, error",
-                        [(GpioPins.DIN1, True, True, does_not_raise()),
-                         (GpioPins.DIN2, True, True, does_not_raise()),
-                         (GpioPins.DIN3, True, True, does_not_raise()),
-                         (GpioPins.DIN4, True, True, does_not_raise()),
-                         (GpioPins.DIN5, True, True, does_not_raise()),
-                         (GpioPins.DIN6, True, True, does_not_raise()),
-                         (GpioPins.DIN7, True, True, does_not_raise()),
-                         (GpioPins.DIN8, True, True, does_not_raise()),
-                         (GpioPins.DIN1, False, False, does_not_raise()),
-                         (GpioPins.DIN2, False, False, does_not_raise()),
-                         (GpioPins.DIN3, False, False, does_not_raise()),
-                         (GpioPins.DIN4, False, False, does_not_raise()),
-                         (GpioPins.DIN5, False, False, does_not_raise()),
-                         (GpioPins.DIN6, False, False, does_not_raise()),
-                         (GpioPins.DIN7, False, False, does_not_raise()),
-                         (GpioPins.DIN8, False, False, does_not_raise()),
+                        [(DinPins.DIN1, True, True, does_not_raise()),
+                         (DinPins.DIN2, True, True, does_not_raise()),
+                         (DinPins.DIN3, True, True, does_not_raise()),
+                         (DinPins.DIN4, True, True, does_not_raise()),
+                         (DinPins.DIN5, True, True, does_not_raise()),
+                         (DinPins.DIN6, True, True, does_not_raise()),
+                         (DinPins.DIN7, True, True, does_not_raise()),
+                         (DinPins.DIN8, True, True, does_not_raise()),
+                         (DinPins.DIN1, False, False, does_not_raise()),
+                         (DinPins.DIN2, False, False, does_not_raise()),
+                         (DinPins.DIN3, False, False, does_not_raise()),
+                         (DinPins.DIN4, False, False, does_not_raise()),
+                         (DinPins.DIN5, False, False, does_not_raise()),
+                         (DinPins.DIN6, False, False, does_not_raise()),
+                         (DinPins.DIN7, False, False, does_not_raise()),
+                         (DinPins.DIN8, False, False, does_not_raise()),
                          (GpioPins.DOUT2, False, False, pytest.raises(InvalidPinName)),
                          (None, False, False, pytest.raises(InvalidPinName))])
 def test_edgepi_digital_input_state(mocker, pin_name, mock_value, result, error, din):
