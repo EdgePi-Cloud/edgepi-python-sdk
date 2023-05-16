@@ -86,6 +86,18 @@ class AOPins(Enum):
     AO_EN7 = "AO_EN7"
     AO_EN8 = "AO_EN8"
 
+class DOPins(Enum):
+    """Analog/Digital out gpio pin names"""
+
+    DOUT1 = 'DOUT1'
+    DOUT2 = 'DOUT2'
+    DOUT3 = 'DOUT3'
+    DOUT4 = 'DOUT4'
+    DOUT5 = 'DOUT5'
+    DOUT6 = 'DOUT6'
+    DOUT7 = 'DOUT7'
+    DOUT8 = 'DOUT8'
+
 class GainPin(Enum):
     """DAC gain enable/disable pin"""
     DAC_GAIN = "DAC_GAIN"

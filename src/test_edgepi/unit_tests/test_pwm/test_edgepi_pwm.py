@@ -7,14 +7,14 @@ if sys.platform != 'linux':
 from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.pwm.pwm_constants import PWMCh, Polarity
+from edgepi.pwm.pwm_constants import PWMCh, Polarity, PWMPins
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_pwm(mocker):
     mocker_pwm= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
-    pwm_dev = EdgePiPWM(GpioPins.PWM1)
+    pwm_dev = EdgePiPWM(PWMPins.PWM1)
     pwm_dev.pwm = mocker_pwm
     yield pwm_dev
 
@@ -22,9 +22,9 @@ def fixture_test_pwm(mocker):
 @pytest.mark.parametrize(
     "pwm_num, result",
     [
-        (GpioPins.PWM1,
+        (PWMPins.PWM1,
          [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
-        (GpioPins.PWM2,
+        (PWMPins.PWM2,
          [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
     ],
 )
@@ -59,8 +59,8 @@ def test__check_range(target, min_range, max_range, error, pwm_dev):
 @pytest.mark.parametrize(
     "pwm_num, result",
     [
-        (GpioPins.PWM1,[GpioPins.AO_EN1.value, GpioPins.DOUT1.value]),
-        (GpioPins.PWM2, [GpioPins.AO_EN2.value, GpioPins.DOUT2.value]),
+        (PWMPins.PWM1,[GpioPins.AO_EN1.value, GpioPins.DOUT1.value]),
+        (PWMPins.PWM2, [GpioPins.AO_EN2.value, GpioPins.DOUT2.value]),
     ],
 )
 def test_pwm_enable(mocker, pwm_num, result):
