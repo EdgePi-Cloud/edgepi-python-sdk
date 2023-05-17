@@ -20,6 +20,6 @@ class DoutPins(Enum):
 class DoutTriState(Enum):
     """Digital Output Tri-state Enum"""
 
-    Z = -1
+    HI_Z = -1
     LOW = 0
     HIGH = 1

@@ -40,15 +40,13 @@ class EdgePiDigitalOutput():
         self.gpio = EdgePiGPIO()
         self.dac = EdgePiDAC()
 
-    def digital_output_state(self, pin_name: DoutPins = None, state: DoutTriState = None):
+    def set_dout_state(self, pin_name: DoutPins = None, state: DoutTriState = None):
         """
         change the output state of the pin to the state passed as argument
         Args:
             pin_name (DoutPins): DoutPins enums
             state (bool): True = output high, False, output low
         """
-        if state is None:
-            raise ValueError(f'Invalid state passed: {state}')
         if pin_name is None or pin_name.value not in [pins.value for pins in DoutPins]:
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
         if state == DoutTriState.HIGH:
@@ -60,29 +58,15 @@ class EdgePiDigitalOutput():
             self.gpio.clear_pin_state(pin_name.value)
             time.sleep(0.05)
             self.gpio.clear_pin_state(self._dout_aout_pair[pin_name].value)
-        else:
+        elif state == DoutTriState.HI_Z:
             # very similar to LOW state, set analog_enable, clear dout and set direction to input
             # set dac to 0V
             self.dac.write_voltage(self._dout_dac_pair[pin_name],0)
             self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.clear_pin_state(pin_name.value)
             self.gpio.set_pin_direction_in(pin_name.value)
-
-    def digital_output_direction(self, pin_name: DoutPins = None, direction: bool = None):
-        """
-        change the output state of the pin to the state passed as argument
-        Args:
-            pin_name (DoutPins): DoutPins enums
-            state (bool): True = direction input, False = direction output
-        """
-        if direction is None:
-            raise ValueError(f'Invalid direction passed: {direction}')
-        if pin_name is None or pin_name.value not in [pins.value for pins in DoutPins]:
-            raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
-        if direction:
-            self.gpio.set_pin_direction_in(pin_name.value)
         else:
-            self.gpio.set_pin_direction_out(pin_name.value)
+            raise ValueError(f'Invalid state passed: {state}')
 
     def get_state(self, pin_name: DoutPins = None):
         """
@@ -101,4 +85,4 @@ class EdgePiDigitalOutput():
             return DoutTriState.HIGH
         if not direction and not state:
             return DoutTriState.LOW
-        return DoutTriState.Z
+        return DoutTriState.HI_Z
