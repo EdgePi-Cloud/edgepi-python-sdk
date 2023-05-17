@@ -63,10 +63,10 @@ class EdgePiDigitalOutput():
         else:
             # very similar to LOW state, set analog_enable, clear dout and set direction to input
             # set dac to 0V 
+            self.dac.write_voltage(self._dout_dac_pair[pin_name],0)            
             self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.clear_pin_state(pin_name.value)
             self.gpio.set_pin_direction_in(pin_name.value)
-            self.dac.write_voltage(self._dout_dac_pair[pin_name],0)            
 
     def digital_output_direction(self, pin_name: DoutPins = None, direction: bool = None):
         """
