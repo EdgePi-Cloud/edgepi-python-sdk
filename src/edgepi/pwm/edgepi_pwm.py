@@ -24,13 +24,13 @@ class EdgePiPWM():
     """PWM module to provide PWM signal"""
     __pwm_pin_to_channel = {PWMPins.PWM1 : PWMCh.PWM_1,
                             PWMPins.PWM2 : PWMCh.PWM_2}
-    __pwm_devs = {PWMPins.PWM1 : None,
-                  PWMPins.PWM2 : None}
 
     """handling PWM output"""
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.gpio = EdgePiGPIO()
+        self.__pwm_devs = {PWMPins.PWM1 : None,
+                  PWMPins.PWM2 : None}
 
     def __check_range(self, target, range_min, range_max) -> bool:
         """Validates target is in range between a min and max value"""

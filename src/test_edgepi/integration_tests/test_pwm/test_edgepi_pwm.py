@@ -5,11 +5,6 @@ import pytest
 from edgepi.pwm.pwm_constants import Polarity, PWMPins
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
-@pytest.fixture(name="pwm_dev")
-def fixture_test_pwm():
-    pwm_dev = EdgePiPWM()
-    yield pwm_dev
-
 @pytest.fixture(name="pwm_dev_default")
 def fixture_test_pwm_def():
     pwm_dev_default = EdgePiPWM()
@@ -21,15 +16,16 @@ def fixture_test_pwm_def():
                          [(PWMPins.PWM1),
                           (PWMPins.PWM2),
                           ])
-def test_pwm_init(pwm_num, pwm_dev):
+def test_pwm_init(pwm_num):
     # pylint: disable=protected-access
+    pwm_dev = EdgePiPWM()
     pwm_dev.init_pwm(pwm_num)
     if pwm_num == PWMPins.PWM1:
-        assert pwm_dev._EdgePiPWM__pwm_1 is not None
-        assert pwm_dev._EdgePiPWM__pwm_2 is None
+        assert pwm_dev.__pwm_devs[pwm_num] is not None
+        assert pwm_dev.__pwm_devs[PWMPins.PWM2] is None
     else:
-        assert pwm_dev._EdgePiPWM__pwm_1 is None
-        assert pwm_dev._EdgePiPWM__pwm_2 is not None
+        assert pwm_dev.__pwm_devs[pwm_num] is not None
+        assert pwm_dev.__pwm_devs[PWMPins.PWM1] is None
     pwm_dev.close(pwm_num)
 
 def test_get_frequency_pwm(pwm_dev_default):
