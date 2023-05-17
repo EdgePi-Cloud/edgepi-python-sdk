@@ -6,40 +6,46 @@ A/DOUT1-8 allow the user to modify the direction and output state of the corresp
 
 # Example Code
 ```python
-from edgepi.digital_output.digital_output_constants import DoutPins
+from edgepi.digital_output.digital_output_constants import DoutPins, DoutTriState
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput
 
 digital_output = EdgePiDigitalOutput()
 
 # setting corresponding GpioPin to Output direction
 digital_output.digital_output_direction(DoutPins.DOUT1, False)
-digital_output.digital_output_direction(DoutPins.DOUT2, False)
-digital_output.digital_output_direction(DoutPins.DOUT3, False)
-digital_output.digital_output_direction(DoutPins.DOUT4, False)
-digital_output.digital_output_direction(DoutPins.DOUT5, False)
-digital_output.digital_output_direction(DoutPins.DOUT6, False)
-digital_output.digital_output_direction(DoutPins.DOUT7, False)
-digital_output.digital_output_direction(DoutPins.DOUT8, False)
+# setting corresponding GpioPin to Input direction
+digital_output.digital_output_direction(DoutPins.DOUT1, True)
+
 
 # setting corresponding GpioPin to output High/On
-digital_output.digital_output_state(DoutPins.DOUT1, True)
-digital_output.digital_output_state(DoutPins.DOUT2, True)
-digital_output.digital_output_state(DoutPins.DOUT3, True)
-digital_output.digital_output_state(DoutPins.DOUT4, True)
-digital_output.digital_output_state(DoutPins.DOUT5, True)
-digital_output.digital_output_state(DoutPins.DOUT6, True)
-digital_output.digital_output_state(DoutPins.DOUT7, True)
-digital_output.digital_output_state(DoutPins.DOUT8, True)
+digital_output.digital_output_state(DoutPins.DOUT1, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT2, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT3, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT4, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT5, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT6, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT7, DoutTriState.HIGH)
+digital_output.digital_output_state(DoutPins.DOUT8, DoutTriState.HIGH)
 
 # setting corresponding GpioPin to output Low/Off
-digital_output.digital_output_state(DoutPins.DOUT1, False)
-digital_output.digital_output_state(DoutPins.DOUT2, False)
-digital_output.digital_output_state(DoutPins.DOUT3, False)
-digital_output.digital_output_state(DoutPins.DOUT4, False)
-digital_output.digital_output_state(DoutPins.DOUT5, False)
-digital_output.digital_output_state(DoutPins.DOUT6, False)
-digital_output.digital_output_state(DoutPins.DOUT7, False)
-digital_output.digital_output_state(DoutPins.DOUT8, False)
+digital_output.digital_output_state(DoutPins.DOUT1, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT2, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT3, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT4, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT5, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT6, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT7, DoutTriState.LOW)
+digital_output.digital_output_state(DoutPins.DOUT8, DoutTriState.LOW)
+
+# setting corresponding GpioPin to high impedance state
+digital_output.digital_output_state(DoutPins.DOUT1, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT2, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT3, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT4, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT5, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT6, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT7, DoutTriState.Z)
+digital_output.digital_output_state(DoutPins.DOUT8, DoutTriState.Z)
 ```
 
 
