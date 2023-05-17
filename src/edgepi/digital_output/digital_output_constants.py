@@ -15,3 +15,11 @@ class DoutPins(Enum):
     DOUT6 = 'DOUT6'
     DOUT7 = 'DOUT7'
     DOUT8 = 'DOUT8'
+
+@unique
+class DoutTriState(Enum):
+    """Digital Output Tri-state Enum"""
+
+    HI_Z = -1
+    LOW = 0
+    HIGH = 1
