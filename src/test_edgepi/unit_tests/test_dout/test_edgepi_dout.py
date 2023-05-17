@@ -44,6 +44,7 @@ from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, Inv
 def test_edgepi_digital_output_state(mocker, pin_name, state, error, aout_clear):
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
+    exp_dir_in = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_in")
     mock_dac = mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC")
     dout = EdgePiDigitalOutput()
     dout.dac=mock_dac
@@ -58,6 +59,7 @@ def test_edgepi_digital_output_state(mocker, pin_name, state, error, aout_clear)
         else:
             expander_set.assert_called_once_with(aout_clear.value)
             expander_clear.assert_called_once_with(pin_name.value)
+            exp_dir_in.assert_called_once_with(pin_name.value)
             dout.dac.write_voltage.assert_called_once()
 
 @pytest.mark.parametrize("pin_name, direction, error",
@@ -93,22 +95,21 @@ def test_edgepi_digital_output_direction(mocker, pin_name, direction, error):
 
 
 
-@pytest.mark.parametrize("pin_name, mock_vals",
-                        [(DoutPins.DOUT1,[True, False]),
-                         (DoutPins.DOUT2,[True, True]),
-                         (DoutPins.DOUT3,[False, False]),
-                         (DoutPins.DOUT4,[False, True]),
-                         (DoutPins.DOUT5,[True, False]),
-                         (DoutPins.DOUT6,[True, True]),
-                         (DoutPins.DOUT7,[False, False]),
-                         (DoutPins.DOUT8,[False, True]),
+@pytest.mark.parametrize("pin_name, mock_vals, result",
+                        [(DoutPins.DOUT1,[True, False], DoutTriState.HIGH),
+                         (DoutPins.DOUT3,[False, False], DoutTriState.LOW),
+                         (DoutPins.DOUT2,[True, True], DoutTriState.Z),
+                         (DoutPins.DOUT4,[False, True], DoutTriState.Z),
+                         (DoutPins.DOUT5,[True, False], DoutTriState.HIGH),
+                         (DoutPins.DOUT7,[False, False], DoutTriState.LOW),
+                         (DoutPins.DOUT6,[True, True], DoutTriState.Z),
+                         (DoutPins.DOUT8,[False, True], DoutTriState.Z),
                          ])
-def test_get_state(mocker, pin_name, mock_vals):
-    mock_state = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_pin_state",
+def test_get_state(mocker, pin_name, mock_vals, result):
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.read_pin_state",
                                return_value = mock_vals[0])
-    mock_direction = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction",
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction",
                                    return_value = mock_vals[1])
     dout= EdgePiDigitalOutput()
-    gpio_stat, gpio_dir = dout.get_state(pin_name)
-    assert gpio_stat == mock_state.return_value
-    assert gpio_dir == mock_direction.return_value
+    gpio_state = dout.get_state(pin_name)
+    assert gpio_state == result

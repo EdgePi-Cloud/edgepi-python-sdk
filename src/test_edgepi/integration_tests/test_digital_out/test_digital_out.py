@@ -3,7 +3,7 @@
 import time
 import pytest
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput
-from edgepi.digital_output.digital_output_constants import DoutPins
+from edgepi.digital_output.digital_output_constants import DoutPins, DoutTriState
 
 
 @pytest.mark.parametrize("pin_name", [

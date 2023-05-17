@@ -65,8 +65,8 @@ class EdgePiDigitalOutput():
             # set dac to 0V 
             self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.clear_pin_state(pin_name.value)
+            self.gpio.set_pin_direction_in(pin_name.value)
             self.dac.write_voltage(self._dout_dac_pair[pin_name],0)            
-
 
     def digital_output_direction(self, pin_name: DoutPins = None, direction: bool = None):
         """
@@ -97,5 +97,9 @@ class EdgePiDigitalOutput():
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
         state = self.gpio.read_pin_state(pin_name.value)
         direction = self.gpio.get_pin_direction(pin_name.value)
-
-        return state, direction
+        if not direction and state:
+            return DoutTriState.HIGH
+        elif not direction and not state:
+            return DoutTriState.LOW
+        else:
+            return DoutTriState.Z
