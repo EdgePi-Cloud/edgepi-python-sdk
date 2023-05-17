@@ -12,7 +12,7 @@ def fixture_test_pwm():
     yield pwm_dev
 
 @pytest.fixture(name="pwm_dev_default")
-def fixture_test_pwm():
+def fixture_test_pwm_def():
     pwm_dev_default = EdgePiPWM()
     pwm_dev_default.init_pwm(PWMPins.PWM1)
     pwm_dev_default.set_config(PWMPins.PWM1, 1000, 50, Polarity.NORMAL)
