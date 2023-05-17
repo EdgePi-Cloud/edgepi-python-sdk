@@ -10,41 +10,55 @@ if sys.platform != 'linux':
 from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.digital_output.digital_output_constants import DoutPins
+from edgepi.digital_output.digital_output_constants import DoutPins, DoutTriState
 from edgepi.digital_output.edgepi_digital_output import EdgePiDigitalOutput, InvalidPinName
 
 @pytest.mark.parametrize("pin_name, state, error, aout_clear",
-                        [(DoutPins.DOUT1, True, does_not_raise(), GpioPins.AO_EN1),
-                         (DoutPins.DOUT2, True, does_not_raise(), GpioPins.AO_EN2),
-                         (DoutPins.DOUT3, True, does_not_raise(), GpioPins.AO_EN3),
-                         (DoutPins.DOUT4, True, does_not_raise(), GpioPins.AO_EN4),
-                         (DoutPins.DOUT5, True, does_not_raise(), GpioPins.AO_EN5),
-                         (DoutPins.DOUT6, True, does_not_raise(), GpioPins.AO_EN6),
-                         (DoutPins.DOUT7, True, does_not_raise(), GpioPins.AO_EN7),
-                         (DoutPins.DOUT8, True, does_not_raise(), GpioPins.AO_EN8),
-                         (DoutPins.DOUT1, False, does_not_raise(), GpioPins.AO_EN1),
-                         (DoutPins.DOUT2, False, does_not_raise(), GpioPins.AO_EN2),
-                         (DoutPins.DOUT3, False, does_not_raise(), GpioPins.AO_EN3),
-                         (DoutPins.DOUT4, False, does_not_raise(), GpioPins.AO_EN4),
-                         (DoutPins.DOUT5, False, does_not_raise(), GpioPins.AO_EN5),
-                         (DoutPins.DOUT6, False, does_not_raise(), GpioPins.AO_EN6),
-                         (DoutPins.DOUT7, False, does_not_raise(), GpioPins.AO_EN7),
-                         (DoutPins.DOUT8, False, does_not_raise(), GpioPins.AO_EN8),
+                        [(DoutPins.DOUT1, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN1),
+                         (DoutPins.DOUT2, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN2),
+                         (DoutPins.DOUT3, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN3),
+                         (DoutPins.DOUT4, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN4),
+                         (DoutPins.DOUT5, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN5),
+                         (DoutPins.DOUT6, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN6),
+                         (DoutPins.DOUT7, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN7),
+                         (DoutPins.DOUT8, DoutTriState.HIGH, does_not_raise(), GpioPins.AO_EN8),
+                         (DoutPins.DOUT1, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN1),
+                         (DoutPins.DOUT2, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN2),
+                         (DoutPins.DOUT3, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN3),
+                         (DoutPins.DOUT4, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN4),
+                         (DoutPins.DOUT5, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN5),
+                         (DoutPins.DOUT6, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN6),
+                         (DoutPins.DOUT7, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN7),
+                         (DoutPins.DOUT8, DoutTriState.LOW, does_not_raise(), GpioPins.AO_EN8),
+                         (DoutPins.DOUT1, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN1),
+                         (DoutPins.DOUT2, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN2),
+                         (DoutPins.DOUT3, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN3),
+                         (DoutPins.DOUT4, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN4),
+                         (DoutPins.DOUT5, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN5),
+                         (DoutPins.DOUT6, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN6),
+                         (DoutPins.DOUT7, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN7),
+                         (DoutPins.DOUT8, DoutTriState.Z, does_not_raise(), GpioPins.AO_EN8),
                          (DoutPins.DOUT8, None, pytest.raises(ValueError), None),
                          (None, False, pytest.raises(InvalidPinName), None),
                          (GpioPins.AO_EN8, False, pytest.raises(InvalidPinName), None)])
 def test_edgepi_digital_output_state(mocker, pin_name, state, error, aout_clear):
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
+    mock_dac = mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC")
     dout = EdgePiDigitalOutput()
+    dout.dac=mock_dac
     with error:
         dout.digital_output_state(pin_name, state)
-        if state:
+        if state == DoutTriState.HIGH:
             expander_set.assert_called_once_with(pin_name.value)
-        else:
+        elif state == DoutTriState.LOW:
             expander_set.assert_called_once_with(aout_clear.value)
             expander_clear.assert_has_calls([mocker.call(pin_name.value),
                                              mocker.call(aout_clear.value)])
+        else:
+            expander_set.assert_called_once_with(aout_clear.value)
+            expander_clear.assert_called_once_with(pin_name.value)
+            dout.dac.write_voltage.assert_called_once()
 
 @pytest.mark.parametrize("pin_name, direction, error",
                         [(DoutPins.DOUT1, True, does_not_raise()),
