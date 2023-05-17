@@ -18,10 +18,10 @@ from edgepi.digital_output.digital_output_constants import DoutPins, DoutTriStat
 ])
 def test_output_high(pin_name):
     dout=EdgePiDigitalOutput()
-    dout.digital_output_state(pin_name, True)
+    dout.digital_output_state(pin_name, DoutTriState.HIGH)
     time.sleep(1)
-    gpio_stat, _ = dout.get_state(pin_name)
-    assert gpio_stat is True
+    gpio_stat = dout.get_state(pin_name)
+    assert gpio_stat == DoutTriState.HIGH
 
 @pytest.mark.parametrize("pin_name", [
     (DoutPins.DOUT1),
@@ -35,10 +35,27 @@ def test_output_high(pin_name):
 ])
 def test_output_low(pin_name):
     dout=EdgePiDigitalOutput()
-    dout.digital_output_state(pin_name, False)
+    dout.digital_output_state(pin_name, DoutTriState.LOW)
     time.sleep(1)
-    gpio_stat, _ = dout.get_state(pin_name)
-    assert gpio_stat is False
+    gpio_stat = dout.get_state(pin_name)
+    assert gpio_stat == DoutTriState.LOW
+
+@pytest.mark.parametrize("pin_name", [
+    (DoutPins.DOUT1),
+    (DoutPins.DOUT2),
+    (DoutPins.DOUT3),
+    (DoutPins.DOUT4),
+    (DoutPins.DOUT5),
+    (DoutPins.DOUT6),
+    (DoutPins.DOUT7),
+    (DoutPins.DOUT8),
+])
+def test_output_low(pin_name):
+    dout=EdgePiDigitalOutput()
+    dout.digital_output_state(pin_name, DoutTriState.Z)
+    time.sleep(1)
+    gpio_stat = dout.get_state(pin_name)
+    assert gpio_stat == DoutTriState.Z
 
 @pytest.mark.parametrize("pin_name", [
     (DoutPins.DOUT1),
@@ -52,10 +69,11 @@ def test_output_low(pin_name):
 ])
 def test_direction_in(pin_name):
     dout=EdgePiDigitalOutput()
+    dout.digital_output_state(pin_name, DoutTriState.LOW)
     dout.digital_output_direction(pin_name, True)
     time.sleep(1)
-    _, gpio_dir = dout.get_state(pin_name)
-    assert gpio_dir is True
+    gpio_stat = dout.get_state(pin_name)
+    assert gpio_stat == DoutTriState.Z
 
 @pytest.mark.parametrize("pin_name", [
     (DoutPins.DOUT1),
@@ -69,7 +87,8 @@ def test_direction_in(pin_name):
 ])
 def test_direction_out(pin_name):
     dout=EdgePiDigitalOutput()
+    dout.digital_output_state(pin_name, DoutTriState.LOW)
     dout.digital_output_direction(pin_name, False)
     time.sleep(1)
-    _, gpio_dir = dout.get_state(pin_name)
-    assert gpio_dir is False
+    gpio_stat = dout.get_state(pin_name)
+    assert gpio_stat == DoutTriState.LOW
