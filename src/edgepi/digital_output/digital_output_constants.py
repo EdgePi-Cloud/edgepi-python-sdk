@@ -23,4 +23,3 @@ class DoutTriState(Enum):
     Z = -1
     LOW = 0
     HIGH = 1
-

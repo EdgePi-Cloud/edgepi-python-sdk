@@ -47,7 +47,7 @@ def test_output_low(pin_name):
     (DoutPins.DOUT7),
     (DoutPins.DOUT8),
 ])
-def test_output_low(pin_name):
+def test_output_z(pin_name):
     dout=EdgePiDigitalOutput()
     dout.digital_output_state(pin_name, DoutTriState.Z)
     gpio_stat = dout.get_state(pin_name)
