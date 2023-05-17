@@ -17,6 +17,9 @@ from edgepi.pwm.pwm_constants import (
     PWM_MIN_DUTY_CYCLE,
 )
 
+class PwmDeviceError(Exception):
+    """Raised when PWM device doesn't exist"""
+
 class EdgePiPWM():
     """PWM module to provide PWM signal"""
     __pwm_pin_to_channel = {PWMPins.PWM1 : PWMCh.PWM_1,
@@ -46,7 +49,7 @@ class EdgePiPWM():
             N/A
         """
         if pwm_num is None:
-            raise ValueError("set_config: PWM number is missing {pwm_num}")
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
         self.__check_range(frequency, PWM_MIN_FREQ, PWM_MAX_FREQ)
 
         self.__pwm_1.set_frequency_pwm(frequency) if pwm_num == PWMPins.PWM1 else\
@@ -61,7 +64,7 @@ class EdgePiPWM():
             frequency (int): frequency value
         """
         if pwm_num is None:
-            raise ValueError("set_config: PWM number is missing {pwm_num}")
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
         return self.__pwm_1.get_frequency_pwm() if pwm_num == PWMPins.PWM1 else\
                self.__pwm_2.get_frequency_pwm()
 
@@ -76,40 +79,51 @@ class EdgePiPWM():
             N/A
         """
         if pwm_num is None:
-            raise ValueError("set_config: PWM number is missing {pwm_num}")
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
         self.__check_range(duty_cycle, PWM_MIN_DUTY_CYCLE, PWM_MAX_DUTY_CYCLE)
         self.__pwm_1.set_duty_cycle_pwm(duty_cycle/100) if pwm_num == PWMPins.PWM1 else\
-        self.__pwm_2.set_frequency_pwm(duty_cycle/100)
+        self.__pwm_2.set_duty_cycle_pwm(duty_cycle/100)
 
-    def get_duty_cycle(self):
+    def get_duty_cycle(self, pwm_num: PWMPins):
         """
         Get duty_cycle
         Args:
-            N/A
+            pwm_num (PWMPins): target pwm device
         Returns:
             duty_cycle (int): duty_cycle value in percentage
         """
-        return int(self.pwm.get_duty_cycle_pwm() * 100)
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        return self.__pwm_1.get_duty_cycle_pwm()*100 if pwm_num == PWMPins.PWM1 else\
+               self.__pwm_2.get_duty_cycle_pwm()*100
 
-    def set_polarity(self, polarity: Polarity):
+    def __set_polarity(self, pwm_num: PWMPins, polarity: Polarity):
         """
         Set polarity
         Args:
+            pwm_num (PWMPins): target pwm device
             polarity (int): polarity value
         Returns:
             N/A
         """
-        self.pwm.set_polarity_pwm(polarity.value)
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        self.__pwm_1.set_polarity_pwm(polarity.value) if pwm_num == PWMPins.PWM1 else\
+        self.__pwm_2.set_polarity_pwm(polarity.value)
 
-    def get_polarity(self):
+    def get_polarity(self, pwm_num: PWMPins):
         """
         Get polarity
         Args:
-            N/A
+            pwm_num (PWMPins): target pwm device
         Returns:
             polarity (int): polarity value
         """
-        return self.pwm.get_polarity_pwm()
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        return self.__pwm_1.get_polarity_pwm() if pwm_num == PWMPins.PWM1 else\
+               self.__pwm_2.get_polarity_pwm()
+
 
     def enable(self):
         """
@@ -169,7 +183,7 @@ class EdgePiPWM():
             N/A
         """
         if pwm_num is None:
-            raise ValueError("set_config: PWM number is missing {pwm_num}")
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
         pwm_dev = self.__check_pwm_device_and_instantiate(pwm_num)
         if pwm_dev is not None:
             pwm_dev.open_pwm()
@@ -197,18 +211,12 @@ class EdgePiPWM():
             N/A
         """
         if pwm_num is None:
-            raise ValueError("set_config: PWM number is missing {pwm_num}")
-        pwm_dev = self.__check_pwm_device_and_instantiate(pwm_num)
-        if pwm_dev is not None:
-            if pwm_num == PWMPins.PWM1:
-                self.__pwm_1 = pwm_dev
-            else:
-                self.__pwm_2 = pwm_dev
-            self.log.debug(f"set_config: Instantiating PWM Device for the first time {pwm_dev.chip}"
-                           f",{pwm_dev.channel}")
-            pwm_dev.open_pwm()
-            # if PWM is already enabled, it means it crahsed previously
-            if pwm_dev.get_enabled_pwm():
-                pwm_dev.disable_pwm()
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        if self.__check_pwm_device_and_instantiate(pwm_num) is not None:
+            raise PwmDeviceError(f"PWM device doesn't exist {pwm_num}, initialize the device first")
+        if self.get_frequency(pwm_num) != frequency:
             self.__set_frequency(pwm_num, frequency)
-        
+        if self.get_duty_cycle(pwm_num) != duty_cycle:
+            self.__set_duty_cycle(pwm_num, duty_cycle)
+        if self.get_polarity(pwm_num) != polarity.value:
+            self.__set_polarity(pwm_num, polarity)

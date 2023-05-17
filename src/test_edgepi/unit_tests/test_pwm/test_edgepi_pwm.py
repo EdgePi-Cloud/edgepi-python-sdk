@@ -8,7 +8,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.pwm.pwm_constants import PWMCh, Polarity, PWMPins
-from edgepi.pwm.edgepi_pwm import EdgePiPWM
+from edgepi.pwm.edgepi_pwm import EdgePiPWM, PwmDeviceError
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_pwm(mocker):
@@ -85,11 +85,15 @@ def test_pwm_close(pwm_dev):
                           (None,10000, pytest.raises(ValueError)),
                           ])
 def test_get_frequency_pwm(mocker, pwm_num,expected, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_frequency_pwm", return_value = expected)
     with error:
         freq = pwm_dev.get_frequency(pwm_num)
         assert freq == expected
-    
 
 @pytest.mark.parametrize("pwm_num ,freq, error",
                          [(PWMPins.PWM1,1000, does_not_raise()),
@@ -103,43 +107,134 @@ def test_get_frequency_pwm(mocker, pwm_num,expected, error, pwm_dev):
                           (None,10000, pytest.raises(ValueError)),
                           ])
 def test_set_frequency_pwm(mocker, pwm_num, freq, error, pwm_dev):
-    set_freq_mock = mocker.patch("edgepi.peripherals.pwm.PwmDevice.set_frequency_pwm")
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_frequency_pwm", return_value = freq)
     with error:
         pwm_dev._EdgePiPWM__set_frequency(pwm_num, freq)
         result = pwm_dev.get_frequency(pwm_num)
-        set_freq_mock.assert_called_once_with(pwm_num, freq)
+        if pwm_num == PWMPins.PWM1:
+            pwm_dev._EdgePiPWM__pwm_1.set_frequency_pwm.assert_called_once_with(freq)
+        else:
+            pwm_dev._EdgePiPWM__pwm_2.set_frequency_pwm.assert_called_once_with(freq)
         assert result == freq
 
-@pytest.mark.parametrize("expected", [(50),(40),(30),(20),(10),(60),(70),(80),(90),(100)])
-def test_get_duty_cycle_pwm(mocker, expected, pwm_dev):
+@pytest.mark.parametrize("pwm_num ,expected, error",
+                         [(PWMPins.PWM1,50,does_not_raise()),
+                          (PWMPins.PWM1, 40, does_not_raise()),
+                          (PWMPins.PWM1, 30, does_not_raise()),
+                          (PWMPins.PWM1, 20, does_not_raise()),
+                          (PWMPins.PWM1, 10, does_not_raise()),
+                          (PWMPins.PWM1, 60, does_not_raise()),
+                          (PWMPins.PWM1, 70, does_not_raise()),
+                          (PWMPins.PWM1, 80, does_not_raise()),
+                          (PWMPins.PWM1, 90, does_not_raise()),
+                          (PWMPins.PWM1, 100, does_not_raise()),
+                          (PWMPins.PWM2,50,does_not_raise()),
+                          (PWMPins.PWM2, 40, does_not_raise()),
+                          (PWMPins.PWM2, 30, does_not_raise()),
+                          (PWMPins.PWM2, 20, does_not_raise()),
+                          (PWMPins.PWM2, 10, does_not_raise()),
+                          (PWMPins.PWM2, 60, does_not_raise()),
+                          (PWMPins.PWM2, 70, does_not_raise()),
+                          (PWMPins.PWM2, 80, does_not_raise()),
+                          (PWMPins.PWM2, 90, does_not_raise()),
+                          (PWMPins.PWM2, 100, does_not_raise()),
+                          (None, 50, pytest.raises(ValueError))
+                          ])
+def test_get_duty_cycle_pwm(mocker, pwm_num ,expected, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = expected/100)
-    duty_cycle = pwm_dev.get_duty_cycle()
-    assert duty_cycle == expected
+    with error:
+        duty_cycle = pwm_dev.get_duty_cycle(pwm_num)
+        assert duty_cycle == expected
 
-@pytest.mark.parametrize("duty_cycle", [(50),(40),(30),(20),(10),(60),(70),(80),(90),(100)])
-def test_set_duty_cycle_pwm(mocker, duty_cycle, pwm_dev):
-    set_dc_mock = mocker.patch("edgepi.peripherals.pwm.PwmDevice.set_duty_cycle_pwm")
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value=duty_cycle/100)
-    pwm_dev.set_duty_cycle(duty_cycle)
-    result = pwm_dev.get_duty_cycle()
-    set_dc_mock.assert_called_once_with(duty_cycle/100)
-    assert result == duty_cycle
+@pytest.mark.parametrize("pwm_num ,duty_cycle, error",
+                         [(PWMPins.PWM1,50,does_not_raise()),
+                          (PWMPins.PWM1, 40, does_not_raise()),
+                          (PWMPins.PWM1, 30, does_not_raise()),
+                          (PWMPins.PWM1, 20, does_not_raise()),
+                          (PWMPins.PWM1, 10, does_not_raise()),
+                          (PWMPins.PWM1, 60, does_not_raise()),
+                          (PWMPins.PWM1, 70, does_not_raise()),
+                          (PWMPins.PWM1, 80, does_not_raise()),
+                          (PWMPins.PWM1, 90, does_not_raise()),
+                          (PWMPins.PWM1, 100, does_not_raise()),
+                          (PWMPins.PWM2,50,does_not_raise()),
+                          (PWMPins.PWM2, 40, does_not_raise()),
+                          (PWMPins.PWM2, 30, does_not_raise()),
+                          (PWMPins.PWM2, 20, does_not_raise()),
+                          (PWMPins.PWM2, 10, does_not_raise()),
+                          (PWMPins.PWM2, 60, does_not_raise()),
+                          (PWMPins.PWM2, 70, does_not_raise()),
+                          (PWMPins.PWM2, 80, does_not_raise()),
+                          (PWMPins.PWM2, 90, does_not_raise()),
+                          (PWMPins.PWM2, 100, does_not_raise()),
+                          (None, 60, pytest.raises(ValueError))
+                          ])
+def test_set_duty_cycle_pwm(mocker, pwm_num, duty_cycle, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = duty_cycle/100)
+    with error:
+        pwm_dev._EdgePiPWM__set_duty_cycle(pwm_num, duty_cycle)
+        result = pwm_dev.get_duty_cycle(pwm_num)
+        if pwm_num == PWMPins.PWM1:
+            pwm_dev._EdgePiPWM__pwm_1.set_duty_cycle_pwm.assert_called_once_with(duty_cycle/100)
+        else:
+            pwm_dev._EdgePiPWM__pwm_2.set_duty_cycle_pwm.assert_called_once_with(duty_cycle/100)
+        assert result == duty_cycle
 
-@pytest.mark.parametrize("expected", [(Polarity.NORMAL),(Polarity.INVERSED)])
-def test_get_polarity_pwm(mocker, expected, pwm_dev):
+@pytest.mark.parametrize("pwm_num ,expected, error",
+                         [(PWMPins.PWM1, Polarity.NORMAL,does_not_raise()),
+                          (PWMPins.PWM1, Polarity.INVERSED,does_not_raise()),
+                          (PWMPins.PWM2, Polarity.NORMAL,does_not_raise()),
+                          (PWMPins.PWM2, Polarity.INVERSED,does_not_raise()),
+                          (None, Polarity.INVERSED,pytest.raises(ValueError)),
+                          ])
+def test_get_polarity_pwm(mocker, pwm_num, expected, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected.value)
-    pol = pwm_dev.get_polarity()
-    assert pol == expected.value
+    with error:
+        polarity = pwm_dev.get_polarity(pwm_num)
+        assert polarity == expected.value
 
-@pytest.mark.parametrize("polarity", [(Polarity.NORMAL),(Polarity.INVERSED)])
-def test_set_polarity_pwm(mocker, polarity, pwm_dev):
-    set_pol_mock = mocker.patch("edgepi.peripherals.pwm.PwmDevice.set_polarity_pwm")
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = polarity.value)
-    pwm_dev.set_polarity(polarity)
-    result = pwm_dev.get_polarity()
-    set_pol_mock.assert_called_once_with(polarity.value)
-    assert result == polarity.value
+@pytest.mark.parametrize("pwm_num ,expected, error",
+                         [(PWMPins.PWM1, Polarity.NORMAL,does_not_raise()),
+                          (PWMPins.PWM1, Polarity.INVERSED,does_not_raise()),
+                          (PWMPins.PWM2, Polarity.NORMAL,does_not_raise()),
+                          (PWMPins.PWM2, Polarity.INVERSED,does_not_raise()),
+                          (None, Polarity.INVERSED,pytest.raises(ValueError)),
+                          ])
+def test__set_polarity_pwm(mocker, pwm_num, expected, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if pwm_num == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected.value)
+    with error:
+        pwm_dev._EdgePiPWM__set_polarity(pwm_num, expected)
+        result = pwm_dev.get_polarity(pwm_num)
+        if pwm_num == PWMPins.PWM1:
+            pwm_dev._EdgePiPWM__pwm_1.set_polarity_pwm.assert_called_once_with(expected.value)
+        else:
+            pwm_dev._EdgePiPWM__pwm_2.set_polarity_pwm.assert_called_once_with(expected.value)
+        assert result == expected.value
 
 @pytest.mark.parametrize("expected", [(True),(False)])
 def test_get_enabled_pwm(mocker, expected, pwm_dev):
@@ -203,3 +298,45 @@ def test_init_pwm_first_time(mocker, pwm_num,error, pwm_dev):
     with error:
         pwm_dev.init_pwm(pwm_num)
         assert mock_open.call_count == 0
+
+@pytest.mark.parametrize("params, mock_vals, error", 
+                         [([None, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL],pytest.raises(ValueError)),
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL],pytest.raises(PwmDeviceError)),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL],pytest.raises(PwmDeviceError)),
+                        ])
+def test_set_config_errors(mocker, params, mock_vals, error, pwm_dev):
+    with error:
+        pwm_dev.set_config(params[0])
+
+@pytest.mark.parametrize("params, mock_vals", 
+                        [
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[2000, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 60, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.INVERSED]),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[2000, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 60, Polarity.NORMAL]),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.INVERSED]),
+                        ])
+def test_set_config(mocker, params, mock_vals, pwm_dev):
+    # mock getter function
+    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_frequency", return_value = mock_vals[0])
+    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_duty_cycle", return_value = mock_vals[1]/100)
+    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_polarity", return_value = mock_vals[2].value)
+    # mock setter function
+    mock_set_freq = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_frequency")
+    mock_set_duty = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_duty_cycle")
+    mock_set_pol = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_polarity")
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    if params[0] == PWMPins.PWM1:
+        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
+    else:
+        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
+    pwm_dev.set_config(params[0], params[1], params[2], params[3])
+    if params[1] != mock_vals[0]:
+        mock_set_freq.assert_called_once_with(params[0],params[1])
+    if params[2] != mock_vals[1]:
+            mock_set_duty.assert_called_once_with(params[0],params[2])
+    if params[3] != mock_vals[2]:
+            mock_set_pol.assert_called_once_with(params[0],params[3])
