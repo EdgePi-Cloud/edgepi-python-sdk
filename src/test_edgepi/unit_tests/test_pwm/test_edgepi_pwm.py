@@ -1,5 +1,6 @@
 """unit tests for pwm.py module"""
 # pylint: disable=wrong-import-position
+# pylint: disable=protected-access
 from unittest import mock
 import sys
 if sys.platform != 'linux':
@@ -19,8 +20,8 @@ def fixture_test_pwm(mocker):
 def test_pwm_init(mocker):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     pwm_dev = EdgePiPWM()
-    assert pwm_dev._EdgePiPWM__pwm_1 == None
-    assert pwm_dev._EdgePiPWM__pwm_2 == None
+    assert pwm_dev._EdgePiPWM__pwm_1 is None
+    assert pwm_dev._EdgePiPWM__pwm_2 is None
 
 @pytest.mark.parametrize("target, min_range, max_range, error",
                          [(0, 0, 100, does_not_raise()),
@@ -39,7 +40,6 @@ def test_pwm_init(mocker):
                           ])
 def test__check_range(target, min_range, max_range, error, pwm_dev):
     with error:
-        # pylint: disable=protected-access
         assert pwm_dev._EdgePiPWM__check_range(target, min_range, max_range) is True
 
 @pytest.mark.parametrize(
@@ -97,22 +97,6 @@ def test_pwm_disable(mocker, pwm_num, error, pwm_dev):
         else:
             pwm_dev._EdgePiPWM__pwm_2.disable_pwm.assert_called_once_with()
         mock_set_pin.assert_called_with(pwm_num.value)
-
-@pytest.mark.parametrize("pwm_num, expected, error",
-                         [(PWMPins.PWM1, True, does_not_raise()),
-                          (PWMPins.PWM2, False, does_not_raise()),
-                          (None, False, pytest.raises(ValueError)),
-                          ])
-def test_get_enabled(mocker, pwm_num, expected, error, pwm_dev):
-    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
-    if pwm_num == PWMPins.PWM1:
-        pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
-    else:
-        pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_enabled_pwm", return_value = expected)
-    with error:
-        enabled = pwm_dev.get_enabled(pwm_num)
-        assert enabled == expected
 
 @pytest.mark.parametrize("pwm_num, error",
                          [(PWMPins.PWM1, does_not_raise()),
@@ -244,7 +228,8 @@ def test_set_duty_cycle_pwm(mocker, pwm_num, duty_cycle, error, pwm_dev):
         pwm_dev._EdgePiPWM__pwm_1 = mock_pwmdevice
     else:
         pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm", return_value = duty_cycle/100)
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_duty_cycle_pwm",
+                 return_value = duty_cycle/100)
     with error:
         pwm_dev._EdgePiPWM__set_duty_cycle(pwm_num, duty_cycle)
         result = pwm_dev.get_duty_cycle(pwm_num)
@@ -311,7 +296,7 @@ def test_get_enabled(mocker, pwm_num, expected, error, pwm_dev):
         enabled = pwm_dev.get_enabled(pwm_num)
         assert enabled == expected
 
-@pytest.mark.parametrize("pwm_num, result", 
+@pytest.mark.parametrize("pwm_num, result",
                          [(PWMPins.PWM1, [PWMCh.PWM_1.value.channel, PWMCh.PWM_1.value.chip]),
                           (PWMPins.PWM2, [PWMCh.PWM_2.value.channel, PWMCh.PWM_2.value.chip]),
                         ])
@@ -320,7 +305,7 @@ def test__check_pwm_device_and_instantiate_first_time(pwm_num, result, pwm_dev):
     assert pwm_device.channel == result[0]
     assert pwm_device.chip == result[1]
 
-@pytest.mark.parametrize("pwm_num", 
+@pytest.mark.parametrize("pwm_num",
                          [(PWMPins.PWM1),
                           (PWMPins.PWM2),
                         ])
@@ -331,9 +316,9 @@ def test__check_pwm_device_and_instantiate_not_first_time(mocker, pwm_num, pwm_d
     else:
         pwm_dev._EdgePiPWM__pwm_2 = mock_pwmdevice
     pwm_device = pwm_dev._EdgePiPWM__check_pwm_device_and_instantiate(pwm_num)
-    assert pwm_device == None
+    assert pwm_device is None
 
-@pytest.mark.parametrize("pwm_num,error", 
+@pytest.mark.parametrize("pwm_num,error",
                          [(PWMPins.PWM1,does_not_raise()),
                           (PWMPins.PWM2,does_not_raise()),
                           (None, pytest.raises(ValueError)),
@@ -352,12 +337,12 @@ def test_init_pwm_first_time(mocker, pwm_num,error, pwm_dev):
             assert pwm_dev._EdgePiPWM__pwm_1 is None
         mock_open.assert_called_once()
 
-@pytest.mark.parametrize("pwm_num,error", 
+@pytest.mark.parametrize("pwm_num,error",
                          [(PWMPins.PWM1,does_not_raise()),
                           (PWMPins.PWM2,does_not_raise()),
                           (None, pytest.raises(ValueError)),
                         ])
-def test_init_pwm_first_time(mocker, pwm_num,error, pwm_dev):
+def test_init_pwm(mocker, pwm_num,error, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     mock_open = mocker.patch("edgepi.peripherals.pwm.PwmDevice.open_pwm")
     if pwm_num == PWMPins.PWM1:
@@ -368,7 +353,7 @@ def test_init_pwm_first_time(mocker, pwm_num,error, pwm_dev):
         pwm_dev.init_pwm(pwm_num)
         assert mock_open.call_count == 0
 
-@pytest.mark.parametrize("pwm_num, error", 
+@pytest.mark.parametrize("pwm_num, error",
                         [(None, pytest.raises(ValueError)),
                           (PWMPins.PWM1, pytest.raises(PwmDeviceError)),
                           (PWMPins.PWM2, pytest.raises(PwmDeviceError)),
@@ -377,7 +362,7 @@ def test_set_config_errors(pwm_num, error, pwm_dev):
     with error:
         pwm_dev.set_config(pwm_num)
 
-@pytest.mark.parametrize("params, mock_vals", 
+@pytest.mark.parametrize("params, mock_vals",
                         [
                           ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL]),
                           ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[2000, 50, Polarity.NORMAL]),
@@ -406,6 +391,6 @@ def test_set_config(mocker, params, mock_vals, pwm_dev):
     if params[1] != mock_vals[0]:
         mock_set_freq.assert_called_once_with(params[0],params[1])
     if params[2] != mock_vals[1]:
-            mock_set_duty.assert_called_once_with(params[0],params[2])
+        mock_set_duty.assert_called_once_with(params[0],params[2])
     if params[3] != mock_vals[2]:
-            mock_set_pol.assert_called_once_with(params[0],params[3])
+        mock_set_pol.assert_called_once_with(params[0],params[3])

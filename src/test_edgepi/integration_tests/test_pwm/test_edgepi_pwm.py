@@ -1,6 +1,5 @@
 """EdgePi PWM integration test"""
 
-import logging
 import pytest
 
 from edgepi.pwm.pwm_constants import Polarity, PWMPins
@@ -23,6 +22,7 @@ def fixture_test_pwm_def():
                           (PWMPins.PWM2),
                           ])
 def test_pwm_init(pwm_num, pwm_dev):
+    # pylint: disable=protected-access
     pwm_dev.init_pwm(pwm_num)
     if pwm_num == PWMPins.PWM1:
         assert pwm_dev._EdgePiPWM__pwm_1 is not None
