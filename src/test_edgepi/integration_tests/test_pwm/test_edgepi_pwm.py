@@ -3,10 +3,8 @@
 import logging
 import pytest
 
-from edgepi.pwm.pwm_constants import PWMCh, Polarity, PWMPins
+from edgepi.pwm.pwm_constants import Polarity, PWMPins
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
-
-_logger = logging.getLogger(__name__)
 
 @pytest.fixture(name="pwm_dev")
 def fixture_test_pwm():
@@ -65,9 +63,9 @@ def test_get_polarity_pwm(pwm_dev_default):
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_set_polarity_pwm(pwm_dev_default):
-    init_pol = pwm_dev_default.get_polarity()
+    init_pol = pwm_dev_default.get_polarity(PWMPins.PWM1)
     pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, polarity = Polarity.INVERSED)
-    result = pwm_dev_default.get_polarity()
+    result = pwm_dev_default.get_polarity(PWMPins.PWM1)
     assert result != init_pol
     pwm_dev_default.close(PWMPins.PWM1)
 
