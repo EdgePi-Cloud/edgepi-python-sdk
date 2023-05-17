@@ -125,26 +125,42 @@ class EdgePiPWM():
                self.__pwm_2.get_polarity_pwm()
 
 
-    def enable(self):
+    def enable(self, pwm_num: PWMPins):
         """
         Enable pwm output
+        Args:
+            pwm_num (PWMPins): target pwm device
+        Returns:
+            N/A
         """
-        self.gpio.set_pin_state(GpioPins.AO_EN1.value if self.pwm_num==PWMPins.PWM1 else\
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        if self.get_enabled(pwm_num):
+            self.disable(pwm_num)
+        self.gpio.set_pin_state(GpioPins.AO_EN1.value if pwm_num==PWMPins.PWM1 else\
                                 GpioPins.AO_EN2.value)
-        self.gpio.clear_pin_state(GpioPins.DOUT1.value if self.pwm_num==PWMPins.PWM1 else\
+        self.gpio.clear_pin_state(GpioPins.DOUT1.value if pwm_num==PWMPins.PWM1 else\
                                 GpioPins.DOUT2.value)
-        self.gpio.clear_pin_state(self.pwm_num.value)
-        self.log.info("Enabling PWM")
-        self.pwm.enable_pwm()
+        self.gpio.clear_pin_state(pwm_num.value)
+        self.log.info("enable: Enabling PWM")
+        self.__pwm_1.enable_pwm() if pwm_num == PWMPins.PWM1 else\
+        self.__pwm_2.enable_pwm()
 
-    def disable(self):
+    def disable(self, pwm_num: PWMPins):
         """
         Disable pwm output
+        Args:
+            pwm_num (PWMPins): target pwm device
+        Returns:
+            N/A
         """
-        self.pwm.disable_pwm()
-        self.gpio.set_pin_state(self.pwm_num.value)
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        self.__pwm_1.disable_pwm() if pwm_num == PWMPins.PWM1 else\
+        self.__pwm_2.disable_pwm()
+        self.gpio.set_pin_state(pwm_num.value)
 
-    def get_enabled(self):
+    def get_enabled(self, pwm_num: PWMPins):
         """
         Get enabled state
         Args:
@@ -152,17 +168,23 @@ class EdgePiPWM():
         Returns:
             enabled (bool): True enabled, False Disabled
         """
-        return self.pwm.get_enabled_pwm()
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        return self.__pwm_1.get_enabled_pwm() if pwm_num == PWMPins.PWM1 else\
+               self.__pwm_2.get_enabled_pwm()
 
-    def close(self):
+    def close(self, pwm_num: PWMPins):
         """
         Close PWM connection
         Args:
-            N/A
+            pwm_num (PWMPins): target pwm device
         Returns:
             N/A
         """
-        self.pwm.close_pwm()
+        if pwm_num is None:
+            raise ValueError(f"set_config: PWM number is missing {pwm_num}")
+        return self.__pwm_1.close_pwm() if pwm_num == PWMPins.PWM1 else\
+               self.__pwm_2.close_pwm()
 
     def __check_pwm_device_and_instantiate(self, pwm_num: PWMPins):
         # Check if it is first time being called, __pwm
