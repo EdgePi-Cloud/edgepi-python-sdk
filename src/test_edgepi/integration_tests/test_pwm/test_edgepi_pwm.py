@@ -21,11 +21,11 @@ def test_pwm_init(pwm_num):
     pwm_dev = EdgePiPWM()
     pwm_dev.init_pwm(pwm_num)
     if pwm_num == PWMPins.PWM1:
-        assert pwm_dev.__pwm_devs[pwm_num] is not None
-        assert pwm_dev.__pwm_devs[PWMPins.PWM2] is None
+        assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is not None
+        assert pwm_dev._EdgePiPWM__pwm_devs[PWMPins.PWM2] is None
     else:
-        assert pwm_dev.__pwm_devs[pwm_num] is not None
-        assert pwm_dev.__pwm_devs[PWMPins.PWM1] is None
+        assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is not None
+        assert pwm_dev._EdgePiPWM__pwm_devs[PWMPins.PWM1] is None
     pwm_dev.close(pwm_num)
 
 def test_get_frequency_pwm(pwm_dev_default):
