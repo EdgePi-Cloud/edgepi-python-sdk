@@ -26,6 +26,11 @@ from edgepi.adc.adc_constants import (
     RTDModes,
     ADC1RtdConfig,
     ADC2RtdConfig,
+    AnalogIn,
+    ADC1DataRate,
+    ADC2DataRate,
+    FilterMode,
+    ADCChannel,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
@@ -1049,3 +1054,38 @@ def test__is_rtd_on(mocker, mock_value, result):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.read_pin_state", return_value=mock_value[0])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.get_pin_direction", return_value=mock_value[1])
     assert adc._EdgePiADC__is_rtd_on() == result
+
+@pytest.mark.parametrize("param, error",
+                    [
+                        ([AnalogIn.AIN1,
+                          ADC1DataRate.SPS_10,
+                          AnalogIn.AIN2,
+                          ADC2DataRate.SPS_100,
+                          FilterMode.FIR,
+                          ConvMode.CONTINUOUS,
+                          True], does_not_raise()),
+                        ([ADCChannel.AIN1,
+                          ADC1DataRate.SPS_10,
+                          AnalogIn.AIN2,
+                          ADC2DataRate.SPS_100,
+                          FilterMode.FIR,
+                          ConvMode.CONTINUOUS,
+                          True], pytest.raises(TypeError)),
+                        ([AnalogIn.AIN1,
+                          ADC1DataRate.SPS_10,
+                          ADCChannel.AIN2,
+                          ADC2DataRate.SPS_100,
+                          FilterMode.FIR,
+                          ConvMode.CONTINUOUS,
+                          True], pytest.raises(TypeError)),
+                    ]
+)
+def test_set_config(param, error, adc):
+    with error:
+        adc.set_config(adc_1_analog_in = param[0],
+                       adc_1_data_rate = param[1],
+                       adc_2_analog_in = param[2],
+                       adc_2_data_rate = param[3],
+                       filter_mode = param[4],
+                       conversion_mode = param[5],
+                       override_updates_validation = param[6])
