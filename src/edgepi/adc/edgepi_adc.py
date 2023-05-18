@@ -937,7 +937,7 @@ class EdgePiADC(SPI):
         if adc_1_ch is None and adc_1_analog_in is not None:
             raise TypeError(f"set_config: wrong type passed for adc_1_analog_in: {adc_1_analog_in}")
         if adc_2_ch is None and adc_2_analog_in is not None:
-            raise TypeError(f"set_config: wrong type passed for adc_1_analog_in: {adc_2_analog_in}")
+            raise TypeError(f"set_config: wrong type passed for adc_2_analog_in: {adc_2_analog_in}")
 
         args = filter_dict_list_key_val(locals(),
                                         ["self", "adc_1_analog_in", "adc_2_analog_in"],

@@ -30,7 +30,6 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
     FilterMode,
-    ADCChannel,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
@@ -1064,7 +1063,7 @@ def test__is_rtd_on(mocker, mock_value, result):
                           FilterMode.FIR,
                           ConvMode.CONTINUOUS,
                           True], does_not_raise()),
-                        ([ADCChannel.AIN1,
+                        ([CH.AIN1,
                           ADC1DataRate.SPS_10,
                           AnalogIn.AIN2,
                           ADC2DataRate.SPS_100,
@@ -1073,7 +1072,7 @@ def test__is_rtd_on(mocker, mock_value, result):
                           True], pytest.raises(TypeError)),
                         ([AnalogIn.AIN1,
                           ADC1DataRate.SPS_10,
-                          ADCChannel.AIN2,
+                          CH.AIN2,
                           ADC2DataRate.SPS_100,
                           FilterMode.FIR,
                           ConvMode.CONTINUOUS,
