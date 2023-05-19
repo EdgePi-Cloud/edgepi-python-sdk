@@ -37,7 +37,7 @@ def test_is_negative_voltage(code, result):
             2147483647,
             2.5,
             ADCNum.ADC_1.value.num_data_bytes,
-        ),        
+        ),
         (
             -2147483648,
             -2.5,
