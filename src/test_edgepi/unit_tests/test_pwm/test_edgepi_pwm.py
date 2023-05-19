@@ -297,22 +297,18 @@ def test_set_config_errors(mocker, pwm_num, error):
     with error:
         pwm_dev.set_config(pwm_num)
 
-@pytest.mark.parametrize("params, mock_vals",
+@pytest.mark.parametrize("params",
                         [
-                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL]),
-                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[2000, 50, Polarity.NORMAL]),
-                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 60, Polarity.NORMAL]),
-                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.INVERSED]),
-                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.NORMAL]),
-                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[2000, 50, Polarity.NORMAL]),
-                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 60, Polarity.NORMAL]),
-                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL],[1000, 50, Polarity.INVERSED]),
+                          ([PWMPins.PWM1, 1000, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, None, 50, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, 1000, None, Polarity.NORMAL]),
+                          ([PWMPins.PWM1, 1000, 50, None]),
+                          ([PWMPins.PWM2, None, None, Polarity.NORMAL]),
+                          ([PWMPins.PWM2, 1000, None, None]),
+                          ([PWMPins.PWM2, None, None, None]),
+                          ([PWMPins.PWM2, 1000, 50, Polarity.NORMAL]),
                         ])
-def test_set_config(mocker, params, mock_vals, pwm_dev):
-    # mock getter function
-    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_frequency", return_value = mock_vals[0])
-    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_duty_cycle", return_value = mock_vals[1]/100)
-    mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM.get_polarity", return_value = mock_vals[2].value)
+def test_set_config(mocker, params, pwm_dev):
     # mock setter function
     mock_set_freq = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_frequency")
     mock_set_duty = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_duty_cycle")
@@ -320,9 +316,15 @@ def test_set_config(mocker, params, mock_vals, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     pwm_dev._EdgePiPWM__pwm_devs[params[0]] = mock_pwmdevice
     pwm_dev.set_config(params[0], params[1], params[2], params[3])
-    if params[1] != mock_vals[0]:
+    if params[1] is not None:
         mock_set_freq.assert_called_once_with(params[0],params[1])
-    if params[2] != mock_vals[1]:
+    else:
+        assert mock_set_freq.call_count == 0
+    if params[2] is not None:
         mock_set_duty.assert_called_once_with(params[0],params[2])
-    if params[3] != mock_vals[2]:
+    else:
+        assert mock_set_duty.call_count == 0
+    if params[3] is not None:
         mock_set_pol.assert_called_once_with(params[0],params[3])
+    else:
+        assert mock_set_pol.call_count == 0
