@@ -9,8 +9,6 @@ from edgepi.adc.adc_voltage import (
     _is_negative_voltage,
     _adc_voltage_to_input_voltage,
     code_to_temperature,
-    STEP_DOWN_RESISTOR_1,
-    STEP_DOWN_RESISTOR_2
 )
 
 # pylint: disable=too-many-lines
@@ -32,77 +30,53 @@ def test_is_negative_voltage(code, result):
 @pytest.mark.parametrize(
     "code, voltage, num_bytes",
     [
-        ([0,0,0,0], 0, ADCNum.ADC_1.value.num_data_bytes),
-        ([0,0,0,0], 0, ADCNum.ADC_2.value.num_data_bytes),
+        (0, 0, ADCNum.ADC_1.value.num_data_bytes),
+        (0, 0, ADCNum.ADC_2.value.num_data_bytes),
         # based on a reference voltage of 2.5 V
         (
-            [0x7F,0xFF,0xFF,0xFF],
+            2147483647,
             2.5,
             ADCNum.ADC_1.value.num_data_bytes,
-        ),        (
-            [0x80,0x0,0x0,0x0],
+        ),        
+        (
+            -2147483648,
             -2.5,
             ADCNum.ADC_1.value.num_data_bytes,
         ),
         (
-            [0x7F,0xFF,0xFF,0xFF],
+            8388607,
             2.5,
             ADCNum.ADC_2.value.num_data_bytes,
         ),
         (
-            [0x80,0x0,0x0,0x0],
+            -8388608,
             -2.5,
             ADCNum.ADC_2.value.num_data_bytes,
         ),
     ],
 )
 def test_code_to_input_voltage(code, voltage, num_bytes):
-    code_bits = bitstring_from_list(code[:num_bytes])
-    num_bits = num_bytes * 8
-    code_uint = code_bits.uint
-    # handling negative number
-    if _is_negative_voltage(code_bits):
-        code_uint = code_uint - 2**num_bits
-    assert pytest.approx(_code_to_input_voltage(code_uint, V_REF, num_bytes * 8),0.0001) == voltage
+    assert pytest.approx(_code_to_input_voltage(code, V_REF, num_bytes * 8),0.0001) == voltage
 
 
 @pytest.mark.parametrize(
-    "code, voltage, num_bytes",
+    "voltage, gain, offset, result",
     [
-        ([0,0,0,0], 0, ADCNum.ADC_1.value.num_data_bytes),
-        ([0,0,0,0], 0, ADCNum.ADC_2.value.num_data_bytes),
-        # based on a reference voltage of 2.5 V
-        (
-            [0x7F,0xFF,0xFF,0xFF],
-            2.5,
-            ADCNum.ADC_1.value.num_data_bytes,
-        ),        (
-            [0x80,0x0,0x0,0x0],
-            -2.5,
-            ADCNum.ADC_1.value.num_data_bytes,
-        ),
-        (
-            [0x7F,0xFF,0xFF,0xFF],
-            2.5,
-            ADCNum.ADC_2.value.num_data_bytes,
-        ),
-        (
-            [0x80,0x0,0x0,0x0],
-            -2.5,
-            ADCNum.ADC_2.value.num_data_bytes,
-        ),
+        (0	  ,1, -0.014, -0.014),
+        (0.25 ,1, -0.014, 1.192913828),
+        (0.5  ,1, -0.014, 2.399827655),
+        (0.75 ,1, -0.014, 3.606741483),
+        (1	  ,1, -0.014, 4.813655311),
+        (1.25 ,1, -0.014, 6.020569138),
+        (1.5  ,1, -0.014, 7.227482966),
+        (1.75 ,1, -0.014, 8.434396794),
+        (2	  ,1, -0.014, 9.641310621),
+        (2.25 ,1, -0.014, 10.84822445),
+        (2.5  ,1, -0.014, 12.05513828),
     ],
 )
-def test__adc_voltage_to_input_voltage(code, voltage, num_bytes):
-    code_bits = bitstring_from_list(code[:num_bytes])
-    num_bits = num_bytes * 8
-    code_uint = code_bits.uint
-    # handling negative number
-    if _is_negative_voltage(code_bits):
-        code_uint = code_uint - 2**num_bits
-    vin = _code_to_input_voltage(code_uint, V_REF, num_bits)
-    assert pytest.approx(_adc_voltage_to_input_voltage(vin, GAIN, OFFSET),0.0001) == \
-           voltage * (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
+def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
+    assert pytest.approx(_adc_voltage_to_input_voltage(voltage, gain, offset),0.0001) == result
 
 @pytest.mark.parametrize(
     "code, ref_resistance, temp_offset, rtd_conv_constant, adc_num, expected",

@@ -71,9 +71,9 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     code_uint = code_bits.uint
     # handling negative number
     if _is_negative_voltage(code_bits):
-        code_uint = code_uint - 2**num_bits
+        code_int = code_uint - 2**num_bits
 
-    v_in = _code_to_input_voltage(code_uint, REFERENCE_VOLTAGE, num_bits)
+    v_in = _code_to_input_voltage(code_int, REFERENCE_VOLTAGE, num_bits)
 
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
