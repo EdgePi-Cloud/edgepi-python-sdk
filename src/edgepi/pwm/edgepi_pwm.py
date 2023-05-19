@@ -201,9 +201,9 @@ class EdgePiPWM():
         self.log.debug("init_pwm: PWM device is already open")
 
     def set_config(self, pwm_num: PWMPins,
-                   frequency: int = PWM_MIN_FREQ,
-                   duty_cycle: int = PWM_MIN_DUTY_CYCLE,
-                   polarity: Polarity = Polarity.NORMAL
+                   frequency: int = None,
+                   duty_cycle: int = None,
+                   polarity: Polarity = None
                    ):
         """
         Setting PWM configuration
@@ -220,9 +220,9 @@ class EdgePiPWM():
         if self.__pwm_devs[pwm_num] is None:
             raise PwmDeviceError(f"set_config: PWM device doesn't exist {pwm_num},"
                                  f"initialize the device first")
-        if self.get_frequency(pwm_num) != frequency:
+        if frequency is not None:
             self.__set_frequency(pwm_num, frequency)
-        if self.get_duty_cycle(pwm_num) != duty_cycle:
+        if  duty_cycle is not None:
             self.__set_duty_cycle(pwm_num, duty_cycle)
-        if self.get_polarity(pwm_num) != polarity.value:
+        if polarity is not None:
             self.__set_polarity(pwm_num, polarity)
