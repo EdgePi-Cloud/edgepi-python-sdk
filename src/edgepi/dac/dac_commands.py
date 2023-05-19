@@ -32,7 +32,7 @@ class DACCommands:
         Convert a voltage to full precision binary code value
         code = ((expected_v - offset)/gain) * (Code_range/V_range))/DAC_GAIN
         """
-        float_code =(((expected - self.dict_calib_param[ch].offset)/self.dict_calib_param[ch].gain)*\
+        float_code =(((expected-self.dict_calib_param[ch].offset)/self.dict_calib_param[ch].gain)*\
                     (CALIB_CONSTS.RANGE.value/CALIB_CONSTS.V_RANGE.value))/dac_gain
         _logger.debug(f"Full code generated {float_code}")
         return float_code
