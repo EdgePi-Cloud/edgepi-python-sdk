@@ -205,7 +205,7 @@ def test_set_duty_cycle_pwm(mocker, pwm_num, duty_cycle, error, pwm_dev):
         pwm_dev._EdgePiPWM__pwm_devs[pwm_num].set_duty_cycle_pwm.assert_called_once_with(duty_cycle/100)
         assert result == duty_cycle
 
-@pytest.mark.parametrize("pwm_num ,expected, error",
+@pytest.mark.parametrize("pwm_num, expected, error",
                          [(PWMPins.PWM1, Polarity.NORMAL,does_not_raise()),
                           (PWMPins.PWM1, Polarity.INVERSED,does_not_raise()),
                           (PWMPins.PWM2, Polarity.NORMAL,does_not_raise()),
@@ -215,12 +215,12 @@ def test_set_duty_cycle_pwm(mocker, pwm_num, duty_cycle, error, pwm_dev):
 def test_get_polarity_pwm(mocker, pwm_num, expected, error, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     pwm_dev._EdgePiPWM__pwm_devs[pwm_num] = mock_pwmdevice
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected.value)
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected)
     with error:
         polarity = pwm_dev.get_polarity(pwm_num)
-        assert polarity == expected.value
+        assert polarity == expected
 
-@pytest.mark.parametrize("pwm_num ,expected, error",
+@pytest.mark.parametrize("pwm_num, expected, error",
                          [(PWMPins.PWM1, Polarity.NORMAL,does_not_raise()),
                           (PWMPins.PWM1, Polarity.INVERSED,does_not_raise()),
                           (PWMPins.PWM2, Polarity.NORMAL,does_not_raise()),
@@ -230,13 +230,13 @@ def test_get_polarity_pwm(mocker, pwm_num, expected, error, pwm_dev):
 def test__set_polarity_pwm(mocker, pwm_num, expected, error, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     pwm_dev._EdgePiPWM__pwm_devs[pwm_num] = mock_pwmdevice
-    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected.value)
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.get_polarity_pwm", return_value = expected)
     with error:
         pwm_dev._EdgePiPWM__set_polarity(pwm_num, expected)
         result = pwm_dev.get_polarity(pwm_num)
         # pylint: disable=line-too-long
-        pwm_dev._EdgePiPWM__pwm_devs[pwm_num].set_polarity_pwm.assert_called_once_with(expected.value)
-        assert result == expected.value
+        pwm_dev._EdgePiPWM__pwm_devs[pwm_num].set_polarity_pwm.assert_called_once_with(expected)
+        assert result == expected
 
 @pytest.mark.parametrize("pwm_num, expected, error",
                          [(PWMPins.PWM1, True, does_not_raise()),

@@ -39,12 +39,12 @@ class EdgePiPWM():
 
         raise ValueError(f"Target {target} is out of range: {range_min} <-> {range_max} ")
 
-    def __set_frequency(self, pwm_num: PWMPins, frequency: int):
+    def __set_frequency(self, pwm_num: PWMPins, frequency: float):
         """
         Set frequency
         Args:
             pwm_num (PWMPins): target pwm device
-            frequency (int): frequency value
+            frequency (float): frequency value
         Returns:
             N/A
         """
@@ -59,19 +59,19 @@ class EdgePiPWM():
         Args:
             pwm_num (PWMPins): target pwm device
         Returns:
-            frequency (int): frequency value
+            frequency (float): frequency value
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"get_frequency: PWM number is missing {pwm_num}")
         return self.__pwm_devs[pwm_num].get_frequency_pwm()
 
-    def __set_duty_cycle(self, pwm_num: PWMPins, duty_cycle: int):
+    def __set_duty_cycle(self, pwm_num: PWMPins, duty_cycle: float):
         """
         Set duty_cycle
         Args:
             pwm_num (PWMPins): target pwm device
-            duty_cycle (int): duty_cycle value in percentage, this is divided by 100 and sent to the
-            PWM device file
+            duty_cycle (float): duty_cycle value in percentage, this is divided by 100 and sent to
+            the PWM device file
         Returns:
             N/A
         """
@@ -86,7 +86,7 @@ class EdgePiPWM():
         Args:
             pwm_num (PWMPins): target pwm device
         Returns:
-            duty_cycle (int): duty_cycle value in percentage
+            duty_cycle (float): duty_cycle value in percentage
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"get_duty_cycle: PWM number is missing {pwm_num}")
@@ -97,13 +97,13 @@ class EdgePiPWM():
         Set polarity
         Args:
             pwm_num (PWMPins): target pwm device
-            polarity (int): polarity value
+            polarity (Polarity): polarity enum
         Returns:
             N/A
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"__set_polarity: PWM number is missing {pwm_num}")
-        self.__pwm_devs[pwm_num].set_polarity_pwm(polarity.value)
+        self.__pwm_devs[pwm_num].set_polarity_pwm(polarity)
 
     def get_polarity(self, pwm_num: PWMPins):
         """
@@ -111,7 +111,7 @@ class EdgePiPWM():
         Args:
             pwm_num (PWMPins): target pwm device
         Returns:
-            polarity (int): polarity value
+            polarity (Polarity): polarity enum
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"get_polarity: PWM number is missing {pwm_num}")
