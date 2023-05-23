@@ -55,7 +55,7 @@ def test_set_duty_cycle_pwm(pwm_dev_default):
 
 def test_get_polarity_pwm(pwm_dev_default):
     pol = pwm_dev_default.get_polarity(PWMPins.PWM1)
-    assert pol == Polarity.NORMAL.value
+    assert pol == Polarity.NORMAL
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_set_polarity_pwm(pwm_dev_default):
