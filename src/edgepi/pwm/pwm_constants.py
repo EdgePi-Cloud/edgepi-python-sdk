@@ -30,8 +30,8 @@ class PWMCh(Enum):
 @unique
 class Polarity(Enum):
     """PWM polarity Enum"""
-    NORMAL = "normal"
-    INVERSED = "inversed"
+    NORMAL = 1
+    INVERSED = -1
 
 PWM_MAX_FREQ = 10000.0
 PWM_MIN_FREQ = 1000.0
