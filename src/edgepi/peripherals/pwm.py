@@ -104,12 +104,7 @@ class PwmDevice:
         Return:
             polarity (Polarity)
         """
-        if self.pwm.polarity == "normal":
-            return Polarity.NORMAL
-        if self.pwm.polarity == "inversed":
-            return Polarity.INVERSED
-
-        raise ValueError(f"{self.pwm.polarity} is not a valid value.")
+        return Polarity[self.pwm.polarity.upper()]
 
     def get_enabled_pwm(self):
         """
