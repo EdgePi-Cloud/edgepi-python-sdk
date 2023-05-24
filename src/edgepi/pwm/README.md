@@ -15,7 +15,7 @@ edgepi_pwm = EdgePiPWM()
 # Initialize and open pwm device
 edgepi_pwm.init_pwm(PWMPins.PWM1)
 # Setting PWM parameters
-edgepi_pwm.set_config(PWMPins.PWM1, 1000, 50)
+edgepi_pwm.set_config(PWMPins.PWM1, 1000.0, 50.0)
 # enable the pwm signal 
 edgepi_pwm.enable()
 # disable the pwm signal 
