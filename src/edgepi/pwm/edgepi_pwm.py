@@ -78,7 +78,7 @@ class EdgePiPWM():
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"__set_duty_cycle: PWM number is missing {pwm_num}")
         self.__check_range(duty_cycle, PWM_MIN_DUTY_CYCLE, PWM_MAX_DUTY_CYCLE)
-        self.__pwm_devs[pwm_num].set_duty_cycle_pwm(duty_cycle/100)
+        self.__pwm_devs[pwm_num].set_duty_cycle_pwm(duty_cycle)
 
     def get_duty_cycle(self, pwm_num: PWMPins):
         """
@@ -90,7 +90,7 @@ class EdgePiPWM():
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"get_duty_cycle: PWM number is missing {pwm_num}")
-        return self.__pwm_devs[pwm_num].get_duty_cycle_pwm()*100
+        return self.__pwm_devs[pwm_num].get_duty_cycle_pwm()
 
     def __set_polarity(self, pwm_num: PWMPins, polarity: Polarity):
         """
