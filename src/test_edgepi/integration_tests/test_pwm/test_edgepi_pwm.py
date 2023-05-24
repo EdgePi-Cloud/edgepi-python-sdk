@@ -9,7 +9,7 @@ from edgepi.pwm.edgepi_pwm import EdgePiPWM
 def fixture_test_pwm_def():
     pwm_dev_default = EdgePiPWM()
     pwm_dev_default.init_pwm(PWMPins.PWM1)
-    pwm_dev_default.set_config(PWMPins.PWM1, 1000, 50, Polarity.NORMAL)
+    pwm_dev_default.set_config(PWMPins.PWM1, 1000.0, 0.5, Polarity.NORMAL)
     yield pwm_dev_default
 
 @pytest.mark.parametrize("pwm_num",
@@ -33,34 +33,34 @@ def test_get_frequency_pwm(pwm_dev_default):
     assert freq == 1000
     pwm_dev_default.close(PWMPins.PWM1)
 
-@pytest.mark.parametrize("freq", [(2000)])
+@pytest.mark.parametrize("freq", [(2000.0)])
 def test_set_frequency_pwm(freq, pwm_dev_default):
     init_freq = pwm_dev_default.get_frequency(PWMPins.PWM1)
-    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, frequency = freq)
+    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, frequency=freq)
     result = pwm_dev_default.get_frequency(PWMPins.PWM1)
     assert result != init_freq
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_get_duty_cycle_pwm(pwm_dev_default):
     duty_cycle = pwm_dev_default.get_duty_cycle(PWMPins.PWM1)
-    assert duty_cycle == 50
+    assert duty_cycle == 0.5
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_set_duty_cycle_pwm(pwm_dev_default):
     init_duty_cycle = pwm_dev_default.get_duty_cycle(PWMPins.PWM1)
-    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, duty_cycle=60)
+    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, duty_cycle=0.6)
     result = pwm_dev_default.get_duty_cycle(PWMPins.PWM1)
     assert result != init_duty_cycle
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_get_polarity_pwm(pwm_dev_default):
     pol = pwm_dev_default.get_polarity(PWMPins.PWM1)
-    assert pol == Polarity.NORMAL.value
+    assert pol == Polarity.NORMAL
     pwm_dev_default.close(PWMPins.PWM1)
 
 def test_set_polarity_pwm(pwm_dev_default):
     init_pol = pwm_dev_default.get_polarity(PWMPins.PWM1)
-    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, polarity = Polarity.INVERSED)
+    pwm_dev_default.set_config(pwm_num = PWMPins.PWM1, polarity=Polarity.INVERSED)
     result = pwm_dev_default.get_polarity(PWMPins.PWM1)
     assert result != init_pol
     pwm_dev_default.close(PWMPins.PWM1)
