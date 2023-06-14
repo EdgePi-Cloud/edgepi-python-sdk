@@ -88,7 +88,7 @@ def new_formula(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam):
         code_val = code_val - 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-    v_in = REFERENCE_VOLTAGE - v_in
+    v_in = REFERENCE_VOLTAGE + v_in
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
