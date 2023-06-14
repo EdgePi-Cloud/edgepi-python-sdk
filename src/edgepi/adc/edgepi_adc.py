@@ -34,7 +34,7 @@ from edgepi.adc.adc_constants import (
     AllowedChannels,
     AnalogIn,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
+from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature, new_formula
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins, RTDPins
@@ -126,7 +126,7 @@ class EdgePiADC(SPI):
         self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
-        self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
+        # self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
 
         # user updated rtd hardware constants
         self.rtd_sensor_resistance = (
@@ -241,26 +241,26 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
-    def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
-        """
-        Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
-        be configured as regular 0V GND or 12V GND.
+    # def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
+    #     """
+    #     Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
+    #     be configured as regular 0V GND or 12V GND.
 
-        Args:
-            reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
-        """
-        if reference_config == ADCReferenceSwitching.GND_SW1.value:
-            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
-            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
-        elif reference_config == ADCReferenceSwitching.GND_SW2.value:
-            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
-            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
-        elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
-            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
-            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
-        elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
-            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
-            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
+    #     Args:
+    #         reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
+    #     """
+    #     if reference_config == ADCReferenceSwitching.GND_SW1.value:
+    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
+    #     elif reference_config == ADCReferenceSwitching.GND_SW2.value:
+    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
+    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
+    #     elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
+    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
+    #     elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
+    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
+    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
 
     def stop_conversions(self, adc_num: ADCNum):
         """
@@ -499,6 +499,36 @@ class EdgePiADC(SPI):
         _logger.debug(f" read_voltage: code {voltage_code}")
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
+
+    def new_single_sample(self):
+        """
+        Trigger a single ADC1 voltage sampling event, when performing single channel reading or
+        differential reading. ADC1 must be in `PULSE` conversion mode before calling this method.
+        Do not call this method for voltage reading if ADC is configured to `CONTINUOUS`
+        conversion mode: use `read_voltage` instead.
+
+        Returns:
+            `float`: input voltage (V) read from ADC1
+        """
+        state = self.get_state()
+        self.__enforce_pulse_mode(state)
+
+        # send command to trigger conversion
+        self.start_conversions(ADCNum.ADC_1)
+
+        # send command to read conversion data.
+        status_code, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
+
+        # log STATUS byte
+        status = get_adc_status(status_code)
+        _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
+
+        calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
+
+        # convert from code to voltage
+        _logger.debug(f" read_voltage: code {voltage_code}")
+        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
+        return new_formula(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):
         """
