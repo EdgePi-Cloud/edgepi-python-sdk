@@ -451,8 +451,8 @@ class EdgePiADC(SPI):
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
 
-        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended else \
-               code_to_voltage(voltage_code, adc_num.value, calibs)
+        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended\
+            else code_to_voltage(voltage_code, adc_num.value, calibs)
 
 
     def read_rtd_temperature(self):
@@ -496,6 +496,11 @@ class EdgePiADC(SPI):
             `float`: input voltage (V) read from ADC1
         """
         state = self.get_state()
+        single_ended = False
+        # Check whether the ADC is either in single-ended or differential
+        if state.adc_1.mux_n.code == CH.AINCOM:
+            single_ended = True
+
         self.__enforce_pulse_mode(state)
 
         # send command to trigger conversion
@@ -513,37 +518,8 @@ class EdgePiADC(SPI):
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
-
-    def new_single_sample(self):
-        """
-        Trigger a single ADC1 voltage sampling event, when performing single channel reading or
-        differential reading. ADC1 must be in `PULSE` conversion mode before calling this method.
-        Do not call this method for voltage reading if ADC is configured to `CONTINUOUS`
-        conversion mode: use `read_voltage` instead.
-
-        Returns:
-            `float`: input voltage (V) read from ADC1
-        """
-        state = self.get_state()
-        self.__enforce_pulse_mode(state)
-
-        # send command to trigger conversion
-        self.start_conversions(ADCNum.ADC_1)
-
-        # send command to read conversion data.
-        status_code, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1)
-
-        # log STATUS byte
-        status = get_adc_status(status_code)
-        _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
-
-        calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
-
-        # convert from code to voltage
-        _logger.debug(f" read_voltage: code {voltage_code}")
-        _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        return new_formula(voltage_code, ADCNum.ADC_1.value, calibs)
+        return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) if \
+            single_ended  else code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):
         """
