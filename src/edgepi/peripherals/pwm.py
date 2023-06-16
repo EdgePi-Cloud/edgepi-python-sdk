@@ -4,6 +4,7 @@ Module for PWM devices
 
 import logging
 from periphery import PWM
+from edgepi.pwm.pwm_constants import Polarity
 
 
 class PwmDevice:
@@ -23,7 +24,7 @@ class PwmDevice:
 
     def enable_pwm(self):
         """
-        enable pwm signal
+        Enable pwm signal
         Args:
             N/A
         Return:
@@ -34,7 +35,7 @@ class PwmDevice:
 
     def disable_pwm(self):
         """
-        disable pwm signal
+        Disable pwm signal
         Args:
             N/A
         Return:
@@ -42,11 +43,11 @@ class PwmDevice:
         """
         self.pwm.disable()
 
-    def set_frequency_pwm(self, freq: int = None):
+    def set_frequency_pwm(self, freq: float = None):
         """
-        set pwm frequency
+        Set pwm frequency
         Args:
-            freq (int): frequency to set
+            freq (float): frequency to set
         Return:
             N/A
         """
@@ -54,17 +55,17 @@ class PwmDevice:
 
     def get_frequency_pwm(self):
         """
-        get pwm frequency
+        Get pwm frequency
         Args:
             N/A
         Return:
-            freq (int): frequency to set
+            freq (float): frequency to set
         """
         return self.pwm.frequency
 
     def set_duty_cycle_pwm(self, duty_cycle: float = None):
         """
-        set pwm duty cycle
+        Set pwm duty cycle
         Args:
             duty_cycle (float): duty cycle value from 0 to 1.0
         Return:
@@ -74,7 +75,7 @@ class PwmDevice:
 
     def get_duty_cycle_pwm(self):
         """
-        get pwm duty cycle
+        Get pwm duty cycle
         Args:
             N/A
         Return:
@@ -82,25 +83,35 @@ class PwmDevice:
         """
         return self.pwm.duty_cycle
 
-    def set_polarity_pwm(self, polarity: str = None):
+    def set_polarity_pwm(self, polarity: Polarity = None):
         """
-        set pwm polarity
+        Set pwm polarity
         Args:
-            polarity (str): "Normal" or "Inversed"
+            polarity (Polarity)
         Return:
             N/A
         """
-        self.pwm.polarity = polarity
+        if polarity == Polarity.NORMAL:
+            self.pwm.polarity = "normal"
+        elif polarity == Polarity.INVERSED:
+            self.pwm.polarity = "inversed"
+        else:
+            raise ValueError(f"{polarity} is not a valid value for polarity.")
 
     def get_polarity_pwm(self):
         """
-        get pwm polarity
+        Get pwm polarity
         Args:
             N/A
         Return:
-            polarity (str): "Normal" or "Inversed"
+            polarity (Polarity)
         """
-        return self.pwm.polarity
+        if self.pwm.polarity == "normal":
+            return Polarity.NORMAL
+        if self.pwm.polarity == "inversed":
+            return Polarity.INVERSED
+
+        raise ValueError(f"{self.pwm.polarity} is not a valid value for polarity.")
 
     def get_enabled_pwm(self):
         """

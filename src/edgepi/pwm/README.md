@@ -6,19 +6,16 @@ A/DOUT1 and A/DOUT2 can be configured to provide vairable PWM signal.
 
 # Example Code
 ```python
-from edgepi.gpio.gpio_constants import GpioPins
-from edgepi.pwm.pwm_constants import Polarity
+from edgepi.pwm.pwm_constants import Polarity, PWMPins
 from edgepi.pwm.edgepi_pwm import EdgePiPWM
 
 # Enable PWM1
-edgepi_pwm = EdgePiPWM(GpioPins.PWM1)
+edgepi_pwm = EdgePiPWM()
 
-# Set frequency to 1KHz
-edgepi_pwm.set_frequency(1000)
-# Set Duty Cycle to 50 %
-edgepi_pwm.set_duty_cycle(0.5)
-# Set polarity of PWM to Normal
-edgepi_pwm.set_polarity(Polarity.NORMAL)
+# Initialize and open pwm device
+edgepi_pwm.init_pwm(PWMPins.PWM1)
+# Setting PWM parameters
+edgepi_pwm.set_config(PWMPins.PWM1, 1000.0, 50.0)
 # enable the pwm signal 
 edgepi_pwm.enable()
 # disable the pwm signal 

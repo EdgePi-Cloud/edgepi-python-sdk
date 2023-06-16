@@ -128,7 +128,7 @@ This section introduces thermocouple functionality available to users, and provi
                     <p><code>cj_low_mask</code> (<code>CJLowMask</code>): choose whether to mask CJLOW fault from asserting through the FAULT pin</p>
                 </li>
                 <li>
-                    <p><code>tc_high_mask</code> (<code>TCLHighMask</code>): choose whether to mask TCHIGH fault from asserting through the FAULT pin</p>
+                    <p><code>tc_high_mask</code> (<code>TCHighMask</code>): choose whether to mask TCHIGH fault from asserting through the FAULT pin</p>
                 </li>
                 <li>
                     <p><code>tc_low_mask</code> (<code>TCLowMask</code>): choose whether to mask TCLOW fault from asserting through the FAULT pin</p>

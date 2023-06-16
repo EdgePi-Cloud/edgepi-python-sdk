@@ -14,6 +14,12 @@ class PWMChSysfs:
     chip: int = None
     channel: int =None
 
+@unique
+class PWMPins(Enum):
+    """GPIO Pin Names"""
+
+    PWM1 = 'PWM1'
+    PWM2 = 'PWM2'
 
 @unique
 class PWMCh(Enum):
@@ -24,10 +30,10 @@ class PWMCh(Enum):
 @unique
 class Polarity(Enum):
     """PWM polarity Enum"""
-    NORMAL = "normal"
-    INVERSED = "inversed"
+    NORMAL = 1
+    INVERSED = -1
 
-PWM_MAX_FREQ = 10000
-PWM_MIN_FREQ = 1000
-PWM_MAX_DUTY_CYCLE = 100
-PWM_MIN_DUTY_CYCLE = 0
+PWM_MAX_FREQ = 10000.0
+PWM_MIN_FREQ = 1000.0
+PWM_MAX_DUTY_CYCLE = 1.0
+PWM_MIN_DUTY_CYCLE = 0.0
