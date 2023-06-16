@@ -245,7 +245,7 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
-# TODO: To be deleted 
+# TODO: To be deleted
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
         Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
@@ -437,7 +437,6 @@ class EdgePiADC(SPI):
         else:
             if state.adc_2.mux_n.code == CH.AINCOM:
                 single_ended = True
-        
 
         self.__continuous_time_delay(adc_num, state)
 

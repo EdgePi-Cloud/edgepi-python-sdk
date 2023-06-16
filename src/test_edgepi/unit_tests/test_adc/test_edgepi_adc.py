@@ -1041,7 +1041,7 @@ def test_adc_voltage_read_mode(mocker, adc_to_read, ch, adc):
         adc_default_vals[6] = 0x10 + ch.value
     else:
         adc_default_vals[22] = 0x10 + ch.value
-    mocker.patch(   
+    mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         return_value=deepcopy(adc_default_vals)
     )
@@ -1071,13 +1071,13 @@ def test_adc_voltage_read_mode(mocker, adc_to_read, ch, adc):
 def test_adc_single_sample_mode(mocker, adc_to_read, ch, adc):
     # changing the ADC1 Input mux negative value to the channel value. This will allow to determine
     # if the adc is in single ended or differential
-    # ADC2 channel shouldn't return differential as well since single sampel only cares about 
+    # ADC2 channel shouldn't return differential as well since single sampel only cares about
     # ADC1
     if adc_to_read == ADCNum.ADC_1:
         adc_default_vals[6] = 0x10 + ch.value
     else:
         adc_default_vals[22] = 0x10 + ch.value
-    mocker.patch(   
+    mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         return_value=deepcopy(adc_default_vals)
     )

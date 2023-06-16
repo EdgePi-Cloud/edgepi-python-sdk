@@ -80,6 +80,19 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     return v_out
 
 def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam):
+    """
+    Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
+
+    Args:
+        `code` (list[int]): code bytes retrieved from ADC voltage read
+
+        `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
+
+        `calibs` (CalibParam): voltage reading gain and offset calibration values
+
+    Returns:
+        `float`: voltage value (V) corresponding to `code`
+    """
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
