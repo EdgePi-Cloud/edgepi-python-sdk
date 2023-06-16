@@ -1024,6 +1024,40 @@ def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, ad
     else:
         validate_func.assert_not_called()
 
+@pytest.mark.parametrize("adc_to_read, ch",
+    [
+        (ADCNum.ADC_1, CH.AINCOM), #single-ended
+        (ADCNum.ADC_1, CH.AIN1), #differential
+        (ADCNum.ADC_1, CH.AIN2), #differential
+        (ADCNum.ADC_2, CH.AINCOM), #differential
+        (ADCNum.ADC_2, CH.AIN1),#differential
+        (ADCNum.ADC_2, CH.AIN2),#differential
+    ]
+)
+def test_adc_voltage_read_mode(mocker, adc_to_read, ch, adc):
+    # changing the ADC1 Input mux negative value to the channel value. This will allow to determine
+    # if the adc is in single ended or differential
+    if adc_to_read == ADCNum.ADC_1:
+        adc_default_vals[6] = 0x10 + ch.value
+    else:
+        adc_default_vals[22] = 0x10 + ch.value
+    mocker.patch(   
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
+        return_value=deepcopy(adc_default_vals)
+    )
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__check_adc_1_conv_mode")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    differential = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
+    single = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage_single_ended")
+    mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
+    adc.read_voltage(adc_to_read)
+    if ch == CH.AINCOM:
+        single.assert_called_once()
+    else:
+        differential.assert_called_once()
+
 @pytest.mark.parametrize("adc_num, mock_val, expected",
     [
         (ADCNum.ADC_1, [161,96]+[255]*5, True),

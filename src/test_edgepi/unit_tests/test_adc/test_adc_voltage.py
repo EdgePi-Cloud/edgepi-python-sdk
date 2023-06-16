@@ -10,6 +10,7 @@ from edgepi.adc.adc_voltage import (
     _is_negative_voltage,
     _adc_voltage_to_input_voltage,
     code_to_voltage,
+    code_to_voltage_single_ended,
     code_to_temperature,
 )
 
@@ -98,6 +99,25 @@ def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
 )
 def test_code_to_voltage(code, adc_num, calibs, result):
     assert pytest.approx(code_to_voltage(code, adc_num, calibs),0.0001) == result
+
+@pytest.mark.parametrize(
+    "code, adc_num, calibs, result",
+    [
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 12.069),
+    ],
+)
+def test_code_to_voltage_single_ended(code, adc_num, calibs, result):
+    assert pytest.approx(code_to_voltage_single_ended(code, adc_num, calibs),0.0001) == result
 
 @pytest.mark.parametrize(
     "code, ref_resistance, temp_offset, rtd_conv_constant, adc_num, expected",

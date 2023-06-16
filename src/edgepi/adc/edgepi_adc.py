@@ -34,7 +34,11 @@ from edgepi.adc.adc_constants import (
     AllowedChannels,
     AnalogIn,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature, new_formula
+from edgepi.adc.adc_voltage import (
+    code_to_voltage,
+    code_to_temperature,
+    code_to_voltage_single_ended
+)
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins, RTDPins
@@ -241,26 +245,27 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
-    # def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
-    #     """
-    #     Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
-    #     be configured as regular 0V GND or 12V GND.
+# TODO: To be deleted 
+    def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
+        """
+        Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
+        be configured as regular 0V GND or 12V GND.
 
-    #     Args:
-    #         reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
-    #     """
-    #     if reference_config == ADCReferenceSwitching.GND_SW1.value:
-    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
-    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
-    #     elif reference_config == ADCReferenceSwitching.GND_SW2.value:
-    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
-    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
-    #     elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
-    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
-    #         self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
-    #     elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
-    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
-    #         self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
+        Args:
+            reference_config: (ADCReferenceSwitching): selecting none, 1, 2, both
+        """
+        if reference_config == ADCReferenceSwitching.GND_SW1.value:
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW2.value:
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW_BOTH.value:
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.set_pin_state(ADCPins.GNDSW_IN2.value)
+        elif reference_config == ADCReferenceSwitching.GND_SW_NONE.value:
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN1.value)
+            self.gpio.clear_pin_state(ADCPins.GNDSW_IN2.value)
 
     def stop_conversions(self, adc_num: ADCNum):
         """
@@ -422,9 +427,17 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from the indicated ADC
         """
+        single_ended = False
         state = self.get_state()
         if adc_num == ADCNum.ADC_1:
             self.__check_adc_1_conv_mode(state)
+            # Check whether the ADC is either in single-ended or differential
+            if state.adc_1.mux_n.code == CH.AINCOM:
+                single_ended = True
+        else:
+            if state.adc_2.mux_n.code == CH.AINCOM:
+                single_ended = True
+        
 
         self.__continuous_time_delay(adc_num, state)
 
@@ -437,7 +450,9 @@ class EdgePiADC(SPI):
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
-        return code_to_voltage(voltage_code, adc_num.value, calibs)
+
+        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended else \
+               code_to_voltage(voltage_code, adc_num.value, calibs)
 
 
     def read_rtd_temperature(self):
