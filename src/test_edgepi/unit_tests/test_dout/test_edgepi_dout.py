@@ -45,7 +45,7 @@ def test_set_dout_state(mocker, pin_name, state, error, aout_clear):
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     exp_dir_in = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_in")
-    mock_dac = mocker.patch("edgepi.dac.edgepi_dac.EdgePiDAC")
+    mock_dac = mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM")
     dout = EdgePiDigitalOutput()
     dout.dac=mock_dac
     with error:
@@ -77,6 +77,7 @@ def test_get_state(mocker, pin_name, mock_vals, result):
                                return_value = mock_vals[0])
     mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.get_pin_direction",
                                    return_value = mock_vals[1])
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM")
     dout= EdgePiDigitalOutput()
     gpio_state = dout.get_state(pin_name)
     assert gpio_state == result
