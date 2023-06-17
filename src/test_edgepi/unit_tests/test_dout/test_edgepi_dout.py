@@ -45,9 +45,9 @@ def test_set_dout_state(mocker, pin_name, state, error, aout_clear):
     expander_set = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin")
     expander_clear = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.clear_expander_pin")
     exp_dir_in = mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIO.set_expander_pin_direction_in")
-    mock_dac = mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM")
+    mock_eeprom = mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM")
     dout = EdgePiDigitalOutput()
-    dout.dac=mock_dac
+    dout.dac=mock_eeprom
     with error:
         dout.set_dout_state(pin_name, state)
         if state == DoutTriState.HIGH:
