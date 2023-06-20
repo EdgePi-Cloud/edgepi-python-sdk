@@ -177,7 +177,9 @@ class EdgePiEEPROM(I2CDevice):
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
-
+# TODO: have default eeprom_data class with default value 
+# TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call another method that takes the dataclass and write the eeprom
+# TODO: drop that MessageFieldNumber nonesense
     def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
         """
         Write EdgePi reserved memory space using the populated dataclass
@@ -393,4 +395,7 @@ class EdgePiEEPROM(I2CDevice):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
             time.sleep(0.01)
-       
+
+
+# TODO: read/write binary with MD5Sum hash to prevent accidental read/writes
+# TODO: Refactoring set_edgepi_resereved_data() by reading back the memory and 

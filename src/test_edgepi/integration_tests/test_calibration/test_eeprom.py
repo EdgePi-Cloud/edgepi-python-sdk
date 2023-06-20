@@ -83,6 +83,7 @@ def test_set_edgepi_reserved_data(eeprom):
         modified_data.data_key.private = DUMMY_KEY + res
         # Write modified data
         eeprom.set_edgepi_reserved_data(modified_data, MessageFieldNumber.ALL)
+        # Read back the changed data
         modified_data = eeprom.get_edgepi_reserved_data()
 
         assert modified_data.dac_calib_params == original_data.dac_calib_params
@@ -91,8 +92,10 @@ def test_set_edgepi_reserved_data(eeprom):
         assert modified_data.rtd_hw_params == original_data.rtd_hw_params
         assert modified_data.tc_calib_params == original_data.tc_calib_params
         assert modified_data.tc_hw_params == original_data.tc_hw_params
-        assert modified_data.config_key != original_data.config_key
-        assert modified_data.data_key != original_data.data_key
+        assert modified_data.config_key.certificate == DUMMY_KEY + res
+        assert modified_data.config_key.private == DUMMY_KEY + res
+        assert modified_data.config_key.certificate == DUMMY_KEY + res
+        assert modified_data.data_key.private == DUMMY_KEY + res
         assert modified_data.serial == original_data.serial
         assert modified_data.model == original_data.model
         assert modified_data.client_id_config == original_data.client_id_config
@@ -101,3 +104,6 @@ def test_set_edgepi_reserved_data(eeprom):
 
     # Write the original data back
     eeprom.set_edgepi_reserved_data(original_data, MessageFieldNumber.ALL)
+
+# TODO: Check the integrity of data by comparing the stored value to the changed value
+# TODO: Move the files around
