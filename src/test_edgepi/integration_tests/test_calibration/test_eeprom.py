@@ -67,7 +67,6 @@ TmZ\n-----END RSA PRIVATE KEY-----\n'
 def test_set_edgepi_reserved_data(eeprom):
     original_data = eeprom.get_edgepi_reserved_data()
 
-
     for _ in range(10):
         # initializing size of string
         str_len = 100
@@ -83,19 +82,22 @@ def test_set_edgepi_reserved_data(eeprom):
         modified_data.data_key.certificate = DUMMY_KEY + res
         modified_data.data_key.private = DUMMY_KEY + res
         # Write modified data
-        # eeprom.set_edgepi_reserved_data(modified_data, MessageFieldNumber.ALL)
-        # modified_data = eeprom.get_edgepi_reserved_data()
+        eeprom.set_edgepi_reserved_data(modified_data, MessageFieldNumber.ALL)
+        modified_data = eeprom.get_edgepi_reserved_data()
 
-        # assert modified_data.dac_calib_params == original_data.dac_calib_params
-        # assert modified_data.adc_calib_params == original_data.adc_calib_params
-        # assert modified_data.rtd_calib_params == original_data.rtd_calib_params
-        # assert modified_data.rtd_hw_params == original_data.rtd_hw_params
-        # assert modified_data.tc_calib_params == original_data.tc_calib_params
-        # assert modified_data.tc_hw_params == original_data.tc_hw_params
-        # assert modified_data.config_key != original_data.config_key
-        # assert modified_data.data_key != original_data.data_key
-        # assert modified_data.serial == original_data.serial
-        # assert modified_data.model == original_data.model
-        # assert modified_data.client_id_config == original_data.client_id_config
-        # assert modified_data.client_id_data == original_data.client_id_data
-        # assert modified_data.thing_id == original_data.thing_id
+        assert modified_data.dac_calib_params == original_data.dac_calib_params
+        assert modified_data.adc_calib_params == original_data.adc_calib_params
+        assert modified_data.rtd_calib_params == original_data.rtd_calib_params
+        assert modified_data.rtd_hw_params == original_data.rtd_hw_params
+        assert modified_data.tc_calib_params == original_data.tc_calib_params
+        assert modified_data.tc_hw_params == original_data.tc_hw_params
+        assert modified_data.config_key != original_data.config_key
+        assert modified_data.data_key != original_data.data_key
+        assert modified_data.serial == original_data.serial
+        assert modified_data.model == original_data.model
+        assert modified_data.client_id_config == original_data.client_id_config
+        assert modified_data.client_id_data == original_data.client_id_data
+        assert modified_data.thing_id == original_data.thing_id
+
+    # Write the original data back
+    eeprom.set_edgepi_reserved_data(original_data, MessageFieldNumber.ALL)

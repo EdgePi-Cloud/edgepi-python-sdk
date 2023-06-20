@@ -122,7 +122,7 @@ class EdgePiEEPROM(I2CDevice):
         for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
-            time.sleep(0.002)
+            time.sleep(0.01)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -148,7 +148,7 @@ class EdgePiEEPROM(I2CDevice):
             buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
             check_crc(buff_list[:-1], buff_list[-1])
             buff+=buff_list[:-1]
-            time.sleep(0.002)
+            time.sleep(0.01)
         return bytes(buff[2:buff_and_len])
 
     def get_message_of_interest(self, msg: MessageFieldNumber = None):
@@ -325,7 +325,7 @@ class EdgePiEEPROM(I2CDevice):
         for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
-            time.sleep(0.002)
+            time.sleep(0.01)
 
 # TODO why not separate it into a class
     def init_memory(self):
@@ -392,5 +392,5 @@ class EdgePiEEPROM(I2CDevice):
         for _ in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
-            time.sleep(0.02)
+            time.sleep(0.01)
        
