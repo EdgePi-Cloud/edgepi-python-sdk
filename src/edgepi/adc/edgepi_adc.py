@@ -34,7 +34,11 @@ from edgepi.adc.adc_constants import (
     AllowedChannels,
     AnalogIn,
 )
-from edgepi.adc.adc_voltage import code_to_voltage, code_to_temperature
+from edgepi.adc.adc_voltage import (
+    code_to_voltage,
+    code_to_temperature,
+    code_to_voltage_single_ended
+)
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 from edgepi.gpio.gpio_configs import ADCPins, RTDPins
@@ -126,7 +130,7 @@ class EdgePiADC(SPI):
         self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
-        self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
+        # self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
 
         # user updated rtd hardware constants
         self.rtd_sensor_resistance = (
@@ -241,6 +245,7 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
+# TODO: To be deleted
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
         Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
@@ -422,9 +427,16 @@ class EdgePiADC(SPI):
         Returns:
             `float`: input voltage (V) read from the indicated ADC
         """
+        single_ended = False
         state = self.get_state()
         if adc_num == ADCNum.ADC_1:
             self.__check_adc_1_conv_mode(state)
+            # Check whether the ADC is either in single-ended or differential
+            if state.adc_1.mux_n.code == CH.AINCOM:
+                single_ended = True
+        else:
+            if state.adc_2.mux_n.code == CH.AINCOM:
+                single_ended = True
 
         self.__continuous_time_delay(adc_num, state)
 
@@ -437,7 +449,9 @@ class EdgePiADC(SPI):
         calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
-        return code_to_voltage(voltage_code, adc_num.value, calibs)
+
+        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended\
+            else code_to_voltage(voltage_code, adc_num.value, calibs)
 
 
     def read_rtd_temperature(self):
@@ -481,6 +495,11 @@ class EdgePiADC(SPI):
             `float`: input voltage (V) read from ADC1
         """
         state = self.get_state()
+        single_ended = False
+        # Check whether the ADC is either in single-ended or differential
+        if state.adc_1.mux_n.code == CH.AINCOM:
+            single_ended = True
+
         self.__enforce_pulse_mode(state)
 
         # send command to trigger conversion
@@ -498,7 +517,8 @@ class EdgePiADC(SPI):
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
+        return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) if \
+            single_ended  else code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
 
     def single_sample_rtd(self):
         """
