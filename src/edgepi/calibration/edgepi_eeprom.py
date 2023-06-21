@@ -16,7 +16,8 @@ from edgepi.utilities.crc_8_atm import (
 from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    MessageFieldNumber
+    MessageFieldNumber,
+    PAGE_WRITE_CYCLE_TIME
     )
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -122,7 +123,7 @@ class EdgePiEEPROM(I2CDevice):
         for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
-            time.sleep(0.01)
+            time.sleep(PAGE_WRITE_CYCLE_TIME)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -177,8 +178,9 @@ class EdgePiEEPROM(I2CDevice):
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
-# TODO: have default eeprom_data class with default value 
-# TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call another method that takes the dataclass and write the eeprom
+# TODO: have default eeprom_data class with default value
+# TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call
+#  another method that takes the dataclass and write the eeprom
 # TODO: drop that MessageFieldNumber nonesense
     def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
         """
@@ -327,7 +329,7 @@ class EdgePiEEPROM(I2CDevice):
         for page in pages:
             self.__page_write_register(mem_offset, page)
             mem_offset = mem_offset+len(page)
-            time.sleep(0.01)
+            time.sleep(PAGE_WRITE_CYCLE_TIME)
 
 # TODO why not separate it into a class
     def init_memory(self):
@@ -394,8 +396,8 @@ class EdgePiEEPROM(I2CDevice):
         for _ in range(tatal_page):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
-            time.sleep(0.01)
+            time.sleep(PAGE_WRITE_CYCLE_TIME)
 
 
 # TODO: read/write binary with MD5Sum hash to prevent accidental read/writes
-# TODO: Refactoring set_edgepi_resereved_data() by reading back the memory and 
+# TODO: Refactoring set_edgepi_resereved_data() by reading back the memory an
