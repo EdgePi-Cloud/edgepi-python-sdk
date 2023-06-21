@@ -172,7 +172,7 @@ class EdgePiEEPROMData:
         proto_buf.client_id_config = self.client_id_config
         proto_buf.client_id_data = self.client_id_data
         proto_buf.thing_id = self.thing_id
-
+# TODO: get rid of this method, doesn't make sense
     def pack_dataclass(self, proto_buf: EepromLayout, message_field: MessageFieldNumber):
         """
         Function to populate current dictionary value to proto buffer message
