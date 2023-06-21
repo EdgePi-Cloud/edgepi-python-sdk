@@ -8,13 +8,13 @@ Note, the EdgePi ADC can be used with two different sampling modes: pulse conver
 In pulse conversion mode, a sampling event must be manually triggered. This can be achieved as follows.
 ```python
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import AnalogIn, ConvMode
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADC1DataRate
 
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
 # configure ADC to sample A-IN 1 (Refer to the EdgePi label for details)
-edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.PULSE)
+edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.PULSE, adc_1_data_rate=ADC1DataRate.SPS_38400)
 
 # trigger sampling event
 out = edgepi_adc.single_sample()
@@ -27,13 +27,37 @@ to perform continuous conversion, the user must send a command to start the conv
 sampling data must also be manually by the user.
 ```python
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum, ADC1DataRate
 
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
 # configure ADC to sample A-IN 1 (Refer to the EdgePi label for details)
-edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.CONTINUOUS)
+edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.CONTINUOUS, adc_1_data_rate=ADC1DataRate.SPS_38400)
+
+# send command to start automatic conversions
+edgepi_adc.start_conversions(ADCNum.ADC_1)
+
+# perform 10 voltage reads
+for _ in range(10):
+  out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+  print(out)
+  
+# stop automatic conversions
+edgepi_adc.stop_conversions(ADCNum.ADC_1)
+```
+### Reading Voltage from Analog Input Pin: Continuous Conversion Mode and Differential
+```python
+from edgepi.adc.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import AnalogIn, ConvMode, ADCNum, ADC1DataRate, DiffMode
+
+# initialize ADC
+edgepi_adc = EdgePiADC()
+
+# configure ADC to sample A-IN 1 (Refer to the EdgePi label for details)
+edgepi_adc.set_config(adc_1_analog_in=AnalogIn.AIN1, conversion_mode=ConvMode.CONTINUOUS, adc_1_data_rate=ADC1DataRate.SPS_38400)
+# Configure inputs to differential between A/DIN5 and A/DIN6
+edgepi_adc.select_differential(ADCNum.ADC_1,DiffMode.DIFF_3)
 
 # send command to start automatic conversions
 edgepi_adc.start_conversions(ADCNum.ADC_1)

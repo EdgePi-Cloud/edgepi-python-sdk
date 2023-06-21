@@ -2,6 +2,9 @@
 
 from enum import Enum
 
+# page write cycle time requirements https://www.onsemi.com/pdf/datasheet/cat24c256-d.pdf
+PAGE_WRITE_CYCLE_TIME=0.01
+
 class EEPROMInfo(Enum):
     """
     EEPROM device address for I2C addressing
