@@ -287,7 +287,7 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f"__generate_list_of_pages_crc: {number_of_pages} pages generated")
         return pages
 
-    def read_memory(self, mem_size: int = None):
+    def read_user_space(self, mem_size: int = None):
         """
         Read user space memory starting from 0 to 16383
         Args:
@@ -313,7 +313,7 @@ class EdgePiEEPROM(I2CDevice):
             buff+=buff_list[:-1]
         return buff[2:buff_and_len]
 
-    def write_memory(self, data: bytes):
+    def write_user_space(self, data: bytes):
         """
         Writes data to the eeprom
         Args:
@@ -366,7 +366,7 @@ class EdgePiEEPROM(I2CDevice):
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
-            mem_content = bytes(self.read_memory(mem_size))
+            mem_content = bytes(self.read_user_space(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
         # part of memory occupied
@@ -374,14 +374,14 @@ class EdgePiEEPROM(I2CDevice):
             is_full=False
             is_empty=False
             # read memory content should be in json encoded bytes converted into list
-            mem_content = bytes(self.read_memory(mem_size))
+            mem_content = bytes(self.read_user_space(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
             self.log.info(f'{mem_size}bytes of data is read from the user space')
 
         return is_full, is_empty
 
-    def eeprom_reset(self):
+    def reset_user_space(self):
         """
         Reset User space memory
         Args:
