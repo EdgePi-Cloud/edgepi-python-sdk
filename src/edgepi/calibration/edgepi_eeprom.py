@@ -403,7 +403,7 @@ class EdgePiEEPROM(I2CDevice):
             mem_offset = mem_offset+page_size
             time.sleep(PAGE_WRITE_CYCLE_TIME)
 
-    def reset_edgepi_memory(self, hash: str = None):
+    def reset_edgepi_memory(self, bin_hash: str = None):
         """
         reset edgepi reserved memory by reading default binary files. In order to trigger this
         method, correct md5sum hash must be passed.
@@ -412,12 +412,10 @@ class EdgePiEEPROM(I2CDevice):
         with open(DEFUALT_MEMORY_PATH, "rb") as fd:
             default_binary = fd.read()
         res = hashlib.md5(default_binary)
-        if hash != res.hexdigest() or hash is None:
+        if bin_hash != res.hexdigest() or bin_hash is None:
             raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
         # Write to the memory
         self.__write_edgepi_reserved_memory(default_binary)
-        
-
 
 
 # TODO: read/write binary with MD5Sum hash to prevent accidental read/writes

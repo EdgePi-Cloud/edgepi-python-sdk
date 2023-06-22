@@ -12,8 +12,8 @@ import random
 
 import time
 import logging
-import pytest
 from contextlib import nullcontext as does_not_raise
+import pytest
 _logger = logging.getLogger(__name__)
 
 from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, DEFUALT_MEMORY_PATH
@@ -110,15 +110,15 @@ def test_set_edgepi_reserved_data(eeprom):
 # TODO: Default Hash
 DEFAULT_HASH = "THIS NEED TO BE ADDED"
 
-@pytest.mark.parametrize("hash, error",
+@pytest.mark.parametrize("bin_hash, error",
                         [
                          (None, pytest.raises(PermissionDenied)),
-                         ("This is Dummy", pytest.raises(PermissionDenied)), 
+                         ("This is Dummy", pytest.raises(PermissionDenied)),
                          ("0d0a96fa021ccd3fac05df1a584e3185", does_not_raise())
                         ])
-def test_reset_edgepi_memory(hash, error, eeprom):
+def test_reset_edgepi_memory(bin_hash, error, eeprom):
     with error:
-        eeprom.reset_edgepi_memory(hash)
+        eeprom.reset_edgepi_memory(bin_hash)
     written_data = eeprom.get_edgepi_reserved_data()
     with open(DEFUALT_MEMORY_PATH, "rb") as fd:
         read_bin = fd.read()
