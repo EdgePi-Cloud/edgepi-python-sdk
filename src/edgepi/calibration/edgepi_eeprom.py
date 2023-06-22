@@ -7,6 +7,7 @@ import logging
 import math
 import json
 import time
+import hashlib
 
 from edgepi.utilities.crc_8_atm import (
     CRC_BYTE_SIZE,
@@ -17,11 +18,15 @@ from edgepi.calibration.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
     MessageFieldNumber,
-    PAGE_WRITE_CYCLE_TIME
+    PAGE_WRITE_CYCLE_TIME,
+    DEFUALT_MEMORY_PATH
     )
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
+
+class PermissionDenied(Exception):
+    """Raised when permission is denied to perform an operation"""
 
 class MemoryOutOfBound(Exception):
     """Raised memory out-of-bound error"""
@@ -397,6 +402,24 @@ class EdgePiEEPROM(I2CDevice):
             self.__page_write_register(mem_offset, reset_vals)
             mem_offset = mem_offset+page_size
             time.sleep(PAGE_WRITE_CYCLE_TIME)
+
+    def reset_osensa_memory(self, hash: str = None):
+        """
+        reset edgepi reserved memory by reading default binary files. In order to trigger this
+        method, correct md5sum hash must be passed.
+        """
+        # TODO: default memory bin file store path
+        with open(DEFUALT_MEMORY_PATH, "rb") as fd:
+            default_binary = fd.read()
+        res = hashlib.md5(default_binary)
+        if hash != res or hash is None:
+            raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
+        
+        self.eeprom_layout.ParseFromString(default_binary)
+        pb_data = self.eeprom_layout.SerializeToString()
+        self.__write_edgepi_reserved_memory(pb_data)
+        
+
 
 
 # TODO: read/write binary with MD5Sum hash to prevent accidental read/writes
