@@ -403,7 +403,7 @@ class EdgePiEEPROM(I2CDevice):
             mem_offset = mem_offset+page_size
             time.sleep(PAGE_WRITE_CYCLE_TIME)
 
-    def reset_osensa_memory(self, hash: str = None):
+    def reset_edgepi_memory(self, hash: str = None):
         """
         reset edgepi reserved memory by reading default binary files. In order to trigger this
         method, correct md5sum hash must be passed.
@@ -412,12 +412,10 @@ class EdgePiEEPROM(I2CDevice):
         with open(DEFUALT_MEMORY_PATH, "rb") as fd:
             default_binary = fd.read()
         res = hashlib.md5(default_binary)
-        if hash != res or hash is None:
+        if hash != res.hexdigest() or hash is None:
             raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
-        
-        self.eeprom_layout.ParseFromString(default_binary)
-        pb_data = self.eeprom_layout.SerializeToString()
-        self.__write_edgepi_reserved_memory(pb_data)
+        # Write to the memory
+        self.__write_edgepi_reserved_memory(default_binary)
         
 
 

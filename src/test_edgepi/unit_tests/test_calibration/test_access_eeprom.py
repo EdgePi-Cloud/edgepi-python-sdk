@@ -16,7 +16,7 @@ import pytest
 
 from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
 from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
@@ -343,3 +343,18 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
             assert eeprom.used_size == mem_size
         else:
             assert eeprom.data_list == []
+
+@pytest.mark.parametrize("hash, error",
+                        [
+                         (None, pytest.raises(PermissionDenied)),
+                         ("This is Dummy", pytest.raises(PermissionDenied)), 
+                         ("0d0a96fa021ccd3fac05df1a584e3185", does_not_raise())
+                        ])
+def test_reset_edgepi_memory(mocker, hash, error, eeprom):
+    data = bytes("hellow_world", "utf-8")
+    mocker.patch("builtins.open", mock.mock_open(read_data = data))
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
+    with error:
+        eeprom.reset_edgepi_memory(hash)
+

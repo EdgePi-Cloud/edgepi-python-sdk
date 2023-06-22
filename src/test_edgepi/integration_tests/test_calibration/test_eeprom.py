@@ -13,10 +13,12 @@ import random
 import time
 import logging
 import pytest
+from contextlib import nullcontext as does_not_raise
 _logger = logging.getLogger(__name__)
 
-from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, DEFUALT_MEMORY_PATH
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
+from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_constants import MessageFieldNumber
 
 @pytest.fixture(name="eeprom")
@@ -104,6 +106,37 @@ def test_set_edgepi_reserved_data(eeprom):
 
     # Write the original data back
     eeprom.set_edgepi_reserved_data(original_data, MessageFieldNumber.ALL)
+
+# TODO: Default Hash
+DEFAULT_HASH = "THIS NEED TO BE ADDED"
+
+@pytest.mark.parametrize("hash, error",
+                        [
+                         (None, pytest.raises(PermissionDenied)),
+                         ("This is Dummy", pytest.raises(PermissionDenied)), 
+                         ("0d0a96fa021ccd3fac05df1a584e3185", does_not_raise())
+                        ])
+def test_reset_edgepi_memory(hash, error, eeprom):
+    with error:
+        eeprom.reset_edgepi_memory(hash)
+    written_data = eeprom.get_edgepi_reserved_data()
+    with open(DEFUALT_MEMORY_PATH, "rb") as fd:
+        read_bin = fd.read()
+    default_data = eeprom.eeprom_layout.ParseFromString(read_bin)
+    default_data = EdgePiEEPROMData(default_data)
+    assert written_data.dac_calib_params == default_data.dac_calib_params
+    assert written_data.adc_calib_params == default_data.adc_calib_params
+    assert written_data.rtd_calib_params == default_data.rtd_calib_params
+    assert written_data.rtd_hw_params == default_data.rtd_hw_params
+    assert written_data.tc_calib_params == default_data.tc_calib_params
+    assert written_data.tc_hw_params == default_data.tc_hw_params
+    assert written_data.config_key == default_data.config_key
+    assert written_data.data_key == default_data.data_key
+    assert written_data.serial == default_data.serial
+    assert written_data.model == default_data.model
+    assert written_data.client_id_config == default_data.client_id_config
+    assert written_data.client_id_data == default_data.client_id_data
+    assert written_data.thing_id == default_data.thing_id
 
 # TODO: Check the integrity of data by comparing the stored value to the changed value
 # TODO: Move the files around
