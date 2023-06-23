@@ -172,39 +172,19 @@ class EdgePiEEPROMData:
         proto_buf.client_id_config = self.client_id_config
         proto_buf.client_id_data = self.client_id_data
         proto_buf.thing_id = self.thing_id
-# TODO: get rid of this method, doesn't make sense
-    def pack_dataclass(self, proto_buf: EepromLayout, message_field: MessageFieldNumber):
+
+    def pack_dataclass(self, proto_buf: EepromLayout):
         """
         Function to populate current dictionary value to proto buffer message
         Args:
             proto_buf (EepromLayout): protobuffer layout
-            message_field (Enum): message filed number to populate
         # """
-        if message_field == MessageFieldNumber.DAC:
-            self.pack_dac_calib(proto_buf.dac)
-        elif message_field == MessageFieldNumber.ADC:
-            self.pack_adc_calib(proto_buf.adc)
-        elif message_field == MessageFieldNumber.RTD:
-            self.pack_rtd_calib(proto_buf.rtd)
-            self.pack_rtd_hw(proto_buf.rtd)
-        elif message_field == MessageFieldNumber.TC:
-            self.pack_tc_calib(proto_buf.tc)
-            self.pack_tc_hw(proto_buf.tc)
-        elif message_field == MessageFieldNumber.CONFIGS_KEY:
-            self.pack_config_key(proto_buf.config_key)
-        elif message_field == MessageFieldNumber.DATA_KEY:
-            self.pack_data_key(proto_buf.data_key)
-        elif message_field in (MessageFieldNumber.MODEL,\
-                               MessageFieldNumber.CLIENT_ID,\
-                               MessageFieldNumber.SERIAL):
-            self.pack_product_info(proto_buf)
-        else:
-            self.pack_dac_calib(proto_buf.dac)
-            self.pack_adc_calib(proto_buf.adc)
-            self.pack_rtd_calib(proto_buf.rtd)
-            self.pack_rtd_hw(proto_buf.rtd)
-            self.pack_tc_calib(proto_buf.tc)
-            self.pack_tc_hw(proto_buf.tc)
-            self.pack_config_key(proto_buf.config_key)
-            self.pack_data_key(proto_buf.data_key)
-            self.pack_product_info(proto_buf)
+        self.pack_dac_calib(proto_buf.dac)
+        self.pack_adc_calib(proto_buf.adc)
+        self.pack_rtd_calib(proto_buf.rtd)
+        self.pack_rtd_hw(proto_buf.rtd)
+        self.pack_tc_calib(proto_buf.tc)
+        self.pack_tc_hw(proto_buf.tc)
+        self.pack_config_key(proto_buf.config_key)
+        self.pack_data_key(proto_buf.data_key)
+        self.pack_product_info(proto_buf)

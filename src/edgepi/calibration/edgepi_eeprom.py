@@ -187,14 +187,14 @@ class EdgePiEEPROM(I2CDevice):
 # TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call
 #  another method that takes the dataclass and write the eeprom
 # TODO: drop that MessageFieldNumber nonesense
-    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
+    def set_edgepi_data(self, eeprom_data: EdgePiEEPROMData):
         """
         Write EdgePi reserved memory space using the populated dataclass
         Args:
             eeprom_data (EdgePiEEPROMData): eeprom data class with modified section
         """
         # Update the pb layout by packing the updated EEPROM data dataclass
-        eeprom_data.pack_dataclass(self.eeprom_layout, message)
+        eeprom_data.pack_dataclass(self.eeprom_layout)
         # Serialize the pb
         pb_data = self.eeprom_layout.SerializeToString()
         self.__write_edgepi_reserved_memory(pb_data)
@@ -416,7 +416,5 @@ class EdgePiEEPROM(I2CDevice):
             raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
         # Write to the memory
         self.__write_edgepi_reserved_memory(default_binary)
-
-
-# TODO: read/write binary with MD5Sum hash to prevent accidental read/writes
+ 
 # TODO: Refactoring set_edgepi_resereved_data() by reading back the memory an

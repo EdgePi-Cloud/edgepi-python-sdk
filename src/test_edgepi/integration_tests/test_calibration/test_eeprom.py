@@ -66,7 +66,7 @@ haoqI+\nGgNa2JECgYEAwEEEq7dxGXYmlIhTs5IiEleLjBydQ9B1P8zIIApLJdHuu50K7ifq\nVYWC0Q
 h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyNepTxS32VzVTx2z+A=G+\
 TmZ\n-----END RSA PRIVATE KEY-----\n'
 
-def test_set_edgepi_reserved_data(eeprom):
+def test_set_edgepi_data(eeprom):
     original_data = eeprom.get_edgepi_reserved_data()
 
     for _ in range(10):
@@ -84,7 +84,7 @@ def test_set_edgepi_reserved_data(eeprom):
         modified_data.data_key.certificate = DUMMY_KEY + res
         modified_data.data_key.private = DUMMY_KEY + res
         # Write modified data
-        eeprom.set_edgepi_reserved_data(modified_data, MessageFieldNumber.ALL)
+        eeprom.set_edgepi_data(modified_data, MessageFieldNumber.ALL)
         # Read back the changed data
         modified_data = eeprom.get_edgepi_reserved_data()
 
@@ -105,7 +105,7 @@ def test_set_edgepi_reserved_data(eeprom):
         assert modified_data.thing_id == original_data.thing_id
 
     # Write the original data back
-    eeprom.set_edgepi_reserved_data(original_data, MessageFieldNumber.ALL)
+    eeprom.set_edgepi_data(original_data, MessageFieldNumber.ALL)
 
 # TODO: Default Hash
 DEFAULT_HASH = "THIS NEED TO BE ADDED"
