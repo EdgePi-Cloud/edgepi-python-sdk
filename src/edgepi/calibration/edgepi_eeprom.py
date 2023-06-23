@@ -183,10 +183,9 @@ class EdgePiEEPROM(I2CDevice):
         self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
-# TODO: have default eeprom_data class with default value
+
 # TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call
 #  another method that takes the dataclass and write the eeprom
-# TODO: drop that MessageFieldNumber nonesense
     def set_edgepi_data(self, eeprom_data: EdgePiEEPROMData):
         """
         Write EdgePi reserved memory space using the populated dataclass
