@@ -119,7 +119,7 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
         eeprom.reset_edgepi_memory(bin_hash)
         written_data = eeprom.get_edgepi_reserved_data()
         default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
-        default_data = EdgePiEEPROMData(default_data)
+        default_data = EdgePiEEPROMData(eeprom.eeprom_layout)
         assert written_data.dac_calib_params == default_data.dac_calib_params
         assert written_data.adc_calib_params == default_data.adc_calib_params
         assert written_data.rtd_calib_params == default_data.rtd_calib_params
@@ -133,9 +133,8 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
         assert written_data.client_id_config == default_data.client_id_config
         assert written_data.client_id_data == default_data.client_id_data
         assert written_data.thing_id == default_data.thing_id
-
-    # Reset to origianl Data
-    eeprom.set_edgepi_data(original_data)
+        # Reset to origianl Data
+        eeprom.set_edgepi_data(original_data)
 
 # TODO: Check the integrity of data by comparing the stored value to the changed value
 # TODO: Move the files around
