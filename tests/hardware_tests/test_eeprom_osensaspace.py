@@ -36,9 +36,9 @@ def test_osensa_space_modify_1(eeprom):
         calibs.gain = ch
         calibs.offset = ch
 
-    eeprom.set_edgepi_data(eeprom_data_modify, MessageFieldNumber.DAC)
+    eeprom.set_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
-    eeprom.set_edgepis_data(eeprom_data_modify, MessageFieldNumber.ADC)
+    eeprom.set_edgepis_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
@@ -65,9 +65,9 @@ def test_osensa_space_modify_2(eeprom):
     for ch, _ in eeprom_data_modify.tc_hw_params.items():
         eeprom_data_modify.tc_hw_params[ch] = 1818.5
 
-    eeprom.set_edgepi_data(eeprom_data_modify, MessageFieldNumber.RTD)
+    eeprom.set_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
-    eeprom.set_edgepi_data(eeprom_data_modify, MessageFieldNumber.TC)
+    eeprom.set_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
@@ -89,9 +89,9 @@ def test_osensa_space_modify_3(eeprom):
     eeprom_data_modify.data_key.certificate = "This is data certificate"
     eeprom_data_modify.data_key.private = "This is data private"
 
-    eeprom.set_edgepi_data(eeprom_data_modify, MessageFieldNumber.CONFIGS_KEY)
+    eeprom.set_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
-    eeprom.set_edgepi_data(eeprom_data_modify, MessageFieldNumber.DATA_KEY)
+    eeprom.set_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")

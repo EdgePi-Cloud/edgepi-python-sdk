@@ -10,7 +10,6 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout

@@ -348,11 +348,9 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("0d0a96fa021ccd3fac05df1a584e3185", does_not_raise())
+                         ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
                         ])
 def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
-    data = bytes("hellow_world", "utf-8")
-    mocker.patch("builtins.open", mock.mock_open(read_data = data))
     mocker.patch(
         "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
     with error:

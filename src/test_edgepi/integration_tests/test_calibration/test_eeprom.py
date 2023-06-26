@@ -9,6 +9,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 import string
 import random
+import base64
 
 import time
 import logging
@@ -16,10 +17,9 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 _logger = logging.getLogger(__name__)
 
-from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, DEFUALT_MEMORY_PATH
+from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, DEFUALT_EEPROM_BIN
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
 
 @pytest.fixture(name="eeprom")
 def fixture_test_eeprom():
@@ -84,7 +84,7 @@ def test_set_edgepi_data(eeprom):
         modified_data.data_key.certificate = DUMMY_KEY + res
         modified_data.data_key.private = DUMMY_KEY + res
         # Write modified data
-        eeprom.set_edgepi_data(modified_data, MessageFieldNumber.ALL)
+        eeprom.set_edgepi_data(modified_data)
         # Read back the changed data
         modified_data = eeprom.get_edgepi_reserved_data()
 
@@ -105,24 +105,20 @@ def test_set_edgepi_data(eeprom):
         assert modified_data.thing_id == original_data.thing_id
 
     # Write the original data back
-    eeprom.set_edgepi_data(original_data, MessageFieldNumber.ALL)
-
-# TODO: Default Hash
-DEFAULT_HASH = "THIS NEED TO BE ADDED"
+    eeprom.set_edgepi_data(original_data)
 
 @pytest.mark.parametrize("bin_hash, error",
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("0d0a96fa021ccd3fac05df1a584e3185", does_not_raise())
+                         ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
+    original_data = eeprom.get_edgepi_reserved_data()
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
     written_data = eeprom.get_edgepi_reserved_data()
-    with open(DEFUALT_MEMORY_PATH, "rb") as fd:
-        read_bin = fd.read()
-    default_data = eeprom.eeprom_layout.ParseFromString(read_bin)
+    default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
     default_data = EdgePiEEPROMData(default_data)
     assert written_data.dac_calib_params == default_data.dac_calib_params
     assert written_data.adc_calib_params == default_data.adc_calib_params
@@ -137,6 +133,9 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
     assert written_data.client_id_config == default_data.client_id_config
     assert written_data.client_id_data == default_data.client_id_data
     assert written_data.thing_id == default_data.thing_id
+
+    # Reset to origianl Data
+    eeprom.set_edgepi_data(original_data)
 
 # TODO: Check the integrity of data by comparing the stored value to the changed value
 # TODO: Move the files around

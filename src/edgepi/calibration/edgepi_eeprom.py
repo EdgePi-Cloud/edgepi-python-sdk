@@ -8,6 +8,7 @@ import math
 import json
 import time
 import hashlib
+import base64
 
 from edgepi.utilities.crc_8_atm import (
     CRC_BYTE_SIZE,
@@ -19,7 +20,7 @@ from edgepi.calibration.eeprom_constants import (
     EdgePiMemoryInfo,
     MessageFieldNumber,
     PAGE_WRITE_CYCLE_TIME,
-    DEFUALT_MEMORY_PATH
+    DEFUALT_EEPROM_BIN
     )
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -406,14 +407,16 @@ class EdgePiEEPROM(I2CDevice):
         """
         reset edgepi reserved memory by reading default binary files. In order to trigger this
         method, correct md5sum hash must be passed.
+        Args:
+            bin_hash (str): md5sum hash string to compare with default eeprom hash
+        Return:
+            N/A
         """
-        # TODO: default memory bin file store path
-        with open(DEFUALT_MEMORY_PATH, "rb") as fd:
-            default_binary = fd.read()
-        res = hashlib.md5(default_binary)
+        defualt_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
+        res = hashlib.md5(defualt_bin)
         if bin_hash != res.hexdigest() or bin_hash is None:
             raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
         # Write to the memory
-        self.__write_edgepi_reserved_memory(default_binary)
- 
+        self.__write_edgepi_reserved_memory(defualt_bin)
+
 # TODO: Refactoring set_edgepi_resereved_data() by reading back the memory an
