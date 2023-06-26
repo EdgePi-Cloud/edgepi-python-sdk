@@ -12,7 +12,6 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
 
 @pytest.fixture(name="eeprom")

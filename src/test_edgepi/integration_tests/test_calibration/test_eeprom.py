@@ -117,22 +117,22 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
     original_data = eeprom.get_edgepi_reserved_data()
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
-    written_data = eeprom.get_edgepi_reserved_data()
-    default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
-    default_data = EdgePiEEPROMData(default_data)
-    assert written_data.dac_calib_params == default_data.dac_calib_params
-    assert written_data.adc_calib_params == default_data.adc_calib_params
-    assert written_data.rtd_calib_params == default_data.rtd_calib_params
-    assert written_data.rtd_hw_params == default_data.rtd_hw_params
-    assert written_data.tc_calib_params == default_data.tc_calib_params
-    assert written_data.tc_hw_params == default_data.tc_hw_params
-    assert written_data.config_key == default_data.config_key
-    assert written_data.data_key == default_data.data_key
-    assert written_data.serial == default_data.serial
-    assert written_data.model == default_data.model
-    assert written_data.client_id_config == default_data.client_id_config
-    assert written_data.client_id_data == default_data.client_id_data
-    assert written_data.thing_id == default_data.thing_id
+        written_data = eeprom.get_edgepi_reserved_data()
+        default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
+        default_data = EdgePiEEPROMData(default_data)
+        assert written_data.dac_calib_params == default_data.dac_calib_params
+        assert written_data.adc_calib_params == default_data.adc_calib_params
+        assert written_data.rtd_calib_params == default_data.rtd_calib_params
+        assert written_data.rtd_hw_params == default_data.rtd_hw_params
+        assert written_data.tc_calib_params == default_data.tc_calib_params
+        assert written_data.tc_hw_params == default_data.tc_hw_params
+        assert written_data.config_key == default_data.config_key
+        assert written_data.data_key == default_data.data_key
+        assert written_data.serial == default_data.serial
+        assert written_data.model == default_data.model
+        assert written_data.client_id_config == default_data.client_id_config
+        assert written_data.client_id_data == default_data.client_id_data
+        assert written_data.thing_id == default_data.thing_id
 
     # Reset to origianl Data
     eeprom.set_edgepi_data(original_data)
