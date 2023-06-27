@@ -11,13 +11,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
-from edgepi.eeprom.proto_files import (
-    edgepi_module_pb2,
-    dac_module_pb2,
-    adc_module_pb2,
-    rtd_module_pb2,
-    tc_module_pb2
-)
+from edgepi.eeprom.proto_files import edgepi_module_pb2
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""
@@ -27,7 +21,50 @@ def read_binfile():
 
 def test_init_data_class():
     edgepi_eeprom_data = EepromDataClass()
-    edgepi_eeprom_data = edgepi_eeprom_data.__dict__
-    for val in edgepi_eeprom_data.values():
-        assert val is None
+    edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
+    assert edgepi_eeprom_pb.ByteSize() == 0
+    assert edgepi_eeprom_data.dac_calib_params is None 
+    assert edgepi_eeprom_data.adc_calib_params is None
+    assert edgepi_eeprom_data.rtd_calib_params is None
+    assert edgepi_eeprom_data.tc_calib_params is None
+    assert edgepi_eeprom_data.config_key is None
+    assert edgepi_eeprom_data.data_key is None
+    assert edgepi_eeprom_data.serial is None
+    assert edgepi_eeprom_data.model is None
+    assert edgepi_eeprom_data.client_id_config is None
+    assert edgepi_eeprom_data.client_id_data is None
+    assert edgepi_eeprom_data.thing_id is None
+    assert edgepi_eeprom_data.cm_part_number is None
+    assert edgepi_eeprom_data.tb_part_number is None
+    assert edgepi_eeprom_data.cm4_part_number is None
 
+
+def test_deserialize_pb():
+    default_bin = read_binfile()
+    edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
+    edgepi_eeprom_pb.ParseFromString(default_bin)
+    edgepi_eeprom_data = EepromDataClass.extract_eeprom_data(edgepi_eeprom_pb)
+    assert edgepi_eeprom_data.dac_calib_params is not None
+    assert edgepi_eeprom_data.adc_calib_params is not None
+    assert edgepi_eeprom_data.rtd_calib_params is not None
+    assert edgepi_eeprom_data.tc_calib_params is not None
+    assert edgepi_eeprom_data.config_key is not None
+    assert edgepi_eeprom_data.data_key is not None
+    assert edgepi_eeprom_data.serial is not None
+    assert edgepi_eeprom_data.model is not None
+    assert edgepi_eeprom_data.client_id_config is not None
+    assert edgepi_eeprom_data.client_id_data is not None
+    assert edgepi_eeprom_data.thing_id is not None
+    assert edgepi_eeprom_data.cm_part_number is not None
+    assert edgepi_eeprom_data.tb_part_number is not None
+    assert edgepi_eeprom_data.cm4_part_number is not None
+
+def test_serialize_pb():
+    default_bin = read_binfile()
+    edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
+    edgepi_eeprom_pb_2 = edgepi_module_pb2.EepromData()
+    edgepi_eeprom_pb_2.ParseFromString(default_bin)
+    assert edgepi_eeprom_pb.ByteSize() == 0
+    edgepi_eeprom_data = EepromDataClass.extract_eeprom_data(edgepi_eeprom_pb_2)
+    edgepi_eeprom_data.populate_eeprom_module(edgepi_eeprom_pb)
+    assert edgepi_eeprom_pb.ByteSize() != 0

@@ -417,7 +417,7 @@ class EepromDataClass:
         if eeprom_pb.HasField("config_keys"):
             eeprom_data.config_key = eeprom_pb.config_keys
         if eeprom_pb.HasField("data_keys"):
-            eeprom_data.config_key = eeprom_pb.data_keys
+            eeprom_data.data_key = eeprom_pb.data_keys
         if eeprom_pb.HasField("cm_part_number"):
             eeprom_data.cm_part_number = eeprom_pb.cm_part_number
         if eeprom_pb.HasField("tb_part_number"):
