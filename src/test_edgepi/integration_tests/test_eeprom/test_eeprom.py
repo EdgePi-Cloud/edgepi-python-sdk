@@ -17,9 +17,9 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 _logger = logging.getLogger(__name__)
 
-from edgepi.calibration.eeprom_constants import EdgePiMemoryInfo, DEFUALT_EEPROM_BIN
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
-from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
+from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, DEFUALT_EEPROM_BIN
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
+from edgepi.eeprom.protobuf_mapping import EdgePiEEPROMData
 
 @pytest.fixture(name="eeprom")
 def fixture_test_eeprom():

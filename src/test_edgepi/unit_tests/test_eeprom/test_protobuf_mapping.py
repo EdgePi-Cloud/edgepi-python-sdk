@@ -10,9 +10,9 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
-from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
+from edgepi.eeprom.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from edgepi.eeprom.eeprom_mapping_pb2 import EepromLayout
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""

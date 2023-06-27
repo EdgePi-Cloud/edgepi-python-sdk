@@ -15,10 +15,10 @@ import json
 import pytest
 
 from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
-from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
+from edgepi.eeprom.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
+from edgepi.eeprom.eeprom_mapping_pb2 import EepromLayout
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac(mocker):
@@ -88,7 +88,7 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
     data = mock_value + [1]*61
     data = get_crc(data)
     # pylint: disable=protected-access
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
+    mocker.patch("edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 return_value =data)
     # pylint: disable=protected-access
     length = eeprom._EdgePiEEPROM__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
@@ -102,9 +102,9 @@ def test__read_edgepi_reserved_memory(mocker, eeprom):
     pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(data_l)
 
     # pylint: disable=protected-access
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
+    mocker.patch("edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
                  return_value = (data_l[0]<<8) + data_l[1])
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
+    mocker.patch("edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
                 side_effect = list(pages))
     # pylint: disable=protected-access
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
@@ -124,7 +124,7 @@ def test__read_edgepi_reserved_memory(mocker, eeprom):
 def test_get_message_of_interest(mocker, msg, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
+        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
         return_value = read_binfile())
     memory_contents = EepromLayout()
     memory_contents.ParseFromString(read_binfile())
@@ -182,7 +182,7 @@ h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyN
 def test_get_edgepi_reserved_data(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
+        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
         return_value = read_binfile())
     memory_contents = EepromLayout()
     memory_contents.ParseFromString(read_binfile())
@@ -252,7 +252,7 @@ def test__generate_list_of_pages_crc(size, error, eeprom):
                          (OSENSA_DATA_SIZE-256, pytest.raises(MemoryOutOfBound)),
                         ])
 def test__write_edgepi_reserved_memory(mocker, data_size, error, eeprom):
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__page_write_register")
+    mocker.patch("edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__page_write_register")
     data = bytes([1]*data_size)
     with error:
     # pylint: disable=protected-access
@@ -312,7 +312,7 @@ def test_read_user_space(mocker, eeprom):
     # pylint: disable=protected-access
     pages = eeprom._EdgePiEEPROM__generate_list_of_pages_crc(dummy_data_l)
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
+        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
         side_effect = pages)
     data_size = (dummy_data_l[0]<<8) + dummy_data_l[1]
     result = eeprom.read_user_space(data_size)
@@ -327,9 +327,9 @@ def test_read_user_space(mocker, eeprom):
                         ])
 def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.read_user_space",
+        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM.read_user_space",
         return_value = list(bytes(json.dumps([2]*dummy_size), "utf8")))
-    mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
+    mocker.patch("edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
                   return_value = mem_size)
     with error:
         is_full, is_empty = eeprom.init_memory()
@@ -352,6 +352,6 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
                         ])
 def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
+        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
     with error:
         eeprom.reset_edgepi_memory(bin_hash)

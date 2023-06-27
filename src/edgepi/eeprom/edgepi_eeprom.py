@@ -15,15 +15,15 @@ from edgepi.utilities.crc_8_atm import (
     get_crc,
     check_crc
 )
-from edgepi.calibration.eeprom_constants import (
+from edgepi.eeprom.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
     MessageFieldNumber,
     PAGE_WRITE_CYCLE_TIME,
     DEFUALT_EEPROM_BIN
     )
-from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
-from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from edgepi.eeprom.protobuf_mapping import EdgePiEEPROMData
+from edgepi.eeprom.eeprom_mapping_pb2 import EepromLayout
 from edgepi.peripherals.i2c import I2CDevice
 
 class PermissionDenied(Exception):
