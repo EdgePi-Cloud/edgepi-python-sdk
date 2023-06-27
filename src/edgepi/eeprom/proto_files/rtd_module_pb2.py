@@ -11,7 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import calibration_parameters_pb2 as calibration__parameters__pb2
+from edgepi.eeprom.proto_files import calibration_parameters_pb2 as calibration__parameters__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10rtd_module.proto\x1a\x1c\x63\x61libration_parameters.proto\"_\n\tRtdModule\x12\x1e\n\x03rtd\x18\x01 \x01(\x0b\x32\x0c.calib_paramH\x00\x88\x01\x01\x12\x19\n\x0crtd_resistor\x18\x02 \x01(\x02H\x01\x88\x01\x01\x42\x06\n\x04_rtdB\x0f\n\r_rtd_resistorb\x06proto3')
