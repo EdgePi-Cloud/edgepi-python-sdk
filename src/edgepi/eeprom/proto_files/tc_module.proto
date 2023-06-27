@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "calibration_parameters.proto";
+
+message TcModule {
+    optional calib_param tc_B = 1;
+    optional calib_param tc_E = 2;
+    optional calib_param tc_J = 3;
+    optional calib_param tc_K = 4;
+    optional calib_param tc_N = 5;
+    optional calib_param tc_R = 6;
+    optional calib_param tc_S = 7;
+    optional calib_param tc_T = 8;
+}

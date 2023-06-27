@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "dac_module.proto";
+import "adc_module.proto";
+import "rtd_module.proto";
+import "tc_module.proto";
+import "keys.proto";
+
+message EepromData {
+    optional DacModule dac_module = 1;
+    optional AdcModule adc_module = 2;
+    optional RtdModule rtd_module = 3;
+    optional TcModule tc_module = 4;
+    optional AwsKeys config_keys = 5;
+    optional AwsKeys data_keys = 6;
+    optional string serial_number = 7;
+    optional string cm_part_number = 8;
+    optional string tb_part_number = 9;
+    optional string cm4_part_number = 10;
+    optional string model = 11;
+    optional string client_id_config = 12;
+    optional string client_id_data = 13;
+    optional string thing_id = 14;
+}

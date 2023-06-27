@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "calibration_parameters.proto";
+
+message AdcModule {
+    optional calib_param adc1_ch_1 = 1;  
+    optional calib_param adc1_ch_2 = 2; 
+    optional calib_param adc1_ch_3 = 3;  
+    optional calib_param adc1_ch_4 = 4;  
+    optional calib_param adc1_ch_5 = 5;  
+    optional calib_param adc1_ch_6 = 6;  
+    optional calib_param adc1_ch_7 = 7;  
+    optional calib_param adc1_ch_8 = 8;  
+
+    optional calib_param adc1_diff_1 = 9;  
+    optional calib_param adc1_diff_2 = 10;  
+    optional calib_param adc1_diff_3 = 11;  
+    optional calib_param adc1_diff_4 = 12;  
+
+    optional calib_param adc2_ch_1 = 13;  
+    optional calib_param adc2_ch_2 = 14; 
+    optional calib_param adc2_ch_3 = 15;  
+    optional calib_param adc2_ch_4 = 16;  
+    optional calib_param adc2_ch_5 = 17;  
+    optional calib_param adc2_ch_6 = 18;  
+    optional calib_param adc2_ch_7 = 19;  
+    optional calib_param adc2_ch_8 = 20;  
+
+    optional calib_param adc2_diff_1 = 21;  
+    optional calib_param adc2_diff_2 = 23;  
+    optional calib_param adc2_diff_3 = 24;  
+    optional calib_param adc2_diff_4 = 25;  
+}
