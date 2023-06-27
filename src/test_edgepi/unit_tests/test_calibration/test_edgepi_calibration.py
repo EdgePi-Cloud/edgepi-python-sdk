@@ -11,7 +11,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
 from edgepi.calibration.edgepi_calibration import EdgePiCalibration
-from edgepi.calibration.eeprom_constants import ModuleNames
+from edgepi.eeprom.eeprom_constants import ModuleNames
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""

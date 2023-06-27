@@ -50,7 +50,7 @@ from edgepi.adc.adc_multiplexers import (
 )
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 from edgepi.adc.adc_state import ADCState
 from edgepi.adc.adc_exceptions import (
     ADCRegisterUpdateError,

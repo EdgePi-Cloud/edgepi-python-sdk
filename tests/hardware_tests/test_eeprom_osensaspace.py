@@ -12,7 +12,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac():

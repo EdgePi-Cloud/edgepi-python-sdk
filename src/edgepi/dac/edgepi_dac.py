@@ -21,7 +21,7 @@ from edgepi.dac.dac_constants import (
 from edgepi.peripherals.spi import SpiDevice as spi
 from edgepi.gpio.gpio_constants import GpioPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 class EdgePiDAC(spi):
     """A EdgePi DAC device"""
