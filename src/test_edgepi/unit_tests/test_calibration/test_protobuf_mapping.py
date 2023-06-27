@@ -10,7 +10,6 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
 from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
@@ -98,18 +97,7 @@ def test_edgepi_eeprom_data():
     assert eeprom_data.data_key.certificate == KEYS
     assert eeprom_data.data_key.certificate == KEYS
 
-@pytest.mark.parametrize("msg",
-                        [(MessageFieldNumber.DAC),
-                         (MessageFieldNumber.ADC),
-                         (MessageFieldNumber.RTD),
-                         (MessageFieldNumber.TC),
-                         (MessageFieldNumber.CONFIGS_KEY),
-                         (MessageFieldNumber.DATA_KEY),
-                         (MessageFieldNumber.MODEL),
-                         (MessageFieldNumber.SERIAL),
-                         (MessageFieldNumber.CLIENT_ID),
-                        ])
-def test_edgepi_protobuf_pack_data(msg):
+def test_edgepi_protobuf_pack_data():
     original_memory_map = EepromLayout()
     changed_memory_map = EepromLayout()
     original_memory_map.ParseFromString(read_binfile())
@@ -140,5 +128,5 @@ def test_edgepi_protobuf_pack_data(msg):
     change_data.thing_id = "This is new thing id"
     change_data.model = "This is new model"
     change_data.serial = "this is new serial number"
-    change_data.pack_dataclass(changed_memory_map, msg)
+    change_data.pack_dataclass(changed_memory_map)
     assert original_memory_map != changed_memory_map

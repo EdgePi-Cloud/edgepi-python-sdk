@@ -16,7 +16,7 @@ import pytest
 
 from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
 from edgepi.calibration.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound
+from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
 
@@ -304,7 +304,7 @@ def test__generate_list_of_pages_json(json_file_name, error,eeprom):
             assert len(page) == EEPROMInfo.PAGE_SIZE.value
             check_crc(page[:-1], page[-1])
 
-def test_read_memory(mocker, eeprom):
+def test_read_user_space(mocker, eeprom):
     dummy_data = read_dummy_json("dummy_0.json")
     dummy_data_b = bytes(json.dumps(dummy_data), "utf-8")
     # pylint: disable=protected-access
@@ -315,7 +315,7 @@ def test_read_memory(mocker, eeprom):
         "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__sequential_read",
         side_effect = pages)
     data_size = (dummy_data_l[0]<<8) + dummy_data_l[1]
-    result = eeprom.read_memory(data_size)
+    result = eeprom.read_user_space(data_size)
     assert result == list(dummy_data_b)
 
 @pytest.mark.parametrize("mem_size, dummy_size, result, error",
@@ -327,7 +327,7 @@ def test_read_memory(mocker, eeprom):
                         ])
 def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
     mocker.patch(
-        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.read_memory",
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM.read_user_space",
         return_value = list(bytes(json.dumps([2]*dummy_size), "utf8")))
     mocker.patch("edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__allocated_memory",
                   return_value = mem_size)
@@ -343,3 +343,15 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
             assert eeprom.used_size == mem_size
         else:
             assert eeprom.data_list == []
+
+@pytest.mark.parametrize("bin_hash, error",
+                        [
+                         (None, pytest.raises(PermissionDenied)),
+                         ("This is Dummy", pytest.raises(PermissionDenied)),
+                         ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
+                        ])
+def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
+    mocker.patch(
+        "edgepi.calibration.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
+    with error:
+        eeprom.reset_edgepi_memory(bin_hash)
