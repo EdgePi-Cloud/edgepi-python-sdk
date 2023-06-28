@@ -1,3 +1,4 @@
+"""EdgePi EEPROM Dataclass"""
 from dataclasses import dataclass
 
 from edgepi.calibration.calibration_constants import CalibParam
@@ -11,22 +12,25 @@ from edgepi.eeprom.proto_files import (
 
 @dataclass
 class AwsKeys:
+    """Key Pair dataclass"""
     private_key:str = None
     certificate:str = None
 
 @dataclass
 class DACModule:
-    dac_ch_1: CalibParam = None  
-    dac_ch_2: CalibParam = None 
-    dac_ch_3: CalibParam = None  
-    dac_ch_4: CalibParam = None  
-    dac_ch_5: CalibParam = None  
-    dac_ch_6: CalibParam = None  
-    dac_ch_7: CalibParam = None  
-    dac_ch_8: CalibParam = None  
+# pylint: disable=too-many-instance-attributes
+    """DAC module dataclass"""
+    dac_ch_1: CalibParam = None
+    dac_ch_2: CalibParam = None
+    dac_ch_3: CalibParam = None
+    dac_ch_4: CalibParam = None
+    dac_ch_5: CalibParam = None
+    dac_ch_6: CalibParam = None
+    dac_ch_7: CalibParam = None
+    dac_ch_8: CalibParam = None
 
-# serialize method
     def populate_dac_module_pb(self, dac_pb: dac_module_pb2):
+        """serialize method"""
         # DAC
         if self.dac_ch_1 is not None:
             dac_pb.dac_ch_1.gain = self.dac_ch_1.gain
@@ -52,46 +56,48 @@ class DACModule:
         if self.dac_ch_8 is not None:
             dac_pb.dac_ch_8.gain = self.dac_ch_8.gain
             dac_pb.dac_ch_8.offset = self.dac_ch_8.offset
-        
-# De-serialize method
+
     @staticmethod
     def extract_dac_calib_params(dac_pb: dac_module_pb2):
+        """De-serialize method"""
         dac_mod = DACModule()
         # DAC
         if dac_pb.HasField("dac_ch_1"):
-            dac_mod.dac_ch_1 = CalibParam(gain=dac_pb.dac_ch_1.gain, offset = dac_pb.dac_ch_1.offset)
+            dac_mod.dac_ch_1 = CalibParam(gain=dac_pb.dac_ch_1.gain, offset=dac_pb.dac_ch_1.offset)
         if dac_pb.HasField("dac_ch_2"):
-            dac_mod.dac_ch_2 = CalibParam(gain=dac_pb.dac_ch_2.gain, offset = dac_pb.dac_ch_2.offset)
+            dac_mod.dac_ch_2 = CalibParam(gain=dac_pb.dac_ch_2.gain, offset=dac_pb.dac_ch_2.offset)
         if dac_pb.HasField("dac_ch_3"):
-            dac_mod.dac_ch_3 = CalibParam(gain=dac_pb.dac_ch_3.gain, offset = dac_pb.dac_ch_3.offset)
+            dac_mod.dac_ch_3 = CalibParam(gain=dac_pb.dac_ch_3.gain, offset=dac_pb.dac_ch_3.offset)
         if dac_pb.HasField("dac_ch_4"):
-            dac_mod.dac_ch_4 = CalibParam(gain=dac_pb.dac_ch_4.gain, offset = dac_pb.dac_ch_4.offset)
+            dac_mod.dac_ch_4 = CalibParam(gain=dac_pb.dac_ch_4.gain, offset=dac_pb.dac_ch_4.offset)
         if dac_pb.HasField("dac_ch_5"):
-            dac_mod.dac_ch_5 = CalibParam(gain=dac_pb.dac_ch_5.gain, offset = dac_pb.dac_ch_5.offset)
+            dac_mod.dac_ch_5 = CalibParam(gain=dac_pb.dac_ch_5.gain, offset=dac_pb.dac_ch_5.offset)
         if dac_pb.HasField("dac_ch_6"):
-            dac_mod.dac_ch_6 = CalibParam(gain=dac_pb.dac_ch_6.gain, offset = dac_pb.dac_ch_6.offset)
+            dac_mod.dac_ch_6 = CalibParam(gain=dac_pb.dac_ch_6.gain, offset=dac_pb.dac_ch_6.offset)
         if dac_pb.HasField("dac_ch_7"):
-            dac_mod.dac_ch_7 = CalibParam(gain=dac_pb.dac_ch_7.gain, offset = dac_pb.dac_ch_7.offset)
+            dac_mod.dac_ch_7 = CalibParam(gain=dac_pb.dac_ch_7.gain, offset=dac_pb.dac_ch_7.offset)
         if dac_pb.HasField("dac_ch_8"):
-            dac_mod.dac_ch_8 = CalibParam(gain=dac_pb.dac_ch_8.gain, offset = dac_pb.dac_ch_8.offset)
+            dac_mod.dac_ch_8 = CalibParam(gain=dac_pb.dac_ch_8.gain, offset=dac_pb.dac_ch_8.offset)
         return dac_mod
 
 
 @dataclass
 class ADCModule:
-    adc1_ch_1: CalibParam = None  
-    adc1_ch_2: CalibParam = None 
-    adc1_ch_3: CalibParam = None  
-    adc1_ch_4: CalibParam = None  
-    adc1_ch_5: CalibParam = None  
-    adc1_ch_6: CalibParam = None  
-    adc1_ch_7: CalibParam = None  
-    adc1_ch_8: CalibParam = None  
+    """ADC Module Dataclass"""
+    # pylint: disable=too-many-instance-attributes
+    adc1_ch_1: CalibParam = None
+    adc1_ch_2: CalibParam = None
+    adc1_ch_3: CalibParam = None
+    adc1_ch_4: CalibParam = None
+    adc1_ch_5: CalibParam = None
+    adc1_ch_6: CalibParam = None
+    adc1_ch_7: CalibParam = None
+    adc1_ch_8: CalibParam = None
 
-    adc1_diff_1: CalibParam = None 
+    adc1_diff_1: CalibParam = None
     adc1_diff_2: CalibParam = None
-    adc1_diff_3: CalibParam = None  
-    adc1_diff_4: CalibParam = None  
+    adc1_diff_3: CalibParam = None
+    adc1_diff_4: CalibParam = None
 
     adc2_ch_1: CalibParam = None
     adc2_ch_2: CalibParam = None
@@ -107,8 +113,10 @@ class ADCModule:
     adc2_diff_3: CalibParam = None
     adc2_diff_4: CalibParam = None
 
-# serialize method
     def populate_adc_module_pb(self, adc_pb: adc_module_pb2):
+        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-statements
+        """serialize method"""
         # ADC1 Single ended
         if self.adc1_ch_1 is not None:
             adc_pb.adc1_ch_1.gain = self.adc1_ch_1.gain
@@ -186,103 +194,121 @@ class ADCModule:
             adc_pb.adc2_diff_4.gain = self.adc2_diff_4.gain
             adc_pb.adc2_diff_4.offset = self.adc2_diff_4.offset
 
-# De-serialize method
     @staticmethod
     def extract_adc_calib_params(adc_pb: adc_module_pb2):
+        # pylint: disable=too-many-branches
+        """De-serialize method"""
         adc_mod = ADCModule()
         # ADC1 Single Ended
         if adc_pb.HasField("adc1_ch_1"):
-            adc_mod.adc1_ch_1 = CalibParam(gain=adc_pb.adc1_ch_1.gain, offset = adc_pb.adc1_ch_1.offset)
+            adc_mod.adc1_ch_1=CalibParam(gain=adc_pb.adc1_ch_1.gain, offset=adc_pb.adc1_ch_1.offset)
         if adc_pb.HasField("adc1_ch_2"):
-            adc_mod.adc1_ch_2 = CalibParam(gain=adc_pb.adc1_ch_2.gain, offset = adc_pb.adc1_ch_2.offset)
+            adc_mod.adc1_ch_2=CalibParam(gain=adc_pb.adc1_ch_2.gain, offset=adc_pb.adc1_ch_2.offset)
         if adc_pb.HasField("adc1_ch_3"):
-            adc_mod.adc1_ch_3 = CalibParam(gain=adc_pb.adc1_ch_3.gain, offset = adc_pb.adc1_ch_3.offset)
+            adc_mod.adc1_ch_3=CalibParam(gain=adc_pb.adc1_ch_3.gain, offset=adc_pb.adc1_ch_3.offset)
         if adc_pb.HasField("adc1_ch_4"):
-            adc_mod.adc1_ch_4 = CalibParam(gain=adc_pb.adc1_ch_4.gain, offset = adc_pb.adc1_ch_4.offset)
+            adc_mod.adc1_ch_4=CalibParam(gain=adc_pb.adc1_ch_4.gain, offset=adc_pb.adc1_ch_4.offset)
         if adc_pb.HasField("adc1_ch_5"):
-            adc_mod.adc1_ch_5 = CalibParam(gain=adc_pb.adc1_ch_5.gain, offset = adc_pb.adc1_ch_5.offset)
+            adc_mod.adc1_ch_5=CalibParam(gain=adc_pb.adc1_ch_5.gain, offset=adc_pb.adc1_ch_5.offset)
         if adc_pb.HasField("adc1_ch_6"):
-            adc_mod.adc1_ch_6 = CalibParam(gain=adc_pb.adc1_ch_6.gain, offset = adc_pb.adc1_ch_6.offset)
+            adc_mod.adc1_ch_6=CalibParam(gain=adc_pb.adc1_ch_6.gain, offset=adc_pb.adc1_ch_6.offset)
         if adc_pb.HasField("adc1_ch_7"):
-            adc_mod.adc1_ch_7 = CalibParam(gain=adc_pb.adc1_ch_7.gain, offset = adc_pb.adc1_ch_7.offset)
+            adc_mod.adc1_ch_7=CalibParam(gain=adc_pb.adc1_ch_7.gain, offset=adc_pb.adc1_ch_7.offset)
         if adc_pb.HasField("adc1_ch_8"):
-            adc_mod.adc1_ch_8 = CalibParam(gain=adc_pb.adc1_ch_8.gain, offset = adc_pb.adc1_ch_8.offset)
+            adc_mod.adc1_ch_8=CalibParam(gain=adc_pb.adc1_ch_8.gain, offset=adc_pb.adc1_ch_8.offset)
         # ADC1 Differential
         if adc_pb.HasField("adc1_diff_1"):
-            adc_mod.adc1_diff_1 = CalibParam(gain=adc_pb.adc1_diff_1.gain, offset = adc_pb.adc1_diff_1.offset)
+            adc_mod.adc1_diff_1 = CalibParam(gain=adc_pb.adc1_diff_1.gain,
+                                             offset=adc_pb.adc1_diff_1.offset)
         if adc_pb.HasField("adc1_diff_2"):
-            adc_mod.adc1_diff_2 = CalibParam(gain=adc_pb.adc1_diff_2.gain, offset = adc_pb.adc1_diff_2.offset)
+            adc_mod.adc1_diff_2 = CalibParam(gain=adc_pb.adc1_diff_2.gain,
+                                             offset=adc_pb.adc1_diff_2.offset)
         if adc_pb.HasField("adc1_diff_3"):
-            adc_mod.adc1_diff_3 = CalibParam(gain=adc_pb.adc1_diff_3.gain, offset = adc_pb.adc1_diff_3.offset)
+            adc_mod.adc1_diff_3 = CalibParam(gain=adc_pb.adc1_diff_3.gain,
+                                             offset=adc_pb.adc1_diff_3.offset)
         if adc_pb.HasField("adc1_diff_4"):
-            adc_mod.adc1_diff_4 = CalibParam(gain=adc_pb.adc1_diff_4.gain, offset = adc_pb.adc1_diff_4.offset)
+            adc_mod.adc1_diff_4 = CalibParam(gain=adc_pb.adc1_diff_4.gain,
+                                             offset=adc_pb.adc1_diff_4.offset)
         # ADC2 Single Ended
         if adc_pb.HasField("adc2_ch_1"):
-            adc_mod.adc2_ch_1 = CalibParam(gain=adc_pb.adc2_ch_1.gain, offset = adc_pb.adc2_ch_1.offset)
+            adc_mod.adc2_ch_1 = CalibParam(gain=adc_pb.adc2_ch_1.gain,
+                                           offset=adc_pb.adc2_ch_1.offset)
         if adc_pb.HasField("adc2_ch_2"):
-            adc_mod.adc2_ch_2 = CalibParam(gain=adc_pb.adc2_ch_2.gain, offset = adc_pb.adc2_ch_2.offset)
+            adc_mod.adc2_ch_2 = CalibParam(gain=adc_pb.adc2_ch_2.gain,
+                                           offset=adc_pb.adc2_ch_2.offset)
         if adc_pb.HasField("adc2_ch_3"):
-            adc_mod.adc2_ch_3 = CalibParam(gain=adc_pb.adc2_ch_3.gain, offset = adc_pb.adc2_ch_3.offset)
+            adc_mod.adc2_ch_3 = CalibParam(gain=adc_pb.adc2_ch_3.gain,
+                                           offset=adc_pb.adc2_ch_3.offset)
         if adc_pb.HasField("adc2_ch_4"):
-            adc_mod.adc2_ch_4 = CalibParam(gain=adc_pb.adc2_ch_4.gain, offset = adc_pb.adc2_ch_4.offset)
+            adc_mod.adc2_ch_4 = CalibParam(gain=adc_pb.adc2_ch_4.gain,
+                                           offset=adc_pb.adc2_ch_4.offset)
         if adc_pb.HasField("adc2_ch_5"):
-            adc_mod.adc2_ch_5 = CalibParam(gain=adc_pb.adc2_ch_5.gain, offset = adc_pb.adc2_ch_5.offset)
+            adc_mod.adc2_ch_5 = CalibParam(gain=adc_pb.adc2_ch_5.gain,
+                                           offset=adc_pb.adc2_ch_5.offset)
         if adc_pb.HasField("adc2_ch_6"):
-            adc_mod.adc2_ch_6 = CalibParam(gain=adc_pb.adc2_ch_6.gain, offset = adc_pb.adc2_ch_6.offset)
+            adc_mod.adc2_ch_6 = CalibParam(gain=adc_pb.adc2_ch_6.gain,
+                                           offset=adc_pb.adc2_ch_6.offset)
         if adc_pb.HasField("adc2_ch_7"):
-            adc_mod.adc2_ch_7 = CalibParam(gain=adc_pb.adc2_ch_7.gain, offset = adc_pb.adc2_ch_7.offset)
+            adc_mod.adc2_ch_7 = CalibParam(gain=adc_pb.adc2_ch_7.gain,
+                                           offset=adc_pb.adc2_ch_7.offset)
         if adc_pb.HasField("adc2_ch_8"):
-            adc_mod.adc2_ch_8 = CalibParam(gain=adc_pb.adc2_ch_8.gain, offset = adc_pb.adc2_ch_8.offset)
+            adc_mod.adc2_ch_8 = CalibParam(gain=adc_pb.adc2_ch_8.gain,
+                                           offset=adc_pb.adc2_ch_8.offset)
         # ADC2 Differential
         if adc_pb.HasField("adc2_diff_1"):
-            adc_mod.adc2_diff_1 = CalibParam(gain=adc_pb.adc2_diff_1.gain, offset = adc_pb.adc2_diff_1.offset)
+            adc_mod.adc2_diff_1 = CalibParam(gain=adc_pb.adc2_diff_1.gain,
+                                             offset=adc_pb.adc2_diff_1.offset)
         if adc_pb.HasField("adc2_diff_2"):
-            adc_mod.adc2_diff_2 = CalibParam(gain=adc_pb.adc2_diff_2.gain, offset = adc_pb.adc2_diff_2.offset)
+            adc_mod.adc2_diff_2 = CalibParam(gain=adc_pb.adc2_diff_2.gain,
+                                             offset=adc_pb.adc2_diff_2.offset)
         if adc_pb.HasField("adc2_diff_3"):
-            adc_mod.adc2_diff_3 = CalibParam(gain=adc_pb.adc2_diff_3.gain, offset = adc_pb.adc2_diff_3.offset)
+            adc_mod.adc2_diff_3 = CalibParam(gain=adc_pb.adc2_diff_3.gain,
+                                             offset=adc_pb.adc2_diff_3.offset)
         if adc_pb.HasField("adc2_diff_4"):
-            adc_mod.adc2_diff_4 = CalibParam(gain=adc_pb.adc2_diff_4.gain, offset = adc_pb.adc2_diff_4.offset)
+            adc_mod.adc2_diff_4 = CalibParam(gain=adc_pb.adc2_diff_4.gain,
+                                             offset=adc_pb.adc2_diff_4.offset)
         return adc_mod
 
 @dataclass
 class RTDModule:
-    rtd: CalibParam = None  
+    """RTD Module Dataclass"""
+    rtd: CalibParam = None
     rtd_resistor: float = None
 
-# serialize method
     def populate_rtd_module_pb(self, rtd_pb: rtd_module_pb2):
-        # ADC1 Single ended
+        """serialize method"""
         if self.rtd is not None:
             rtd_pb.rtd.gain = self.rtd.gain
             rtd_pb.rtd.offset = self.rtd.offset
         if self.rtd_resistor is not None:
             rtd_pb.rtd_resistor = self.rtd_resistor
-        
-# De-serialize method
+
     @staticmethod
     def extract_rtd_calib_params(rtd_pb: rtd_module_pb2):
+        """De-serialize method"""
         rtd_mod = RTDModule()
-        # ADC1 Single Ended
         if rtd_pb.HasField("rtd"):
             rtd_mod.rtd = CalibParam(gain=rtd_pb.rtd.gain, offset = rtd_pb.rtd.offset)
         if rtd_pb.HasField("rtd_resistor"):
-            rtd_mod.dac_ch_2 = rtd_pb.rtd_resistor
+            rtd_mod.rtd_resistor = rtd_pb.rtd_resistor
         return rtd_mod
 
 @dataclass
 class TCModule:
-    tc_B: CalibParam = None  
-    tc_E: CalibParam = None 
-    tc_J: CalibParam = None  
-    tc_K: CalibParam = None  
-    tc_N: CalibParam = None  
-    tc_R: CalibParam = None  
-    tc_S: CalibParam = None  
-    tc_T: CalibParam = None  
+    """TC module dataclass"""
+    # pylint: disable=invalid-name
+    # pylint: disable=too-many-instance-attributes
+    tc_B: CalibParam = None
+    tc_E: CalibParam = None
+    tc_J: CalibParam = None
+    tc_K: CalibParam = None
+    tc_N: CalibParam = None
+    tc_R: CalibParam = None
+    tc_S: CalibParam = None
+    tc_T: CalibParam = None
 
-# serialize method
     def populate_tc_module_pb(self, tc_pb: tc_module_pb2):
-        # DAC
+        """serialize method"""
         if self.tc_B is not None:
             tc_pb.tc_B.gain = self.tc_B.gain
             tc_pb.tc_B.offset = self.tc_B.offset
@@ -307,12 +333,11 @@ class TCModule:
         if self.tc_T is not None:
             tc_pb.tc_T.gain = self.tc_T.gain
             tc_pb.tc_T.offset = self.tc_T.offset
-        
-# De-serialize method
+
     @staticmethod
     def extract_tc_calib_params(tc_pb: tc_module_pb2):
+        """De-serialize method"""
         tc_mod = TCModule()
-        # DAC
         if tc_pb.HasField("tc_B"):
             tc_mod.tc_B = CalibParam(gain=tc_pb.tc_B.gain, offset = tc_pb.tc_B.offset)
         if tc_pb.HasField("tc_E"):
@@ -333,6 +358,8 @@ class TCModule:
 
 @dataclass
 class EepromDataClass:
+    """EEPROM Dataclass"""
+    # pylint: disable=too-many-instance-attributes
     dac_calib_params: DACModule = None
     adc_calib_params: ADCModule = None
     rtd_calib_params: RTDModule = None
@@ -348,8 +375,8 @@ class EepromDataClass:
     tb_part_number: str = None
     cm4_part_number: str = None
 
-    # Serialize
     def populate_eeprom_module(self, eeprom_pb:edgepi_module_pb2):
+        """Serialize"""
         self.__populate_dac_module(eeprom_pb.dac_module)
         self.__populate_adc_module(eeprom_pb.adc_module)
         self.__populate_rtd_module(eeprom_pb.rtd_module)
@@ -379,25 +406,29 @@ class EepromDataClass:
             eeprom_pb.cm4_part_number = self.cm4_part_number
 
     def __populate_dac_module(self, dac_pb: dac_module_pb2):
+        """Serialize DAC"""
         if self.dac_calib_params is None:
             return
         self.dac_calib_params.populate_dac_module_pb(dac_pb)
     def __populate_adc_module(self, adc_pb: adc_module_pb2):
+        """Serialize ADC"""
         if self.adc_calib_params is None:
             return
         self.adc_calib_params.populate_adc_module_pb(adc_pb)
     def __populate_rtd_module(self, rtd_pb: rtd_module_pb2):
+        """Serialize RTD"""
         if self.rtd_calib_params is None:
             return
         self.rtd_calib_params.populate_rtd_module_pb(rtd_pb)
     def __populate_tc_module(self, tc_pb: tc_module_pb2):
+        """Serialize TC"""
         if self.tc_calib_params is None:
             return
         self.tc_calib_params.populate_tc_module_pb(tc_pb)
 
-    # De-serialize
     @staticmethod
     def extract_eeprom_data(eeprom_pb:edgepi_module_pb2):
+        """De-serialize"""
         eeprom_data = EepromDataClass()
         eeprom_data.dac_calib_params = EepromDataClass.extract_dac_data(eeprom_pb.dac_module)
         eeprom_data.adc_calib_params = EepromDataClass.extract_adc_data(eeprom_pb.adc_module)
@@ -427,28 +458,31 @@ class EepromDataClass:
 
         return eeprom_data
 
+    # pylint: disable=inconsistent-return-statements
     @staticmethod
     def extract_dac_data(dac_pb: dac_module_pb2):
+        """De-serialize DAC"""
         if dac_pb is None:
             return
         return DACModule.extract_dac_calib_params(dac_pb)
-        
+
     @staticmethod
     def extract_adc_data(adc_pb: adc_module_pb2):
+        """De-serialize ADC"""
         if adc_pb is None:
             return
         return ADCModule.extract_adc_calib_params(adc_pb)
 
     @staticmethod
     def extract_rtd_data(rtd_pb: rtd_module_pb2):
+        """De-serialize RTD"""
         if rtd_pb is None:
             return
         return RTDModule.extract_rtd_calib_params(rtd_pb)
-    
+
     @staticmethod
     def extract_tc_data(tc_pb: tc_module_pb2):
+        """De-serialize TC"""
         if tc_pb is None:
             return
         return TCModule.extract_tc_calib_params(tc_pb)
-    
-

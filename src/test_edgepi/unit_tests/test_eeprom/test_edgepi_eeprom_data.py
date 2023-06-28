@@ -9,7 +9,6 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.modules['periphery'] = mock.MagicMock()
 
-import pytest
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 from edgepi.eeprom.proto_files import edgepi_module_pb2
 
@@ -23,7 +22,7 @@ def test_init_data_class():
     edgepi_eeprom_data = EepromDataClass()
     edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
     assert edgepi_eeprom_pb.ByteSize() == 0
-    assert edgepi_eeprom_data.dac_calib_params is None 
+    assert edgepi_eeprom_data.dac_calib_params is None
     assert edgepi_eeprom_data.adc_calib_params is None
     assert edgepi_eeprom_data.rtd_calib_params is None
     assert edgepi_eeprom_data.tc_calib_params is None
