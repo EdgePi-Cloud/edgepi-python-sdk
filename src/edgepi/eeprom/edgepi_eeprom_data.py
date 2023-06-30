@@ -85,188 +85,98 @@ class DACModule:
 class ADCModule:
     """ADC Module Dataclass"""
     # pylint: disable=too-many-instance-attributes
-    adc1_ch_1: CalibParam = None
-    adc1_ch_2: CalibParam = None
-    adc1_ch_3: CalibParam = None
-    adc1_ch_4: CalibParam = None
-    adc1_ch_5: CalibParam = None
-    adc1_ch_6: CalibParam = None
-    adc1_ch_7: CalibParam = None
-    adc1_ch_8: CalibParam = None
+    adc_ch_1: CalibParam = None
+    adc_ch_2: CalibParam = None
+    adc_ch_3: CalibParam = None
+    adc_ch_4: CalibParam = None
+    adc_ch_5: CalibParam = None
+    adc_ch_6: CalibParam = None
+    adc_ch_7: CalibParam = None
+    adc_ch_8: CalibParam = None
 
-    adc1_diff_1: CalibParam = None
-    adc1_diff_2: CalibParam = None
-    adc1_diff_3: CalibParam = None
-    adc1_diff_4: CalibParam = None
-
-    adc2_ch_1: CalibParam = None
-    adc2_ch_2: CalibParam = None
-    adc2_ch_3: CalibParam = None
-    adc2_ch_4: CalibParam = None
-    adc2_ch_5: CalibParam = None
-    adc2_ch_6: CalibParam = None
-    adc2_ch_7: CalibParam = None
-    adc2_ch_8: CalibParam = None
-
-    adc2_diff_1: CalibParam = None
-    adc2_diff_2: CalibParam = None
-    adc2_diff_3: CalibParam = None
-    adc2_diff_4: CalibParam = None
+    adc_diff_1: CalibParam = None
+    adc_diff_2: CalibParam = None
+    adc_diff_3: CalibParam = None
+    adc_diff_4: CalibParam = None
 
     def populate_adc_module_pb(self, adc_pb: adc_module_pb2):
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
         """serialize method"""
-        # ADC1 Single ended
-        if self.adc1_ch_1 is not None:
-            adc_pb.adc1_ch_1.gain = self.adc1_ch_1.gain
-            adc_pb.adc1_ch_1.offset = self.adc1_ch_1.offset
-        if self.adc1_ch_2 is not None:
-            adc_pb.adc1_ch_2.gain = self.adc1_ch_2.gain
-            adc_pb.adc1_ch_2.offset = self.adc1_ch_2.offset
-        if self.adc1_ch_3 is not None:
-            adc_pb.adc1_ch_3.gain = self.adc1_ch_3.gain
-            adc_pb.adc1_ch_3.offset = self.adc1_ch_3.offset
-        if self.adc1_ch_4 is not None:
-            adc_pb.adc1_ch_4.gain = self.adc1_ch_4.gain
-            adc_pb.adc1_ch_4.offset = self.adc1_ch_4.offset
-        if self.adc1_ch_5 is not None:
-            adc_pb.adc1_ch_5.gain = self.adc1_ch_5.gain
-            adc_pb.adc1_ch_5.offset = self.adc1_ch_5.offset
-        if self.adc1_ch_6 is not None:
-            adc_pb.adc1_ch_6.gain = self.adc1_ch_6.gain
-            adc_pb.adc1_ch_6.offset = self.adc1_ch_6.offset
-        if self.adc1_ch_7 is not None:
-            adc_pb.adc1_ch_7.gain = self.adc1_ch_7.gain
-            adc_pb.adc1_ch_7.offset = self.adc1_ch_7.offset
-        if self.adc1_ch_8 is not None:
-            adc_pb.adc1_ch_8.gain = self.adc1_ch_8.gain
-            adc_pb.adc1_ch_8.offset = self.adc1_ch_8.offset
-        # ADC1 Differential
-        if self.adc1_diff_1 is not None:
-            adc_pb.adc1_diff_1.gain = self.adc1_diff_1.gain
-            adc_pb.adc1_diff_1.offset = self.adc1_diff_1.offset
-        if self.adc1_diff_2 is not None:
-            adc_pb.adc1_diff_2.gain = self.adc1_diff_2.gain
-            adc_pb.adc1_diff_2.offset = self.adc1_diff_2.offset
-        if self.adc1_diff_3 is not None:
-            adc_pb.adc1_diff_3.gain = self.adc1_diff_3.gain
-            adc_pb.adc1_diff_3.offset = self.adc1_diff_3.offset
-        if self.adc1_diff_4 is not None:
-            adc_pb.adc1_diff_4.gain = self.adc1_diff_4.gain
-            adc_pb.adc1_diff_4.offset = self.adc1_diff_4.offset
-        # ADC2 Single ended
-        if self.adc2_ch_1 is not None:
-            adc_pb.adc2_ch_1.gain = self.adc2_ch_1.gain
-            adc_pb.adc2_ch_1.offset = self.adc2_ch_1.offset
-        if self.adc2_ch_2 is not None:
-            adc_pb.adc2_ch_2.gain = self.adc2_ch_2.gain
-            adc_pb.adc2_ch_2.offset = self.adc2_ch_2.offset
-        if self.adc2_ch_3 is not None:
-            adc_pb.adc2_ch_3.gain = self.adc2_ch_3.gain
-            adc_pb.adc2_ch_3.offset = self.adc2_ch_3.offset
-        if self.adc2_ch_4 is not None:
-            adc_pb.adc2_ch_4.gain = self.adc2_ch_4.gain
-            adc_pb.adc2_ch_4.offset = self.adc2_ch_4.offset
-        if self.adc2_ch_5 is not None:
-            adc_pb.adc2_ch_5.gain = self.adc2_ch_5.gain
-            adc_pb.adc2_ch_5.offset = self.adc2_ch_5.offset
-        if self.adc2_ch_6 is not None:
-            adc_pb.adc2_ch_6.gain = self.adc2_ch_6.gain
-            adc_pb.adc2_ch_6.offset = self.adc2_ch_6.offset
-        if self.adc2_ch_7 is not None:
-            adc_pb.adc2_ch_7.gain = self.adc2_ch_7.gain
-            adc_pb.adc2_ch_7.offset = self.adc2_ch_7.offset
-        if self.adc2_ch_8 is not None:
-            adc_pb.adc2_ch_8.gain = self.adc2_ch_8.gain
-            adc_pb.adc2_ch_8.offset = self.adc2_ch_8.offset
-        # ADC2 Differential
-        if self.adc2_diff_1 is not None:
-            adc_pb.adc2_diff_1.gain = self.adc2_diff_1.gain
-            adc_pb.adc2_diff_1.offset = self.adc2_diff_1.offset
-        if self.adc2_diff_2 is not None:
-            adc_pb.adc2_diff_2.gain = self.adc2_diff_2.gain
-            adc_pb.adc2_diff_2.offset = self.adc2_diff_2.offset
-        if self.adc2_diff_3 is not None:
-            adc_pb.adc2_diff_3.gain = self.adc2_diff_3.gain
-            adc_pb.adc2_diff_3.offset = self.adc2_diff_3.offset
-        if self.adc2_diff_4 is not None:
-            adc_pb.adc2_diff_4.gain = self.adc2_diff_4.gain
-            adc_pb.adc2_diff_4.offset = self.adc2_diff_4.offset
+        # adc Single ended
+        if self.adc_ch_1 is not None:
+            adc_pb.adc_ch_1.gain = self.adc_ch_1.gain
+            adc_pb.adc_ch_1.offset = self.adc_ch_1.offset
+        if self.adc_ch_2 is not None:
+            adc_pb.adc_ch_2.gain = self.adc_ch_2.gain
+            adc_pb.adc_ch_2.offset = self.adc_ch_2.offset
+        if self.adc_ch_3 is not None:
+            adc_pb.adc_ch_3.gain = self.adc_ch_3.gain
+            adc_pb.adc_ch_3.offset = self.adc_ch_3.offset
+        if self.adc_ch_4 is not None:
+            adc_pb.adc_ch_4.gain = self.adc_ch_4.gain
+            adc_pb.adc_ch_4.offset = self.adc_ch_4.offset
+        if self.adc_ch_5 is not None:
+            adc_pb.adc_ch_5.gain = self.adc_ch_5.gain
+            adc_pb.adc_ch_5.offset = self.adc_ch_5.offset
+        if self.adc_ch_6 is not None:
+            adc_pb.adc_ch_6.gain = self.adc_ch_6.gain
+            adc_pb.adc_ch_6.offset = self.adc_ch_6.offset
+        if self.adc_ch_7 is not None:
+            adc_pb.adc_ch_7.gain = self.adc_ch_7.gain
+            adc_pb.adc_ch_7.offset = self.adc_ch_7.offset
+        if self.adc_ch_8 is not None:
+            adc_pb.adc_ch_8.gain = self.adc_ch_8.gain
+            adc_pb.adc_ch_8.offset = self.adc_ch_8.offset
+        # adc Differential
+        if self.adc_diff_1 is not None:
+            adc_pb.adc_diff_1.gain = self.adc_diff_1.gain
+            adc_pb.adc_diff_1.offset = self.adc_diff_1.offset
+        if self.adc_diff_2 is not None:
+            adc_pb.adc_diff_2.gain = self.adc_diff_2.gain
+            adc_pb.adc_diff_2.offset = self.adc_diff_2.offset
+        if self.adc_diff_3 is not None:
+            adc_pb.adc_diff_3.gain = self.adc_diff_3.gain
+            adc_pb.adc_diff_3.offset = self.adc_diff_3.offset
+        if self.adc_diff_4 is not None:
+            adc_pb.adc_diff_4.gain = self.adc_diff_4.gain
+            adc_pb.adc_diff_4.offset = self.adc_diff_4.offset
 
     @staticmethod
     def extract_adc_calib_params(adc_pb: adc_module_pb2):
         # pylint: disable=too-many-branches
         """De-serialize method"""
         adc_mod = ADCModule()
-        # ADC1 Single Ended
-        if adc_pb.HasField("adc1_ch_1"):
-            adc_mod.adc1_ch_1=CalibParam(gain=adc_pb.adc1_ch_1.gain, offset=adc_pb.adc1_ch_1.offset)
-        if adc_pb.HasField("adc1_ch_2"):
-            adc_mod.adc1_ch_2=CalibParam(gain=adc_pb.adc1_ch_2.gain, offset=adc_pb.adc1_ch_2.offset)
-        if adc_pb.HasField("adc1_ch_3"):
-            adc_mod.adc1_ch_3=CalibParam(gain=adc_pb.adc1_ch_3.gain, offset=adc_pb.adc1_ch_3.offset)
-        if adc_pb.HasField("adc1_ch_4"):
-            adc_mod.adc1_ch_4=CalibParam(gain=adc_pb.adc1_ch_4.gain, offset=adc_pb.adc1_ch_4.offset)
-        if adc_pb.HasField("adc1_ch_5"):
-            adc_mod.adc1_ch_5=CalibParam(gain=adc_pb.adc1_ch_5.gain, offset=adc_pb.adc1_ch_5.offset)
-        if adc_pb.HasField("adc1_ch_6"):
-            adc_mod.adc1_ch_6=CalibParam(gain=adc_pb.adc1_ch_6.gain, offset=adc_pb.adc1_ch_6.offset)
-        if adc_pb.HasField("adc1_ch_7"):
-            adc_mod.adc1_ch_7=CalibParam(gain=adc_pb.adc1_ch_7.gain, offset=adc_pb.adc1_ch_7.offset)
-        if adc_pb.HasField("adc1_ch_8"):
-            adc_mod.adc1_ch_8=CalibParam(gain=adc_pb.adc1_ch_8.gain, offset=adc_pb.adc1_ch_8.offset)
-        # ADC1 Differential
-        if adc_pb.HasField("adc1_diff_1"):
-            adc_mod.adc1_diff_1 = CalibParam(gain=adc_pb.adc1_diff_1.gain,
-                                             offset=adc_pb.adc1_diff_1.offset)
-        if adc_pb.HasField("adc1_diff_2"):
-            adc_mod.adc1_diff_2 = CalibParam(gain=adc_pb.adc1_diff_2.gain,
-                                             offset=adc_pb.adc1_diff_2.offset)
-        if adc_pb.HasField("adc1_diff_3"):
-            adc_mod.adc1_diff_3 = CalibParam(gain=adc_pb.adc1_diff_3.gain,
-                                             offset=adc_pb.adc1_diff_3.offset)
-        if adc_pb.HasField("adc1_diff_4"):
-            adc_mod.adc1_diff_4 = CalibParam(gain=adc_pb.adc1_diff_4.gain,
-                                             offset=adc_pb.adc1_diff_4.offset)
-        # ADC2 Single Ended
-        if adc_pb.HasField("adc2_ch_1"):
-            adc_mod.adc2_ch_1 = CalibParam(gain=adc_pb.adc2_ch_1.gain,
-                                           offset=adc_pb.adc2_ch_1.offset)
-        if adc_pb.HasField("adc2_ch_2"):
-            adc_mod.adc2_ch_2 = CalibParam(gain=adc_pb.adc2_ch_2.gain,
-                                           offset=adc_pb.adc2_ch_2.offset)
-        if adc_pb.HasField("adc2_ch_3"):
-            adc_mod.adc2_ch_3 = CalibParam(gain=adc_pb.adc2_ch_3.gain,
-                                           offset=adc_pb.adc2_ch_3.offset)
-        if adc_pb.HasField("adc2_ch_4"):
-            adc_mod.adc2_ch_4 = CalibParam(gain=adc_pb.adc2_ch_4.gain,
-                                           offset=adc_pb.adc2_ch_4.offset)
-        if adc_pb.HasField("adc2_ch_5"):
-            adc_mod.adc2_ch_5 = CalibParam(gain=adc_pb.adc2_ch_5.gain,
-                                           offset=adc_pb.adc2_ch_5.offset)
-        if adc_pb.HasField("adc2_ch_6"):
-            adc_mod.adc2_ch_6 = CalibParam(gain=adc_pb.adc2_ch_6.gain,
-                                           offset=adc_pb.adc2_ch_6.offset)
-        if adc_pb.HasField("adc2_ch_7"):
-            adc_mod.adc2_ch_7 = CalibParam(gain=adc_pb.adc2_ch_7.gain,
-                                           offset=adc_pb.adc2_ch_7.offset)
-        if adc_pb.HasField("adc2_ch_8"):
-            adc_mod.adc2_ch_8 = CalibParam(gain=adc_pb.adc2_ch_8.gain,
-                                           offset=adc_pb.adc2_ch_8.offset)
-        # ADC2 Differential
-        if adc_pb.HasField("adc2_diff_1"):
-            adc_mod.adc2_diff_1 = CalibParam(gain=adc_pb.adc2_diff_1.gain,
-                                             offset=adc_pb.adc2_diff_1.offset)
-        if adc_pb.HasField("adc2_diff_2"):
-            adc_mod.adc2_diff_2 = CalibParam(gain=adc_pb.adc2_diff_2.gain,
-                                             offset=adc_pb.adc2_diff_2.offset)
-        if adc_pb.HasField("adc2_diff_3"):
-            adc_mod.adc2_diff_3 = CalibParam(gain=adc_pb.adc2_diff_3.gain,
-                                             offset=adc_pb.adc2_diff_3.offset)
-        if adc_pb.HasField("adc2_diff_4"):
-            adc_mod.adc2_diff_4 = CalibParam(gain=adc_pb.adc2_diff_4.gain,
-                                             offset=adc_pb.adc2_diff_4.offset)
+        # adc Single Ended
+        if adc_pb.HasField("adc_ch_1"):
+            adc_mod.adc_ch_1=CalibParam(gain=adc_pb.adc_ch_1.gain, offset=adc_pb.adc_ch_1.offset)
+        if adc_pb.HasField("adc_ch_2"):
+            adc_mod.adc_ch_2=CalibParam(gain=adc_pb.adc_ch_2.gain, offset=adc_pb.adc_ch_2.offset)
+        if adc_pb.HasField("adc_ch_3"):
+            adc_mod.adc_ch_3=CalibParam(gain=adc_pb.adc_ch_3.gain, offset=adc_pb.adc_ch_3.offset)
+        if adc_pb.HasField("adc_ch_4"):
+            adc_mod.adc_ch_4=CalibParam(gain=adc_pb.adc_ch_4.gain, offset=adc_pb.adc_ch_4.offset)
+        if adc_pb.HasField("adc_ch_5"):
+            adc_mod.adc_ch_5=CalibParam(gain=adc_pb.adc_ch_5.gain, offset=adc_pb.adc_ch_5.offset)
+        if adc_pb.HasField("adc_ch_6"):
+            adc_mod.adc_ch_6=CalibParam(gain=adc_pb.adc_ch_6.gain, offset=adc_pb.adc_ch_6.offset)
+        if adc_pb.HasField("adc_ch_7"):
+            adc_mod.adc_ch_7=CalibParam(gain=adc_pb.adc_ch_7.gain, offset=adc_pb.adc_ch_7.offset)
+        if adc_pb.HasField("adc_ch_8"):
+            adc_mod.adc_ch_8=CalibParam(gain=adc_pb.adc_ch_8.gain, offset=adc_pb.adc_ch_8.offset)
+        # adc Differential
+        if adc_pb.HasField("adc_diff_1"):
+            adc_mod.adc_diff_1 = CalibParam(gain=adc_pb.adc_diff_1.gain,
+                                             offset=adc_pb.adc_diff_1.offset)
+        if adc_pb.HasField("adc_diff_2"):
+            adc_mod.adc_diff_2 = CalibParam(gain=adc_pb.adc_diff_2.gain,
+                                             offset=adc_pb.adc_diff_2.offset)
+        if adc_pb.HasField("adc_diff_3"):
+            adc_mod.adc_diff_3 = CalibParam(gain=adc_pb.adc_diff_3.gain,
+                                             offset=adc_pb.adc_diff_3.offset)
+        if adc_pb.HasField("adc_diff_4"):
+            adc_mod.adc_diff_4 = CalibParam(gain=adc_pb.adc_diff_4.gain,
+                                             offset=adc_pb.adc_diff_4.offset)
         return adc_mod
 
 @dataclass
@@ -361,7 +271,8 @@ class EepromDataClass:
     """EEPROM Dataclass"""
     # pylint: disable=too-many-instance-attributes
     dac_calib_params: DACModule = None
-    adc_calib_params: ADCModule = None
+    adc1_calib_params: ADCModule = None
+    adc2_calib_params: ADCModule = None
     rtd_calib_params: RTDModule = None
     tc_calib_params: TCModule = None
     config_key: AwsKeys = None
@@ -375,7 +286,8 @@ class EepromDataClass:
     def populate_eeprom_module(self, eeprom_pb:edgepi_module_pb2):
         """Serialize"""
         self.__populate_dac_module(eeprom_pb.dac_module)
-        self.__populate_adc_module(eeprom_pb.adc_module)
+        self.__populate_adc1_module(eeprom_pb.adc1_module)
+        self.__populate_adc2_module(eeprom_pb.adc2_module)
         self.__populate_rtd_module(eeprom_pb.rtd_module)
         self.__populate_tc_module(eeprom_pb.tc_module)
 
@@ -389,12 +301,6 @@ class EepromDataClass:
             eeprom_pb.serial_number = self.serial
         if self.model is not None:
             eeprom_pb.model = self.model
-        if self.client_id_config is not None:
-            eeprom_pb.client_id_config = self.client_id_config
-        if self.client_id_data is not None:
-            eeprom_pb.client_id_data = self.client_id_data
-        if self.thing_id is not None:
-            eeprom_pb.thing_id = self.thing_id
         if self.cm_part_number is not None:
             eeprom_pb.cm_part_number = self.cm_part_number
         if self.tb_part_number is not None:
@@ -407,11 +313,19 @@ class EepromDataClass:
         if self.dac_calib_params is None:
             return
         self.dac_calib_params.populate_dac_module_pb(dac_pb)
-    def __populate_adc_module(self, adc_pb: adc_module_pb2):
-        """Serialize ADC"""
-        if self.adc_calib_params is None:
+
+    def __populate_adc1_module(self, adc_pb: adc_module_pb2):
+        """Serialize ADC1"""
+        if self.adc1_calib_params is None:
             return
-        self.adc_calib_params.populate_adc_module_pb(adc_pb)
+        self.adc1_calib_params.populate_adc_module_pb(adc_pb)
+
+    def __populate_adc2_module(self, adc_pb: adc_module_pb2):
+        """Serialize ADC2"""
+        if self.adc2_calib_params is None:
+            return
+        self.adc2_calib_params.populate_adc_module_pb(adc_pb)
+
     def __populate_rtd_module(self, rtd_pb: rtd_module_pb2):
         """Serialize RTD"""
         if self.rtd_calib_params is None:
@@ -428,7 +342,8 @@ class EepromDataClass:
         """De-serialize"""
         eeprom_data = EepromDataClass()
         eeprom_data.dac_calib_params = EepromDataClass.extract_dac_data(eeprom_pb.dac_module)
-        eeprom_data.adc_calib_params = EepromDataClass.extract_adc_data(eeprom_pb.adc_module)
+        eeprom_data.adc1_calib_params = EepromDataClass.extract_adc_data(eeprom_pb.adc1_module)
+        eeprom_data.adc2_calib_params = EepromDataClass.extract_adc_data(eeprom_pb.adc2_module)
         eeprom_data.rtd_calib_params = EepromDataClass.extract_rtd_data(eeprom_pb.rtd_module)
         eeprom_data.tc_calib_params = EepromDataClass.extract_tc_data(eeprom_pb.tc_module)
 
@@ -436,12 +351,6 @@ class EepromDataClass:
             eeprom_data.serial = eeprom_pb.serial_number
         if eeprom_pb.HasField("model"):
             eeprom_data.model = eeprom_pb.model
-        if eeprom_pb.HasField("client_id_config"):
-            eeprom_data.client_id_config = eeprom_pb.client_id_config
-        if eeprom_pb.HasField("client_id_data"):
-            eeprom_data.client_id_data = eeprom_pb.client_id_data
-        if eeprom_pb.HasField("thing_id"):
-            eeprom_data.thing_id = eeprom_pb.thing_id
         if eeprom_pb.HasField("config_keys"):
             eeprom_data.config_key = eeprom_pb.config_keys
         if eeprom_pb.HasField("data_keys"):

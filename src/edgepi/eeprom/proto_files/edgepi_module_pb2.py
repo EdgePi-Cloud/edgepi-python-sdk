@@ -3,6 +3,7 @@
 # source: edgepi_module.proto
 """Generated protocol buffer code."""
 # pylint: skip-file
+
 from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
@@ -19,7 +20,7 @@ from edgepi.eeprom.proto_files import tc_module_pb2 as tc__module__pb2
 from edgepi.eeprom.proto_files import keys_pb2 as keys__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13\x65\x64gepi_module.proto\x1a\x10\x64\x61\x63_module.proto\x1a\x10\x61\x64\x63_module.proto\x1a\x10rtd_module.proto\x1a\x0ftc_module.proto\x1a\nkeys.proto\"\xa3\x05\n\nEepromData\x12#\n\ndac_module\x18\x01 \x01(\x0b\x32\n.DacModuleH\x00\x88\x01\x01\x12#\n\nadc_module\x18\x02 \x01(\x0b\x32\n.AdcModuleH\x01\x88\x01\x01\x12#\n\nrtd_module\x18\x03 \x01(\x0b\x32\n.RtdModuleH\x02\x88\x01\x01\x12!\n\ttc_module\x18\x04 \x01(\x0b\x32\t.TcModuleH\x03\x88\x01\x01\x12\"\n\x0b\x63onfig_keys\x18\x05 \x01(\x0b\x32\x08.AwsKeysH\x04\x88\x01\x01\x12 \n\tdata_keys\x18\x06 \x01(\x0b\x32\x08.AwsKeysH\x05\x88\x01\x01\x12\x1a\n\rserial_number\x18\x07 \x01(\tH\x06\x88\x01\x01\x12\x1b\n\x0e\x63m_part_number\x18\x08 \x01(\tH\x07\x88\x01\x01\x12\x1b\n\x0etb_part_number\x18\t \x01(\tH\x08\x88\x01\x01\x12\x1c\n\x0f\x63m4_part_number\x18\n \x01(\tH\t\x88\x01\x01\x12\x12\n\x05model\x18\x0b \x01(\tH\n\x88\x01\x01\x12\x1d\n\x10\x63lient_id_config\x18\x0c \x01(\tH\x0b\x88\x01\x01\x12\x1b\n\x0e\x63lient_id_data\x18\r \x01(\tH\x0c\x88\x01\x01\x12\x15\n\x08thing_id\x18\x0e \x01(\tH\r\x88\x01\x01\x42\r\n\x0b_dac_moduleB\r\n\x0b_adc_moduleB\r\n\x0b_rtd_moduleB\x0c\n\n_tc_moduleB\x0e\n\x0c_config_keysB\x0c\n\n_data_keysB\x10\n\x0e_serial_numberB\x11\n\x0f_cm_part_numberB\x11\n\x0f_tb_part_numberB\x12\n\x10_cm4_part_numberB\x08\n\x06_modelB\x13\n\x11_client_id_configB\x11\n\x0f_client_id_dataB\x0b\n\t_thing_idb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13\x65\x64gepi_module.proto\x1a\x10\x64\x61\x63_module.proto\x1a\x10\x61\x64\x63_module.proto\x1a\x10rtd_module.proto\x1a\x0ftc_module.proto\x1a\nkeys.proto\"\xd3\x04\n\nEepromData\x12#\n\ndac_module\x18\x01 \x01(\x0b\x32\n.DacModuleH\x00\x88\x01\x01\x12$\n\x0b\x61\x64\x63\x31_module\x18\x02 \x01(\x0b\x32\n.AdcModuleH\x01\x88\x01\x01\x12$\n\x0b\x61\x64\x63\x32_module\x18\x03 \x01(\x0b\x32\n.AdcModuleH\x02\x88\x01\x01\x12#\n\nrtd_module\x18\x04 \x01(\x0b\x32\n.RtdModuleH\x03\x88\x01\x01\x12!\n\ttc_module\x18\x05 \x01(\x0b\x32\t.TcModuleH\x04\x88\x01\x01\x12\"\n\x0b\x63onfig_keys\x18\x06 \x01(\x0b\x32\x08.AwsKeysH\x05\x88\x01\x01\x12 \n\tdata_keys\x18\x07 \x01(\x0b\x32\x08.AwsKeysH\x06\x88\x01\x01\x12\x1a\n\rserial_number\x18\x08 \x01(\tH\x07\x88\x01\x01\x12\x1b\n\x0e\x63m_part_number\x18\t \x01(\tH\x08\x88\x01\x01\x12\x1b\n\x0etb_part_number\x18\n \x01(\tH\t\x88\x01\x01\x12\x1c\n\x0f\x63m4_part_number\x18\x0b \x01(\tH\n\x88\x01\x01\x12\x12\n\x05model\x18\x0c \x01(\tH\x0b\x88\x01\x01\x42\r\n\x0b_dac_moduleB\x0e\n\x0c_adc1_moduleB\x0e\n\x0c_adc2_moduleB\r\n\x0b_rtd_moduleB\x0c\n\n_tc_moduleB\x0e\n\x0c_config_keysB\x0c\n\n_data_keysB\x10\n\x0e_serial_numberB\x11\n\x0f_cm_part_numberB\x11\n\x0f_tb_part_numberB\x12\n\x10_cm4_part_numberB\x08\n\x06_modelb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'edgepi_module_pb2', globals())
@@ -27,5 +28,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _EEPROMDATA._serialized_start=107
-  _EEPROMDATA._serialized_end=782
+  _EEPROMDATA._serialized_end=702
 # @@protoc_insertion_point(module_scope)

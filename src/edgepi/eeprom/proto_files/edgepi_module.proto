@@ -8,14 +8,15 @@ import "keys.proto";
 
 message EepromData {
     optional DacModule dac_module = 1;
-    optional AdcModule adc_module = 2;
-    optional RtdModule rtd_module = 3;
-    optional TcModule tc_module = 4;
-    optional AwsKeys config_keys = 5;
-    optional AwsKeys data_keys = 6;
-    optional string serial_number = 7;
-    optional string cm_part_number = 8;
-    optional string tb_part_number = 9;
-    optional string cm4_part_number = 10;
-    optional string model = 11;
+    optional AdcModule adc1_module = 2;
+    optional AdcModule adc2_module = 3;
+    optional RtdModule rtd_module = 4;
+    optional TcModule tc_module = 5;
+    optional AwsKeys config_keys = 6;
+    optional AwsKeys data_keys = 7;
+    optional string serial_number = 8;
+    optional string cm_part_number = 9;
+    optional string tb_part_number = 10;
+    optional string cm4_part_number = 11;
+    optional string model = 12;
 }
