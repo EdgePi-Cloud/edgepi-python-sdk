@@ -18,7 +18,4 @@ message EepromData {
     optional string tb_part_number = 9;
     optional string cm4_part_number = 10;
     optional string model = 11;
-    optional string client_id_config = 12;
-    optional string client_id_data = 13;
-    optional string thing_id = 14;
 }

@@ -368,9 +368,6 @@ class EepromDataClass:
     data_key: AwsKeys = None
     serial:str = None
     model:str = None
-    client_id_config:str = None
-    client_id_data:str = None
-    thing_id:str = None
     cm_part_number: str = None
     tb_part_number: str = None
     cm4_part_number: str = None
