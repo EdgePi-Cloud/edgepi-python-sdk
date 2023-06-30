@@ -10,7 +10,7 @@ import sys
 sys.modules['periphery'] = mock.MagicMock()
 
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
-from edgepi.eeprom.proto_files import edgepi_module_pb2
+from edgepi.eeprom.generated_pb2 import edgepi_module_pb2
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""

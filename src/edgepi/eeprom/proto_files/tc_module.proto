@@ -3,12 +3,12 @@ syntax = "proto3";
 import "calibration_parameters.proto";
 
 message TcModule {
-    optional calib_param tc_B = 1;
-    optional calib_param tc_E = 2;
-    optional calib_param tc_J = 3;
-    optional calib_param tc_K = 4;
-    optional calib_param tc_N = 5;
-    optional calib_param tc_R = 6;
-    optional calib_param tc_S = 7;
-    optional calib_param tc_T = 8;
+    optional CalibParam tc_B = 1;
+    optional CalibParam tc_E = 2;
+    optional CalibParam tc_J = 3;
+    optional CalibParam tc_K = 4;
+    optional CalibParam tc_N = 5;
+    optional CalibParam tc_R = 6;
+    optional CalibParam tc_S = 7;
+    optional CalibParam tc_T = 8;
 }

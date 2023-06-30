@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.eeprom.proto_files import (
+from edgepi.eeprom.generated_pb2 import (
     edgepi_module_pb2,
     dac_module_pb2,
     adc_module_pb2,

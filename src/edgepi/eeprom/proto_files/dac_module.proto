@@ -3,12 +3,12 @@ syntax = "proto3";
 import "calibration_parameters.proto";
 
 message DacModule {
-    optional calib_param dac_ch_1 = 1;  
-    optional calib_param dac_ch_2 = 2; 
-    optional calib_param dac_ch_3 = 3;  
-    optional calib_param dac_ch_4 = 4;  
-    optional calib_param dac_ch_5 = 5;  
-    optional calib_param dac_ch_6 = 6;  
-    optional calib_param dac_ch_7 = 7;  
-    optional calib_param dac_ch_8 = 8;
+    optional CalibParam dac_ch_1 = 1;  
+    optional CalibParam dac_ch_2 = 2; 
+    optional CalibParam dac_ch_3 = 3;  
+    optional CalibParam dac_ch_4 = 4;  
+    optional CalibParam dac_ch_5 = 5;  
+    optional CalibParam dac_ch_6 = 6;  
+    optional CalibParam dac_ch_7 = 7;  
+    optional CalibParam dac_ch_8 = 8;
 }

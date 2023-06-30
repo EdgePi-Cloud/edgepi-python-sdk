@@ -3,6 +3,6 @@ syntax = "proto3";
 import "calibration_parameters.proto";
 
 message RtdModule {
-    optional calib_param rtd = 1;
+    optional CalibParam rtd = 1;
     optional float rtd_resistor = 2;
 }
