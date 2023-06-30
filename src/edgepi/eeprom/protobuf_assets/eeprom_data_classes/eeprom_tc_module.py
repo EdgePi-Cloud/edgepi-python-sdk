@@ -1,7 +1,7 @@
 """EEPROM RTD module Dataclass"""
 from dataclasses import dataclass
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.eeprom.generated_pb2 import tc_module_pb2
+from edgepi.eeprom.protobuf_assets.generated_pb2 import tc_module_pb2
 
 @dataclass
 class TCModule:

@@ -1,7 +1,6 @@
 """EdgePi EEPROM Dataclass"""
 from dataclasses import dataclass
 
-from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.eeprom.protobuf_assets.generated_pb2 import (
     edgepi_module_pb2,
     dac_module_pb2,

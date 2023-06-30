@@ -1,9 +1,9 @@
 """EEPROM ADC Module Dataclass"""
 from dataclasses import dataclass
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.eeprom.generated_pb2 import adc_module_pb2
+from edgepi.eeprom.protobuf_assets.generated_pb2 import adc_module_pb2
 
-
+@dataclass
 class ADCModule:
     """ADC Module Dataclass"""
     # pylint: disable=too-many-instance-attributes
