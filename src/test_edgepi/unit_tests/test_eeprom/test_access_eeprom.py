@@ -15,9 +15,10 @@ import json
 import pytest
 
 from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
-from edgepi.eeprom.eeprom_constants import MessageFieldNumber, EdgePiMemoryInfo, EEPROMInfo
+from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, EEPROMInfo
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
-from edgepi.eeprom.eeprom_mapping_pb2 import EepromLayout
+from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
+from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 from edgepi.calibration.calibration_constants import CalibParam
 
 @pytest.fixture(name="eeprom")
@@ -34,7 +35,7 @@ USER_SPACE_SIZE = EdgePiMemoryInfo.USER_SPACE_END_BYTE.value -\
 
 def read_binfile():
     """Read the dummy serializedFile and return byte string"""
-    with open(PATH+"/serializedFile","rb") as fd:
+    with open(PATH+"/edgepi_default_bin","rb") as fd:
         b_string = fd.read()
     return b_string
 
@@ -137,59 +138,16 @@ rtd_dict_hw= {0:1}
 tc_dict_calib = {0:CalibParam(gain = 1, offset=0)}
 tc_dict_hw = {0:1}
 
-
-KEYS = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLykG+TmZ\
-Qcd6pE\nv7fji6ZoW/dl8dKwwdi/cfSS/J5Iv+5FwQU4KGNBbhVAnmJeLd+PMUT4bQTf9rVF\nHsDoIPoQLDH7jmBu8ai7jQ0hY\
-5SqPbynPGELFrk/vEpHwg/8fO4lbw1YxwgGc0SR\n8k1tFdi4On7NymBiv88HOsrrziAPGCd7Hc07s+SdFQF+nDPidyM1pMqvUC\
-25c5Sk\ncsrBlMgmcSRY8y6MJFPObg0ahLsI/YT+jT2G6AioQOz9ZJ89DSzjEfoFK9KlIzq1\n46THPR8Tdc9quchsqfX1zvxKd\
-rQPbdtC7ZnMhQIDAQABAoIBAQCccv3PUpGXZzVz\neJUTgfwQ89iW8qUXcVS8vh7za35CvYo/QFN+T9JapefUR4mVlk5fcOnpm8\
-8XBlDD\n1AvzskGqoPBU7DzzUAoaj+YYbiL9gqUY1vlWJiZxgep0vvoX9M5Nk1BikL7+aNgK\nANB1OXSh9ro2as8pm3YgIlbaZ\
-cOli7doqtDM4kzxpKOhSAwtQqAS15GwMsKyhs1q\nvN6BqTBQE7XjdO5k1GCT4+vWEnptKMlLxi/zj1uAXuAmujKHf3FcNqnrmN\
-Q2v5+g\nNmuFCiknrtK5p5va67g6JgWqy45EG5CJLupIpM31xmewFXtlsfh3/fYSzkZqK9jX\nHg/Wq7ShAoGBAMqzZTr2kjxtP\
-0UjN4S5L0da7k4UX+4GEJRrQgG6RUgrL5eq4tfc\nT4DU7mp7SAb7FVwZmJ5kXZ33aQBF6UYRuIpzUWRT+QOfzeTeJSQGAR8Ng/\
-STNaUt\nD9XalRJSYn49LMGTgFebKJakIUC7lZ0ZZxpP1yFZbmYtJN1xFB/jhfGdAoGBAMjd\nwuzc5VPJV5fQte6lTcnTzkqnP\
-XnSvpf4sK+22i/1xGi0kbdimQiXHPj2xnwQmygN\n3a+l2ysChimOx2qqVdeFQbAveKwYYSk41R10PmsQE14CgREN3r1XcXGz4m\
-qXpL8l\n7Ry2HOIDQjTRVye2YdRO0zu3+egdFz4UTnxE8yYJAoGBAIM5+MNfdfTg1SExV3P5\nX35WhAjQb/psurcbaTQtH0VFk\
-B4kZ49P9bh2IZOWFF9Qldd2SrPgTitCTRv8JrVS\nK6KWXY8SPhf2kRkmJ+1WZctwuIjR9Nzme2X7iJ6/7zvC5wK7N0+AB5rezx\
-hVWNrH\n41PJdIEGoM5NU5x45IpwhfqRAoGANpYdbOUy5SwoQ7eSWYJOu3R18U+1oy+kYART\nb80PSk1NzO6VUvLWh8EZPIdDt\
-V+F6sKp5hv6jZun/g8xHkmf/mvWSBz+fDY74Uny\nkIiQlePOf5PKo2nTiD0FNVMfSrxfJxsVbuIGw10DVvs05jPoLhwlx2rd3T\
-haoqI+\nGgNa2JECgYEAwEEEq7dxGXYmlIhTs5IiEleLjBydQ9B1P8zIIApLJdHuu50K7ifq\nVYWC0QMrAr4lWmJ3ZAmewtrgD\
-h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyNepTxS32VzVTx2z+A=\n\
------END RSA PRIVATE KEY-----\n'
-
 def test_get_edgepi_data(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
         return_value = read_binfile())
-    memory_contents = EepromLayout()
+    memory_contents = edgepi_module_pb2.EepromData()
     memory_contents.ParseFromString(read_binfile())
+    memory_data = EepromDataClass.extract_eeprom_data(memory_contents)
     eeprom_data = eeprom.get_edgepi_data()
-    for key, value in eeprom_data.dac_calib_params.items():
-        assert value.gain == pytest.approx(dac_dict_calib[key].gain)
-        assert value.offset == pytest.approx(dac_dict_calib[key].offset)
-    for key, value in eeprom_data.adc_calib_params.items():
-        assert value.gain == pytest.approx(adc_dict_calib[key].gain)
-        assert value.offset == pytest.approx(adc_dict_calib[key].offset)
-    for key, value in eeprom_data.tc_calib_params.items():
-        assert value.gain == pytest.approx(tc_dict_calib[key].gain)
-        assert value.offset == pytest.approx(tc_dict_calib[key].offset)
-    for key, value in eeprom_data.tc_hw_params.items():
-        assert value == pytest.approx(tc_dict_hw[key])
-    for key, value in eeprom_data.rtd_calib_params.items():
-        assert value.gain == pytest.approx(rtd_dict_calib[key].gain)
-        assert value.offset == pytest.approx(rtd_dict_calib[key].offset)
-    for key, value in eeprom_data.rtd_hw_params.items():
-        assert value == pytest.approx(rtd_dict_hw[key])
-    assert eeprom_data.serial == '20221110-021'
-    assert eeprom_data.model == 'EdgePi-Bearbone'
-    assert eeprom_data.client_id_config == 'client-id__shadow'
-    assert eeprom_data.client_id_data == 'client-id'
-    assert eeprom_data.thing_id == 'thing-id'
-    assert eeprom_data.config_key.certificate == KEYS
-    assert eeprom_data.config_key.private == KEYS
-    assert eeprom_data.data_key.certificate == KEYS
-    assert eeprom_data.data_key.certificate == KEYS
+    assert memory_data.__dict__ == eeprom_data.__dict__
 
 @pytest.mark.parametrize("size",
                         [
