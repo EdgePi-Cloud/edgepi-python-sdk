@@ -50,18 +50,20 @@ class EdgePiMemoryInfo(Enum):
 
     FACTORY_DEFAULT_VALUE = 0xFFFF
 
-class MessageFieldNumber(Enum):
+class EepromModuleNames(Enum):
     """
     MessageField index number to be used for ListFields() function. The function lists fields start
     from index 0
     """
-    DAC=1
-    ADC=2
-    RTD=3
-    TC=4
-    CONFIGS_KEY=5
-    DATA_KEY=6
-    SERIAL=7
-    MODEL=8
-    CLIENT_ID=9
-    ALL=10
+    DAC_CALIB_PARAMS="dac_calib_params"
+    ADC1_CALIB_PARAMS="adc1_calib_params"
+    ADC2_CALIB_PARAMS="adc2_calib_params"
+    RTD_CALIB_PARAMS="rtd_calib_params"
+    TC_CALIB_PARAMS="tc_calib_params"
+    CONFIG_KEY="config_key"
+    DATA_KEY="data_key"
+    SERIAL="serial"
+    MODEL="model"
+    CM_PART_NUMBER="cm_part_number"
+    TB_PART_NUMBER="tb_part_number"
+    CM4_PART_NUMBER="cm4_part_number"

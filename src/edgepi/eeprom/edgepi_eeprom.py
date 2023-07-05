@@ -18,7 +18,7 @@ from edgepi.utilities.crc_8_atm import (
 from edgepi.eeprom.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    MessageFieldNumber,
+    EepromModuleNames,
     PAGE_WRITE_CYCLE_TIME,
     DEFUALT_EEPROM_BIN
     )
@@ -176,7 +176,7 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EepromDataClass.extract_eeprom_data(self.eeprom_pb)
         return eeprom_data
 
-    def set_edgepi_data(self, module_name, module_value):
+    def set_edgepi_dataclass(self, module_name: EepromModuleNames, module_value):
         """
         Reads the current memory and modify the dataclass
         Args:
@@ -185,7 +185,7 @@ class EdgePiEEPROM(I2CDevice):
             modified dataclass
         """
         modified_dataclass = self.get_edgepi_data()
-        modified_dataclass.__dict__[module_name] = module_value
+        modified_dataclass.__dict__[module_name.value] = module_value
         return modified_dataclass
 
     def set_edgepi_data(self, eeprom_data: EepromDataClass):
