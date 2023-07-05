@@ -185,6 +185,19 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         return eeprom_data
 
+    def set_edgepi_data(self, module_name, module_value):
+        """
+        Reads the current memory and modify the dataclass
+        Args:
+            module data to overwrite
+        Return:
+            modified dataclass
+        """
+        modified_dataclass = self.get_edgepi_reserved_data()
+        modified_dataclass.__dict__[module_name] = module_value
+        return modified_dataclass
+        
+
 # TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call
 #  another method that takes the dataclass and write the eeprom
     def set_edgepi_data(self, eeprom_data: EdgePiEEPROMData):
