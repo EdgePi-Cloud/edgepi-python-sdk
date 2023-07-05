@@ -44,7 +44,7 @@ def fixture_test_dac(mocker):
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -56,7 +56,7 @@ def fixture_test_dac_write_voltage(mocker):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -195,7 +195,7 @@ def test_dac_send_to_gpio_pins(mocker, analog_out, voltage, result):
     mock_clear = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -261,7 +261,7 @@ def test__compute_code_val(mocker, set_gain, code, result, error):
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -292,7 +292,7 @@ def test__get_ch_codes(mocker, set_gain, result, mock_vals, error):
                   side_effect = mock_vals)
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -310,7 +310,7 @@ def test__auto_code_handler(mocker, set_gain, result):
     clear_dac_gain = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.clear_expander_pin")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -338,7 +338,7 @@ def test_set_gain_gain(mocker, set_gain, auto_code_change, mocker_values, result
     mocker.patch("edgepi.gpio.edgepi_gpio_expander.I2CDevice")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -388,7 +388,7 @@ def test_get_state(mocker, analog_out, code, voltage, gain, result, mock_val):
                   side_effect=[mock_val[3] if gain is True else result[2], mock_val[3]])
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict
@@ -409,7 +409,7 @@ def test__dac_switching_logic(mocker, analog_out, result):
     mock_set_pin_state = mocker.patch("edgepi.dac.edgepi_dac.EdgePiGPIO.set_pin_state")
     eelayout= EepromLayout()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_reserved_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
                   return_value = EdgePiEEPROMData(eelayout))
     dac = EdgePiDAC()
     dac.dac_ops.dict_calib_param = dummy_calib_param_dict

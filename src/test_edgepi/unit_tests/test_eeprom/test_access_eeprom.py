@@ -110,28 +110,6 @@ def test__read_edgepi_reserved_memory(mocker, eeprom):
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == data_b
 
-@pytest.mark.parametrize("msg",
-                        [(MessageFieldNumber.DAC),
-                         (MessageFieldNumber.ADC),
-                         (MessageFieldNumber.RTD),
-                         (MessageFieldNumber.TC),
-                         (MessageFieldNumber.CONFIGS_KEY),
-                         (MessageFieldNumber.DATA_KEY),
-                         (MessageFieldNumber.SERIAL),
-                         (MessageFieldNumber.MODEL),
-                         (MessageFieldNumber.CLIENT_ID)
-                        ])
-def test_get_message_of_interest(mocker, msg, eeprom):
-    # pylint: disable=protected-access
-    mocker.patch(
-        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
-        return_value = read_binfile())
-    memory_contents = EepromLayout()
-    memory_contents.ParseFromString(read_binfile())
-    msg_of_interest = eeprom.get_message_of_interest(msg)
-    assert msg_of_interest == memory_contents.ListFields()[msg.value -1][1]
-
-
 dac_dict_calib = {0:CalibParam(gain = 1.0229951270016944, offset= -0.01787674545454656),
                   1:CalibParam(gain = 1.0233775195153139, offset= -0.019239763636362414),
                   2:CalibParam(gain = 1.0238480841375301, offset= -0.014646763636360628),
@@ -179,14 +157,14 @@ haoqI+\nGgNa2JECgYEAwEEEq7dxGXYmlIhTs5IiEleLjBydQ9B1P8zIIApLJdHuu50K7ifq\nVYWC0Q
 h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyNepTxS32VzVTx2z+A=\n\
 -----END RSA PRIVATE KEY-----\n'
 
-def test_get_edgepi_reserved_data(mocker, eeprom):
+def test_get_edgepi_data(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
         return_value = read_binfile())
     memory_contents = EepromLayout()
     memory_contents.ParseFromString(read_binfile())
-    eeprom_data = eeprom.get_edgepi_reserved_data()
+    eeprom_data = eeprom.get_edgepi_data()
     for key, value in eeprom_data.dac_calib_params.items():
         assert value.gain == pytest.approx(dac_dict_calib[key].gain)
         assert value.offset == pytest.approx(dac_dict_calib[key].offset)

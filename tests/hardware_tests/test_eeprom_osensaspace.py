@@ -22,9 +22,9 @@ def fixture_test_dac():
 # Change ADC DAC Module Param
 def test_osensa_space_modify_1(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.get_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     time.sleep(0.5)
 
     for ch, calibs in eeprom_data_modify.dac_calib_params.items():
@@ -41,16 +41,16 @@ def test_osensa_space_modify_1(eeprom):
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     assert eeprom_data_origin.dac_calib_params != eeprom_data_modify.dac_calib_params
     assert eeprom_data_origin.adc_calib_params != eeprom_data_modify.adc_calib_params
 
 # TC and RTD modification
 def test_osensa_space_modify_2(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.get_edgepi_data()
     time.sleep(5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     time.sleep(5)
 
     for ch, calibs in eeprom_data_modify.rtd_calib_params.items():
@@ -70,7 +70,7 @@ def test_osensa_space_modify_2(eeprom):
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     assert eeprom_data_origin.rtd_calib_params != eeprom_data_modify.rtd_calib_params
     assert eeprom_data_origin.tc_calib_params != eeprom_data_modify.tc_calib_params
     assert eeprom_data_origin.rtd_hw_params != eeprom_data_modify.rtd_hw_params
@@ -78,9 +78,9 @@ def test_osensa_space_modify_2(eeprom):
 
 def test_osensa_space_modify_3(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.get_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     time.sleep(0.5)
 
     eeprom_data_modify.config_key.certificate = "This is config certificate"
@@ -94,6 +94,6 @@ def test_osensa_space_modify_3(eeprom):
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.get_edgepi_data()
     assert eeprom_data_origin.config_key != eeprom_data_modify.config_key
     assert eeprom_data_origin.data_key != eeprom_data_modify.data_key

@@ -67,7 +67,7 @@ h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyN
 TmZ\n-----END RSA PRIVATE KEY-----\n'
 
 def test_set_edgepi_data(eeprom):
-    original_data = eeprom.get_edgepi_reserved_data()
+    original_data = eeprom.get_edgepi_data()
 
     for _ in range(10):
         # initializing size of string
@@ -78,7 +78,7 @@ def test_set_edgepi_data(eeprom):
                                      string.digits, k=str_len))
 
         # Modified data to write to memory
-        modified_data = eeprom.get_edgepi_reserved_data()
+        modified_data = eeprom.get_edgepi_data()
         modified_data.config_key.certificate = DUMMY_KEY + res
         modified_data.config_key.private = DUMMY_KEY + res
         modified_data.data_key.certificate = DUMMY_KEY + res
@@ -86,7 +86,7 @@ def test_set_edgepi_data(eeprom):
         # Write modified data
         eeprom.set_edgepi_data(modified_data)
         # Read back the changed data
-        modified_data = eeprom.get_edgepi_reserved_data()
+        modified_data = eeprom.get_edgepi_data()
 
         assert modified_data.dac_calib_params == original_data.dac_calib_params
         assert modified_data.adc_calib_params == original_data.adc_calib_params
@@ -114,10 +114,10 @@ def test_set_edgepi_data(eeprom):
                          ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
-    original_data = eeprom.get_edgepi_reserved_data()
+    original_data = eeprom.get_edgepi_data()
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
-        written_data = eeprom.get_edgepi_reserved_data()
+        written_data = eeprom.get_edgepi_data()
         default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
         default_data = EdgePiEEPROMData(eeprom.eeprom_layout)
         assert written_data.dac_calib_params == default_data.dac_calib_params
