@@ -5,6 +5,7 @@
 # https://github.com/protocolbuffers/protobuf/issues/10372
 
 from unittest import mock
+import base64
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 import sys
@@ -15,7 +16,12 @@ import json
 import pytest
 
 from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
-from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, EEPROMInfo,EepromModuleNames
+from edgepi.eeprom.eeprom_constants import (
+    EdgePiMemoryInfo,
+    EEPROMInfo,
+    EepromModuleNames,
+    DEFUALT_EEPROM_BIN
+    )
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
 from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
@@ -308,10 +314,16 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
+                         ("95be85731976764d4e38e7677ace3a14", does_not_raise())
                         ])
 def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
+
+def test_check_default_bin(eeprom):
+    default_bin_file = read_binfile()
+    default_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
+    assert default_bin_file == default_bin
+

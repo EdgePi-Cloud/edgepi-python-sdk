@@ -135,6 +135,3 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
         assert written_data.thing_id == default_data.thing_id
         # Reset to origianl Data
         eeprom.set_edgepi_data(original_data)
-
-# TODO: Check the integrity of data by comparing the stored value to the changed value
-# TODO: Move the files around

@@ -22,8 +22,6 @@ from edgepi.eeprom.eeprom_constants import (
     PAGE_WRITE_CYCLE_TIME,
     DEFUALT_EEPROM_BIN
     )
-from edgepi.eeprom.protobuf_mapping import EdgePiEEPROMData
-from edgepi.eeprom.eeprom_mapping_pb2 import EepromLayout
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
 from edgepi.peripherals.i2c import I2CDevice
@@ -43,7 +41,6 @@ class EdgePiEEPROM(I2CDevice):
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing EEPROM Access")
-        self.eeprom_layout = EepromLayout()
         self.eeprom_pb = edgepi_module_pb2.EepromData()
         self.data_list = []
         self.used_size = 0
@@ -170,8 +167,6 @@ class EdgePiEEPROM(I2CDevice):
             eeprom_data (EepromDataClass): dataclass containing eeprom values
         """
         # pylint: disable=no-member
-        # self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
-        # eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
         self.eeprom_pb.ParseFromString(self.__read_edgepi_reserved_memory())
         eeprom_data = EepromDataClass.extract_eeprom_data(self.eeprom_pb)
         return eeprom_data
