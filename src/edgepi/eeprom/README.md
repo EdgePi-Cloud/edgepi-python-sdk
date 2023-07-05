@@ -34,6 +34,21 @@ modified_data = edgepi_eeprom.set_edgepi_dataclass(EepromModuleNames.CONFIG_KEY,
 edgepi_eeprom.set_edgepi_data(modified_data)
 ```
 
+## Reset EdgePi Reserved Memory
+```python
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.eeprom_constants import EepromModuleNames, DEFUALT_EEPROM_BIN
+import base64
+import hashlib
+
+edgepi_eeprom = EdgePiEEPROM()
+
+default_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
+hash_res = hashlib.md5(default_bin)
+edgepi_eeprom.reset_edgepi_memory(hash_res.hexdigest())
+```
+
+
 
 # Functionalities
 

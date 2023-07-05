@@ -322,8 +322,7 @@ def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
 
-def test_check_default_bin(eeprom):
+def test_check_default_bin():
     default_bin_file = read_binfile()
     default_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
     assert default_bin_file == default_bin
-

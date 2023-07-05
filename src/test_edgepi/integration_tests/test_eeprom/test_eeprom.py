@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 
 from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, DEFUALT_EEPROM_BIN
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
-from edgepi.eeprom.protobuf_mapping import EdgePiEEPROMData
+from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 
 @pytest.fixture(name="eeprom")
 def fixture_test_eeprom():
@@ -80,29 +80,28 @@ def test_set_edgepi_data(eeprom):
         # Modified data to write to memory
         modified_data = eeprom.get_edgepi_data()
         modified_data.config_key.certificate = DUMMY_KEY + res
-        modified_data.config_key.private = DUMMY_KEY + res
+        modified_data.config_key.private_key = DUMMY_KEY + res
         modified_data.data_key.certificate = DUMMY_KEY + res
-        modified_data.data_key.private = DUMMY_KEY + res
+        modified_data.data_key.private_key = DUMMY_KEY + res
         # Write modified data
         eeprom.set_edgepi_data(modified_data)
         # Read back the changed data
         modified_data = eeprom.get_edgepi_data()
 
         assert modified_data.dac_calib_params == original_data.dac_calib_params
-        assert modified_data.adc_calib_params == original_data.adc_calib_params
+        assert modified_data.adc1_calib_params == original_data.adc1_calib_params
+        assert modified_data.adc2_calib_params == original_data.adc2_calib_params
         assert modified_data.rtd_calib_params == original_data.rtd_calib_params
-        assert modified_data.rtd_hw_params == original_data.rtd_hw_params
         assert modified_data.tc_calib_params == original_data.tc_calib_params
-        assert modified_data.tc_hw_params == original_data.tc_hw_params
         assert modified_data.config_key.certificate == DUMMY_KEY + res
-        assert modified_data.config_key.private == DUMMY_KEY + res
+        assert modified_data.config_key.private_key == DUMMY_KEY + res
         assert modified_data.config_key.certificate == DUMMY_KEY + res
-        assert modified_data.data_key.private == DUMMY_KEY + res
+        assert modified_data.data_key.private_key == DUMMY_KEY + res
         assert modified_data.serial == original_data.serial
         assert modified_data.model == original_data.model
-        assert modified_data.client_id_config == original_data.client_id_config
-        assert modified_data.client_id_data == original_data.client_id_data
-        assert modified_data.thing_id == original_data.thing_id
+        assert modified_data.cm_part_number == original_data.cm_part_number
+        assert modified_data.tb_part_number == original_data.tb_part_number
+        assert modified_data.cm4_part_number == original_data.cm4_part_number
 
     # Write the original data back
     eeprom.set_edgepi_data(original_data)
@@ -111,27 +110,26 @@ def test_set_edgepi_data(eeprom):
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("d77ac66e1727ab332ef5a474bbe07305", does_not_raise())
+                         ("48d088f7536e5c59938724b174184611", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
     original_data = eeprom.get_edgepi_data()
     with error:
         eeprom.reset_edgepi_memory(bin_hash)
         written_data = eeprom.get_edgepi_data()
-        default_data = eeprom.eeprom_layout.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
-        default_data = EdgePiEEPROMData(eeprom.eeprom_layout)
+        default_data = eeprom.eeprom_pb.ParseFromString(base64.b64decode(DEFUALT_EEPROM_BIN))
+        default_data = EepromDataClass.extract_eeprom_data(eeprom.eeprom_pb)
         assert written_data.dac_calib_params == default_data.dac_calib_params
-        assert written_data.adc_calib_params == default_data.adc_calib_params
+        assert written_data.adc1_calib_params == default_data.adc1_calib_params
+        assert written_data.adc2_calib_params == default_data.adc2_calib_params
         assert written_data.rtd_calib_params == default_data.rtd_calib_params
-        assert written_data.rtd_hw_params == default_data.rtd_hw_params
         assert written_data.tc_calib_params == default_data.tc_calib_params
-        assert written_data.tc_hw_params == default_data.tc_hw_params
         assert written_data.config_key == default_data.config_key
         assert written_data.data_key == default_data.data_key
         assert written_data.serial == default_data.serial
         assert written_data.model == default_data.model
-        assert written_data.client_id_config == default_data.client_id_config
-        assert written_data.client_id_data == default_data.client_id_data
-        assert written_data.thing_id == default_data.thing_id
+        assert written_data.cm_part_number == default_data.cm_part_number
+        assert written_data.tb_part_number == default_data.tb_part_number
+        assert written_data.cm4_part_number == default_data.cm4_part_number
         # Reset to origianl Data
         eeprom.set_edgepi_data(original_data)
