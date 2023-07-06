@@ -149,6 +149,7 @@ def test_get_edgepi_data(mocker, eeprom):
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
         return_value = read_binfile())
+    # pylint: disable=no-member
     memory_contents = edgepi_module_pb2.EepromData()
     memory_contents.ParseFromString(read_binfile())
     memory_data = EepromDataClass.extract_eeprom_data(memory_contents)

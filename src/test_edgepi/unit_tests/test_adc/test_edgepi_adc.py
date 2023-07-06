@@ -89,6 +89,7 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_state",
                  return_value=[RTDModes.RTD_OFF, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
+    # pylint: disable=no-member
     eelayout= edgepi_module_pb2.EepromData()
     eelayout.ParseFromString(read_binfile())
     mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",

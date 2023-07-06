@@ -41,6 +41,7 @@ class EdgePiEEPROM(I2CDevice):
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing EEPROM Access")
+        # pylint: disable=no-member
         self.eeprom_pb = edgepi_module_pb2.EepromData()
         self.data_list = []
         self.used_size = 0

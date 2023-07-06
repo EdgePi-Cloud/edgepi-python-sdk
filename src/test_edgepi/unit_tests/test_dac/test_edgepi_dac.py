@@ -9,6 +9,7 @@ sys.modules['periphery'] = mock.MagicMock()
 
 # pylint: disable=wrong-import-position
 # pylint: disable=no-name-in-module
+# pylint: disable=no-member
 # https://github.com/protocolbuffers/protobuf/issues/10372
 # pylint: disable=protected-access
 
