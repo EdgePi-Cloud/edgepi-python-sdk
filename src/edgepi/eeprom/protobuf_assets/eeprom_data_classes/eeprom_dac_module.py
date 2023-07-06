@@ -66,3 +66,17 @@ class DACModule:
         if dac_pb.HasField("dac_ch_8"):
             dac_mod.dac_ch_8 = CalibParam(gain=dac_pb.dac_ch_8.gain, offset=dac_pb.dac_ch_8.offset)
         return dac_mod
+
+    def extract_ch_dict(self):
+        """create channel to calibration param dictionary"""
+        ch_dict = {
+            0:self.dac_ch_1,
+            1:self.dac_ch_2,
+            2:self.dac_ch_3,
+            3:self.dac_ch_4,
+            4:self.dac_ch_5,
+            5:self.dac_ch_6,
+            6:self.dac_ch_7,
+            7:self.dac_ch_8,
+        }
+        return ch_dict
