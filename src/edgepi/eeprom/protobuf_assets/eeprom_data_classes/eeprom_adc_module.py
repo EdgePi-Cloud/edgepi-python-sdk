@@ -100,3 +100,21 @@ class ADCModule:
             adc_mod.adc_diff_4 = CalibParam(gain=adc_pb.adc_diff_4.gain,
                                              offset=adc_pb.adc_diff_4.offset)
         return adc_mod
+
+    def extract_ch_dict(self):
+        """create channel to calibration param dictionary"""
+        ch_dict = {
+            0:self.adc_ch_1,
+            1:self.adc_ch_2,
+            2:self.adc_ch_3,
+            3:self.adc_ch_4,
+            4:self.adc_ch_5,
+            5:self.adc_ch_6,
+            6:self.adc_ch_7,
+            7:self.adc_ch_8,
+            8:self.adc_diff_1,
+            9:self.adc_diff_2,
+            10:self.adc_diff_3,
+            11:self.adc_diff_4,
+        }
+        return ch_dict

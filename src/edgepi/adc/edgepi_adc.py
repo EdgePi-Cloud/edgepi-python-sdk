@@ -118,9 +118,10 @@ class EdgePiADC(SPI):
 
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
-        eeprom_data  = eeprom.get_edgepi_reserved_data()
-        self.adc_calib_params = eeprom_data.adc_calib_params
-        self.r_ref = eeprom_data.rtd_hw_params[0]
+        eeprom_data  = eeprom.read_edgepi_data()
+        self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
+                                 ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
+        self.r_ref = eeprom_data.rtd_calib_params.rtd_resistor
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
@@ -383,8 +384,7 @@ class EdgePiADC(SPI):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
         calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
-
-        calibs = adc_calibs.get(calib_key)
+        calibs = adc_calibs[calib_key]
 
         if calibs is None:
             _logger.error("Failed to find ADC calibration values")
@@ -446,7 +446,7 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f" read_voltage: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params, adc_num)
+        calibs = self.__get_calibration_values(self.adc_calib_params[adc_num], adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         # convert from code to voltage
 
@@ -512,7 +512,7 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params, ADCNum.ADC_1)
+        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1)
 
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
