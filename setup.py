@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setuptools.setup(
     name="edgepi-python-sdk",
-    version="1.2.0",
+    version="1.2.1",
     author="S.Park",
     author_email="spark@osensa.com",
     description="EdgePi Python SDK package",
