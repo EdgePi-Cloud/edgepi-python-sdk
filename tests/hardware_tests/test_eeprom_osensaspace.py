@@ -13,7 +13,6 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
-from edgepi.eeprom.eeprom_constants import EepromModuleNames
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac():
@@ -87,7 +86,7 @@ def test_osensa_space_modify_2(eeprom):
 
     assert eeprom_data_origin.rtd_calib_params != eeprom_data_modify.rtd_calib_params
     assert eeprom_data_origin.tc_calib_params != eeprom_data_modify.tc_calib_params
-    
+
     eeprom.set_edgepi_data(eeprom_data_origin)
 
 
