@@ -7,21 +7,24 @@ import logging
 import math
 import json
 import time
+import hashlib
 
 from edgepi.utilities.crc_8_atm import (
     CRC_BYTE_SIZE,
     get_crc,
     check_crc
 )
-from edgepi.calibration.eeprom_constants import (
+from edgepi.eeprom.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    MessageFieldNumber,
-    PAGE_WRITE_CYCLE_TIME
+    PAGE_WRITE_CYCLE_TIME,
     )
-from edgepi.calibration.protobuf_mapping import EdgePiEEPROMData
-from edgepi.calibration.eeprom_mapping_pb2 import EepromLayout
+from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
+from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
 from edgepi.peripherals.i2c import I2CDevice
+
+class PermissionDenied(Exception):
+    """Raised when permission is denied to perform an operation"""
 
 class MemoryOutOfBound(Exception):
     """Raised memory out-of-bound error"""
@@ -35,7 +38,8 @@ class EdgePiEEPROM(I2CDevice):
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.log.info("Initializing EEPROM Access")
-        self.eeprom_layout = EepromLayout()
+        # pylint: disable=no-member
+        self.eeprom_pb = edgepi_module_pb2.EepromData()
         self.data_list = []
         self.used_size = 0
         super().__init__(self.__dev_path)
@@ -152,47 +156,31 @@ class EdgePiEEPROM(I2CDevice):
             time.sleep(0.01)
         return bytes(buff[2:buff_and_len])
 
-    def get_message_of_interest(self, msg: MessageFieldNumber = None):
-        """
-        This function filters out the message according to the specified field number passed as
-        parameter.
-        Args:
-            msg (MessageFieldNumber): protocol buffer message field index number for ListFields()
-            function
-        Return:
-            pb message specified by the message field number. ex) if message field of DAC is passed,
-            the dac message will be returned
-        """
-        self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
-        return self.eeprom_layout.ListFields()[msg.value - 1][1]
-
-    def get_edgepi_reserved_data(self):
+    def read_edgepi_data(self):
         """
         Read Edgepi reserved memory space and populate dataclass
         Args:
             N/A
         Return:
-            eeprom_data (EdgePiEEPROMData): dataclass containing eeprom values
+            eeprom_data (EepromDataClass): dataclass containing eeprom values
         """
         # pylint: disable=no-member
-        self.eeprom_layout.ParseFromString(self.__read_edgepi_reserved_memory())
-        eeprom_data = EdgePiEEPROMData(self.eeprom_layout)
+        self.eeprom_pb.ParseFromString(self.__read_edgepi_reserved_memory())
+        eeprom_data = EepromDataClass.extract_eeprom_data(self.eeprom_pb)
         return eeprom_data
-# TODO: have default eeprom_data class with default value
-# TODO: another method takes the parameters reads the memory and modifies the dataclass -> then call
-#  another method that takes the dataclass and write the eeprom
-# TODO: drop that MessageFieldNumber nonesense
-    def set_edgepi_reserved_data(self, eeprom_data: EdgePiEEPROMData, message: MessageFieldNumber):
+
+    def write_edgepi_data(self, eeprom_data: EepromDataClass):
         """
         Write EdgePi reserved memory space using the populated dataclass
         Args:
-            eeprom_data (EdgePiEEPROMData): eeprom data class with modified section
+            eeprom_data (EepromDataClass): eeprom data class with modified section
         """
         # Update the pb layout by packing the updated EEPROM data dataclass
-        eeprom_data.pack_dataclass(self.eeprom_layout, message)
+        # eeprom_data.pack_dataclass(self.eeprom_layout)
         # Serialize the pb
-        pb_data = self.eeprom_layout.SerializeToString()
-        self.__write_edgepi_reserved_memory(pb_data)
+        # pb_data = self.eeprom_layout.SerializeToString()
+        eeprom_data.populate_eeprom_module(self.eeprom_pb)
+        self.__write_edgepi_reserved_memory(self.eeprom_pb.SerializeToString())
 
     def __sequential_read(self, mem_addr: int = None, length: int = None):
         '''
@@ -282,7 +270,7 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f"__generate_list_of_pages_crc: {number_of_pages} pages generated")
         return pages
 
-    def read_memory(self, mem_size: int = None):
+    def read_user_space(self, mem_size: int = None):
         """
         Read user space memory starting from 0 to 16383
         Args:
@@ -308,7 +296,7 @@ class EdgePiEEPROM(I2CDevice):
             buff+=buff_list[:-1]
         return buff[2:buff_and_len]
 
-    def write_memory(self, data: bytes):
+    def write_user_space(self, data: bytes):
         """
         Writes data to the eeprom
         Args:
@@ -361,7 +349,7 @@ class EdgePiEEPROM(I2CDevice):
             is_full=True
             is_empty = False
             self.log.warning('User Space Memory is full')
-            mem_content = bytes(self.read_memory(mem_size))
+            mem_content = bytes(self.read_user_space(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
         # part of memory occupied
@@ -369,14 +357,14 @@ class EdgePiEEPROM(I2CDevice):
             is_full=False
             is_empty=False
             # read memory content should be in json encoded bytes converted into list
-            mem_content = bytes(self.read_memory(mem_size))
+            mem_content = bytes(self.read_user_space(mem_size))
             self.data_list = json.loads(mem_content)
             self.used_size = mem_size
             self.log.info(f'{mem_size}bytes of data is read from the user space')
 
         return is_full, is_empty
 
-    def eeprom_reset(self):
+    def reset_user_space(self):
         """
         Reset User space memory
         Args:
@@ -398,6 +386,17 @@ class EdgePiEEPROM(I2CDevice):
             mem_offset = mem_offset+page_size
             time.sleep(PAGE_WRITE_CYCLE_TIME)
 
-
-# TODO: read/write binary with MD5Sum hash to prevent accidental read/writes
-# TODO: Refactoring set_edgepi_resereved_data() by reading back the memory an
+    def reset_edgepi_memory(self, bin_hash: str = None, bin_bytes: bytes = None):
+        """
+        reset edgepi reserved memory by reading default binary files. In order to trigger this
+        method, correct md5sum hash must be passed.
+        Args:
+            bin_hash (str): md5sum hash string to compare with default eeprom hash
+        Return:
+            N/A
+        """
+        res = hashlib.md5(bin_bytes)
+        if bin_hash != res.hexdigest() or bin_hash is None:
+            raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
+        # Write to the memory
+        self.__write_edgepi_reserved_memory(bin_bytes)

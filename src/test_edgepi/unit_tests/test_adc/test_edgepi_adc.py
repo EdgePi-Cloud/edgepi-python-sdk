@@ -40,6 +40,10 @@ from edgepi.adc.adc_exceptions import (
     InvalidDifferentialPairError
 )
 
+from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
+from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
+from test_edgepi.unit_tests.test_eeprom.read_serialized import read_binfile
+
 adc_default_vals = [
     0,
     0x11,
@@ -85,7 +89,11 @@ def fixture_adc(mocker):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_rtd_state",
                  return_value=[RTDModes.RTD_OFF, None])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__validate_updates", return_value=True)
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiEEPROM")
+    # pylint: disable=no-member
+    eelayout= edgepi_module_pb2.EepromData()
+    eelayout.ParseFromString(read_binfile())
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.read_edgepi_data",
+                  return_value = EepromDataClass.extract_eeprom_data(eelayout))
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
     yield EdgePiADC()
 
@@ -937,21 +945,6 @@ def test_set_rtd(mocker, set_rtd, adc_num, adc_mux, config_calls, adc):
 def test_extract_mux_args(args, result, adc):
     assert adc._EdgePiADC__extract_mux_args(args) == result
 
-_mock_adc_calibs = {
-    0: CalibParam(0, 0),
-    1: CalibParam(1, 0),
-    2: CalibParam(2, 0),
-    3: CalibParam(3, 0),
-    4: CalibParam(4, 0),
-    5: CalibParam(5, 0),
-    6: CalibParam(6, 0),
-    7: CalibParam(7, 0),
-    8: CalibParam(8, 0),
-    9: CalibParam(9, 0),
-    10: CalibParam(10, 0),
-    11: CalibParam(11, 0),
-}
-
 def _apply_register_updates(reg_map: list, updates: dict):
     for addx, value in updates.items():
         reg_map[addx.value] = value
@@ -959,30 +952,30 @@ def _apply_register_updates(reg_map: list, updates: dict):
 @pytest.mark.parametrize(
     "reg_updates, adc_num, expected, err",
     [
-        ({ADCReg.REG_INPMUX: 0x0A}, ADCNum.ADC_1, CalibParam(0, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x0A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
         ({ADCReg.REG_INPMUX: 0x1A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x2A}, ADCNum.ADC_1, CalibParam(2, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x3A}, ADCNum.ADC_1, CalibParam(3, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x4A}, ADCNum.ADC_1, CalibParam(4, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x5A}, ADCNum.ADC_1, CalibParam(5, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x6A}, ADCNum.ADC_1, CalibParam(6, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x7A}, ADCNum.ADC_1, CalibParam(7, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x01}, ADCNum.ADC_1, CalibParam(8, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x23}, ADCNum.ADC_1, CalibParam(9, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x45}, ADCNum.ADC_1, CalibParam(10, 0), does_not_raise()),
-        ({ADCReg.REG_INPMUX: 0x67}, ADCNum.ADC_1, CalibParam(11, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x0A}, ADCNum.ADC_2, CalibParam(0, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x2A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x3A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x4A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x5A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x6A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x7A}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x01}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x23}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x45}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_INPMUX: 0x67}, ADCNum.ADC_1, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x0A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
         ({ADCReg.REG_ADC2MUX: 0x1A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x2A}, ADCNum.ADC_2, CalibParam(2, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x3A}, ADCNum.ADC_2, CalibParam(3, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x4A}, ADCNum.ADC_2, CalibParam(4, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x5A}, ADCNum.ADC_2, CalibParam(5, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x6A}, ADCNum.ADC_2, CalibParam(6, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x7A}, ADCNum.ADC_2, CalibParam(7, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x01}, ADCNum.ADC_2, CalibParam(8, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x23}, ADCNum.ADC_2, CalibParam(9, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x45}, ADCNum.ADC_2, CalibParam(10, 0), does_not_raise()),
-        ({ADCReg.REG_ADC2MUX: 0x67}, ADCNum.ADC_2, CalibParam(11, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x2A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x3A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x4A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x5A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x6A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x7A}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x01}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x23}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x45}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
+        ({ADCReg.REG_ADC2MUX: 0x67}, ADCNum.ADC_2, CalibParam(1, 0), does_not_raise()),
         ({ADCReg.REG_INPMUX: 0xFA}, ADCNum.ADC_1, None, pytest.raises(ValueError)),
         ({ADCReg.REG_INPMUX: 0x1F}, ADCNum.ADC_1, None, pytest.raises(ValueError)),
         (
@@ -999,7 +992,7 @@ def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.get_state", return_value=mock_state)
 
     with err:
-        out = adc._EdgePiADC__get_calibration_values(_mock_adc_calibs, adc_num)
+        out = adc._EdgePiADC__get_calibration_values(adc.adc_calib_params[adc_num], adc_num)
         assert out == expected
 
 

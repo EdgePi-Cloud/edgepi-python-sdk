@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "calibration_parameters.proto";
+
+message AdcModule {
+    optional CalibParam adc_ch_1 = 1;  
+    optional CalibParam adc_ch_2 = 2; 
+    optional CalibParam adc_ch_3 = 3;  
+    optional CalibParam adc_ch_4 = 4;  
+    optional CalibParam adc_ch_5 = 5;  
+    optional CalibParam adc_ch_6 = 6;  
+    optional CalibParam adc_ch_7 = 7;  
+    optional CalibParam adc_ch_8 = 8;  
+
+    optional CalibParam adc_diff_1 = 9;  
+    optional CalibParam adc_diff_2 = 10;  
+    optional CalibParam adc_diff_3 = 11;  
+    optional CalibParam adc_diff_4 = 12;  
+}

@@ -12,8 +12,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.calibration.eeprom_constants import MessageFieldNumber
-from edgepi.calibration.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 @pytest.fixture(name="eeprom")
 def fixture_test_dac():
@@ -23,78 +22,98 @@ def fixture_test_dac():
 # Change ADC DAC Module Param
 def test_osensa_space_modify_1(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(0.5)
 
-    for ch, calibs in eeprom_data_modify.dac_calib_params.items():
+    _logger.info(f"Origin Data class {eeprom_data_origin.dac_calib_params}\n")
+    _logger.info(f"Modified Data class {eeprom_data_modify.dac_calib_params}\n")
+
+    for ch, calibs in eeprom_data_modify.dac_calib_params.extract_ch_dict().items():
         calibs.gain = ch
         calibs.offset = ch
 
-    for ch, calibs in eeprom_data_modify.adc_calib_params.items():
+    for ch, calibs in eeprom_data_modify.adc1_calib_params.extract_ch_dict().items():
         calibs.gain = ch
         calibs.offset = ch
 
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.DAC)
-    time.sleep(0.5)
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.ADC)
+    for ch, calibs in eeprom_data_modify.adc2_calib_params.extract_ch_dict().items():
+        calibs.gain = ch
+        calibs.offset = ch
+
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
+    _logger.info(f"Origin Data class {eeprom_data_origin.dac_calib_params}\n")
+    _logger.info(f"Modified Data class {eeprom_data_modify.dac_calib_params}\n")
     assert eeprom_data_origin.dac_calib_params != eeprom_data_modify.dac_calib_params
-    assert eeprom_data_origin.adc_calib_params != eeprom_data_modify.adc_calib_params
+    assert eeprom_data_origin.adc1_calib_params != eeprom_data_modify.adc1_calib_params
+    assert eeprom_data_origin.adc2_calib_params != eeprom_data_modify.adc2_calib_params
+
+    eeprom.read_edgepi_data(eeprom_data_origin)
 
 # TC and RTD modification
 def test_osensa_space_modify_2(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(5)
 
-    for ch, calibs in eeprom_data_modify.rtd_calib_params.items():
-        calibs.gain = ch
-        calibs.offset = ch
-    for ch, _ in eeprom_data_modify.rtd_hw_params.items():
-        eeprom_data_modify.rtd_hw_params[ch] = 1818.5
-    for ch, calibs in eeprom_data_modify.tc_calib_params.items():
-        calibs.gain = ch
-        calibs.offset = ch
-    for ch, _ in eeprom_data_modify.tc_hw_params.items():
-        eeprom_data_modify.tc_hw_params[ch] = 1818.5
+    eeprom_data_modify.rtd_calib_params.rtd.gain = 32.0
+    eeprom_data_modify.rtd_calib_params.rtd.offset = -0.9238
+    eeprom_data_modify.rtd_calib_params.rtd_resistor = 1923.48
+    eeprom_data_modify.tc_calib_params.tc_B.gain = 123.0
+    eeprom_data_modify.tc_calib_params.tc_B.offset = 5231.0
+    eeprom_data_modify.tc_calib_params.tc_E.gain = 123.0
+    eeprom_data_modify.tc_calib_params.tc_E.offset = 5231.0
+    eeprom_data_modify.tc_calib_params.tc_J.gain = 123.0
+    eeprom_data_modify.tc_calib_params.tc_J.offset = 5231.0
 
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.RTD)
-    time.sleep(0.5)
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.TC)
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
+
+    _logger.info(f"Origin RTD Calib Params {eeprom_data_origin.rtd_calib_params}")
+    _logger.info(f"Modify RTD Calib Params {eeprom_data_modify.rtd_calib_params}")
+    _logger.info(f"Origin TC Calib Params {eeprom_data_origin.tc_calib_params}")
+    _logger.info(f"Modify TC Calib Params {eeprom_data_modify.tc_calib_params}")
+
     assert eeprom_data_origin.rtd_calib_params != eeprom_data_modify.rtd_calib_params
     assert eeprom_data_origin.tc_calib_params != eeprom_data_modify.tc_calib_params
-    assert eeprom_data_origin.rtd_hw_params != eeprom_data_modify.rtd_hw_params
-    assert eeprom_data_origin.tc_hw_params != eeprom_data_modify.tc_hw_params
+
+    eeprom.write_edgepi_data(eeprom_data_origin)
+
 
 def test_osensa_space_modify_3(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_reserved_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(0.5)
 
-    eeprom_data_modify.config_key.certificate = "This is config certificate"
-    eeprom_data_modify.config_key.private = "This is config private"
-    eeprom_data_modify.data_key.certificate = "This is data certificate"
-    eeprom_data_modify.data_key.private = "This is data private"
+    eeprom_data_modify.config_key.certificate = "yeeeeeeet"
+    eeprom_data_modify.config_key.private_key = "ajksbvjkalsbkvalva"
+    eeprom_data_modify.data_key.certificate = "asjkdbvakjsnvjka"
+    eeprom_data_modify.data_key.private_key = "lozxivhzlnjqq"
 
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.CONFIGS_KEY)
-    time.sleep(0.5)
-    eeprom.set_edgepi_reserved_data(eeprom_data_modify, MessageFieldNumber.DATA_KEY)
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_reserved_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
+
+    _logger.info(f"Origin Config Key {eeprom_data_origin.config_key}")
+    _logger.info(f"Origin Data Key {eeprom_data_origin.data_key}")
+    _logger.info(f"Modified Config Key {eeprom_data_modify.config_key}")
+    _logger.info(f"Modified Data Key {eeprom_data_modify.data_key}")
+
     assert eeprom_data_origin.config_key != eeprom_data_modify.config_key
     assert eeprom_data_origin.data_key != eeprom_data_modify.data_key
+
+    eeprom.write_edgepi_data(eeprom_data_origin)
