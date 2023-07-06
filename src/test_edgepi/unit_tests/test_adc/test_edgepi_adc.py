@@ -92,7 +92,7 @@ def fixture_adc(mocker):
     # pylint: disable=no-member
     eelayout= edgepi_module_pb2.EepromData()
     eelayout.ParseFromString(read_binfile())
-    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.get_edgepi_data",
+    mocker.patch("edgepi.dac.edgepi_dac.EdgePiEEPROM.read_edgepi_data",
                   return_value = EepromDataClass.extract_eeprom_data(eelayout))
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO")
     yield EdgePiADC()

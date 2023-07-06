@@ -118,7 +118,7 @@ class EdgePiADC(SPI):
 
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
-        eeprom_data  = eeprom.get_edgepi_data()
+        eeprom_data  = eeprom.read_edgepi_data()
         self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
                                  ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
         self.r_ref = eeprom_data.rtd_calib_params.rtd_resistor
@@ -384,7 +384,6 @@ class EdgePiADC(SPI):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
         calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
-        # TODO: fix this properly later
         calibs = adc_calibs[calib_key]
 
         if calibs is None:

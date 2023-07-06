@@ -19,8 +19,7 @@ from edgepi.utilities.crc_8_atm import CRC_BYTE_SIZE, check_crc, get_crc
 from edgepi.eeprom.eeprom_constants import (
     EdgePiMemoryInfo,
     EEPROMInfo,
-    EepromModuleNames,
-    DEFUALT_EEPROM_BIN
+    DEFAULT_EEPROM_BIN_B64
     )
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, MemoryOutOfBound, PermissionDenied
 from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
@@ -144,7 +143,7 @@ rtd_dict_hw= {0:1}
 tc_dict_calib = {0:CalibParam(gain = 1, offset=0)}
 tc_dict_hw = {0:1}
 
-def test_get_edgepi_data(mocker, eeprom):
+def test_read_edgepi_data(mocker, eeprom):
     # pylint: disable=protected-access
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
@@ -153,32 +152,8 @@ def test_get_edgepi_data(mocker, eeprom):
     memory_contents = edgepi_module_pb2.EepromData()
     memory_contents.ParseFromString(read_binfile())
     memory_data = EepromDataClass.extract_eeprom_data(memory_contents)
-    eeprom_data = eeprom.get_edgepi_data()
+    eeprom_data = eeprom.read_edgepi_data()
     assert memory_data.__dict__ == eeprom_data.__dict__
-
-@pytest.mark.parametrize("module_name,module_value",
-                        [(EepromModuleNames.DAC_CALIB_PARAMS, "changed"),
-                         (EepromModuleNames.ADC1_CALIB_PARAMS, "changed"),
-                         (EepromModuleNames.ADC2_CALIB_PARAMS, "changed"),
-                         (EepromModuleNames.RTD_CALIB_PARAMS, "changed"),
-                         (EepromModuleNames.TC_CALIB_PARAMS, "changed"),
-                         (EepromModuleNames.SERIAL, "changed"),
-                         (EepromModuleNames.MODEL, "changed"),
-                         (EepromModuleNames.CM_PART_NUMBER, "changed"),
-                         (EepromModuleNames.TB_PART_NUMBER, "changed"),
-                         (EepromModuleNames.CM4_PART_NUMBER, "changed")
-                        ])
-def test_set_edgepi_dataclass(mocker, module_name, module_value, eeprom):
-    mocker.patch(
-        "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__read_edgepi_reserved_memory",
-        return_value = read_binfile())
-    curr_data = eeprom.get_edgepi_data()
-    modified_dataclass = eeprom.set_edgepi_dataclass(module_name, module_value)
-    for attr in curr_data.__annotations__:
-        if attr != module_name.value:
-            assert getattr(curr_data, attr) == getattr(modified_dataclass, attr)
-        else:
-            assert getattr(curr_data, attr) != getattr(modified_dataclass, attr)
 
 @pytest.mark.parametrize("size",
                         [
@@ -321,9 +296,9 @@ def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
     mocker.patch(
         "edgepi.eeprom.edgepi_eeprom.EdgePiEEPROM._EdgePiEEPROM__write_edgepi_reserved_memory")
     with error:
-        eeprom.reset_edgepi_memory(bin_hash)
+        eeprom.reset_edgepi_memory(bin_hash, base64.b64decode(DEFAULT_EEPROM_BIN_B64))
 
 def test_check_default_bin():
     default_bin_file = read_binfile()
-    default_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
+    default_bin = base64.b64decode(DEFAULT_EEPROM_BIN_B64)
     assert default_bin_file == default_bin

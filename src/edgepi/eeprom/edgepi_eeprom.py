@@ -8,7 +8,6 @@ import math
 import json
 import time
 import hashlib
-import base64
 
 from edgepi.utilities.crc_8_atm import (
     CRC_BYTE_SIZE,
@@ -18,9 +17,7 @@ from edgepi.utilities.crc_8_atm import (
 from edgepi.eeprom.eeprom_constants import (
     EEPROMInfo,
     EdgePiMemoryInfo,
-    EepromModuleNames,
     PAGE_WRITE_CYCLE_TIME,
-    DEFUALT_EEPROM_BIN
     )
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 from edgepi.eeprom.protobuf_assets.generated_pb2 import edgepi_module_pb2
@@ -159,7 +156,7 @@ class EdgePiEEPROM(I2CDevice):
             time.sleep(0.01)
         return bytes(buff[2:buff_and_len])
 
-    def get_edgepi_data(self):
+    def read_edgepi_data(self):
         """
         Read Edgepi reserved memory space and populate dataclass
         Args:
@@ -172,19 +169,7 @@ class EdgePiEEPROM(I2CDevice):
         eeprom_data = EepromDataClass.extract_eeprom_data(self.eeprom_pb)
         return eeprom_data
 
-    def set_edgepi_dataclass(self, module_name: EepromModuleNames, module_value):
-        """
-        Reads the current memory and modify the dataclass
-        Args:
-            module data to overwrite
-        Return:
-            modified dataclass
-        """
-        modified_dataclass = self.get_edgepi_data()
-        modified_dataclass.__dict__[module_name.value] = module_value
-        return modified_dataclass
-
-    def set_edgepi_data(self, eeprom_data: EepromDataClass):
+    def write_edgepi_data(self, eeprom_data: EepromDataClass):
         """
         Write EdgePi reserved memory space using the populated dataclass
         Args:
@@ -401,7 +386,7 @@ class EdgePiEEPROM(I2CDevice):
             mem_offset = mem_offset+page_size
             time.sleep(PAGE_WRITE_CYCLE_TIME)
 
-    def reset_edgepi_memory(self, bin_hash: str = None):
+    def reset_edgepi_memory(self, bin_hash: str = None, bin_bytes: bytes = None):
         """
         reset edgepi reserved memory by reading default binary files. In order to trigger this
         method, correct md5sum hash must be passed.
@@ -410,9 +395,8 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             N/A
         """
-        defualt_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
-        res = hashlib.md5(defualt_bin)
+        res = hashlib.md5(bin_bytes)
         if bin_hash != res.hexdigest() or bin_hash is None:
             raise PermissionDenied("Hash Mis-match, permission to reset memory denied")
         # Write to the memory
-        self.__write_edgepi_reserved_memory(defualt_bin)
+        self.__write_edgepi_reserved_memory(bin_bytes)

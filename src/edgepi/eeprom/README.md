@@ -17,35 +17,35 @@ __It is not recommanded for the end user to write to EdgePi Reserved Space__
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 edgepi_eeprom = EdgePiEEPROM()
-eeprom_data = edgepi_eeprom.get_edgepi_data()
+eeprom_data = edgepi_eeprom.read_edgepi_data()
 ```
 ## Writing EdgePi Reserved Memory
+__NOTE__: To write to the eeprom memory, the memory needs to be read first.
 ```python
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 from edgepi.eeprom.eeprom_constants import EepromModuleNames
 
 edgepi_eeprom = EdgePiEEPROM()
-eeprom_data = edgepi_eeprom.get_edgepi_data()
+# Read the eeprom memory first
+eeprom_data = edgepi_eeprom.read_edgepi_data()
 # Changing Config_key certificate
 eeprom_data.config_key.certificate = "Changed Config key certificate"
-# Get Modified dataclass
-modified_data = edgepi_eeprom.set_edgepi_dataclass(EepromModuleNames.CONFIG_KEY, eeprom_data.config_key)
 # Write the modified dataclass to the memory
-edgepi_eeprom.set_edgepi_data(modified_data)
+edgepi_eeprom.write_edgepi_data(eeprom_data)
 ```
 
 ## Reset EdgePi Reserved Memory
 ```python
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
-from edgepi.eeprom.eeprom_constants import EepromModuleNames, DEFUALT_EEPROM_BIN
+from edgepi.eeprom.eeprom_constants import EepromModuleNames, DEFAULT_EEPROM_BIN_B64
 import base64
 import hashlib
 
 edgepi_eeprom = EdgePiEEPROM()
 
-default_bin = base64.b64decode(DEFUALT_EEPROM_BIN)
+default_bin = base64.b64decode(DEFAULT_EEPROM_BIN_B64)
 hash_res = hashlib.md5(default_bin)
-edgepi_eeprom.reset_edgepi_memory(hash_res.hexdigest())
+edgepi_eeprom.reset_edgepi_memory(hash_res.hexdigest(), default_bin)
 ```
 
 

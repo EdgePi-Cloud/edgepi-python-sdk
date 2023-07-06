@@ -22,9 +22,9 @@ def fixture_test_dac():
 # Change ADC DAC Module Param
 def test_osensa_space_modify_1(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(0.5)
 
     _logger.info(f"Origin Data class {eeprom_data_origin.dac_calib_params}\n")
@@ -42,25 +42,25 @@ def test_osensa_space_modify_1(eeprom):
         calibs.gain = ch
         calibs.offset = ch
 
-    eeprom.set_edgepi_data(eeprom_data_modify)
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     _logger.info(f"Origin Data class {eeprom_data_origin.dac_calib_params}\n")
     _logger.info(f"Modified Data class {eeprom_data_modify.dac_calib_params}\n")
     assert eeprom_data_origin.dac_calib_params != eeprom_data_modify.dac_calib_params
     assert eeprom_data_origin.adc1_calib_params != eeprom_data_modify.adc1_calib_params
     assert eeprom_data_origin.adc2_calib_params != eeprom_data_modify.adc2_calib_params
 
-    eeprom.set_edgepi_data(eeprom_data_origin)
+    eeprom.read_edgepi_data(eeprom_data_origin)
 
 # TC and RTD modification
 def test_osensa_space_modify_2(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(5)
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(5)
 
     eeprom_data_modify.rtd_calib_params.rtd.gain = 32.0
@@ -73,11 +73,11 @@ def test_osensa_space_modify_2(eeprom):
     eeprom_data_modify.tc_calib_params.tc_J.gain = 123.0
     eeprom_data_modify.tc_calib_params.tc_J.offset = 5231.0
 
-    eeprom.set_edgepi_data(eeprom_data_modify)
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
 
     _logger.info(f"Origin RTD Calib Params {eeprom_data_origin.rtd_calib_params}")
     _logger.info(f"Modify RTD Calib Params {eeprom_data_modify.rtd_calib_params}")
@@ -87,14 +87,14 @@ def test_osensa_space_modify_2(eeprom):
     assert eeprom_data_origin.rtd_calib_params != eeprom_data_modify.rtd_calib_params
     assert eeprom_data_origin.tc_calib_params != eeprom_data_modify.tc_calib_params
 
-    eeprom.set_edgepi_data(eeprom_data_origin)
+    eeprom.write_edgepi_data(eeprom_data_origin)
 
 
 def test_osensa_space_modify_3(eeprom):
     _logger.info("Modifying Module Params")
-    eeprom_data_origin = eeprom.get_edgepi_data()
+    eeprom_data_origin = eeprom.read_edgepi_data()
     time.sleep(0.5)
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(0.5)
 
     eeprom_data_modify.config_key.certificate = "yeeeeeeet"
@@ -102,11 +102,11 @@ def test_osensa_space_modify_3(eeprom):
     eeprom_data_modify.data_key.certificate = "asjkdbvakjsnvjka"
     eeprom_data_modify.data_key.private_key = "lozxivhzlnjqq"
 
-    eeprom.set_edgepi_data(eeprom_data_modify)
+    eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)
 
     _logger.info("Reading Osensa Reserved Space")
-    eeprom_data_modify = eeprom.get_edgepi_data()
+    eeprom_data_modify = eeprom.read_edgepi_data()
 
     _logger.info(f"Origin Config Key {eeprom_data_origin.config_key}")
     _logger.info(f"Origin Data Key {eeprom_data_origin.data_key}")
@@ -116,4 +116,4 @@ def test_osensa_space_modify_3(eeprom):
     assert eeprom_data_origin.config_key != eeprom_data_modify.config_key
     assert eeprom_data_origin.data_key != eeprom_data_modify.data_key
 
-    eeprom.set_edgepi_data(eeprom_data_origin)
+    eeprom.write_edgepi_data(eeprom_data_origin)
