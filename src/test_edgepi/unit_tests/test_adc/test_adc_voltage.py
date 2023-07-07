@@ -1,19 +1,18 @@
 """Unit tests for adc_voltage.py module"""
 
-
-from contextlib import nullcontext as does_not_raise
-
 import pytest
+
+from edgepi.calibration.calibration_constants import CalibParam
+from edgepi.utilities.utilities import bitstring_from_list
 from edgepi.adc.adc_constants import ADCNum
 from edgepi.adc.adc_voltage import (
-    check_crc,
-    CRCCheckError,
     _code_to_input_voltage,
-    generate_crc_8_table,
+    _is_negative_voltage,
+    _adc_voltage_to_input_voltage,
+    code_to_voltage,
+    code_to_voltage_single_ended,
     code_to_temperature,
-    CRC_8_ATM_GEN
 )
-from edgepi.adc.adc_crc_8_atm import CRC_8_ATM_LUT
 
 # pylint: disable=too-many-lines
 
@@ -22,63 +21,111 @@ V_REF = 2.5
 GAIN = 1
 OFFSET = 0
 
+@pytest.mark.parametrize("code, result",
+                        [([0xFF,0xFF,0xFF,0xFF], True),
+                         ([0x7F,0xFF,0xFF,0xFF], False),
+                        ])
+def test_is_negative_voltage(code, result):
+    code_bits = bitstring_from_list(code)
+    assert _is_negative_voltage(code_bits) ==result
+
 
 @pytest.mark.parametrize(
     "code, voltage, num_bytes",
     [
-        (0x00000000, 0, ADCNum.ADC_1.value.num_data_bytes),
-        (0x00000000, 0, ADCNum.ADC_2.value.num_data_bytes),
+        (0, 0, ADCNum.ADC_1.value.num_data_bytes),
+        (0, 0, ADCNum.ADC_2.value.num_data_bytes),
         # based on a reference voltage of 2.5 V
         (
-            0xFFFFFFFF,
-            5.0,
+            2147483647,
+            2.5,
             ADCNum.ADC_1.value.num_data_bytes,
         ),
         (
-            0xFFFFFF,
-            5.0,
+            -2147483648,
+            -2.5,
+            ADCNum.ADC_1.value.num_data_bytes,
+        ),
+        (
+            8388607,
+            2.5,
+            ADCNum.ADC_2.value.num_data_bytes,
+        ),
+        (
+            -8388608,
+            -2.5,
             ADCNum.ADC_2.value.num_data_bytes,
         ),
     ],
 )
-def test_code_to_voltage(code, voltage, num_bytes):
-    assert pytest.approx(_code_to_input_voltage(code, V_REF, num_bytes * 8)) == voltage
+def test_code_to_input_voltage(code, voltage, num_bytes):
+    assert pytest.approx(_code_to_input_voltage(code, V_REF, num_bytes * 8),0.0001) == voltage
 
 
 @pytest.mark.parametrize(
-    "voltage_bytes, crc_code, err",
+    "voltage, gain, offset, result",
     [
-        ([51, 16, 126, 166], 62, does_not_raise()),
-        ([51, 14, 170, 195], 98, does_not_raise()),
-        ([51, 16, 133, 237], 75, does_not_raise()),
-        ([51, 17, 166, 166], 71, does_not_raise()),
-        ([51, 16, 148, 157], 94, does_not_raise()),
-        ([51, 14, 144, 155], 150, does_not_raise()),
-        ([51, 14, 166, 18], 167, does_not_raise()),
-        ([51, 16, 5, 109], 116, does_not_raise()),
-        ([51, 15, 16, 130], 4, does_not_raise()),
-        ([51, 16, 126, 166], 61, pytest.raises(CRCCheckError)),
-        ([51, 14, 170, 195], 99, pytest.raises(CRCCheckError)),
-        ([51, 16, 133, 237], 70, pytest.raises(CRCCheckError)),
+        (0	  ,1, -0.014, -0.014),
+        (0.25 ,1, -0.014, 1.192913828),
+        (0.5  ,1, -0.014, 2.399827655),
+        (0.75 ,1, -0.014, 3.606741483),
+        (1	  ,1, -0.014, 4.813655311),
+        (1.25 ,1, -0.014, 6.020569138),
+        (1.5  ,1, -0.014, 7.227482966),
+        (1.75 ,1, -0.014, 8.434396794),
+        (2	  ,1, -0.014, 9.641310621),
+        (2.25 ,1, -0.014, 10.84822445),
+        (2.5  ,1, -0.014, 12.05513828),
     ],
 )
-def test_crc_8_atm_adc_1(voltage_bytes, crc_code, err):
-    with err:
-        check_crc(voltage_bytes, crc_code)
-
-
-def test_generate_crc_8_table():
-    assert generate_crc_8_table(CRC_8_ATM_GEN) == CRC_8_ATM_LUT
-
+def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
+    assert pytest.approx(_adc_voltage_to_input_voltage(voltage, gain, offset),0.0001) == result
 
 @pytest.mark.parametrize(
-    "code, ref_resistance, temp_offset, rtd_conv_constant",
+    "code, adc_num, calibs, result",
     [
-        ([51, 16, 126, 166], 1326.20, 100, 0.385),
-        ([0x8, 0x43, 0x1C, 0x45], 1326.20, 100, 0.385),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 12.08313),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), -12.05513),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 0.014),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 12.08313),
+        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 12.08313),
+        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), -12.05513),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), -12.05513),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 0.014),
+    ],
+)
+def test_code_to_voltage(code, adc_num, calibs, result):
+    assert pytest.approx(code_to_voltage(code, adc_num, calibs),0.0001) == result
+
+@pytest.mark.parametrize(
+    "code, adc_num, calibs, result",
+    [
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 24.138),
+        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 0.00),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.00), 12.069),
+    ],
+)
+def test_code_to_voltage_single_ended(code, adc_num, calibs, result):
+    assert pytest.approx(code_to_voltage_single_ended(code, adc_num, calibs),0.0001) == result
+
+@pytest.mark.parametrize(
+    "code, ref_resistance, temp_offset, rtd_conv_constant, adc_num, expected",
+    [
+        ([0x03, 0x85, 0x1E, 0xB8], 2000, 100, 0.385, ADCNum.ADC_1, 25.97),
+        ([0x03, 0x85, 0x1E], 2000, 100, 0.385, ADCNum.ADC_2, 25.97),
     ]
 )
-def test_code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant):
-    # TODO: add check for expected value later if any values are known. No errors raised
-    # is good enough for now.
-    code_to_temperature(code, ref_resistance, temp_offset, rtd_conv_constant)
+def test_code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num,expected):
+    temperature = code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num)
+    assert expected == pytest.approx(temperature, 0.001)

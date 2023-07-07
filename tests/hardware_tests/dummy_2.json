@@ -1,0 +1,39 @@
+{
+	"random": "94",
+	"random float": "46.963",
+	"bool": "true",
+	"date": "1985-02-02",
+	"regEx": "hellooooooooooooooooooooooo world",
+	"enum": "json",
+	"firstname": "Devina",
+	"lastname": "Karylin",
+	"city": "Vaduz",
+	"country": "Malawi",
+	"countryCode": "BT",
+	"email uses current data": "Devina.Karylin@gmail.com",
+	"email from expression": "Devina.Karylin@yopmail.com",
+	"array": [
+		"Tamqrah",
+		"Fina",
+		"Keelia",
+		"Britte",
+		"Fanchon"
+	],
+	"array of objects": [
+		{
+			"index": "0",
+			"index start at 5": "5"
+		},
+		{
+			"index": "1",
+			"index start at 5": "6"
+		},
+		{
+			"index": "2",
+			"index start at 5": "7"
+		}
+	],
+	"Dulcinea": {
+		"age": "37"
+	}
+}

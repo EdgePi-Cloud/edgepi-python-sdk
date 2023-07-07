@@ -6,7 +6,8 @@ from edgepi.adc.adc_conv_time import (
     expected_continuous_time_delay,
     ADC1_CONT_DELAYS,
     ADC1_INITIAL_DELAYS,
-    ADC2_DELAYS,
+    ADC2_CONT_DELAYS,
+    ADC2_INITIAL_DELAYS,
 )
 from edgepi.adc.adc_constants import (
     FilterMode as FILT,
@@ -505,121 +506,121 @@ from edgepi.adc.adc_constants import (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
             FILT.SINC1.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
             FILT.SINC2.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
             FILT.SINC3.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
             FILT.SINC4.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
             FILT.FIR.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
             FILT.SINC1.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
             FILT.SINC2.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
             FILT.SINC3.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
             FILT.SINC4.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
             FILT.FIR.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
             FILT.SINC1.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
             FILT.SINC2.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
             FILT.SINC3.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
             FILT.SINC4.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
             FILT.FIR.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
             FILT.SINC1.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_800.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
             FILT.SINC2.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_800.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
             FILT.SINC3.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_800.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
             FILT.SINC4.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_800.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
             FILT.FIR.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_INITIAL_DELAYS[DR2.SPS_800.value.op_code],
         ),
     ],
 )
@@ -627,7 +628,7 @@ def test_compute_initial_time_delay(adc_num, data_rate, filter_mode, expected):
     if adc_num == ADCNum.ADC_1:
         assert expected_initial_time_delay(adc_num, data_rate, filter_mode) == expected
     else:
-        assert expected_initial_time_delay(adc_num, data_rate, filter_mode) == expected * 3
+        assert expected_initial_time_delay(adc_num, data_rate, filter_mode) == expected
 
 
 @pytest.mark.parametrize(
@@ -718,22 +719,22 @@ def test_compute_initial_time_delay(adc_num, data_rate, filter_mode, expected):
         (
             ADCNum.ADC_2,
             DR2.SPS_10.value.op_code,
-            ADC2_DELAYS[DR2.SPS_10.value.op_code],
+            ADC2_CONT_DELAYS[DR2.SPS_10.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_100.value.op_code,
-            ADC2_DELAYS[DR2.SPS_100.value.op_code],
+            ADC2_CONT_DELAYS[DR2.SPS_100.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_400.value.op_code,
-            ADC2_DELAYS[DR2.SPS_400.value.op_code],
+            ADC2_CONT_DELAYS[DR2.SPS_400.value.op_code],
         ),
         (
             ADCNum.ADC_2,
             DR2.SPS_800.value.op_code,
-            ADC2_DELAYS[DR2.SPS_800.value.op_code],
+            ADC2_CONT_DELAYS[DR2.SPS_800.value.op_code],
         ),
     ],
 )

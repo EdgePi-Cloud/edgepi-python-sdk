@@ -21,6 +21,7 @@ from edgepi.tc.tc_constants import (
     DecBits6,
     FaultMode,
     NoiseFilterMode,
+    Masks,
     OpenCircuitMode,
     OpenMask,
     OvuvMask,
@@ -38,6 +39,79 @@ from edgepi.tc.tc_conv_time import calc_conv_time
 
 _logger = logging.getLogger(__name__)
 
+# pylint: disable=too-many-instance-attributes
+class TCState:
+    """
+    A Class to store TC state
+    """
+    def __init__(self):
+        # cmode = True = auto conv mode
+        self.cmode = None
+        # one_shot = True = single shot
+        self.one_shot = None
+        self.open_circuit_fault = None
+        # cj = True = disabled
+        self.cold_junction = None
+        # fault = True = interrupt mode
+        self.fault = None
+        self.fault_clr = None
+        # noise_rejection = true = 50Hz
+        self.noise_rejection = None
+        self.sampling_average = None
+        self.tc_type = None
+
+    def __tc_get_state_bool(self, cr_reg: int, mask:int):
+        """
+        Populate the state value using the cr_regs
+        Args:
+            cr_reg (int): value of one of configuration register either CR0 | CR1
+            bitmask (int): bit mask
+        Return:
+            Bool
+        """
+        return (cr_reg & mask) == mask
+
+    def __tc_get_state(self, cr_reg: int, mask: int):
+        """
+        Populate thes state value using the cr_regs
+        Args:
+            cr_reg (int): value of one of configuration register either CR0 | CR1
+            bitmask (int): bit mask
+        Return:
+            int
+        """
+        reg_val = cr_reg&mask
+        if mask == Masks.CR1_HIGH_MASK.value:
+            state = TCType.get_tc_type(reg_val=reg_val)
+        else:
+            state = AvgMode.get_avg_mode(reg_val=reg_val)
+        return state
+
+    def tc_update_state(self, cr_regs: list):
+        """
+        Update configurations using configuration registers
+        """
+        # cmode = True = auto conv mode
+        self.cmode = self.__tc_get_state_bool(cr_regs[0], ConvMode.AUTO.value.op_code)
+        # one_shot = True = single shot
+        self.one_shot = self.__tc_get_state_bool(cr_regs[0], TCOps.SINGLE_SHOT.value.op_code)
+        self.open_circuit_fault = None
+        # cj = True = disabled
+        self.cold_junction = self.__tc_get_state_bool(cr_regs[0], CJMode.DISABLE.value.op_code)
+        # fault = True = interrupt mode
+        self.fault = self.__tc_get_state_bool(cr_regs[0], FaultMode.INTERRUPT.value.op_code)
+        self.fault_clr = None
+        # noise_rejection = true = 50Hz
+        self.noise_rejection = self.__tc_get_state_bool(cr_regs[0],
+                                                        NoiseFilterMode.HZ_50.value.op_code)
+        # sampling_average = 0x00 =1sample,
+        #                    0x10 = 2 samples,
+        #                    0x20 = 4 samples,
+        #                    0x30 = 8 samples,
+        #                    0x40 = 16 samples
+        self.sampling_average = self.__tc_get_state(cr_regs[1], Masks.CR1_LOW_MASK.value)
+        #TC_TYPE = 0->7 = B->E->J->K->N->R->S->T
+        self.tc_type = self.__tc_get_state(cr_regs[1], Masks.CR1_HIGH_MASK.value)
 
 class EdgePiTC(SpiDevice):
     """
@@ -62,6 +136,7 @@ class EdgePiTC(SpiDevice):
 
     def __init__(self):
         super().__init__(bus_num=6, dev_id=2)
+        self.tc_state = TCState()
 
     def read_temperatures(self):
         """Use to read cold junction and linearized thermocouple temperature measurements"""
@@ -179,7 +254,6 @@ class EdgePiTC(SpiDevice):
             new_data[0] = register address, new_data[1] = register value
         """
         data = [reg_addx] + [0xFF]
-        _logger.debug(f"__read_register: addx = {reg_addx} => data before xfer = {data}")
         new_data = self.transfer(data)
         _logger.debug(f"__read_register: addx = {reg_addx} => data after xfer = {new_data}")
         return new_data
@@ -196,7 +270,6 @@ class EdgePiTC(SpiDevice):
             is the start address: register values begin from the second entry.
         """
         data = [start_addx] + [0xFF] * regs_to_read
-        _logger.debug(f"__read_registers: shifting in data => {data}")
         new_data = self.transfer(data)
         _logger.debug(f"__read_registers: shifted out data => {new_data}")
         return new_data
@@ -211,8 +284,7 @@ class EdgePiTC(SpiDevice):
         """
         data = [reg_addx] + [value]
         _logger.debug(f"__write_to_registers: shifting in data => {data}")
-        new_data = self.transfer(data)
-        _logger.debug(f"__write_to_registers: shifted out data => {new_data}")
+        self.transfer(data)
 
     def __read_registers_to_map(self):
         """
@@ -249,17 +321,16 @@ class EdgePiTC(SpiDevice):
                 updated_value = entry["value"]
                 self.__write_to_register(reg_addx, updated_value)
                 _logger.debug(
-                    f"""register value at address ({hex(reg_addx)})
-                     has been updated to ({hex(updated_value)})"""
-                )
+                    f"register value at address ({hex(reg_addx)})"
+                    f" has been updated to ({hex(updated_value)})")
 
     def __get_tc_type(self):
         """Returns the currently configured thermocouple type"""
         cr1 = Bits(uint=self.__read_register(TCAddresses.CR1_R.value)[1], length=8)
         tc_bits = cr1[-4:].uint
-        for enum in TCType:
-            if enum.value.op_code == tc_bits:
-                return enum
+        for tc in TCType:
+            if not isinstance(tc.value, int) and tc.value.op_code == tc_bits:
+                return tc
         return None
 
     def __get_cj_status(self):
@@ -437,7 +508,7 @@ class EdgePiTC(SpiDevice):
 
         # filter out self from args
         args_dict = filter_dict(locals(), "self", None)
-        _logger.debug(f"set_config: args dict:\n\n {args_dict}\n\n")
+        _logger.debug(f"set_config: args dict:\n {args_dict}")
 
         # extract non-temperature setting opcodes from Enums
         ops_list = [
@@ -464,11 +535,25 @@ class EdgePiTC(SpiDevice):
         # read value of every write register into dict, starting from CR0_W.
         # Tuples are (write register addx : register_value) pairs.
         reg_values = self.__read_registers_to_map()
-        _logger.debug(f"set_config: register values before updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"set_config: register values before updates:\n{reg_values}")
 
         # updated register values
         apply_opcodes(reg_values, ops_list)
-        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}\n\n")
+        _logger.debug(f"set_config: register values after updates:\n\n{reg_values}")
 
         # only update registers whose values have been changed
         self.__update_registers_from_dict(reg_values)
+
+        # Update configuration state
+        self.get_state()
+
+    def get_state(self):
+        """
+        Read config registers and update state object
+        Args:
+            N/A
+        Retuern:
+            N/A
+        """
+        cr_regs = self.__read_registers(TCAddresses.CR0_R.value, 2)
+        self.tc_state.tc_update_state(cr_regs[1:])

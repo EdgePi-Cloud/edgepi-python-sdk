@@ -45,9 +45,9 @@ def _get_data_ready_time(adc):
     return statistics.fmean(times)
 
 
-def _get_conv_time(adc):
+def _get_conv_time(adc, adc_num):
     start = perf_counter_ns()
-    while not adc._EdgePiADC__is_data_ready():
+    while not adc._EdgePiADC__is_data_ready(adc_num):
         continue
     end = perf_counter_ns()
     return (end - start) * 10**-6
@@ -57,7 +57,7 @@ def _get_initial_conv_time(adc, adc_num, conv_mode):
     times = []
     for _ in range(NUM_TRIALS):
         adc._EdgePiADC__send_start_command(adc_num)
-        times.append(_get_conv_time(adc))
+        times.append(_get_conv_time(adc, adc_num))
         if conv_mode == ConvMode.CONTINUOUS:
             adc.stop_conversions(adc_num)
     return statistics.fmean(times)
@@ -67,7 +67,7 @@ def _get_mean_conv_time_continuous(adc, adc_num):
     adc._EdgePiADC__send_start_command(adc_num)
     times = []
     for _ in range(NUM_TRIALS):
-        times.append(_get_conv_time(adc))
+        times.append(_get_conv_time(adc, adc_num))
     adc.stop_conversions(adc_num)
     # skip first 2 conv times because these are not measured correctly due to
     # new data being available before we start sampling STATUS byte
@@ -261,6 +261,7 @@ def _get_mean_conv_time_continuous(adc, adc_num):
 )
 def test_expected_initial_time_delay(adc_num, conv_mode, data_rate, filter_mode, adc):
     # configure ADC with new filter and data rate modes
+    adc.reset()
     if adc_num == ADCNum.ADC_1:
         adc._EdgePiADC__config(
             conversion_mode=conv_mode, adc_1_data_rate=data_rate, filter_mode=filter_mode

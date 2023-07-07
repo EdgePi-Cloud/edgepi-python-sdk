@@ -124,6 +124,14 @@ def test_generate_pin_info_rtd(config = GpioConfigs.RTD.value):
         assert pin[1].dir_out_code == output_dir.value
         assert pin[1].address == GpioExpanderAddress.EXP_TWO.value
 
+def test_generate_pin_info_relay(config = GpioConfigs.RELAY.value):
+    pin_list = generate_pin_info(config)
+    pin_keys = list(pin_list.keys())
+    assert pin_list[pin_keys[0]].set_code == GpioBOutputSet.SET_OUTPUT_8.value
+    assert pin_list[pin_keys[0]].clear_code == GpioBOutputClear.CLEAR_OUTPUT_8.value
+    assert pin_list[pin_keys[0]].dir_out_code == GpioBPinDirOut.PIN8_DIR_OUT.value
+    assert pin_list[pin_keys[0]].address == GpioExpanderAddress.EXP_TWO.value
+
 def test_generate_pin_info_adc(config = GpioConfigs.ADC.value):
     pin_list = generate_pin_info(config)
     pin_keys = list(pin_list.keys())
@@ -150,13 +158,14 @@ def test_generate_expander_pin_info():
     result_dict.update(generate_pin_info(GpioConfigs.DAC.value))
     result_dict.update(generate_pin_info(GpioConfigs.ADC.value))
     result_dict.update(generate_pin_info(GpioConfigs.RTD.value))
+    result_dict.update(generate_pin_info(GpioConfigs.RELAY.value))
     result_dict.update(generate_pin_info(GpioConfigs.LED.value))
-    result_dict.update(generate_pin_info(GpioConfigs.DOUT2.value))
+    result_dict.update(generate_pin_info(GpioConfigs.DOUT.value))
+    result_dict.update(generate_pin_info(GpioConfigs.PWM.value))
     assert pin_dict == result_dict
 
 def test_generate_gpiochip_pin_info():
     pin_dict = generate_gpiochip_pin_info()
     result_dict = {}
     result_dict.update(generate_pin_info(GpioConfigs.DIN.value))
-    result_dict.update(generate_pin_info(GpioConfigs.DOUT1.value))
     assert pin_dict == result_dict

@@ -23,15 +23,17 @@ class DACCommands:
 
     def generate_write_and_update_command(self, ch: int, data: int) -> list:
         """Construct a write and update command"""
-        self.check_range(ch, 0, len(CH))
+        self.check_range(ch, 0, NUM_PINS-1)
         self.check_range(data, 0, CALIB_CONSTS.RANGE.value)
         return self.combine_command(COMMAND.COM_WRITE_UPDATE.value, CH(ch).value, data)
 
     def __voltage_to_float_code(self, ch: int, expected: float, dac_gain: int = 1):
-        """Convert a voltage to full precision binary code value"""
-        float_code =((expected / dac_gain) - self.dict_calib_param[ch].offset) * \
-                    (CALIB_CONSTS.RANGE.value / \
-                    (CALIB_CONSTS.V_RANGE.value * self.dict_calib_param[ch].gain))
+        """
+        Convert a voltage to full precision binary code value
+        code = ((expected_v - offset)/gain) * (Code_range/V_range))/DAC_GAIN
+        """
+        float_code =(((expected-self.dict_calib_param[ch].offset)/self.dict_calib_param[ch].gain)*\
+                    (CALIB_CONSTS.RANGE.value/CALIB_CONSTS.V_RANGE.value))/dac_gain
         _logger.debug(f"Full code generated {float_code}")
         return float_code
 
@@ -50,7 +52,7 @@ class DACCommands:
             int: 16 bit binary code value for writing voltage value to DAC
         """
         # DAC channels are 0 indexed
-        self.check_range(ch, 0, NUM_PINS - 1)
+        self.check_range(ch, 0, NUM_PINS-1)
         float_code = self.__voltage_to_float_code(ch, expected, dac_gain)
         _logger.debug(f"Int code generated {int(float_code)}")
         # DAC only accepts int values, round to nearest int
@@ -81,10 +83,12 @@ class DACCommands:
         return bits[-16:].uint
 
     def __code_to_float_voltage(self, ch: int, code: int, dac_gain: int = 1) -> float:
-        """Convert a voltage to float voltage"""
-        voltage = (CALIB_CONSTS.V_RANGE.value /
-                   CALIB_CONSTS.RANGE.value * self.dict_calib_param[ch].gain) *\
-                  (code*dac_gain) + self.dict_calib_param[ch].offset
+        """
+        Convert a voltage to float voltage
+        ((Code*DAC_GAIN)*(V_Range/CodeRange))*Calib_Gain + Calib_Offset
+        """
+        voltage = ((code*dac_gain)*(CALIB_CONSTS.V_RANGE.value/CALIB_CONSTS.RANGE.value))*\
+                  self.dict_calib_param[ch].gain + self.dict_calib_param[ch].offset
         return voltage
 
     def code_to_voltage(self, ch: int, code: int, dac_gain: int = 1) -> float:

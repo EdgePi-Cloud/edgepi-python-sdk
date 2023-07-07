@@ -8,7 +8,7 @@ DAC_PRECISION = 3  # decimal place precision for voltage conversions
 SW_RESET = 0x1234  # software reset command data bits
 NULL_BITS = 0x0
 READ_WRITE_SIZE = 3  # size of DAC read/write in bytes
-UPPER_LIMIT = 5.0 # upper limit for voltage writes to DAC
+UPPER_LIMIT = 5.000 # upper limit for voltage writes to DAC
 
 
 class EdgePiDacCom(Enum):
@@ -34,14 +34,14 @@ class EdgePiDacCom(Enum):
 class DACChannel(Enum):
     """EdgePi DAC channel addresses"""
 
-    AOUT0 = 0x0
-    AOUT1 = 0x1
-    AOUT2 = 0x2
-    AOUT3 = 0x3
-    AOUT4 = 0x4
-    AOUT5 = 0x5
-    AOUT6 = 0x6
-    AOUT7 = 0x7
+    AOUT1 = 0x0
+    AOUT2 = 0x1
+    AOUT3 = 0x2
+    AOUT4 = 0x3
+    AOUT5 = 0x4
+    AOUT6 = 0x5
+    AOUT7 = 0x6
+    AOUT8 = 0x7
 
 
 NUM_PINS = len(DACChannel)
@@ -85,6 +85,18 @@ class AOPins(Enum):
     AO_EN6 = "AO_EN6"
     AO_EN7 = "AO_EN7"
     AO_EN8 = "AO_EN8"
+
+class DOPins(Enum):
+    """Analog/Digital out gpio pin names"""
+
+    DOUT1 = 'DOUT1'
+    DOUT2 = 'DOUT2'
+    DOUT3 = 'DOUT3'
+    DOUT4 = 'DOUT4'
+    DOUT5 = 'DOUT5'
+    DOUT6 = 'DOUT6'
+    DOUT7 = 'DOUT7'
+    DOUT8 = 'DOUT8'
 
 class GainPin(Enum):
     """DAC gain enable/disable pin"""

@@ -2,9 +2,10 @@
 
 import logging
 
+from time import sleep
 import pytest
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ADCNum, DiffMode
+from edgepi.adc.adc_constants import AnalogIn, ADCNum, DiffMode
 from edgepi.dac.edgepi_dac import EdgePiDAC
 from edgepi.dac.dac_constants import DACChannel
 
@@ -16,18 +17,19 @@ NUM_CHANNELS = 8
 READS_PER_WRITE = 1
 RW_ERROR = 1e-1 # TODO: change to mV
 MAX_VOLTAGE = 5.0
-VOLTAGE_STEP = 0.1
+VOLTAGE_STEP = 1.0
+WRITE_READ_DELAY = 0.1
 
 
 _ch_map = {
-    0: (ADCChannel.AIN0, DACChannel.AOUT0),
-    1: (ADCChannel.AIN1, DACChannel.AOUT1),
-    2: (ADCChannel.AIN2, DACChannel.AOUT2),
-    3: (ADCChannel.AIN3, DACChannel.AOUT3),
-    4: (ADCChannel.AIN4, DACChannel.AOUT4),
-    5: (ADCChannel.AIN5, DACChannel.AOUT5),
-    6: (ADCChannel.AIN6, DACChannel.AOUT6),
-    7: (ADCChannel.AIN7, DACChannel.AOUT7),
+    0: (AnalogIn.AIN1, DACChannel.AOUT1),
+    1: (AnalogIn.AIN2, DACChannel.AOUT2),
+    2: (AnalogIn.AIN3, DACChannel.AOUT3),
+    3: (AnalogIn.AIN4, DACChannel.AOUT4),
+    4: (AnalogIn.AIN5, DACChannel.AOUT5),
+    5: (AnalogIn.AIN6, DACChannel.AOUT6),
+    6: (AnalogIn.AIN7, DACChannel.AOUT7),
+    7: (AnalogIn.AIN8, DACChannel.AOUT8),
 }
 
 
@@ -71,7 +73,7 @@ def _measure_voltage_individual(
     ):
     # write to DAC channel
     dac.write_voltage(dac_ch, write_voltage)
-
+    sleep(WRITE_READ_DELAY)
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         _logger.info(_voltage_rw_msg(dac_ch, write_voltage, read_voltage))
@@ -133,14 +135,14 @@ def _measure_voltage_differential(
 
 
 _diff_ch_map = {
-    ADCChannel.AIN0: DACChannel.AOUT0,
-    ADCChannel.AIN1: DACChannel.AOUT1,
-    ADCChannel.AIN2: DACChannel.AOUT2,
-    ADCChannel.AIN3: DACChannel.AOUT3,
-    ADCChannel.AIN4: DACChannel.AOUT4,
-    ADCChannel.AIN5: DACChannel.AOUT5,
-    ADCChannel.AIN6: DACChannel.AOUT6,
-    ADCChannel.AIN7: DACChannel.AOUT7,
+    AnalogIn.AIN1: DACChannel.AOUT1,
+    AnalogIn.AIN2: DACChannel.AOUT2,
+    AnalogIn.AIN3: DACChannel.AOUT3,
+    AnalogIn.AIN4: DACChannel.AOUT4,
+    AnalogIn.AIN5: DACChannel.AOUT5,
+    AnalogIn.AIN6: DACChannel.AOUT6,
+    AnalogIn.AIN7: DACChannel.AOUT7,
+    AnalogIn.AIN8: DACChannel.AOUT8,
 }
 
 

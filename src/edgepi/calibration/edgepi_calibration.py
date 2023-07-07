@@ -3,7 +3,7 @@ Module for generating calibration parameter data structure for each module. This
 able to generate new calibration parameters using measurements tools.
 '''
 
-from edgepi.calibration.eeprom_constants import ModuleNames
+from edgepi.eeprom.eeprom_constants import ModuleNames
 from edgepi.calibration.calibration_constants import NumOfCh
 
 

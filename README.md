@@ -19,26 +19,26 @@ $ python3 -m pip install edgepi-python-sdk
 ## Example Code
 The EdgePi SDK provides a wide range of functionality to users, allowing interaction with the many modules onboard the EdgePi. One such module, the ADC, can be used to read voltage continuously from any of the eight EdgePi analog input pins:
 
-```
-from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import ADCChannel, ConvMode, ADCNum
+```python
+from edgepi.dac.edgepi_adc import EdgePiADC
+from edgepi.adc.adc_constants import ADCChannel, ConvMode
 
 # initialize ADC
 edgepi_adc = EdgePiADC()
 
-# configure ADC to sample analog input pin AIN3
+# configure ADC to sample input pin 4 (the input pins are 0-indexed)
 edgepi_adc.set_config(adc_1_analog_in=ADCChannel.AIN3, conversion_mode=ConvMode.CONTINUOUS)
 
-# send command to start continuous conversions
-edgepi_adc.start_conversions(ADCNum.ADC_1)
+# send command to start automatic conversions
+edgepi_adc.start_conversions()
 
 # perform 10 voltage reads
 for _ in range(10):
-  out = edgepi_adc.read_voltage(ADCNum.ADC_1)
+  out = edgepi_adc.read_voltage()
   print(out)
   
-# stop continuous conversions
-edgepi_adc.stop_conversions(ADCNum.ADC_1)
+# stop automatic conversions
+edgepi_adc.stop_conversions()
 ```
 For further details on this and other modules, please refer to each module's documentation by following the links provided in the `Implemented Modules` section below.
 # Implemented Modules

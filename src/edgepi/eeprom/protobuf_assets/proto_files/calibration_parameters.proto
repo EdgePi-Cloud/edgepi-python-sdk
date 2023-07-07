@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message CalibParam{
+    optional float gain = 1;
+    optional float offset = 2;
+}

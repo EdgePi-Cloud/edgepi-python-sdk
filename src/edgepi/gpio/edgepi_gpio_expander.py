@@ -33,11 +33,11 @@ class EdgePiGPIOExpander(I2CDevice):
             `int`: 8-bit uint value of port/register
         '''
         msg_read = self.set_read_msg(reg_address, [0xFF])
-        _logger.debug(f'Read Message: Register Address {msg_read[0].data}\
-                      , Msg Place Holder {msg_read[1].data}')
+        _logger.debug(f"Read Message: Register Address {msg_read[0].data}"
+                      f", Msg Place Holder {msg_read[1].data}")
         self.transfer(dev_address, msg_read)
-        _logger.debug(f'Message Read: Register Address {msg_read[0].data},\
-         Msg Place Holder {msg_read[1].data}')
+        _logger.debug(f"Message Read: Register Address {msg_read[0].data},"
+                      f"Msg Place Holder {msg_read[1].data}")
         return msg_read[1].data[0]
 
     def __write_changed_values(self, reg_dict: dict, dev_address: int):
@@ -114,9 +114,6 @@ class EdgePiGPIOExpander(I2CDevice):
         # get register value of port this pin belongs to
         reg_val = self.__read_register(reg_addx, dev_address)
 
-        # set pin to low before setting to output (hazard)
-        self.clear_expander_pin(pin_name)
-
         # set pin direction to out
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, dir_out_code)
         _logger.debug(":set_expander_pin_direction_out: pin '%s' set to output", pin_name)
@@ -157,8 +154,9 @@ class EdgePiGPIOExpander(I2CDevice):
         # get register value of port this pin belongs to
         reg_val = self.__read_register(reg_addx, dev_address)
 
-        # set pin direction to output (also sets to low)
-        self.set_expander_pin_direction_out(pin_name)
+        if self.get_expander_pin_direction(pin_name):
+            # set pin direction to output (also sets to low)
+            self.set_expander_pin_direction_out(pin_name)
 
         # set pin state to high
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, set_code)
@@ -202,9 +200,13 @@ class EdgePiGPIOExpander(I2CDevice):
         # get register value of port this pin belongs to
         reg_val = self.__read_register(reg_addx, dev_address)
 
+        if self.get_expander_pin_direction(pin_name):
+            # set pin direction to output (also sets to low)
+            self.set_expander_pin_direction_out(pin_name)
+
         # set pin state to low
         self.__apply_code_to_register(dev_address, reg_addx, reg_val, clear_code)
-        _logger.debug(":set_expander_pin: pin '%s' = set to low", pin_name)
+        _logger.debug(":clear_expander_pin: pin '%s' = set to low", pin_name)
 
         self.expander_pin_dict[pin_name].is_high = False
 
