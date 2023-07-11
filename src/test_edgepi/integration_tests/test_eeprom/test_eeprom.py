@@ -110,7 +110,7 @@ def test_write_edgepi_data(eeprom):
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("48d088f7536e5c59938724b174184611", does_not_raise())
+                         ("6b68b8e2dd2a6bec300ef91572270723", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
     original_data = eeprom.read_edgepi_data()
