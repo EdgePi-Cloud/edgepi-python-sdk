@@ -6,7 +6,8 @@ from edgepi.eeprom.protobuf_assets.generated_pb2 import (
     dac_module_pb2,
     adc_module_pb2,
     rtd_module_pb2,
-    tc_module_pb2
+    tc_module_pb2,
+    keys_pb2
 )
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_dac_module import DACModule
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_adc_module import ADCModule
@@ -38,13 +39,9 @@ class EepromDataClass:
         self.__populate_adc2_module(eeprom_pb.adc2_module)
         self.__populate_rtd_module(eeprom_pb.rtd_module)
         self.__populate_tc_module(eeprom_pb.tc_module)
+        self.__populate_config_key_module(eeprom_pb.config_keys)
+        self.__populate_data_key_module(eeprom_pb.data_keys)
 
-        if self.config_key is not None:
-            eeprom_pb.config_keys.certificate = self.config_key.certificate
-            eeprom_pb.config_keys.private_key = self.config_key.private_key
-        if self.data_key is not None:
-            eeprom_pb.data_keys.certificate = self.data_key.certificate
-            eeprom_pb.data_keys.private_key = self.data_key.private_key
         if self.serial is not None:
             eeprom_pb.serial_number = self.serial
         if self.model is not None:
@@ -85,6 +82,18 @@ class EepromDataClass:
             return
         self.tc_calib_params.populate_tc_module_pb(tc_pb)
 
+    def __populate_config_key_module(self, key_pb: keys_pb2):
+        """Serialize Config Keys"""
+        if self.config_key is None:
+            return
+        self.config_key.populate_keys_pb(key_pb)
+
+    def __populate_data_key_module(self, key_pb: keys_pb2):
+        """Serialize Data Keys"""
+        if self.data_key is None:
+            return
+        self.data_key.populate_keys_pb(key_pb)
+
     @staticmethod
     def extract_eeprom_data(eeprom_pb:edgepi_module_pb2):
         """De-serialize"""
@@ -95,14 +104,14 @@ class EepromDataClass:
         eeprom_data.rtd_calib_params = EepromDataClass.extract_rtd_data(eeprom_pb.rtd_module)
         eeprom_data.tc_calib_params = EepromDataClass.extract_tc_data(eeprom_pb.tc_module)
 
+        if eeprom_pb.HasField("config_keys"):
+            eeprom_data.config_key = EepromDataClass.extract_config_key(eeprom_pb.config_keys)
+        if eeprom_pb.HasField("data_keys"):
+            eeprom_data.data_key = EepromDataClass.extract_data_key(eeprom_pb.data_keys)
         if eeprom_pb.HasField("serial_number"):
             eeprom_data.serial = eeprom_pb.serial_number
         if eeprom_pb.HasField("model"):
             eeprom_data.model = eeprom_pb.model
-        if eeprom_pb.HasField("config_keys"):
-            eeprom_data.config_key = eeprom_pb.config_keys
-        if eeprom_pb.HasField("data_keys"):
-            eeprom_data.data_key = eeprom_pb.data_keys
         if eeprom_pb.HasField("cm_part_number"):
             eeprom_data.cm_part_number = eeprom_pb.cm_part_number
         if eeprom_pb.HasField("tb_part_number"):
@@ -140,3 +149,13 @@ class EepromDataClass:
         if tc_pb is None:
             return
         return TCModule.extract_tc_calib_params(tc_pb)
+
+    @staticmethod
+    def extract_config_key(key_pb: keys_pb2):
+        """De-serialize Config Keys"""
+        return AwsKeys.extract_keys(key_pb)
+
+    @staticmethod
+    def extract_data_key(key_pb: keys_pb2):
+        """De-serialize Data Keys"""
+        return AwsKeys.extract_keys(key_pb)

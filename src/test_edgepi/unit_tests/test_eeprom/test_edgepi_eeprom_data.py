@@ -22,8 +22,21 @@ def test_init_data_class():
     edgepi_eeprom_data = EepromDataClass()
     edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
     assert edgepi_eeprom_pb.ByteSize() == 0
-    for attr in edgepi_eeprom_data.__annotations__:
-        assert getattr(edgepi_eeprom_data, attr) is None
+    assert edgepi_eeprom_data.dac_calib_params is None
+    assert edgepi_eeprom_data.adc1_calib_params is None
+    assert edgepi_eeprom_data.adc2_calib_params is None
+    assert edgepi_eeprom_data.rtd_calib_params is None
+    assert edgepi_eeprom_data.tc_calib_params is None
+    assert edgepi_eeprom_data.config_key.private_key is None
+    assert edgepi_eeprom_data.data_key.private_key is None
+    assert edgepi_eeprom_data.config_key.certificate is None
+    assert edgepi_eeprom_data.data_key.certificate is None
+    assert edgepi_eeprom_data.serial is None
+    assert edgepi_eeprom_data.model is None
+    assert edgepi_eeprom_data.cm_part_number is None
+    assert edgepi_eeprom_data.tb_part_number is None
+    assert edgepi_eeprom_data.cm4_part_number is None
+
 
 
 def test_deserialize_pb():
@@ -31,8 +44,22 @@ def test_deserialize_pb():
     edgepi_eeprom_pb = edgepi_module_pb2.EepromData()
     edgepi_eeprom_pb.ParseFromString(default_bin)
     edgepi_eeprom_data = EepromDataClass.extract_eeprom_data(edgepi_eeprom_pb)
-    for attr in edgepi_eeprom_data.__annotations__:
-        assert getattr(edgepi_eeprom_data, attr) is not None
+    assert edgepi_eeprom_pb.ByteSize() != 0
+    assert edgepi_eeprom_data.dac_calib_params is not None
+    assert edgepi_eeprom_data.adc1_calib_params is not None
+    assert edgepi_eeprom_data.adc2_calib_params is not None
+    assert edgepi_eeprom_data.rtd_calib_params is not None
+    assert edgepi_eeprom_data.tc_calib_params is not None
+    assert edgepi_eeprom_data.config_key.private_key is None
+    assert edgepi_eeprom_data.data_key.private_key is None
+    assert edgepi_eeprom_data.config_key.certificate is None
+    assert edgepi_eeprom_data.data_key.certificate is None
+    assert edgepi_eeprom_data.serial is None
+    assert edgepi_eeprom_data.model is None
+    assert edgepi_eeprom_data.cm_part_number is None
+    assert edgepi_eeprom_data.tb_part_number is None
+    assert edgepi_eeprom_data.cm4_part_number is None
+
 
 def test_serialize_pb():
     default_bin = read_binfile()
@@ -43,3 +70,4 @@ def test_serialize_pb():
     edgepi_eeprom_data = EepromDataClass.extract_eeprom_data(edgepi_eeprom_pb_2)
     edgepi_eeprom_data.populate_eeprom_module(edgepi_eeprom_pb)
     assert edgepi_eeprom_pb.ByteSize() != 0
+    assert edgepi_eeprom_pb.SerializeToString() == edgepi_eeprom_pb_2.SerializeToString()
