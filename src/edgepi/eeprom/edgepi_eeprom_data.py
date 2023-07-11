@@ -12,6 +12,7 @@ from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_dac_module import 
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_adc_module import ADCModule
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_rtd_module import RTDModule
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_tc_module import TCModule
+from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_key_module import AwsKeys
 
 @dataclass
 class EepromDataClass:

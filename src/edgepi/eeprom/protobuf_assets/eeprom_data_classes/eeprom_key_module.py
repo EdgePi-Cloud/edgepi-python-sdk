@@ -17,11 +17,11 @@ class AwsKeys:
             key_pb.certificate = self.certificate
 
     @staticmethod
-    def extract_rtd_calib_params(rtd_pb: keys_pb2):
+    def extract_rtd_calib_params(key_pb: keys_pb2):
         """De-serialize method"""
-        rtd_mod = AwsKeys()
-        if rtd_pb.HasField("private_key"):
-            rtd_mod.rtd = CalibParam(gain=rtd_pb.rtd.gain, offset = rtd_pb.rtd.offset)
-        if rtd_pb.HasField("rtd_resistor"):
-            rtd_mod.rtd_resistor = rtd_pb.rtd_resistor
-        return rtd_mod
+        key_mod = AwsKeys()
+        if key_pb.HasField("private_key"):
+            key_mod.private_key = key_pb.private_key
+        if key_pb.HasField("certificate"):
+            key_mod.certificate = key_pb.certificate
+        return key_mod
