@@ -14,12 +14,6 @@ from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_rtd_module import 
 from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_tc_module import TCModule
 
 @dataclass
-class AwsKeys:
-    """Key Pair dataclass"""
-    private_key:str = None
-    certificate:str = None
-
-@dataclass
 class EepromDataClass:
     """EEPROM Dataclass"""
     # pylint: disable=too-many-instance-attributes
@@ -28,8 +22,8 @@ class EepromDataClass:
     adc2_calib_params: ADCModule = None
     rtd_calib_params: RTDModule = None
     tc_calib_params: TCModule = None
-    config_key: AwsKeys = None
-    data_key: AwsKeys = None
+    config_key: AwsKeys = AwsKeys(None, None)
+    data_key: AwsKeys = AwsKeys(None, None)
     serial:str = None
     model:str = None
     cm_part_number: str = None
