@@ -53,7 +53,7 @@ def test_osensa_space_modify_1(eeprom):
     assert eeprom_data_origin.adc1_calib_params != eeprom_data_modify.adc1_calib_params
     assert eeprom_data_origin.adc2_calib_params != eeprom_data_modify.adc2_calib_params
 
-    eeprom.read_edgepi_data(eeprom_data_origin)
+    eeprom.write_edgepi_data(eeprom_data_origin)
 
 # TC and RTD modification
 def test_osensa_space_modify_2(eeprom):
