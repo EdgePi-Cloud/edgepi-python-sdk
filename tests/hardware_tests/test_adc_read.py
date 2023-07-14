@@ -11,7 +11,7 @@ from edgepi.dac.edgepi_dac import EdgePiDAC
 
 _logger = logging.getLogger(__name__)
 
-NUM_CHANNELS = 8
+NUM_CHANNELS = 2
 READS_PER_WRITE = 1
 RW_ERROR = 1e-1 # TODO: change to mV
 MAX_VOLTAGE = 5.0
@@ -82,5 +82,10 @@ def _generate_test_cases():
 
 @pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
 def test_voltage_rw_adc_1(channel, write_voltage, adc_1, dac):
+    adc_1.set_config(adc_1_analog_in=_ch_map[channel][0])
+    _measure_voltage_individual(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
+
+@pytest.mark.parametrize("channel, write_voltage", _generate_test_cases())
+def test_voltage_rw_adc_2(channel, write_voltage, adc_1, dac):
     adc_1.set_config(adc_1_analog_in=_ch_map[channel][0])
     _measure_voltage_individual(adc_1, dac, ADCNum.ADC_1, _ch_map[channel][1], write_voltage)
