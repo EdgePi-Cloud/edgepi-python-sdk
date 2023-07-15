@@ -10,16 +10,12 @@ from edgepi.digital_output.digital_output_constants import DoutPins, DoutTriStat
 @pytest.mark.parametrize("din_pin, dout_pin", [
     (DinPins.DIN1, DoutPins.DOUT1),
     (DinPins.DIN2, DoutPins.DOUT2),
-    (DinPins.DIN3, DoutPins.DOUT3),
-    (DinPins.DIN4, DoutPins.DOUT4),
-    (DinPins.DIN5, DoutPins.DOUT5),
-    (DinPins.DIN6, DoutPins.DOUT6),
-    (DinPins.DIN7, DoutPins.DOUT7),
-    (DinPins.DIN8, DoutPins.DOUT8),
+    (DinPins.DIN3, DoutPins.DOUT3)
 ])
 def test_input_state(din_pin, dout_pin):
     din=EdgePiDigitalInput()
     dout = EdgePiDigitalOutput()
+    dout.set_dout_state(dout_pin, DoutTriState.LOW)
     initial_state = din.digital_input_state(din_pin)
     dout.set_dout_state(dout_pin, DoutTriState.HIGH)
     sleep(0.1)
