@@ -13,7 +13,23 @@ FQAAAABSCg0AAIA/FQAAAABaCg0AAIA/FQAAAABiCg0AAIA/FQAAAAAiEQoKDQAAgD8VAAAAABUAAPpE
 SCg0AAIA/FQAAAAAaCg0AAIA/FQAAAAAiCg0AAIA/FQAAAAAqCg0AAIA/FQAAAAAyCg0AAIA/FQAAAAA6Cg0AAIA/FQAAAABCCg\
 0AAIA/FQAAAAA='
 
-#TODO: Show what the default dataclass looks 
+"""
+Defaul EEPROM Dataclass
+dac_calib_params.dac_ch_1~8.gain = 1 offset = 0
+adc1_calib_params.adc_ch_1~8, diff1~4.gain = 1 offset = 0
+adc2_calib_params.adc_ch_1~8, diff1~4.gain = 1 offset = 0
+rtd_calib_params.rtd.gain = 1 offset = 0
+rtd_calib_params.rtd_resistor = 2000
+tc_calib_params.tc_B,E,J,K,N,R,S,T.gain = 1 offset = 0
+config_key.private_key = None, certificate = None
+data_key.private_key = None, certificate = None
+serial = None
+model = None
+cm_part_number = None
+tb_part_number = None
+cm4_part_number = None
+"""
+
 
 
 class EEPROMInfo(Enum):
