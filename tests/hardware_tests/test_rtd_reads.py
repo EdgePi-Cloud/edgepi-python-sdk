@@ -7,7 +7,7 @@ from edgepi.adc.adc_constants import ADCNum, ConvMode
 
 # This has to be manually set with temperature machine. Use this value for testing.
 RTD_TEMP = 28
-ERROR = 1
+ERROR = 4
 
 
 @pytest.fixture(name="rtd", scope="module")
