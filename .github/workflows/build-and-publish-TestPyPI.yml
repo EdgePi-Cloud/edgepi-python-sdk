@@ -72,7 +72,7 @@ jobs:
   Hardware_Test:
     needs: publish
     name: Hardware Tests
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: [self-hosted, linux, ARM64, hw-test]
     strategy:
       fail-fast: false
       matrix:
