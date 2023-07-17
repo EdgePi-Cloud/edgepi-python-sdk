@@ -13,7 +13,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, EEPROMInfo
+from edgepi.eeprom.eeprom_constants import EEPROMInfo
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 

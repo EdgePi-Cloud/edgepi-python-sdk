@@ -129,11 +129,12 @@ def _measure_voltage_differential(
     # write to DAC channel
     for channel, write_voltage in write_voltages.items():
         dac.write_voltage(channel, write_voltage)
+        write_volt = write_voltage
     sleep(WRITE_READ_DELAY)
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         _logger.info(f"diff_read_voltage = {read_voltage}")
-        _assert_approx(write_voltage/2, read_voltage, RW_ERROR)
+        _assert_approx(write_volt/2, read_voltage, RW_ERROR)
 
 
 _diff_ch_map = {
@@ -177,4 +178,3 @@ def test_differential_rw_adc_2(diff, mux_p_volt, adc_2, dac):
     }
     _measure_voltage_differential(adc_2, dac, ADCNum.ADC_2, write_voltages)
     adc_2.stop_conversions(ADCNum.ADC_2)
-
