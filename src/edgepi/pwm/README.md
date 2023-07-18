@@ -14,8 +14,8 @@ edgepi_pwm = EdgePiPWM()
 
 # Initialize and open pwm device
 edgepi_pwm.init_pwm(PWMPins.PWM1)
-# Setting PWM parameters, frequency 1K to 10K, duty cycle form 0-1.0
-edgepi_pwm.set_config(PWMPins.PWM1, 1000, 0.50)
+# Setting PWM parameters, frequency 1000.0 to 10,000.0 , duty cycle form 0-1.0
+edgepi_pwm.set_config(PWMPins.PWM1, 1000.0, 0.50)
 # enable the pwm signal, PWM duty cycle and frequency must be set to enable the singal
 edgepi_pwm.enable()
 # disable the pwm signal 

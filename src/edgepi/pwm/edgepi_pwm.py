@@ -201,7 +201,7 @@ class EdgePiPWM():
         self.log.debug("init_pwm: PWM device is already open")
 
     def set_config(self, pwm_num: PWMPins,
-                   frequency: int = None,
+                   frequency: float = None,
                    duty_cycle: int = None,
                    polarity: Polarity = None
                    ):
