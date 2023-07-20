@@ -53,7 +53,7 @@ def test_osensa_space_modify_1(eeprom):
     assert eeprom_data_origin.adc1_calib_params != eeprom_data_modify.adc1_calib_params
     assert eeprom_data_origin.adc2_calib_params != eeprom_data_modify.adc2_calib_params
 
-    eeprom.read_edgepi_data(eeprom_data_origin)
+    eeprom.write_edgepi_data(eeprom_data_origin)
 
 # TC and RTD modification
 def test_osensa_space_modify_2(eeprom):
@@ -97,10 +97,10 @@ def test_osensa_space_modify_3(eeprom):
     eeprom_data_modify = eeprom.read_edgepi_data()
     time.sleep(0.5)
 
-    eeprom_data_modify.config_key.certificate = "yeeeeeeet"
-    eeprom_data_modify.config_key.private_key = "ajksbvjkalsbkvalva"
-    eeprom_data_modify.data_key.certificate = "asjkdbvakjsnvjka"
-    eeprom_data_modify.data_key.private_key = "lozxivhzlnjqq"
+    eeprom_data_modify.config_key.certificate = "This is test string"
+    eeprom_data_modify.config_key.private_key = "This is test string"
+    eeprom_data_modify.data_key.certificate = "This is test string"
+    eeprom_data_modify.data_key.private_key = "This is test string"
 
     eeprom.write_edgepi_data(eeprom_data_modify)
     time.sleep(0.5)

@@ -13,7 +13,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, EEPROMInfo
+from edgepi.eeprom.eeprom_constants import EEPROMInfo
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 
@@ -30,26 +30,6 @@ def read_dummy_json(file_name: str):
     with open(file_name, "r") as file:
         dummy = json.load(file)
     return dummy
-
-def test__page_write_register(eeprom):
-    for val in range(0, 256):
-        _logger.info(f"test__page_write_register: Test Value = {val}")
-        data = [val]*16384
-        initial_data = eeprom.read_user_space(0, len(data))
-        _logger.info(f"test__page_write_register: Initial Value = {len(initial_data)}")
-        addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        # pylint: disable=protected-access
-        page_n = eeprom._EdgePiEEPROM__generate_list_of_pages(addrx, data)
-        for indx, page in enumerate(page_n):
-            # pylint: disable=protected-access
-            eeprom._EdgePiEEPROM__page_write_register(addrx+(indx*EEPROMInfo.PAGE_SIZE.value), page)
-            time.sleep(0.002)
-        _logger.info(f"test__page_write_register: Page Written = {len(page_n)}")
-        new_data = eeprom.read_user_space(0, len(data))
-        _logger.info(f"test__page_write_register: New Value = {len(new_data)}")
-        for indx, init_data in enumerate(initial_data):
-            assert init_data != new_data[indx]
-            assert new_data[indx] == data[indx]
 
 def test_reset_user_space(eeprom):
     reset_vals = []

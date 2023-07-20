@@ -69,3 +69,26 @@ jobs:
         git config user.email ${{ env.commit_email }}
         git cherry-pick ${{ env.bump_commit }}
         git push origin dev
+  Hardware_Test:
+    needs: publish
+    name: Hardware Tests
+    runs-on: [self-hosted, linux, ARM64, hw-test]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m venv venv_hardware_test
+          source venv_hardware_test/bin/activate
+          python -m pip install pytest
+          if [ -f requirements_hw_test.txt ]; then pip install -r requirements_hw_test.txt; fi
+      - name: Test with pytest
+        run: |
+          source venv_hardware_test/bin/activate
+          python -m pytest ./tests/hardware_tests
