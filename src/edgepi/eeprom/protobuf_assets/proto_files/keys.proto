@@ -1,6 +1,6 @@
 syntax = "proto3";
 
 message AwsKeys {
-    string private_key = 1;
-    string certificate = 2;
+    optional string private_key = 1;
+    optional string certificate = 2;
 }

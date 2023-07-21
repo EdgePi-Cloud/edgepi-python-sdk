@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nkeys.proto\"3\n\x07\x41wsKeys\x12\x13\n\x0bprivate_key\x18\x01 \x01(\t\x12\x13\n\x0b\x63\x65rtificate\x18\x02 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nkeys.proto\"]\n\x07\x41wsKeys\x12\x18\n\x0bprivate_key\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0b\x63\x65rtificate\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x0e\n\x0c_private_keyB\x0e\n\x0c_certificateb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'keys_pb2', globals())
@@ -22,5 +22,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _AWSKEYS._serialized_start=14
-  _AWSKEYS._serialized_end=65
+  _AWSKEYS._serialized_end=107
 # @@protoc_insertion_point(module_scope)

@@ -290,7 +290,7 @@ def test_init_memory(mocker, mem_size, dummy_size, result, error, eeprom):
                         [
                          (None, pytest.raises(PermissionDenied)),
                          ("This is Dummy", pytest.raises(PermissionDenied)),
-                         ("48d088f7536e5c59938724b174184611", does_not_raise())
+                         ("6b68b8e2dd2a6bec300ef91572270723", does_not_raise())
                         ])
 def test_reset_edgepi_memory(mocker, bin_hash, error, eeprom):
     mocker.patch(
