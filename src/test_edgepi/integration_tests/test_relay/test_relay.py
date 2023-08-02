@@ -1,6 +1,5 @@
 "relay module integration test"
 
-import pytest
 from edgepi.relay.edgepi_relay import EdgePiRelay
 
 def test_relay_close():
