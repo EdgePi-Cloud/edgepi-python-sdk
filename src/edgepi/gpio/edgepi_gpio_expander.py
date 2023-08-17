@@ -32,12 +32,13 @@ class EdgePiGPIOExpander(I2CDevice):
         Returns:
             `int`: 8-bit uint value of port/register
         '''
-        msg_read = self.set_read_msg(reg_address, [0xFF])
-        _logger.debug(f"Read Message: Register Address {msg_read[0].data}"
-                      f", Msg Place Holder {msg_read[1].data}")
-        self.transfer(dev_address, msg_read)
-        _logger.debug(f"Message Read: Register Address {msg_read[0].data},"
-                      f"Msg Place Holder {msg_read[1].data}")
+        with self.i2c_open():
+            msg_read = self.set_read_msg(reg_address, [0xFF])
+            _logger.debug(f"Read Message: Register Address {msg_read[0].data}"
+                          f", Msg Place Holder {msg_read[1].data}")
+            self.transfer(dev_address, msg_read)
+            _logger.debug(f"Message Read: Register Address {msg_read[0].data},"
+                          f"Msg Place Holder {msg_read[1].data}")
         return msg_read[1].data[0]
 
     def __write_changed_values(self, reg_dict: dict, dev_address: int):
@@ -50,11 +51,12 @@ class EdgePiGPIOExpander(I2CDevice):
         Returns:
             void
         '''
-        for reg_addx, entry in reg_dict.items():
-            if entry['is_changed']:
-                msg_write = self.set_write_msg(reg_addx, [entry['value']])
-                _logger.debug(f'Write Message Content {msg_write[0]}')
-                self.transfer(dev_address, msg_write)
+        with self.i2c_open():
+            for reg_addx, entry in reg_dict.items():
+                if entry['is_changed']:
+                    msg_write = self.set_write_msg(reg_addx, [entry['value']])
+                    _logger.debug(f'Write Message Content {msg_write[0]}')
+                    self.transfer(dev_address, msg_write)
 
     def read_expander_pin(self, pin_name: str) -> bool:
         '''

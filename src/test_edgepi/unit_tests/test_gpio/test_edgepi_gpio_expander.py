@@ -38,7 +38,6 @@ def test_edgepi_expander_init(mock_i2c_device, mock_expect, result, mock_i2c):
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_read_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
 def test_edgepi_expander_read_register(mock_data, mock_msg, dev_address, out, mock_i2c):
-    mock_i2c.return_value = None
     mock_msg.data = [255]
     mock_msg.return_value = (mock_msg ,mock_msg)
     mock_data.return_value = out
@@ -46,8 +45,31 @@ def test_edgepi_expander_read_register(mock_data, mock_msg, dev_address, out, mo
     out_data = gpio_ctrl._EdgePiGPIOExpander__read_register(7,
                                                             dev_address)
     assert out_data == out
+    assert mock_msg.called_once()
+    assert mock_data.called_once()
+    assert gpio_ctrl.i2cdev.close.called_once()
 
-# TODO: these need to be refactored to work with new methods
+@pytest.mark.parametrize("dev_address, reg_dict",
+                        [(32, {7:{"value":255, "is_changed":True}}),
+                         (33, {7:{"value":255, "is_changed":False}}),
+                         (33, {6:{"value":255, "is_changed":True}}),
+                         (32, {6:{"value":255, "is_changed":False}}),
+                        ])
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_write_msg')
+@patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
+def test_edgepi_expander__write_changed_values(mock_data, mock_msg, dev_address, reg_dict, mock_i2c):
+    gpio_ctrl = EdgePiGPIOExpander()
+    gpio_ctrl._EdgePiGPIOExpander__write_changed_values(reg_dict,
+                                                            dev_address)
+    for reg_addx, entry in reg_dict.items():
+        if entry["is_changed"]:
+            assert mock_msg.called_once_with(reg_addx, entry["value"])
+            assert mock_data.called_once()
+        else:
+            assert mock_msg.call_count == 0
+            assert mock_data.call_count == 0
+    assert gpio_ctrl.i2cdev.close.called_once()
+
 @pytest.mark.parametrize("pin_name, mock_value, result",
                          [(DACPins.AO_EN1.value, 170, True),
                           (DACPins.AO_EN2.value, 170, False),
