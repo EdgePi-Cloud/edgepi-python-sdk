@@ -17,8 +17,8 @@ class I2CDevice():
     I2C Device class
     '''
     def __init__(self, fd: str = None):
-        self.fd = fd
-        _logger.debug(f"Initialized I2C device with path '{self.fd}'")
+        self.i2c_fd = fd
+        _logger.debug(f"Initialized I2C device with path '{self.i2c_fd}'")
 
     @contextmanager
     def i2c_open(self):
@@ -30,7 +30,7 @@ class I2CDevice():
             N/A
         """
         try:
-            self.i2cdev = I2C(devpath=self.fd)
+            self.i2cdev = I2C(devpath=self.i2c_fd)
             yield self.i2cdev
         finally:
             self.i2cdev.close()

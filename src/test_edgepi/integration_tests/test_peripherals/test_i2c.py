@@ -31,8 +31,9 @@ def test_i2c_init_param(fd):
 )
 def test_i2c_set_write_msg(addrx, data):
     i2c_device = I2CDevice("/dev/i2c-0")
-    msg = i2c_device.set_write_msg(addrx, data)
-    if isinstance(addrx, int):
-        assert msg[0].data == [addrx]+data
-    else:
-        assert msg[0].data == addrx+data
+    with i2c_device.i2c_open():
+        msg = i2c_device.set_write_msg(addrx, data)
+        if isinstance(addrx, int):
+            assert msg[0].data == [addrx]+data
+        else:
+            assert msg[0].data == addrx+data
