@@ -15,4 +15,4 @@ from edgepi.peripherals.gpio import GpioDevice
 )
 def test_gpio_init_param(fd):
     gpio = GpioDevice(fd)
-    assert gpio.fd == fd
+    assert gpio.gpio_fd == fd

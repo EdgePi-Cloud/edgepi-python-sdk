@@ -17,7 +17,7 @@ from edgepi.peripherals.gpio import GpioDevice
 def test_gpio_init_param(mocker, fd):
     mocker.patch("edgepi.peripherals.gpio.GPIO")
     gpio = GpioDevice(fd)
-    assert gpio.fd == fd
+    assert gpio.gpio_fd == fd
     assert gpio.gpio is None
 
 @pytest.mark.parametrize(

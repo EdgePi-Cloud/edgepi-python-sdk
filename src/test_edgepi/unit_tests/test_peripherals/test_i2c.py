@@ -18,7 +18,7 @@ I2C_DEV_PATH = '/dev/i2c-10'
 )
 def test_i2c_init(fd):
     i2c_dev = I2CDevice(fd)
-    assert i2c_dev.fd == I2C_DEV_PATH
+    assert i2c_dev.i2c_fd == I2C_DEV_PATH
 
 def test_i2c_open(mocker):
     periph_i2c = mocker.patch("edgepi.peripherals.i2c.I2C")

@@ -18,7 +18,7 @@ from edgepi.peripherals.i2c import I2CDevice
 )
 def test_i2c_init_param(fd):
     i2c_device = I2CDevice(fd)
-    assert i2c_device.fd == fd
+    assert i2c_device.i2c_fd == fd
 
 
 @pytest.mark.parametrize(

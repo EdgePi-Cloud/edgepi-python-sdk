@@ -15,5 +15,18 @@ from edgepi.peripherals.spi import SpiDevice
 )
 def test_check_range(mocker, dev_id, bus_num, result):
     mocker.patch("edgepi.peripherals.spi.SPI")
-    spi = SpiDevice(bus_num, dev_id)
-    assert spi.devpath == result
+    spidev = SpiDevice(bus_num, dev_id)
+    assert spidev.devpath == result
+    assert spidev.bit_order == "msb"
+    assert spidev.bits_per_word == 8
+    assert spidev.spi is None
+    assert spidev.max_speed == 1000000
+    assert spidev.mode == 1
+
+def test_spi_open(mocker):
+    mocker.patch("edgepi.peripherals.spi.SPI")
+    spidev = SpiDevice(0, 6)
+    with spidev.spi_open():
+        spidev.transfer([0,1,0])
+    assert spidev.spi.transfer.called_once()
+    assert spidev.spi.close.called_once()
