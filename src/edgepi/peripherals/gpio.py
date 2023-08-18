@@ -10,7 +10,7 @@ class GpioDevice:
     """Class for representing a GPIO device"""
 
     def __init__(self, dev_path: str = None):
-        self.fd = dev_path
+        self.gpio_fd = dev_path
         self.gpio = None
 
     def open_gpio(self, pin_num: int = None, pin_dir: str = None, pin_bias: str = None):
@@ -21,7 +21,7 @@ class GpioDevice:
             pin_dir (str): pin direction
             pin_bias (str): bias direction
         """
-        self.gpio = GPIO(self.fd, pin_num, pin_dir, bias=pin_bias)
+        self.gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
 
     def read_state(self):
         """
