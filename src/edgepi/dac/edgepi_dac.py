@@ -257,7 +257,7 @@ class EdgePiDAC(spi):
                     # update DAC register
                     self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
                 self.gpio.set_pin_state(GainPin.DAC_GAIN.value)
-    
+
             # Disabling gain, change gain first than change codes
             else:
                 self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)

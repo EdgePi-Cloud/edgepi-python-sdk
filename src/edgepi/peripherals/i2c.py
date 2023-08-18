@@ -7,8 +7,8 @@ Classes:
 import logging
 
 from typing import Union
-from periphery import I2C
 from contextlib import contextmanager
+from periphery import I2C
 
 _logger = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ class I2CDevice():
     '''
     def __init__(self, fd: str = None):
         self.i2c_fd = fd
+        self.i2cdev = None
         _logger.debug(f"Initialized I2C device with path '{self.i2c_fd}'")
 
     @contextmanager

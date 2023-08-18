@@ -37,6 +37,8 @@ def test_edgepi_expander_init(mock_i2c_device, mock_expect, result, mock_i2c):
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_read_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
+# pylint: disable=no-member
+# pylint: disable=unused-argument
 def test_edgepi_expander_read_register(mock_data, mock_msg, dev_address, out, mock_i2c):
     mock_msg.data = [255]
     mock_msg.return_value = (mock_msg ,mock_msg)
@@ -45,9 +47,9 @@ def test_edgepi_expander_read_register(mock_data, mock_msg, dev_address, out, mo
     out_data = gpio_ctrl._EdgePiGPIOExpander__read_register(7,
                                                             dev_address)
     assert out_data == out
-    assert mock_msg.called_once()
-    assert mock_data.called_once()
-    assert gpio_ctrl.i2cdev.close.called_once()
+    mock_msg.assert_called_once()
+    mock_data.assert_called_once()
+    gpio_ctrl.i2cdev.close.assert_called_once()
 
 @pytest.mark.parametrize("dev_address, reg_dict",
                         [(32, {7:{"value":255, "is_changed":True}}),
@@ -57,18 +59,20 @@ def test_edgepi_expander_read_register(mock_data, mock_msg, dev_address, out, mo
                         ])
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.set_write_msg')
 @patch('edgepi.gpio.edgepi_gpio.EdgePiGPIOExpander.transfer')
-def test_edgepi_expander__write_changed_values(mock_data, mock_msg, dev_address, reg_dict, mock_i2c):
+# pylint: disable=no-member
+# pylint: disable=unused-argument
+def test_edgepi_expander__write_changed_values(mock_data, mock_msg, dev_address, reg_dict,mock_i2c):
     gpio_ctrl = EdgePiGPIOExpander()
     gpio_ctrl._EdgePiGPIOExpander__write_changed_values(reg_dict,
                                                             dev_address)
     for reg_addx, entry in reg_dict.items():
         if entry["is_changed"]:
-            assert mock_msg.called_once_with(reg_addx, entry["value"])
-            assert mock_data.called_once()
+            mock_msg.assert_called_once_with(reg_addx, [entry["value"]])
+            mock_data.assert_called_once()
         else:
             assert mock_msg.call_count == 0
             assert mock_data.call_count == 0
-    assert gpio_ctrl.i2cdev.close.called_once()
+    gpio_ctrl.i2cdev.close.assert_called_once()
 
 @pytest.mark.parametrize("pin_name, mock_value, result",
                          [(DACPins.AO_EN1.value, 170, True),
