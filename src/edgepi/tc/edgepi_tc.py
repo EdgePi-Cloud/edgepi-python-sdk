@@ -254,7 +254,8 @@ class EdgePiTC(SpiDevice):
             new_data[0] = register address, new_data[1] = register value
         """
         data = [reg_addx] + [0xFF]
-        new_data = self.transfer(data)
+        with self.spi_open():
+            new_data = self.transfer(data)
         _logger.debug(f"__read_register: addx = {reg_addx} => data after xfer = {new_data}")
         return new_data
 
@@ -270,7 +271,8 @@ class EdgePiTC(SpiDevice):
             is the start address: register values begin from the second entry.
         """
         data = [start_addx] + [0xFF] * regs_to_read
-        new_data = self.transfer(data)
+        with self.spi_open():
+            new_data = self.transfer(data)
         _logger.debug(f"__read_registers: shifted out data => {new_data}")
         return new_data
 
@@ -284,7 +286,8 @@ class EdgePiTC(SpiDevice):
         """
         data = [reg_addx] + [value]
         _logger.debug(f"__write_to_registers: shifting in data => {data}")
-        self.transfer(data)
+        with self.spi_open():
+            self.transfer(data)
 
     def __read_registers_to_map(self):
         """

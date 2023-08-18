@@ -124,7 +124,8 @@ class EdgePiDAC(spi):
         self.log.debug(f'Code: {code}')
 
         # update DAC register
-        self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
+        with self.spi_open():
+            self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
         # send voltage to analog out pin
         self.__send_to_gpio_pins(analog_out.value, voltage)
         return code
@@ -145,7 +146,8 @@ class EdgePiDAC(spi):
         self.__dac_power_state[analog_out.value] = power_mode.value
         power_code = self.dac_ops.generate_power_code(self.__dac_power_state.values())
         cmd = self.dac_ops.combine_command(COM.COM_POWER_DOWN_OP.value, NULL_BITS, power_code)
-        self.transfer(cmd)
+        with self.spi_open():
+            self.transfer(cmd)
 
     def reset(self):
         """
@@ -153,7 +155,8 @@ class EdgePiDAC(spi):
         and stops all voltage transmissions through pins.
         """
         cmd = self.dac_ops.combine_command(COM.COM_SW_RESET.value, NULL_BITS, SW_RESET)
-        self.transfer(cmd)
+        with self.spi_open():
+            self.transfer(cmd)
 
     def channel_readback(self, analog_out: DACChannel) -> int:
         """
@@ -170,10 +173,11 @@ class EdgePiDAC(spi):
         cmd = self.dac_ops.combine_command(
                 COM.COM_READBACK.value, DACChannel(analog_out.value).value, NULL_BITS
             )
-        self.transfer(cmd)
-        # all zero dummy command to trigger second transfer which
-        # contains the DAC register contents.
-        read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
+        with self.spi_open():
+            self.transfer(cmd)
+            # all zero dummy command to trigger second transfer which
+            # contains the DAC register contents.
+            read_data = self.transfer([NULL_BITS, NULL_BITS, NULL_BITS])
         self.log.debug(f"reading code {read_data}")
         return self.dac_ops.extract_read_data(read_data)
 
@@ -247,18 +251,19 @@ class EdgePiDAC(spi):
         # gain have different steps of sending code value and toggling the GPIO pin.
 
         # gain being enabled, change code first than enable gain
-        if set_gain:
-            for ch, code in enumerate(codes):
-                # update DAC register
-                self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
-            self.gpio.set_pin_state(GainPin.DAC_GAIN.value)
-
-        # Disabling gain, change gain first than change codes
-        else:
-            self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
-            for ch, code in enumerate(codes):
-                # update DAC register
-                self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
+        with self.spi_open():
+            if set_gain:
+                for ch, code in enumerate(codes):
+                    # update DAC register
+                    self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
+                self.gpio.set_pin_state(GainPin.DAC_GAIN.value)
+    
+            # Disabling gain, change gain first than change codes
+            else:
+                self.gpio.clear_pin_state(GainPin.DAC_GAIN.value)
+                for ch, code in enumerate(codes):
+                    # update DAC register
+                    self.transfer(self.dac_ops.generate_write_and_update_command(ch, code))
 
     def set_dac_gain(self, set_gain: bool, auto_code_change: bool = False):
         """
