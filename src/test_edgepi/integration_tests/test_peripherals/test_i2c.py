@@ -1,6 +1,6 @@
 """ integration tests for peripherals/i2c.py """
 
-
+from contextlib import nullcontext as does_not_raise
 import pytest
 from edgepi.peripherals.i2c import I2CDevice
 
@@ -37,3 +37,11 @@ def test_i2c_set_write_msg(addrx, data):
             assert msg[0].data == [addrx]+data
         else:
             assert msg[0].data == addrx+data
+
+def test_file_descriptor_open():
+    with does_not_raise():
+        i2c_devices = [0]*2048
+        for i2cdev in i2c_devices:
+            i2cdev = I2CDevice("/dev/i2c-10")
+            with i2cdev.i2c_open():
+                pass
