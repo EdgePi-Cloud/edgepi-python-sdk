@@ -29,7 +29,6 @@ class SpiDevice:
         extra_flags: int = 0,
     ):
         self.devpath = f"/dev/spidev{bus_num}.{dev_id}"
-        _logger.debug(f"Initialized SPI device with path '{self.devpath}'")
         self.mode = mode
         self.max_speed = max_speed
         self.bit_order = bit_order
@@ -51,6 +50,7 @@ class SpiDevice:
                 self.bits_per_word,
                 self.extra_flags,
             )
+            _logger.debug(f"Open SPI device with path '{self.devpath}'")
             yield self.spi
         finally:
             self.spi.close()
