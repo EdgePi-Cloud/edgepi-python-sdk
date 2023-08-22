@@ -81,8 +81,10 @@ def test__byte_address_generation(memory_address, result, eeprom):
 def test_sequential_read(mocker, eeprom, reg_addr, length, mock_val, result):
     mocker.patch("edgepi.peripherals.i2c.I2CDevice.transfer",return_value = mock_val)
     # pylint: disable=protected-access
-    read_result = eeprom._EdgePiEEPROM__sequential_read( reg_addr, length)
+    with eeprom.i2c_open():
+        read_result = eeprom._EdgePiEEPROM__sequential_read( reg_addr, length)
     assert read_result == result
+    assert eeprom.i2cdev.close.called_once()
 
 @pytest.mark.parametrize("mock_value,result",
                         [([0,123], 123),
@@ -99,6 +101,8 @@ def test__allocated_memory(mocker,mock_value,result, eeprom):
     # pylint: disable=protected-access
     length = eeprom._EdgePiEEPROM__allocated_memory(EdgePiMemoryInfo.USED_SPACE.value)
     assert length == result
+    assert eeprom.i2cdev.close.called_once()
+
 
 def test__read_edgepi_reserved_memory(mocker, eeprom):
     data_b = read_binfile()
@@ -115,6 +119,9 @@ def test__read_edgepi_reserved_memory(mocker, eeprom):
     # pylint: disable=protected-access
     byte_string = eeprom._EdgePiEEPROM__read_edgepi_reserved_memory()
     assert byte_string == data_b
+    # expected call count of close is one due to the mocked __allocated_memory
+    assert eeprom.i2cdev.close.called_once()
+
 
 dac_dict_calib = {0:CalibParam(gain = 1.0229951270016944, offset= -0.01787674545454656),
                   1:CalibParam(gain = 1.0233775195153139, offset= -0.019239763636362414),
@@ -259,6 +266,7 @@ def test_read_user_space(mocker, eeprom):
     data_size = (dummy_data_l[0]<<8) + dummy_data_l[1]
     result = eeprom.read_user_space(data_size)
     assert result == list(dummy_data_b)
+    assert eeprom.i2cdev.close.called_once()
 
 @pytest.mark.parametrize("mem_size, dummy_size, result, error",
                         [(3, 3,[False, False], does_not_raise()),
