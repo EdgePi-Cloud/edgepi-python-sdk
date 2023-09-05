@@ -2,7 +2,7 @@
 Module for GPIO devices
 """
 
-
+from contextlib import contextmanager
 from periphery import GPIO
 
 
@@ -13,6 +13,7 @@ class GpioDevice:
         self.gpio_fd = dev_path
         self.gpio = None
 
+    @contextmanager
     def open_gpio(self, pin_num: int = None, pin_dir: str = None, pin_bias: str = None):
         """
         Instantiate GPIO device object for reading and writing.
@@ -21,7 +22,11 @@ class GpioDevice:
             pin_dir (str): pin direction
             pin_bias (str): bias direction
         """
-        self.gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
+        try:
+            self.gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
+            yield self.gpio
+        finally:
+            self.gpio.close()
 
     def read_state(self):
         """
@@ -42,7 +47,3 @@ class GpioDevice:
             N/A
         """
         self.gpio.write(state)
-
-    def close_gpio(self):
-        """Close GPIO connection"""
-        self.gpio.close()
