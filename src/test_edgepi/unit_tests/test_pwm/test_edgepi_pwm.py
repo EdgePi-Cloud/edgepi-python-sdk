@@ -97,7 +97,7 @@ def test_pwm_close(mocker, pwm_num, error, pwm_dev):
     with error:
         pwm_dev.close(pwm_num)
         mock_pwmdevice.close_pwm.assert_called_once()
-        assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] == None
+        assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is None
 
 
 @pytest.mark.parametrize("pwm_num ,expected, error",
