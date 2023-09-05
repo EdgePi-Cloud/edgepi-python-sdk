@@ -20,6 +20,14 @@ def test_gpio_init_param(mocker, fd):
     assert gpio.gpio_fd == fd
     assert gpio.gpio is None
 
+# pylint: disable=no-member
+def test_gpio_open(mocker):
+    periph_gpio = mocker.patch("edgepi.peripherals.gpio.GPIO")
+    gpiodev = GpioDevice("/dev/gpiochip0")
+    with gpiodev.open_gpio("DIN1","IN","Pull-down"):
+        assert periph_gpio.called_once()
+    gpiodev.gpio.close.assert_called_once()
+
 @pytest.mark.parametrize(
     "fd, result",
     [

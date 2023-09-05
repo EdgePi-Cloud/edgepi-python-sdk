@@ -71,6 +71,7 @@ class EdgePiGPIOChip(GpioDevice):
         with self.open_gpio(pin_num=self.__pin_name_dict[pin_name],
                        pin_dir="in" if direction else "out",
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias):
+            return self.gpio.direction
 
     def toggle_gpio_pin_state(self, pin_name: str = None):
         """
