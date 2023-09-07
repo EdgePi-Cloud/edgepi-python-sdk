@@ -9,6 +9,7 @@ if sys.platform != 'linux':
     sys.modules['periphery'] = mock.MagicMock()
 
 import pytest
+from edgepi.digital_input.digital_input_constants import DinPins
 from edgepi.gpio.gpio_configs import generate_gpiochip_pin_info
 from edgepi.gpio.edgepi_gpio_chip import EdgePiGPIOChip
 
@@ -21,20 +22,21 @@ def test_edgepi_gpio_init():
     gpio = EdgePiGPIOChip()
     assert gpio.gpiochip_pins_dict == generate_gpiochip_pin_info()
 
-@pytest.mark.parametrize("pin_name, mock_value, result", [("DIN1",[True], True)])
+# pylint: disable=no-member
+@pytest.mark.parametrize("pin_name, mock_value, result", [(DinPins.DIN1.value,[True], True)])
 def test_read_gpio_pin_state(mocker, pin_name, mock_value, result):
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.open_gpio")
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close_gpio")
+    mocker.patch("edgepi.peripherals.gpio.GPIO")
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.read_state", return_value = mock_value[0])
-    gpio = EdgePiGPIOChip()
-    assert gpio.read_gpio_pin_state(pin_name) == result
+    gpio_chip = EdgePiGPIOChip()
+    assert gpio_chip.read_gpio_pin_state(pin_name) == result
+    gpio_chip.gpio.close.assert_called_once()
 
-@pytest.mark.parametrize("pin_name, mock_value, result", [("DIN1",[True], True),
-                                                          ("DIN1",[False], False)])
+# pylint: disable=no-member
+@pytest.mark.parametrize("pin_name, mock_value, result", [(DinPins.DIN1.value,[True], True),
+                                                          (DinPins.DIN1.value,[False], False)])
 def test_write_gpio_pin_state(mocker, pin_name, mock_value, result):
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.open_gpio")
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.close_gpio")
-    mocker.patch("edgepi.peripherals.gpio.GpioDevice.write_state")
+    mocker.patch("edgepi.peripherals.gpio.GPIO")
     mocker.patch("edgepi.peripherals.gpio.GpioDevice.read_state", return_value = mock_value[0])
-    gpio = EdgePiGPIOChip()
-    assert gpio.write_gpio_pin_state(pin_name, mock_value[0]) == result
+    gpio_chip = EdgePiGPIOChip()
+    assert gpio_chip.write_gpio_pin_state(pin_name, mock_value[0]) == result
+    gpio_chip.gpio.close.assert_called_once()
