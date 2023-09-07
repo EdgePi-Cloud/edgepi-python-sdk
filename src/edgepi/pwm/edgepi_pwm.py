@@ -173,7 +173,8 @@ class EdgePiPWM():
         """
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"get_enabled: PWM number is missing {pwm_num}")
-        return self.__pwm_devs[pwm_num].close_pwm()
+        self.__pwm_devs[pwm_num].close_pwm()
+        self.__pwm_devs[pwm_num] = None
 
     def __init_pwm_dev(self, pwm_num: PWMPins):
         self.__pwm_devs[pwm_num]=PwmDevice(channel=self.__pwm_pin_to_channel[pwm_num].value.channel,

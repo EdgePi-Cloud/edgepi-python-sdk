@@ -36,7 +36,7 @@ from edgepi.tc.tc_faults import FaultType
 
 def test_tc_init():
     tc = EdgePiTC()
-    assert tc.spi.devpath == f"/dev/spidev{6}.{2}"
+    assert tc.devpath == f"/dev/spidev{6}.{2}"
 
 
 @pytest.fixture(name="tc")

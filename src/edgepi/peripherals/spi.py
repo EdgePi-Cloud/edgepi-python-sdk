@@ -7,13 +7,12 @@ Classes:
 
 
 import logging
-
+from contextlib import contextmanager
 from periphery import SPI
 
 
 _logger = logging.getLogger(__name__)
 
-# TODO: This class needs to be changed as the SPI library changes
 class SpiDevice:
     """Class representing an I2C device"""
 
@@ -30,21 +29,34 @@ class SpiDevice:
         extra_flags: int = 0,
     ):
         self.devpath = f"/dev/spidev{bus_num}.{dev_id}"
-        _logger.debug(f"Initialized SPI device with path '{self.devpath}'")
-        self.spi = SPI(
-            self.devpath,
-            mode,
-            max_speed,
-            bit_order,
-            bits_per_word,
-            extra_flags,
-        )
+        self.mode = mode
+        self.max_speed = max_speed
+        self.bit_order = bit_order
+        self.bits_per_word = bits_per_word
+        self.extra_flags = extra_flags
+        self.spi = None
+
+    @contextmanager
+    def spi_open(self):
+        """
+        Open SPI device file
+        """
+        try:
+            self.spi = SPI(
+                self.devpath,
+                self.mode,
+                self.max_speed,
+                self.bit_order,
+                self.bits_per_word,
+                self.extra_flags,
+            )
+            _logger.debug(f"Open SPI device with path '{self.devpath}'")
+            yield self.spi
+        finally:
+            self.spi.close()
+
 
     def transfer(self, data: list) -> list:
         """Conduct an SPI data transfer"""
         out = self.spi.transfer(data)
         return out
-
-    def close(self):
-        """Close SPI connection"""
-        self.spi.close()

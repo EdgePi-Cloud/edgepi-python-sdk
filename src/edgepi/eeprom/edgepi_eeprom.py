@@ -82,7 +82,8 @@ class EdgePiEEPROM(I2CDevice):
         Return:
             length (int): size of memory to read
         '''
-        read_data = self.__sequential_read(offset, EEPROMInfo.PAGE_SIZE.value)
+        with self.i2c_open():
+            read_data = self.__sequential_read(offset, EEPROMInfo.PAGE_SIZE.value)
         check_crc(read_data[:-1], read_data[-1])
         return (read_data[0]<<8)| read_data[1]
 
@@ -124,10 +125,11 @@ class EdgePiEEPROM(I2CDevice):
         pages = self.__generate_list_of_pages_crc(data)
 
         mem_offset = start_mem
-        for page in pages:
-            self.__page_write_register(mem_offset, page)
-            mem_offset = mem_offset+len(page)
-            time.sleep(PAGE_WRITE_CYCLE_TIME)
+        with self.i2c_open():
+            for page in pages:
+                self.__page_write_register(mem_offset, page)
+                mem_offset = mem_offset+len(page)
+                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -149,11 +151,12 @@ class EdgePiEEPROM(I2CDevice):
                     int((buff_and_len)/(page_size-CRC_BYTE_SIZE))+1
 
         mem_offset = EdgePiMemoryInfo.PRIVATE_SPACE_START_BYTE.value
-        for page in range(num_pages):
-            buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
-            check_crc(buff_list[:-1], buff_list[-1])
-            buff+=buff_list[:-1]
-            time.sleep(0.01)
+        with self.i2c_open():
+            for page in range(num_pages):
+                buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
+                check_crc(buff_list[:-1], buff_list[-1])
+                buff+=buff_list[:-1]
+                time.sleep(0.01)
         return bytes(buff[2:buff_and_len])
 
     def read_edgepi_data(self):
@@ -290,10 +293,11 @@ class EdgePiEEPROM(I2CDevice):
             num_pages = int((buff_and_len)/(page_size-CRC_BYTE_SIZE))+1
 
         mem_offset = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
-        for page in range(num_pages):
-            buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
-            check_crc(buff_list[:-1], buff_list[-1])
-            buff+=buff_list[:-1]
+        with self.i2c_open():
+            for page in range(num_pages):
+                buff_list = self.__sequential_read(mem_offset+(page*page_size), page_size)
+                check_crc(buff_list[:-1], buff_list[-1])
+                buff+=buff_list[:-1]
         return buff[2:buff_and_len]
 
     def write_user_space(self, data: bytes):
@@ -314,10 +318,11 @@ class EdgePiEEPROM(I2CDevice):
         pages = self.__generate_list_of_pages_crc(data)
 
         mem_offset = start_mem
-        for page in pages:
-            self.__page_write_register(mem_offset, page)
-            mem_offset = mem_offset+len(page)
-            time.sleep(PAGE_WRITE_CYCLE_TIME)
+        with self.i2c_open():
+            for page in pages:
+                self.__page_write_register(mem_offset, page)
+                mem_offset = mem_offset+len(page)
+                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
 # TODO why not separate it into a class
     def init_memory(self):
@@ -381,10 +386,11 @@ class EdgePiEEPROM(I2CDevice):
         reset_vals = [255] * page_size
 
         mem_offset = start_address_page
-        for _ in range(tatal_page):
-            self.__page_write_register(mem_offset, reset_vals)
-            mem_offset = mem_offset+page_size
-            time.sleep(PAGE_WRITE_CYCLE_TIME)
+        with self.i2c_open():
+            for _ in range(tatal_page):
+                self.__page_write_register(mem_offset, reset_vals)
+                mem_offset = mem_offset+page_size
+                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
     def reset_edgepi_memory(self, bin_hash: str = None, bin_bytes: bytes = None):
         """

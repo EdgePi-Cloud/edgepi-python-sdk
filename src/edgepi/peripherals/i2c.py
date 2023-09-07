@@ -7,6 +7,7 @@ Classes:
 import logging
 
 from typing import Union
+from contextlib import contextmanager
 from periphery import I2C
 
 _logger = logging.getLogger(__name__)
@@ -16,9 +17,25 @@ class I2CDevice():
     I2C Device class
     '''
     def __init__(self, fd: str = None):
-        self.fd = fd
-        _logger.debug(f"Initialized I2C device with path '{self.fd}'")
-        self.i2cdev = I2C(devpath=fd)
+        self.i2c_fd = fd
+        self.i2cdev = None
+
+    @contextmanager
+    def i2c_open(self):
+        """
+        Open I2C device
+        Attributes:
+            N/A
+        Return:
+            N/A
+        """
+        try:
+            self.i2cdev = I2C(devpath=self.i2c_fd)
+            _logger.debug(f"Open I2C device with path '{self.i2c_fd}'")
+            yield self.i2cdev
+        finally:
+            self.i2cdev.close()
+
 
     def set_read_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''
@@ -62,9 +79,3 @@ class I2CDevice():
         if len(msg)>1:
             return msg[1].data
         return None
-
-    def close(self):
-        '''
-        Close I2C device
-        '''
-        self.i2cdev.close()
