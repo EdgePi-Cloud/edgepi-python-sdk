@@ -49,7 +49,7 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     ADC output voltage (i.e. voltage measured at terminal block)
     """
     step_up_ratio = (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
-    return v_in * step_up_ratio * gain + offset
+    return v_in * step_up_ratio * gain - offset
 
 
 def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
@@ -71,7 +71,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     code_val = code_bits.uint
     # handling negative number
     if _is_negative_voltage(code_bits):
-        code_val = code_val - 2**num_bits
+        code_val = code_val - 2**(num_bits)
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
 
@@ -96,12 +96,10 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
-    # handling negative number
-    if _is_negative_voltage(code_bits):
-        code_val = code_val - 2**num_bits
+    
+    code_val = code_val - 2147483647
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-    v_in = REFERENCE_VOLTAGE + v_in
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
