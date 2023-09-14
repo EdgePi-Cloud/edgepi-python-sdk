@@ -13,6 +13,9 @@ from edgepi.utilities.utilities import bitstring_from_list
 STEP_DOWN_RESISTOR_1 = 19.1
 STEP_DOWN_RESISTOR_2 = 4.99
 REFERENCE_VOLTAGE = 2.5
+# Instead of subracting Reference voltage use the code value of the max voltage to convert voltage
+ADC1_UPPER_LIMIT = 2147483647
+ADC2_UPPER_LIMIT = 8388607
 
 
 _logger = logging.getLogger(__name__)
@@ -69,9 +72,11 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
-    # handling negative number
-    if _is_negative_voltage(code_bits):
-        code_val = code_val - 2**(num_bits)
+    
+    if adc_info.num_data_bytes == 4:
+        code_val = code_val - ADC1_UPPER_LIMIT
+    else:
+        code_val = code_val - ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
 
@@ -97,7 +102,10 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
     
-    code_val = code_val - 2147483647
+    if adc_info.num_data_bytes == 4:
+        code_val = code_val - ADC1_UPPER_LIMIT
+    else:
+        code_val = code_val - ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
