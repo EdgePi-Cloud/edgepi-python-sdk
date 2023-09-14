@@ -73,9 +73,9 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
     
-    if adc_info.num_data_bytes == 4:
+    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 4:
         code_val = code_val - ADC1_UPPER_LIMIT
-    else:
+    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 3:
         code_val = code_val - ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
@@ -102,9 +102,9 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
     
-    if adc_info.num_data_bytes == 4:
+    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 4:
         code_val = code_val - ADC1_UPPER_LIMIT
-    else:
+    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 3:
         code_val = code_val - ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
