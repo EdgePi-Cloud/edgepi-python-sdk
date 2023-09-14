@@ -9,6 +9,8 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 ADC_NUM_REGS = 27  # number of ADC1263 registers
 ADC_VOLTAGE_READ_LEN = 6  # number of bytes per voltage read
+ADC1_NUM_DATA_BYTES = 4 # Number of data bytes for ADC 1
+ADC2_NUM_DATA_BYTES = 3 # Number of data bytes for ADC 2
 
 
 @unique
@@ -129,7 +131,7 @@ class ADCNum(Enum):
     ADC_1 = ADCReadInfo(
         1,
         ADCReg.REG_INPMUX,
-        4,
+        ADC1_NUM_DATA_BYTES,
         ADCComs.COM_START1.value,
         ADCComs.COM_RDATA1.value,
         ADCComs.COM_STOP1.value,
@@ -137,7 +139,7 @@ class ADCNum(Enum):
     ADC_2 = ADCReadInfo(
         2,
         ADCReg.REG_ADC2MUX,
-        3,
+        ADC2_NUM_DATA_BYTES,
         ADCComs.COM_START2.value,
         ADCComs.COM_RDATA2.value,
         ADCComs.COM_STOP2.value,
