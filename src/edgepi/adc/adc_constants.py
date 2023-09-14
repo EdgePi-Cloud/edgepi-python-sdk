@@ -190,7 +190,12 @@ class ADCMasks(Enum):
     ADC2_DR_BITS = 0x3F  # overwrite bits 7:6
     RMUXP_BITS = 0xC7  # overwrite bits 5:3
     RMUXN_BITS = 0xF8  # overwrite bits 2:0
+    PGA_BITS = 0x7F # overwrite bit 7
 
+class ADC1PGA(Enum):
+    """ADS1263 PGA Enable bypass ADC1"""
+    ENABLED = OpCode(0x00, ADCReg.REG_MODE2.value, ADCMasks.PGA_BITS.value)
+    BYPASSED = OpCode(0x80, ADCReg.REG_MODE2.value, ADCMasks.PGA_BITS.value)
 
 class ADC2DataRate(Enum):
     """ADS1263 data rates for ADC2"""
