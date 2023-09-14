@@ -105,7 +105,7 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
-    
+
     if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 4:
         code_val = code_val - ADC1_UPPER_LIMIT
     elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 3:
