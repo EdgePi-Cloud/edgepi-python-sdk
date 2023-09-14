@@ -4,7 +4,7 @@
 import logging
 
 from bitstring import BitArray
-from edgepi.adc.adc_constants import ADCReadInfo, ADCNum
+from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list
 
@@ -73,13 +73,13 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
 
-    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 4:
+    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 3:
+    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val - ADC2_UPPER_LIMIT
-    elif adc_info.num_data_bytes == 4:
+    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val + ADC1_UPPER_LIMIT
-    elif adc_info.num_data_bytes == 3:
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val + ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
@@ -106,13 +106,13 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
 
-    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 4:
+    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == 3:
+    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val - ADC2_UPPER_LIMIT
-    elif adc_info.num_data_bytes == 4:
+    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val + ADC1_UPPER_LIMIT
-    elif adc_info.num_data_bytes == 3:
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val + ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
