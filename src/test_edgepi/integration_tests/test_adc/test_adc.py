@@ -18,6 +18,7 @@ from edgepi.adc.adc_constants import (
     REFMUX,
     DiffMode,
     RTDModes,
+    ADC1PGA,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
 
@@ -732,6 +733,14 @@ def fixture_adc():
             },
             {
                 ADCReg.REG_REFMUX.value: 0x0,
+            },
+        ),
+        (
+            {
+                "adc_1_pga": ADC1PGA.BYPASSED
+            },
+            {
+                ADCReg.REG_MODE2.value: 0x84,
             },
         ),
     ],
