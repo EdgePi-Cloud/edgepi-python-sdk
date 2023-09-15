@@ -84,17 +84,17 @@ def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
 @pytest.mark.parametrize(
     "code, adc_num, calibs, result",
     [
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 12.069),
-        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 24.138),
-        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0.00),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 12.069),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 12.069),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
-        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 24.138),
-        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 24.138),
-        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0.00),
-        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0.00),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0),
     ],
 )
 def test_code_to_voltage(code, adc_num, calibs, result):
