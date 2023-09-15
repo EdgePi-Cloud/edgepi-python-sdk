@@ -129,7 +129,7 @@ class EdgePiADC(SPI):
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
         # If this call to __config is removed, replace with a call to get_register_map to
         # initialize __state.
-        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC, adc_1_pga=ADC1PGA.BYPASSED)
+        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         # self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -851,6 +851,7 @@ class EdgePiADC(SPI):
             `adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
             `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
+            `adc_1_pga` (ADC1PGA): enable or bypass PGA,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
                 Note this affects data rate. Please refer to module documentation
                 for more information.
@@ -943,6 +944,7 @@ class EdgePiADC(SPI):
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         override_updates_validation: bool = False,
+        adc_1_pga: ADC1PGA = None
     ):
         """
         Configure user accessible ADC settings, either collectively or individually.
@@ -957,6 +959,7 @@ class EdgePiADC(SPI):
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
             `override_updates_validation` (bool): set to True to skip update validation
+            `adc_1_pga` (ADC1PGA): enable or bypass PGA
         """
         # pylint: disable=possibly-unused-variable
         # pylint: disable=unused-argument
