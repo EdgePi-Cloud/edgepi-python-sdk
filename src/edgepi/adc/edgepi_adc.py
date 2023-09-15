@@ -10,6 +10,7 @@ from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
+    ADC1PGA,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel as CH,
@@ -128,7 +129,7 @@ class EdgePiADC(SPI):
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
         # If this call to __config is removed, replace with a call to get_register_map to
         # initialize __state.
-        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC)
+        self.__config(checksum_mode=CheckMode.CHECK_BYTE_CRC, adc_1_pga=ADC1PGA.BYPASSED)
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         # self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
@@ -823,6 +824,7 @@ class EdgePiADC(SPI):
         adc_2_mux_n: CH = None,
         adc_1_data_rate: ADC1DataRate = None,
         adc_2_data_rate: ADC2DataRate = None,
+        adc_1_pga: ADC1PGA = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         checksum_mode: CheckMode = None,
