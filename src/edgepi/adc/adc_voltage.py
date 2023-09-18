@@ -52,7 +52,7 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     ADC output voltage (i.e. voltage measured at terminal block)
     """
     step_up_ratio = (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
-    return v_in * step_up_ratio * gain - offset
+    return v_in * step_up_ratio * gain + offset
 
 
 def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
