@@ -51,7 +51,9 @@ def test_set_dout_state(mocker, pin_name, state, error, aout_clear):
     with error:
         dout.set_dout_state(pin_name, state)
         if state == DoutTriState.HIGH:
-            expander_set.assert_called_once_with(pin_name.value)
+            assert expander_set.call_count == 2
+            assert expander_clear.call_count == 1
+            expander_clear.assert_called_once_with(aout_clear.value)
         elif state == DoutTriState.LOW:
             expander_set.assert_called_once_with(aout_clear.value)
             expander_clear.assert_has_calls([mocker.call(pin_name.value),
