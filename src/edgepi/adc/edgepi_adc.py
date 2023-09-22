@@ -122,7 +122,7 @@ class EdgePiADC(SPI):
         eeprom_data  = eeprom.read_edgepi_data()
         self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
                                  ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
-        self.r_ref = eeprom_data.rtd_calib_params.rtd_resistor
+        self.rtd_calib = eeprom_data.rtd_calib_params
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
@@ -479,9 +479,11 @@ class EdgePiADC(SPI):
 
         return code_to_temperature(
             voltage_code,
-            self.r_ref,
+            self.rtd_calib.rtd_resistor,
             self.rtd_sensor_resistance,
             self.rtd_sensor_resistance_variation,
+            self.rtd_calib.rtd.gain,
+            self.rtd_calib.rtd.offset,
             adc_num
         )
 
@@ -548,9 +550,11 @@ class EdgePiADC(SPI):
 
         return code_to_temperature(
             voltage_code,
-            self.r_ref,
+            self.rtd_calib.rtd.rtd_resistor,
             self.rtd_sensor_resistance,
             self.rtd_sensor_resistance_variation,
+            self.rtd_calib.rtd.gain,
+            self.rtd_calib.rtd.offset,
             adc_num
         )
 
