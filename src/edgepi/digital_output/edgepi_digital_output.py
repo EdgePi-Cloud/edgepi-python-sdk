@@ -50,7 +50,10 @@ class EdgePiDigitalOutput():
         if pin_name is None or pin_name.value not in [pins.value for pins in DoutPins]:
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
         if state == DoutTriState.HIGH:
+            # Clear AO_EN pin to disable the AnalogOut first before switching the DOUT high
+            self.gpio.set_pin_state(self._dout_aout_pair[pin_name].value)
             self.gpio.set_pin_state(pin_name.value)
+            self.gpio.clear_pin_state(self._dout_aout_pair[pin_name].value)
         elif state == DoutTriState.LOW:
             # In order to safely switch internal MUX circuit, Analog enable pin must be set and
             # cleared with a small time delay. This allows overriding AOUT with DOUT

@@ -69,22 +69,24 @@ def test_pwm_enable(mocker, pwm_num, mock_vals, result, error, pwm_dev):
         mock_set_pin.assert_called_with(result[0])
         mock_clear_pin.assert_has_calls([mock.call(result[1]), mock.call(pwm_num.value)])
 
-@pytest.mark.parametrize("pwm_num, error",
-                         [(PWMPins.PWM1, does_not_raise()),
-                          (PWMPins.PWM2, does_not_raise()),
-                          (None, pytest.raises(ValueError)),
-                          ])
-def test_pwm_disable(mocker, pwm_num, error, pwm_dev):
+@pytest.mark.parametrize("pwm_num, pins, error",
+                    [(PWMPins.PWM1,[GpioPins.AO_EN1.value, GpioPins.DOUT1.value], does_not_raise()),
+                     (PWMPins.PWM2,[GpioPins.AO_EN2.value, GpioPins.DOUT2.value], does_not_raise()),
+                     (None, None, pytest.raises(ValueError)),
+                     ])
+def test_pwm_disable(mocker, pwm_num, pins, error, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     mocker_gpio = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO")
     pwm_dev.gpio = mocker_gpio
     pwm_dev._EdgePiPWM__pwm_devs[pwm_num] = mock_pwmdevice
     mocker.patch("edgepi.peripherals.pwm.PwmDevice.disable_pwm")
     mock_set_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.set_pin_state")
+    mock_clear_pin = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiGPIO.clear_pin_state")
     with error:
         pwm_dev.disable(pwm_num)
         pwm_dev._EdgePiPWM__pwm_devs[pwm_num].disable_pwm.assert_called_once_with()
-        mock_set_pin.assert_called_with(pwm_num.value)
+        mock_set_pin.assert_called_with(pins[0])
+        mock_clear_pin.assert_has_calls([mock.call(pins[1]), mock.call(pwm_num.value)])
 
 @pytest.mark.parametrize("pwm_num, error",
                          [(PWMPins.PWM1, does_not_raise()),
