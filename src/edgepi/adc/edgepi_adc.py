@@ -10,6 +10,7 @@ from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
 from edgepi.adc.adc_constants import (
+    ADC1PGA,
     ADC1DataRate,
     ADC2DataRate,
     ADCChannel as CH,
@@ -121,7 +122,7 @@ class EdgePiADC(SPI):
         eeprom_data  = eeprom.read_edgepi_data()
         self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
                                  ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
-        self.r_ref = eeprom_data.rtd_calib_params.rtd_resistor
+        self.rtd_calib = eeprom_data.rtd_calib_params
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
@@ -478,9 +479,11 @@ class EdgePiADC(SPI):
 
         return code_to_temperature(
             voltage_code,
-            self.r_ref,
+            self.rtd_calib.rtd_resistor,
             self.rtd_sensor_resistance,
             self.rtd_sensor_resistance_variation,
+            self.rtd_calib.rtd.gain,
+            self.rtd_calib.rtd.offset,
             adc_num
         )
 
@@ -547,9 +550,11 @@ class EdgePiADC(SPI):
 
         return code_to_temperature(
             voltage_code,
-            self.r_ref,
+            self.rtd_calib.rtd_resistor,
             self.rtd_sensor_resistance,
             self.rtd_sensor_resistance_variation,
+            self.rtd_calib.rtd.gain,
+            self.rtd_calib.rtd.offset,
             adc_num
         )
 
@@ -823,6 +828,7 @@ class EdgePiADC(SPI):
         adc_2_mux_n: CH = None,
         adc_1_data_rate: ADC1DataRate = None,
         adc_2_data_rate: ADC2DataRate = None,
+        adc_1_pga: ADC1PGA = None,
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         checksum_mode: CheckMode = None,
@@ -849,6 +855,7 @@ class EdgePiADC(SPI):
             `adc_2_mux_n` (ADCChannel): input voltage channel to map to ADC1 mux_n
             `adc_1_data_rate` (ADC1DataRate): ADC1 data rate in samples per second
             `adc_2_data_rate` (ADC2DataRate): ADC2 data rate in samples per second,
+            `adc_1_pga` (ADC1PGA): enable or bypass PGA,
             `filter_mode` (FilterMode): filter mode for both ADC1 and ADC2.
                 Note this affects data rate. Please refer to module documentation
                 for more information.
@@ -941,6 +948,7 @@ class EdgePiADC(SPI):
         filter_mode: FilterMode = None,
         conversion_mode: ConvMode = None,
         override_updates_validation: bool = False,
+        adc_1_pga: ADC1PGA = None
     ):
         """
         Configure user accessible ADC settings, either collectively or individually.
@@ -955,6 +963,7 @@ class EdgePiADC(SPI):
                 for more information.
             `conversion_mode` (ConvMode): set conversion mode for ADC1.
             `override_updates_validation` (bool): set to True to skip update validation
+            `adc_1_pga` (ADC1PGA): enable or bypass PGA
         """
         # pylint: disable=possibly-unused-variable
         # pylint: disable=unused-argument

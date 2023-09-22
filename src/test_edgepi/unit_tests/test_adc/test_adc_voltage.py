@@ -84,17 +84,17 @@ def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
 @pytest.mark.parametrize(
     "code, adc_num, calibs, result",
     [
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
-        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 12.08313),
-        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), -12.05513),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.014), 0.014),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 0.014),
-        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 12.08313),
-        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 12.08313),
-        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), -12.05513),
-        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), -12.05513),
-        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.014), 0.014),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_1.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0),
+        ([0x7F, 0xFF, 0xFF, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x7F, 0xFF, 0xFF, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 12.069),
+        ([0x80, 0x00, 0x00, 0xFF], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x80, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), -12.069),
+        ([0x00, 0x00, 0x00, 0x00], ADCNum.ADC_2.value,CalibParam(gain=1, offset=0.0), 0),
     ],
 )
 def test_code_to_voltage(code, adc_num, calibs, result):
@@ -120,12 +120,16 @@ def test_code_to_voltage_single_ended(code, adc_num, calibs, result):
     assert pytest.approx(code_to_voltage_single_ended(code, adc_num, calibs),0.0001) == result
 
 @pytest.mark.parametrize(
-    "code, ref_resistance, temp_offset, rtd_conv_constant, adc_num, expected",
+    "code, ref_resistance, temp_offset, rtd_conv_constant,rtd_gain,rtd_offset,adc_num,expected",
     [
-        ([0x03, 0x85, 0x1E, 0xB8], 2000, 100, 0.385, ADCNum.ADC_1, 25.97),
-        ([0x03, 0x85, 0x1E], 2000, 100, 0.385, ADCNum.ADC_2, 25.97),
+        ([0x03, 0x85, 0x1E, 0xB8], 2000, 100, 0.385,1,0, ADCNum.ADC_1, 25.97),
+        ([0x03, 0x85, 0x1E], 2000, 100, 0.385,1,0, ADCNum.ADC_2, 25.97),
+        ([0x03, 0x85, 0x1E, 0xB8], 2000, 100, 0.385,1,-0.5, ADCNum.ADC_1, 25.47),
+        ([0x03, 0x85, 0x1E], 2000, 100, 0.385,1,-0.5, ADCNum.ADC_2, 25.47),
     ]
 )
-def test_code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num,expected):
-    temperature = code_to_temperature(code,ref_resistance,temp_offset,rtd_conv_constant,adc_num)
+def test_code_to_temperature(
+            code,ref_resistance,temp_offset,rtd_conv_constant,rtd_gain,rtd_offset,adc_num,expected):
+    temperature = code_to_temperature(
+                    code,ref_resistance,temp_offset,rtd_conv_constant,rtd_gain,rtd_offset,adc_num)
     assert expected == pytest.approx(temperature, 0.001)

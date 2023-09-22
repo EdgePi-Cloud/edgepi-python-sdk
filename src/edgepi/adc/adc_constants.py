@@ -9,6 +9,8 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 ADC_NUM_REGS = 27  # number of ADC1263 registers
 ADC_VOLTAGE_READ_LEN = 6  # number of bytes per voltage read
+ADC1_NUM_DATA_BYTES = 4 # Number of data bytes for ADC 1
+ADC2_NUM_DATA_BYTES = 3 # Number of data bytes for ADC 2
 
 
 @unique
@@ -129,7 +131,7 @@ class ADCNum(Enum):
     ADC_1 = ADCReadInfo(
         1,
         ADCReg.REG_INPMUX,
-        4,
+        ADC1_NUM_DATA_BYTES,
         ADCComs.COM_START1.value,
         ADCComs.COM_RDATA1.value,
         ADCComs.COM_STOP1.value,
@@ -137,7 +139,7 @@ class ADCNum(Enum):
     ADC_2 = ADCReadInfo(
         2,
         ADCReg.REG_ADC2MUX,
-        3,
+        ADC2_NUM_DATA_BYTES,
         ADCComs.COM_START2.value,
         ADCComs.COM_RDATA2.value,
         ADCComs.COM_STOP2.value,
@@ -188,7 +190,12 @@ class ADCMasks(Enum):
     ADC2_DR_BITS = 0x3F  # overwrite bits 7:6
     RMUXP_BITS = 0xC7  # overwrite bits 5:3
     RMUXN_BITS = 0xF8  # overwrite bits 2:0
+    PGA_BITS = 0x7F # overwrite bit 7
 
+class ADC1PGA(Enum):
+    """ADS1263 PGA Enable bypass ADC1"""
+    ENABLED = OpCode(0x00, ADCReg.REG_MODE2.value, ADCMasks.PGA_BITS.value)
+    BYPASSED = OpCode(0x80, ADCReg.REG_MODE2.value, ADCMasks.PGA_BITS.value)
 
 class ADC2DataRate(Enum):
     """ADS1263 data rates for ADC2"""

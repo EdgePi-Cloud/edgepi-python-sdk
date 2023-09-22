@@ -4,7 +4,7 @@
 import logging
 
 from bitstring import BitArray
-from edgepi.adc.adc_constants import ADCReadInfo, ADCNum
+from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list
 
@@ -13,6 +13,9 @@ from edgepi.utilities.utilities import bitstring_from_list
 STEP_DOWN_RESISTOR_1 = 19.1
 STEP_DOWN_RESISTOR_2 = 4.99
 REFERENCE_VOLTAGE = 2.5
+# Instead of subracting Reference voltage use the code value of the max voltage to convert voltage
+ADC1_UPPER_LIMIT = 2147483648
+ADC2_UPPER_LIMIT = 8388608
 
 
 _logger = logging.getLogger(__name__)
@@ -69,7 +72,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
-    # handling negative number
+
     if _is_negative_voltage(code_bits):
         code_val = code_val - 2**num_bits
 
@@ -96,12 +99,17 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
-    # handling negative number
-    if _is_negative_voltage(code_bits):
-        code_val = code_val - 2**num_bits
+
+    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = code_val - ADC1_UPPER_LIMIT
+    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = code_val - ADC2_UPPER_LIMIT
+    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = code_val + ADC1_UPPER_LIMIT
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = code_val + ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-    v_in = REFERENCE_VOLTAGE + v_in
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
@@ -111,6 +119,8 @@ def code_to_temperature(
     ref_resistance: float,
     rtd_sensor_resistance: float,
     rtd_sensor_resistance_variation: float,
+    rtd_calib_gain: float,
+    rtd_calib_offset: float,
     adc_num: ADCNum
     ) -> float:
     """
@@ -136,5 +146,5 @@ def code_to_temperature(
     r_rtd = code_bits.uint / (2 ** number_of_bits) * ref_resistance
     temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
     _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")
-
+    temperature = temperature*rtd_calib_gain+rtd_calib_offset
     return temperature

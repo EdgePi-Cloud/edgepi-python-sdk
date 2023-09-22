@@ -30,6 +30,7 @@ from edgepi.adc.adc_constants import (
     ADC1DataRate,
     ADC2DataRate,
     FilterMode,
+    ADC1PGA,
 )
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.calibration.calibration_constants import CalibParam
@@ -335,6 +336,16 @@ def test_read_registers_to_map(mocker, adc):
             {ADCReg.REG_REFMUX.value: 0x3F},
             {"pos_ref_inp": REFMUX.POS_REF_INT_VAVDD, "neg_ref_inp": REFMUX.NEG_REF_INT_VAVSS},
             {ADCReg.REG_REFMUX.value: 0b00100100},
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x0F},
+            {"adc_1_pga": ADC1PGA.BYPASSED},
+            {ADCReg.REG_MODE2.value: 0x8F}
+        ),
+        (
+            {ADCReg.REG_MODE2.value: 0x8F},
+            {"adc_1_pga": ADC1PGA.ENABLED},
+            {ADCReg.REG_MODE2.value: 0x0F}
         ),
     ],
 )
