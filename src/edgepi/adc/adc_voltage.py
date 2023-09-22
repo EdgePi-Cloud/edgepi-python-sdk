@@ -119,6 +119,8 @@ def code_to_temperature(
     ref_resistance: float,
     rtd_sensor_resistance: float,
     rtd_sensor_resistance_variation: float,
+    rtd_calib_gain: float,
+    rtd_calib_offset: float,
     adc_num: ADCNum
     ) -> float:
     """
@@ -144,5 +146,5 @@ def code_to_temperature(
     r_rtd = code_bits.uint / (2 ** number_of_bits) * ref_resistance
     temperature = (r_rtd - rtd_sensor_resistance) / rtd_sensor_resistance_variation
     _logger.debug(f"computed rtd temperature = {temperature}, from code = {code_bits.uint}")
-
+    temperature = temperature*rtd_calib_gain+rtd_calib_offset
     return temperature
