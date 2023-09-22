@@ -550,7 +550,7 @@ class EdgePiADC(SPI):
 
         return code_to_temperature(
             voltage_code,
-            self.rtd_calib.rtd.rtd_resistor,
+            self.rtd_calib.rtd_resistor,
             self.rtd_sensor_resistance,
             self.rtd_sensor_resistance_variation,
             self.rtd_calib.rtd.gain,
