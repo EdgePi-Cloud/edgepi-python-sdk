@@ -177,14 +177,14 @@ def test_dac_compute_expected_voltage(mocker, analog_out, read_data, dac):
         (5, 1.0, [1,1,GpioPins.DOUT6.value]),
         (6, 1.0, [1,1,GpioPins.DOUT7.value]),
         (7, 1.0, [1,1,GpioPins.DOUT8.value]),
-        (0, 0, [1,1,AOPins.AO_EN1.value]),
-        (1, 0, [1,1,AOPins.AO_EN2.value]),
-        (2, 0, [0,1,AOPins.AO_EN3.value]),
-        (3, 0, [0,1,AOPins.AO_EN4.value]),
-        (4, 0, [0,1,AOPins.AO_EN5.value]),
-        (5, 0, [0,1,AOPins.AO_EN6.value]),
-        (6, 0, [0,1,AOPins.AO_EN7.value]),
-        (7, 0, [0,1,AOPins.AO_EN8.value]),
+        (0, 0, [2,2,AOPins.AO_EN1.value]),
+        (1, 0, [2,2,AOPins.AO_EN2.value]),
+        (2, 0, [1,2,AOPins.AO_EN3.value]),
+        (3, 0, [1,2,AOPins.AO_EN4.value]),
+        (4, 0, [1,2,AOPins.AO_EN5.value]),
+        (5, 0, [1,2,AOPins.AO_EN6.value]),
+        (6, 0, [1,2,AOPins.AO_EN7.value]),
+        (7, 0, [1,2,AOPins.AO_EN8.value]),
     ]
 )
 def test_dac_send_to_gpio_pins(mocker, analog_out, voltage, result):

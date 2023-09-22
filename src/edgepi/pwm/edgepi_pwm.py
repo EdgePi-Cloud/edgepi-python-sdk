@@ -149,7 +149,11 @@ class EdgePiPWM():
         if pwm_num is None or pwm_num not in self.__pwm_devs:
             raise ValueError(f"disable: PWM number is missing {pwm_num}")
         self.__pwm_devs[pwm_num].disable_pwm()
-        self.gpio.set_pin_state(pwm_num.value)
+        self.gpio.set_pin_state(GpioPins.AO_EN1.value if pwm_num==PWMPins.PWM1 else\
+                                GpioPins.AO_EN2.value)
+        self.gpio.clear_pin_state(GpioPins.DOUT1.value if pwm_num==PWMPins.PWM1 else\
+                                GpioPins.DOUT2.value)
+        self.gpio.clear_pin_state(pwm_num.value)
 
     def get_enabled(self, pwm_num: PWMPins):
         """

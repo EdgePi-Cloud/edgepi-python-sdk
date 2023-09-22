@@ -80,14 +80,16 @@ class EdgePiDAC(spi):
         ao_pin = self.__analog_out_pin_map[analog_out].value
         do_pin = self.__analog_to_digital_pin_map[analog_out].value
         if voltage > 0:
-            self.gpio.set_pin_state(ao_pin)
-            self.gpio.clear_pin_state(do_pin)
             if analog_out in [DACChannel.AOUT1.value, DACChannel.AOUT2.value]:
                 self.__dac_switching_logic(analog_out)
+            self.gpio.set_pin_state(ao_pin)
+            self.gpio.clear_pin_state(do_pin)
         elif voltage == 0:
-            self.gpio.clear_pin_state(ao_pin)
             if analog_out in [DACChannel.AOUT2.value,DACChannel.AOUT1.value]:
                 self.__dac_switching_logic(analog_out)
+            self.gpio.set_pin_state(ao_pin)
+            self.gpio.clear_pin_state(do_pin)
+            self.gpio.clear_pin_state(ao_pin)
         else:
             raise ValueError("voltage cannot be negative")
 
@@ -123,11 +125,11 @@ class EdgePiDAC(spi):
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
 
+        # send voltage to analog out pin
+        self.__send_to_gpio_pins(analog_out.value, voltage)
         # update DAC register
         with self.spi_open():
             self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
-        # send voltage to analog out pin
-        self.__send_to_gpio_pins(analog_out.value, voltage)
         return code
 
     def set_power_mode(self, analog_out: DACChannel, power_mode: PowerMode):
