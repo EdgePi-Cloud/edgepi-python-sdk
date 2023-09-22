@@ -125,11 +125,11 @@ class EdgePiDAC(spi):
         code = self.dac_ops.voltage_to_code(analog_out.value, voltage, dac_gain)
         self.log.debug(f'Code: {code}')
 
-        # send voltage to analog out pin
-        self.__send_to_gpio_pins(analog_out.value, voltage)
         # update DAC register
         with self.spi_open():
             self.transfer(self.dac_ops.generate_write_and_update_command(analog_out.value, code))
+        # send voltage to analog out pin
+        self.__send_to_gpio_pins(analog_out.value, voltage)
         return code
 
     def set_power_mode(self, analog_out: DACChannel, power_mode: PowerMode):
