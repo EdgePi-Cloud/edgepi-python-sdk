@@ -182,12 +182,14 @@ class EdgePiPWM():
         """
         if pwm_num is None or pwm_num not in EdgePiPWM.__pwm_devs:
             raise ValueError(f"close: PWM number is missing {pwm_num}")
-        EdgePiPWM.__pwm_devs[pwm_num].close_pwm()
-        EdgePiPWM.__pwm_devs[pwm_num] = None
+        with EdgePiPWM.__lock_pwm[pwm_num]:
+            EdgePiPWM.__pwm_devs[pwm_num].close_pwm()
+            EdgePiPWM.__pwm_devs[pwm_num] = None
 
     def __init_pwm_dev(self, pwm_num: PWMPins):
-        EdgePiPWM.__pwm_devs[pwm_num]=PwmDevice(channel=EdgePiPWM.__pwm_pin_to_channel[pwm_num].value.channel,
-                                           chip=EdgePiPWM.__pwm_pin_to_channel[pwm_num].value.chip)
+        EdgePiPWM.__pwm_devs[pwm_num]=PwmDevice(
+                                    channel=EdgePiPWM.__pwm_pin_to_channel[pwm_num].value.channel,
+                                    chip=EdgePiPWM.__pwm_pin_to_channel[pwm_num].value.chip)
         EdgePiPWM.__pwm_devs[pwm_num].open_pwm()
         self.log.debug(f"init_pwm: Instantiating PWM Device for the first time "
                        f"{EdgePiPWM.__pwm_devs[pwm_num].chip}"
@@ -227,10 +229,11 @@ class EdgePiPWM():
         """
         if pwm_num is None:
             raise ValueError(f"set_config: PWM number is missing {pwm_num}")
-        if EdgePiPWM.__pwm_devs[pwm_num] is None:
-            raise PwmDeviceError(f"set_config: PWM device doesn't exist {pwm_num},"
-                                 f"initialize the device first")
+        
         with EdgePiPWM.__lock_pwm[pwm_num]:
+            if EdgePiPWM.__pwm_devs[pwm_num] is None:
+                raise PwmDeviceError(f"set_config: PWM device doesn't exist {pwm_num},"
+                                 f"initialize the device first")
             if frequency is not None:
                 self.__set_frequency(pwm_num, frequency)
             if  duty_cycle is not None:
