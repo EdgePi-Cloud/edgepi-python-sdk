@@ -1,11 +1,14 @@
 """ Integration test for peripheral concurrency """
 
 import threading
+import logging
 import pytest
 
 from edgepi.peripherals.i2c import I2CDevice
 from edgepi.peripherals.spi import SpiDevice
 from edgepi.peripherals.gpio import GpioDevice
+
+_logger = logging.getLogger(__name__)
 
 class PropagatingThread(threading.Thread):
     """Propagating thread to raise exceptions in calling function"""
@@ -58,27 +61,27 @@ def gpio_open_with(gpio):
 
 #pylint:disable=unused-argument
 @pytest.mark.parametrize("iteration", range(10))
-def test_i2c_concurrency(iteration, i2c_dev):
+def test_i2c_concurrency_shared(iteration, i2c_dev):
     """Test for I2C concurrency bug"""
-    threads = [PropagatingThread(target=i2c_open_with(i2c_dev)) for _ in range(10)]
+    threads = [PropagatingThread(target=i2c_open_with(i2c_dev)) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
 @pytest.mark.parametrize("iteration", range(10))
-def test_spi_concurrency(iteration, spi_dev):
+def test_spi_concurrency_shared(iteration, spi_dev):
     """Test for SPI concurrency bug"""
-    threads = [PropagatingThread(target=spi_open_with(spi_dev)) for _ in range(10)]
+    threads = [PropagatingThread(target=spi_open_with(spi_dev)) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
 @pytest.mark.parametrize("iteration", range(10))
-def test_gpio_concurrency(iteration, gpio_dev):
+def test_gpio_concurrency_shared(iteration, gpio_dev):
     """Test for GPIO concurrency bug"""
-    threads = [PropagatingThread(target=gpio_open_with(gpio_dev)) for _ in range(10)]
+    threads = [PropagatingThread(target=gpio_open_with(gpio_dev)) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
@@ -103,27 +106,27 @@ def gpio_open_with_indiv():
         pass
 #pylint:disable=unused-argument
 @pytest.mark.parametrize("iteration", range(10))
-def test_i2c_concurrency(iteration):
+def test_i2c_concurrency_indiv(iteration):
     """Test for I2C concurrency bug"""
-    threads = [PropagatingThread(target=i2c_open_with_indiv()) for _ in range(10)]
+    threads = [PropagatingThread(target=i2c_open_with_indiv()) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
 @pytest.mark.parametrize("iteration", range(10))
-def test_spi_concurrency(iteration):
+def test_spi_concurrency_indiv(iteration):
     """Test for SPI concurrency bug"""
-    threads = [PropagatingThread(target=spi_open_with_indiv()) for _ in range(10)]
+    threads = [PropagatingThread(target=spi_open_with_indiv()) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
 @pytest.mark.parametrize("iteration", range(10))
-def test_gpio_concurrency(iteration):
+def test_gpio_concurrency_indiv(iteration):
     """Test for GPIO concurrency bug"""
-    threads = [PropagatingThread(target=gpio_open_with_indiv()) for _ in range(10)]
+    threads = [PropagatingThread(target=gpio_open_with_indiv()) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:

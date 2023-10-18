@@ -22,15 +22,25 @@ def test_check_range(mocker, dev_id, bus_num, result):
     assert spidev.spi is None
     assert spidev.max_speed == 1000000
     assert spidev.mode == 1
+    assert spidev.dev_id == dev_id
 
+@pytest.mark.parametrize(
+    "dev_id",
+    [
+        (0),
+        (1),
+        (2),
+        (3),
+    ],
+)
 # pylint: disable=no-member
-def test_spi_open(mocker):
+def test_spi_open(mocker, dev_id):
     mocker.patch("edgepi.peripherals.spi.SPI")
-    spidev = SpiDevice(0, 6)
-    assert spidev.lock_spi.locked() is False
+    spidev = SpiDevice(6, dev_id)
+    assert SpiDevice.lock_spi[dev_id].locked() is False
     with spidev.spi_open():
-        assert spidev.lock_spi.locked() is True
+        assert spidev.lock_spi[dev_id].locked() is True
         spidev.transfer([0,1,0])
-    assert spidev.lock_spi.locked() is False
+    assert spidev.lock_spi[dev_id].locked() is False
     spidev.spi.transfer.aasert_called_once()
     spidev.spi.close.aasert_called_once()

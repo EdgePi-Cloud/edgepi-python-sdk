@@ -15,7 +15,12 @@ _logger = logging.getLogger(__name__)
 
 class SpiDevice:
     """Class representing an I2C device"""
-
+    lock_spi = {
+        0:threading.Lock(),
+        1:threading.Lock(),
+        2:threading.Lock(),
+        3:threading.Lock()
+    }
     _devPath = "/dev/spidev"
     def __init__(
         self,
@@ -28,13 +33,13 @@ class SpiDevice:
         extra_flags: int = 0,
     ):
         self.devpath = f"/dev/spidev{bus_num}.{dev_id}"
+        self.dev_id = dev_id
         self.mode = mode
         self.max_speed = max_speed
         self.bit_order = bit_order
         self.bits_per_word = bits_per_word
         self.extra_flags = extra_flags
         self.spi = None
-        self.lock_spi = threading.Lock()
 
     @contextmanager
     def spi_open(self):
@@ -42,7 +47,7 @@ class SpiDevice:
         Open SPI device file
         """
         try:
-            self.lock_spi.acquire()
+            SpiDevice.lock_spi[self.dev_id].acquire()
             self.spi = SPI(
                 self.devpath,
                 self.mode,
@@ -55,7 +60,7 @@ class SpiDevice:
             yield self.spi
         finally:
             self.spi.close()
-            self.lock_spi.release()
+            SpiDevice.lock_spi[self.dev_id].release()
 
 
 
