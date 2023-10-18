@@ -316,9 +316,11 @@ def test_set_config(mocker, params, pwm_dev):
     mock_set_freq = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_frequency")
     mock_set_duty = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_duty_cycle")
     mock_set_pol = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_polarity")
+    mock_lock = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__lock_pwm")
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     pwm_dev._EdgePiPWM__pwm_devs[params[0]] = mock_pwmdevice
     pwm_dev.set_config(params[0], params[1], params[2], params[3])
+    assert len(mock_lock.mock_calls)==3
     if params[1] is not None:
         mock_set_freq.assert_called_once_with(params[0],params[1])
     else:
