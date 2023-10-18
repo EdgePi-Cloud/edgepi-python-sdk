@@ -5,6 +5,7 @@ Classes:
     I2CDevice
 """
 import logging
+import threading
 
 from typing import Union
 from contextlib import contextmanager
@@ -16,6 +17,8 @@ class I2CDevice():
     '''
     I2C Device class
     '''
+    lock_i2c=threading.Lock()
+
     def __init__(self, fd: str = None):
         self.i2c_fd = fd
         self.i2cdev = None
@@ -30,12 +33,13 @@ class I2CDevice():
             N/A
         """
         try:
+            I2CDevice.lock_i2c.acquire()
             self.i2cdev = I2C(devpath=self.i2c_fd)
             _logger.debug(f"Open I2C device with path '{self.i2c_fd}'")
             yield self.i2cdev
         finally:
             self.i2cdev.close()
-
+            I2CDevice.lock_i2c.release()
 
     def set_read_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''

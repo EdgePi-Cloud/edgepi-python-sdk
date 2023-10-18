@@ -5,8 +5,8 @@ Classes:
     SpiDevice
 """
 
-
 import logging
+import threading
 from contextlib import contextmanager
 from periphery import SPI
 
@@ -35,6 +35,7 @@ class SpiDevice:
         self.bits_per_word = bits_per_word
         self.extra_flags = extra_flags
         self.spi = None
+        self.lock_spi = threading.Lock()
 
     @contextmanager
     def spi_open(self):
@@ -42,6 +43,7 @@ class SpiDevice:
         Open SPI device file
         """
         try:
+            self.lock_spi.acquire()
             self.spi = SPI(
                 self.devpath,
                 self.mode,
@@ -54,6 +56,8 @@ class SpiDevice:
             yield self.spi
         finally:
             self.spi.close()
+            self.lock_spi.release()
+
 
 
     def transfer(self, data: list) -> list:

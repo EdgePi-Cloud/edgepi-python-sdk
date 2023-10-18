@@ -27,7 +27,10 @@ def test_check_range(mocker, dev_id, bus_num, result):
 def test_spi_open(mocker):
     mocker.patch("edgepi.peripherals.spi.SPI")
     spidev = SpiDevice(0, 6)
+    assert spidev.lock_spi.locked() is False
     with spidev.spi_open():
+        assert spidev.lock_spi.locked() is True
         spidev.transfer([0,1,0])
+    assert spidev.lock_spi.locked() is False
     spidev.spi.transfer.aasert_called_once()
     spidev.spi.close.aasert_called_once()
