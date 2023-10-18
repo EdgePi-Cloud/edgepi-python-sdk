@@ -59,10 +59,12 @@ class SpiDevice:
             _logger.debug(f"Open SPI device with path '{self.devpath}'")
             yield self.spi
         finally:
-            self.spi.close()
-            SpiDevice.lock_spi[self.dev_id].release()
-
-
+            try:
+                self.spi.close()
+            except Exception as exc:
+                raise OSError(f"Failed to close {self.devpath}") from exc
+            finally:
+                SpiDevice.lock_spi[self.dev_id].release()
 
     def transfer(self, data: list) -> list:
         """Conduct an SPI data transfer"""

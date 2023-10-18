@@ -38,8 +38,12 @@ class I2CDevice():
             _logger.debug(f"Open I2C device with path '{self.i2c_fd}'")
             yield self.i2cdev
         finally:
-            self.i2cdev.close()
-            I2CDevice.lock_i2c.release()
+            try:
+                self.i2cdev.close()
+            except Exception as exc:
+                raise OSError(f"Failed to close {self.i2c_fd}") from exc
+            finally:
+                I2CDevice.lock_i2c.release()
 
     def set_read_msg(self, addr:Union[int,list] = None, msg:list = None):
         '''

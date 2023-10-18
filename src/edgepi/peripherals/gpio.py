@@ -28,8 +28,12 @@ class GpioDevice:
             self.gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
             yield self.gpio
         finally:
-            self.gpio.close()
-            GpioDevice.lock_gpio.release()
+            try:
+                self.gpio.close()
+            except Exception as exc:
+                raise OSError(f"Failed to close {self.gpio_fd}") from exc
+            finally:
+                GpioDevice.lock_gpio.release()
 
     def read_state(self):
         """
