@@ -1,7 +1,6 @@
 """ Integration test for peripheral concurrency """
 
 import threading
-from contextlib import nullcontext as does_not_raise
 import pytest
 
 from edgepi.peripherals.i2c import I2CDevice
@@ -18,8 +17,9 @@ class PropagatingThread(threading.Thread):
         self.exc = None
         try:
             super().run()
-        except Exception as e:
-            self.exc = e
+        # pylint:disable=broad-exception-caught
+        except Exception as err:
+            self.exc = err
 
     def join(self, *args, **kwargs):
         super().join(*args, **kwargs)
@@ -42,35 +42,44 @@ def fixture_gpio():
     yield gpio_dev
 
 def i2c_open_with(i2c):
+    "i2c open call"
     with i2c.i2c_open():
         pass
 
 def spi_open_with(spi):
+    "spi open call"
     with spi.spi_open():
         pass
 
 def gpio_open_with(gpio):
+    "gpio open call"
     with gpio.open_gpio(11,"in","pull_down"):
         pass
 
-
+#pylint:disable=unused-argument
 @pytest.mark.parametrize("iteration", range(100))
 def test_i2c_concurrency(iteration, i2c_dev):
     """Test for I2C concurrency bug"""
     threads = [PropagatingThread(target=i2c_open_with(i2c_dev)) for _ in range(5)]
-    for thread in threads: thread.start()
-    for thread in threads: thread.join()
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 @pytest.mark.parametrize("iteration", range(100))
 def test_spi_concurrency(iteration, spi_dev):
     """Test for SPI concurrency bug"""
     threads = [PropagatingThread(target=spi_open_with(spi_dev)) for _ in range(5)]
-    for thread in threads: thread.start()
-    for thread in threads: thread.join()
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 @pytest.mark.parametrize("iteration", range(100))
 def test_gpio_concurrency(iteration, gpio_dev):
     """Test for GPIO concurrency bug"""
     threads = [PropagatingThread(target=gpio_open_with(gpio_dev)) for _ in range(5)]
-    for thread in threads: thread.start()
-    for thread in threads: thread.join()
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()

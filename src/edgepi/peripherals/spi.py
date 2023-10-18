@@ -4,7 +4,7 @@ Module for SPI devices
 Classes:
     SpiDevice
 """
-
+#pylint:disable=too-many-instance-attributes
 import logging
 import threading
 from contextlib import contextmanager
@@ -17,7 +17,6 @@ class SpiDevice:
     """Class representing an I2C device"""
 
     _devPath = "/dev/spidev"
-
     def __init__(
         self,
         bus_num: int = None,
