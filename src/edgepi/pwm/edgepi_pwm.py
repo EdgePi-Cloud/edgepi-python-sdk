@@ -229,7 +229,7 @@ class EdgePiPWM():
         """
         if pwm_num is None:
             raise ValueError(f"set_config: PWM number is missing {pwm_num}")
-        
+
         with EdgePiPWM.__lock_pwm[pwm_num]:
             if EdgePiPWM.__pwm_devs[pwm_num] is None:
                 raise PwmDeviceError(f"set_config: PWM device doesn't exist {pwm_num},"
