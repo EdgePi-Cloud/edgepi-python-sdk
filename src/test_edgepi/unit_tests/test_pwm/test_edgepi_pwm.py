@@ -101,6 +101,18 @@ def test_pwm_close(mocker, pwm_num, error, pwm_dev):
         mock_pwmdevice.close_pwm.assert_called_once()
         assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is None
 
+@pytest.mark.parametrize("pwm_num, error",
+                         [(PWMPins.PWM1, pytest.raises(OSError)),
+                          (PWMPins.PWM2, pytest.raises(OSError)),
+                          ])
+def test_pwm_close_with_exception(mocker, pwm_num, error, pwm_dev):
+    mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
+    mocker.patch("edgepi.peripherals.pwm.PwmDevice.close_pwm", side_effect=Exception)
+    pwm_dev._EdgePiPWM__pwm_devs[pwm_num] = mock_pwmdevice
+    with error:
+        pwm_dev.close(pwm_num)
+        mock_pwmdevice.close_pwm.assert_called_once()
+        assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is None
 
 @pytest.mark.parametrize("pwm_num ,expected, error",
                          [(PWMPins.PWM1, 1000.0, does_not_raise()),
@@ -316,9 +328,11 @@ def test_set_config(mocker, params, pwm_dev):
     mock_set_freq = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_frequency")
     mock_set_duty = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_duty_cycle")
     mock_set_pol = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__set_polarity")
+    mock_lock = mocker.patch("edgepi.pwm.edgepi_pwm.EdgePiPWM._EdgePiPWM__lock_pwm")
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")
     pwm_dev._EdgePiPWM__pwm_devs[params[0]] = mock_pwmdevice
     pwm_dev.set_config(params[0], params[1], params[2], params[3])
+    assert len(mock_lock.mock_calls)==3
     if params[1] is not None:
         mock_set_freq.assert_called_once_with(params[0],params[1])
     else:
