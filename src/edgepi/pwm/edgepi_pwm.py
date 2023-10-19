@@ -183,8 +183,12 @@ class EdgePiPWM():
         if pwm_num is None or pwm_num not in EdgePiPWM.__pwm_devs:
             raise ValueError(f"close: PWM number is missing {pwm_num}")
         with EdgePiPWM.__lock_pwm[pwm_num]:
-            EdgePiPWM.__pwm_devs[pwm_num].close_pwm()
-            EdgePiPWM.__pwm_devs[pwm_num] = None
+            try:
+                EdgePiPWM.__pwm_devs[pwm_num].close_pwm()
+            except Exception as exc:
+                raise OSError(f"Failed to close {pwm_num}") from exc
+            finally:
+                EdgePiPWM.__pwm_devs[pwm_num] = None
 
     def __init_pwm_dev(self, pwm_num: PWMPins):
         EdgePiPWM.__pwm_devs[pwm_num]=PwmDevice(
