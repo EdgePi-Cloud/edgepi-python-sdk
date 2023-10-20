@@ -25,8 +25,11 @@ def test_i2c_init(fd):
 def test_i2c_open(mocker):
     periph_i2c = mocker.patch("edgepi.peripherals.i2c.I2C")
     i2c_dev = I2CDevice(I2C_DEV_PATH)
+    assert I2CDevice.lock_i2c.locked() is False
     with i2c_dev.i2c_open():
+        assert I2CDevice.lock_i2c.locked() is True
         assert periph_i2c.called_once()
+    assert I2CDevice.lock_i2c.locked() is False
     i2c_dev.i2cdev.close.aasert_called_once()
 
 
@@ -41,11 +44,14 @@ def test_i2c_open(mocker):
 def test_i2c_set_read_msg(mocker, addrs, msg, result):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     i2c_dev = I2CDevice(I2C_DEV_PATH)
+    assert I2CDevice.lock_i2c.locked() is False
     with i2c_dev.i2c_open():
+        assert I2CDevice.lock_i2c.locked() is True
         list_msg = i2c_dev.set_read_msg(addrs, msg)
         i2c_dev.i2cdev.Message.assert_any_call(result[0], read=result[1])
         i2c_dev.i2cdev.Message.assert_any_call(result[2], read=result[3])
         assert len(list_msg) == i2c_dev.i2cdev.Message.call_count
+    assert I2CDevice.lock_i2c.locked() is False
     assert i2c_dev.i2cdev.close.called_once()
 
 @pytest.mark.parametrize("addrs, msg, result",
@@ -59,8 +65,11 @@ def test_i2c_set_read_msg(mocker, addrs, msg, result):
 def test_i2c_set_write_msg(mocker, addrs, msg, result):
     mocker.patch("edgepi.peripherals.i2c.I2C")
     i2c_dev = I2CDevice(I2C_DEV_PATH)
+    assert I2CDevice.lock_i2c.locked() is False
     with i2c_dev.i2c_open():
+        assert I2CDevice.lock_i2c.locked() is True
         list_msg = i2c_dev.set_write_msg(addrs, msg)
         i2c_dev.i2cdev.Message.assert_called_with(result[0], read=result[1])
         assert len(list_msg) == i2c_dev.i2cdev.Message.call_count
+    assert I2CDevice.lock_i2c.locked() is False
     assert i2c_dev.i2cdev.close.called_once()

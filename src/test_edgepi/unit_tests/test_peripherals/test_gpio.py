@@ -24,8 +24,11 @@ def test_gpio_init_param(mocker, fd):
 def test_gpio_open(mocker):
     periph_gpio = mocker.patch("edgepi.peripherals.gpio.GPIO")
     gpiodev = GpioDevice("/dev/gpiochip0")
+    assert GpioDevice.lock_gpio.locked() is False
     with gpiodev.open_gpio("DIN1","IN","Pull-down"):
+        assert GpioDevice.lock_gpio.locked() is True
         assert periph_gpio.called_once()
+    assert GpioDevice.lock_gpio.locked() is False
     gpiodev.gpio.close.assert_called_once()
 
 @pytest.mark.parametrize(
