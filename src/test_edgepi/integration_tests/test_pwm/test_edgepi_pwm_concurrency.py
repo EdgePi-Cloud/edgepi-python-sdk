@@ -34,16 +34,17 @@ def fixture_test_pwm():
     yield pwm_dev
 
 def pwm_open_set_config(pwm):
-    """PWM init, setconfig and close"""
+    """PWM init, setconfig"""
     pwm.init_pwm(PWMPins.PWM1)
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
 
 def pwm_open_close(pwm):
-    """PWM init, setconfig and close"""
+    """PWM init and close"""
     pwm.init_pwm(PWMPins.PWM1)
     pwm.close(PWMPins.PWM1)
 
 def pwm_set_config(pwm):
+    """PWM setconfig"""
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
 
 #pylint:disable=unused-argument
@@ -62,26 +63,27 @@ def test_pwm_concurrency_shared_error(iteration, pwm_dev):
     with pytest.raises(PwmDeviceError):
         threads_open_close = [PropagatingThread(target=pwm_open_close(pwm_dev)) for _ in range(10)]
         threads_set_config = [PropagatingThread(target=pwm_set_config(pwm_dev)) for _ in range(10)]
-        for indx in range(len(threads_open_close)):
+        for _, indx in enumerate(threads_open_close):
             threads_open_close[indx].start()
             threads_set_config[indx].start()
-        for indx in range(len(threads_open_close)):
+        for _, indx in enumerate(threads_open_close):
             threads_open_close[indx].join()
             threads_set_config[indx].join()
 
 def pwm_open_set_config_indiv():
-    """PWM init, setconfig and close"""
+    """PWM init, setconfig """
     pwm = EdgePiPWM()
     pwm.init_pwm(PWMPins.PWM1)
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
 
 def pwm_open_close_indiv():
-    """PWM init, setconfig and close"""
+    """PWM init close"""
     pwm = EdgePiPWM()
     pwm.init_pwm(PWMPins.PWM1)
     pwm.close(PWMPins.PWM1)
 
 def pwm_set_config_indiv():
+    """PWM setconfig"""
     pwm = EdgePiPWM()
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
 
@@ -93,10 +95,10 @@ def test_pwm_concurrency_close_indiv_error(iteration):
     with pytest.raises(PwmDeviceError):
         threads_open_close = [PropagatingThread(target=pwm_open_close_indiv()) for _ in range(10)]
         threads_set_config = [PropagatingThread(target=pwm_set_config_indiv()) for _ in range(10)]
-        for indx in range(len(threads_open_close)):
+        for _, indx in enumerate(threads_open_close):
             threads_open_close[indx].start()
             threads_set_config[indx].start()
-        for indx in range(len(threads_open_close)):
+        for _, indx in enumerate(threads_open_close):
             threads_open_close[indx].join()
             threads_set_config[indx].join()
 
