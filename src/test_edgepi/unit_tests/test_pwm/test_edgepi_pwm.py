@@ -102,8 +102,8 @@ def test_pwm_close(mocker, pwm_num, error, pwm_dev):
         assert pwm_dev._EdgePiPWM__pwm_devs[pwm_num] is None
 
 @pytest.mark.parametrize("pwm_num, error",
-                         [(PWMPins.PWM1, pytest.raises(OSError)),
-                          (PWMPins.PWM2, pytest.raises(OSError)),
+                         [(PWMPins.PWM1, pytest.raises(PwmDeviceError)),
+                          (PWMPins.PWM2, pytest.raises(PwmDeviceError)),
                           ])
 def test_pwm_close_with_exception(mocker, pwm_num, error, pwm_dev):
     mock_pwmdevice= mocker.patch("edgepi.peripherals.pwm.PwmDevice")

@@ -198,7 +198,7 @@ class EdgePiPWM():
             try:
                 EdgePiPWM.__pwm_devs[pwm_num].close_pwm()
             except Exception as exc:
-                raise OSError(f"Failed to close {pwm_num}") from exc
+                raise PwmDeviceError(f"Failed to close {pwm_num}") from exc
             finally:
                 EdgePiPWM.__pwm_devs[pwm_num] = None
 
@@ -222,10 +222,13 @@ class EdgePiPWM():
         """
         if pwm_num is None or pwm_num not in EdgePiPWM.__pwm_devs:
             raise ValueError(f"init_pwm: PWM number is missing {pwm_num}")
-        if EdgePiPWM.__pwm_devs[pwm_num] is None:
-            self.__init_pwm_dev(pwm_num)
-            return
-
+        with EdgePiPWM.__lock_pwm[pwm_num]:
+            try:
+                if EdgePiPWM.__pwm_devs[pwm_num] is None:
+                    self.__init_pwm_dev(pwm_num)
+                    return
+            except Exception as exc:
+                raise PwmDeviceError(f"Error opening {pwm_num}, with error {exc}") from exc
         self.log.debug("init_pwm: PWM device is already open")
 
     def set_config(self, pwm_num: PWMPins,
@@ -258,5 +261,5 @@ class EdgePiPWM():
                 if polarity is not None:
                     self.__set_polarity(pwm_num, polarity)
             except Exception as exc:
-                raise PwmDeviceError (f"set_config: PWM device doesn't exist {pwm_num},"
-                                      f"initialize the device first") from exc
+                raise PwmDeviceError (f"set_config: PWM device {pwm_num},"
+                                      f"closed unexpectedly") from exc
