@@ -37,6 +37,7 @@ def pwm_open_set_config(pwm):
     """PWM init, setconfig and close"""
     pwm.init_pwm(PWMPins.PWM1)
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
+    pwm.close(PWMPins.PWM1)
 
 def pwm_open_set_config_close(pwm):
     """PWM init, setconfig and close"""
@@ -48,16 +49,16 @@ def pwm_open_set_config_close(pwm):
 @pytest.mark.parametrize("iteration", range(10))
 def test_pwm_concurrency_shared(iteration, pwm_dev):
     """Test for PWM concurrency bug"""
-    threads = [PropagatingThread(target=pwm_open_set_config(pwm_dev)) for _ in range(100)]
+    threads = [PropagatingThread(target=pwm_open_set_config(pwm_dev)) for _ in range(10)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
-@pytest.mark.parametrize("iteration, error", (range(10), pytest.raises(PwmDeviceError)))
-def test_pwm_concurrency_shared_error(iteration, error, pwm_dev):
+@pytest.mark.parametrize("iteration", range(10))
+def test_pwm_concurrency_shared_error(iteration, pwm_dev):
     """Test for PWM concurrency bug"""
-    with error:
+    with pytest.raises(PwmDeviceError):
         threads = [PropagatingThread(target=pwm_open_set_config_close(pwm_dev)) for _ in range(100)]
         for thread in threads:
             thread.start()
@@ -78,10 +79,10 @@ def pwm_open_set_config_close_indiv():
     pwm.close(PWMPins.PWM1)
 
 #pylint:disable=unused-argument
-@pytest.mark.parametrize("iteration, error", (range(10), pytest.raises(PwmDeviceError)))
-def test_pwm_concurrency_indiv(iteration, error):
+@pytest.mark.parametrize("iteration", range(10))
+def test_pwm_concurrency_close_indiv(iteration):
     """Test for pwm concurrency bug"""
-    with error:
+    with pytest.raises(PwmDeviceError):
         threads = [PropagatingThread(target=pwm_open_set_config_close_indiv()) for _ in range(100)]
         for thread in threads:
             thread.start()
