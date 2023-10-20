@@ -5,7 +5,7 @@ import logging
 import pytest
 
 from edgepi.pwm.pwm_constants import Polarity, PWMPins
-from edgepi.pwm.edgepi_pwm import EdgePiPWM
+from edgepi.pwm.edgepi_pwm import EdgePiPWM, PwmDeviceError
 
 _logger = logging.getLogger(__name__)
 
@@ -33,35 +33,57 @@ def fixture_test_pwm():
     pwm_dev = EdgePiPWM()
     yield pwm_dev
 
+def pwm_open_set_config(pwm):
+    """PWM init, setconfig and close"""
+    pwm.init_pwm(PWMPins.PWM1)
+    pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
+
 def pwm_open_set_config_close(pwm):
     """PWM init, setconfig and close"""
     pwm.init_pwm(PWMPins.PWM1)
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
-    # pwm.close(PWMPins.PWM1)
+    pwm.close(PWMPins.PWM1)
 
 #pylint:disable=unused-argument
 @pytest.mark.parametrize("iteration", range(10))
 def test_pwm_concurrency_shared(iteration, pwm_dev):
     """Test for PWM concurrency bug"""
-    threads = [PropagatingThread(target=pwm_open_set_config_close(pwm_dev)) for _ in range(100)]
+    threads = [PropagatingThread(target=pwm_open_set_config(pwm_dev)) for _ in range(100)]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
+
+@pytest.mark.parametrize("iteration, error", (range(10), pytest.raises(PwmDeviceError)))
+def test_pwm_concurrency_shared_error(iteration, error, pwm_dev):
+    """Test for PWM concurrency bug"""
+    with error:
+        threads = [PropagatingThread(target=pwm_open_set_config_close(pwm_dev)) for _ in range(100)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+def pwm_open_set_config_indiv():
+    """PWM init, setconfig and close"""
+    pwm = EdgePiPWM()
+    pwm.init_pwm(PWMPins.PWM1)
+    pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
 
 def pwm_open_set_config_close_indiv():
     """PWM init, setconfig and close"""
     pwm = EdgePiPWM()
     pwm.init_pwm(PWMPins.PWM1)
     pwm.set_config(PWMPins.PWM1, frequency=1000, duty_cycle=0.5, polarity=Polarity.NORMAL)
-    # pwm.close(PWMPins.PWM1)
+    pwm.close(PWMPins.PWM1)
 
 #pylint:disable=unused-argument
-@pytest.mark.parametrize("iteration", range(10))
-def test_pwm_concurrency_indiv(iteration):
+@pytest.mark.parametrize("iteration, error", (range(10), pytest.raises(PwmDeviceError)))
+def test_pwm_concurrency_indiv(iteration, error):
     """Test for pwm concurrency bug"""
-    threads = [PropagatingThread(target=pwm_open_set_config_close_indiv()) for _ in range(100)]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+    with error:
+        threads = [PropagatingThread(target=pwm_open_set_config_close_indiv()) for _ in range(100)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
