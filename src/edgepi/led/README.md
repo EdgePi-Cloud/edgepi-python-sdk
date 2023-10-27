@@ -12,9 +12,9 @@ from edgepi.led.led_constants import LEDPins
 
 leds = EdgePiLED()
 
-leds.turn_on(LEDPins.LED1)
+leds.turn_led_on(LEDPins.LED1)
 
-leds.turn_off(LEDPins.LED1)
+leds.turn_led_off(LEDPins.LED1)
 ```
 
 # Functionalities
@@ -28,9 +28,9 @@ Currently, the LED module offers the following functionalities:
 
 ## Turn an LED on/off
 ```python
-leds.turn_on(LEDPins.LED1)
+leds.turn_led_on(LEDPins.LED1)
 
-leds.turn_off(LEDPins.LED1)
+leds.turn_led_off(LEDPins.LED1)
 ```
 
 ## Toggle an LED to the opposite state
