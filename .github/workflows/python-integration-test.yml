@@ -20,19 +20,22 @@ jobs:
         python-version: ["3.9"]
 
     steps:
+      - name: Check pi user groups
+        run: |
+          groups pi | grep -q -P '^(?=.*spi)(?=.*i2c)(?=.*dialout)(?=.*gpio)'
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
           python -m venv venv_test
           source venv_test/bin/activate
-          python -m pip install pytest
+          pip install --upgrade pip
+          pip install pytest
           if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
       - name: Test with pytest
         run: |
           source venv_test/bin/activate
-          python -m pytest ./src/test_edgepi/integration_tests
+          pytest ./src/test_edgepi/integration_tests
       # python -m pytest ../tests/integration_tests --cov --cov-report=xml
       # - name: Code Coverage Summary Report
       #   uses: irongut/CodeCoverageSummary@v1.2.0
