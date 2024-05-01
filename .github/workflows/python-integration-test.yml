@@ -20,6 +20,9 @@ jobs:
         python-version: ["3.9"]
 
     steps:
+      - name: Check pi user groups
+        run: |
+          groups pi | grep -q -P '^(?=.*spi)(?=.*i2c)(?=.*dialout)(?=.*gpio)'
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Dependencies
