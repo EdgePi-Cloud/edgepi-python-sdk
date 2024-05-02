@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 setuptools.setup(
     name="edgepi-python-sdk",
-    version="1.2.15",
+    version="1.2.17",
     author="S.Park",
     author_email="spark@osensa.com",
     description="EdgePi Python SDK package",
@@ -25,5 +25,5 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src", exclude=["test_edgepi"]),
     package_dir={"": "src"},
     python_requires=">=3.6",
-    install_requires=["python-periphery >= 2.3.0", "bitstring >= 3.1.9", "protobuf>=3.20"],
+    install_requires=["python-periphery >= 2.3.0", "bitstring >= 3.1.9, < 4.2.0", "protobuf>=3.20"],
 )

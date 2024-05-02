@@ -134,7 +134,7 @@ def _measure_voltage_differential(
     for _ in range(READS_PER_WRITE):
         read_voltage = adc.read_voltage(adc_num)
         _logger.info(f"diff_read_voltage = {read_voltage}")
-        _assert_approx(write_volt/2, read_voltage, RW_ERROR)
+        _assert_approx(write_volt, read_voltage, RW_ERROR)
 
 
 _diff_ch_map = {
