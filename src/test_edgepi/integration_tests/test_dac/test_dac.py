@@ -71,6 +71,8 @@ def test_dac_write_and_read_voltages(analog_out, voltage, raises, dac):
     with raises:
         # expected_voltage = (voltage)*dac.dac_ops.dict_calib_param[analog_out.value].gain -\
         #  dac.dac_ops.dict_calib_param[analog_out.value].offset
+        # explicitly disable dac gain for this test
+        dac.set_dac_gain(False)
         dac.write_voltage(analog_out, voltage)
         code, voltage_val, gain_state = dac.get_state(analog_out, True, True, True)
         dac_gain = 2 if gain_state else 1

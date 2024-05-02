@@ -33,6 +33,8 @@ def fixture_test_eeprom():
                         ])
 # pylint: disable=protected-access
 def test__page_write_register(data, address, eeprom):
+    # reset user space to make sure init vals are set to 255
+    eeprom.reset_user_space()
     addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
     with eeprom.i2c_open():
         initial_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
