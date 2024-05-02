@@ -13,7 +13,7 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
-from edgepi.eeprom.eeprom_constants import EEPROMInfo
+from edgepi.eeprom.eeprom_constants import EEPROMInfo, EdgePiMemoryInfo
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 
 
@@ -34,11 +34,19 @@ def read_dummy_json(file_name: str):
 def test_reset_user_space(eeprom):
     reset_vals = []
     eeprom.reset_user_space()
-    num_of_pages = int(EEPROMInfo.NUM_OF_PAGE.value / 2)
-    for page in range(num_of_pages, EEPROMInfo.NUM_OF_PAGE.value):
-        # pylint: disable=line-too-long
-        # pylint: disable=protected-access
-        reset_vals += eeprom._EdgePiEEPROM__sequential_read(page * EEPROMInfo.PAGE_SIZE.value,EEPROMInfo.PAGE_SIZE.value)
+    num_of_pages = EdgePiMemoryInfo.USER_SPACE_END_PAGE.value - \
+                   EdgePiMemoryInfo.USER_SPACE_START_PAGE.value + 1
+    mem_offset = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value
+
+    with eeprom.i2c_open():
+        for page in range(num_of_pages):
+            # NOTE: private seq_read is used to ignore CRC check!
+            # pylint: disable=protected-access
+            reset_vals += eeprom._EdgePiEEPROM__sequential_read(
+                    mem_offset + (page * EEPROMInfo.PAGE_SIZE.value),
+                    EEPROMInfo.PAGE_SIZE.value
+            )
+
     for val in reset_vals:
         assert val == 255
 
