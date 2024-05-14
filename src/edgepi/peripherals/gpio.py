@@ -45,6 +45,22 @@ class GpioDevice:
         """
         return self.gpio.read()
 
+    def open_read_state(self, pin_num:int, pin_dir:str, pin_bias:str):
+        try:
+            GpioDevice.lock_gpio.acquire()
+            gpio   = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
+            result = gpio.read()
+
+        finally:
+            try:
+                gpio.close()
+            except Exception as exc:
+                raise OSError(f"Failed to close {self.gpio_fd}") from exc
+            finally:
+                GpioDevice.lock_gpio.release()
+
+        return result
+
     def write_state(self, state: bool = None):
         """
         Write state to GPIO pin

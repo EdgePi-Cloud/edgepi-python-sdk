@@ -24,6 +24,9 @@ class EdgePiGPIOChip(GpioDevice):
                        DINPins.DIN7.value : 10,
                        DINPins.DIN8.value : 7
                     }
+    __din_mapping_array = [26, 6, 11, 9, 22, 27, 10, 7]
+    __din_pin_dir  = "in"
+    __din_pin_bias = "pull_down"
 
     def __init__(self):
         super().__init__(GpioDevPaths.GPIO_CIHP_DEV_PATH.value)
@@ -44,6 +47,13 @@ class EdgePiGPIOChip(GpioDevice):
                        pin_bias=self.gpiochip_pins_dict[pin_name].bias):
             state = self.read_state()
         return state
+
+    def fast_read_din_state(self, din_pin_num:int):
+        return self.open_read_state(
+            pin_num  = self.__din_mapping_array[din_pin_num-1],
+            pin_dir  = self.__din_pin_dir,
+            pin_bias = self.__din_pin_bias,
+        )
 
     def write_gpio_pin_state(self, pin_name: str = None, state: bool = None):
         """
