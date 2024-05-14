@@ -55,6 +55,14 @@ class EdgePiGPIOChip(GpioDevice):
             pin_bias = self.__din_pin_bias,
         )
 
+    def fast_read_din_state_batch(self, din_pin_num_list:list[int]) -> list:
+        pin_num_list = [self.__din_mapping_array[pin_num-1] for pin_num in din_pin_num_list]
+        return self.open_read_state_batch(
+            pin_num_list = pin_num_list,
+            pin_dir      = self.__din_pin_dir,
+            pin_bias     = self.__din_pin_bias,
+        )
+
     def write_gpio_pin_state(self, pin_name: str = None, state: bool = None):
         """
         write pin state

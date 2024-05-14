@@ -46,6 +46,9 @@ class GpioDevice:
         return self.gpio.read()
 
     def open_read_state(self, pin_num:int, pin_dir:str, pin_bias:str):
+        '''
+        To minimize issues with the lock, we open & read in a single function call
+        '''
         try:
             GpioDevice.lock_gpio.acquire()
             gpio   = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
@@ -60,6 +63,37 @@ class GpioDevice:
                 GpioDevice.lock_gpio.release()
 
         return result
+
+    def open_read_state_batch(self, pin_num_list:list[int], pin_dir:str, pin_bias:str) -> list:
+        '''
+        Batch several gpio reads into a single lock / unlock. We can also take advantage of the fact we're accessing
+        the gpio only from different pins, and so we can open & close just a single time.
+        '''
+        results = []
+        try:
+            GpioDevice.lock_gpio.acquire()
+            gpio = None
+            try:
+                for pin_num in pin_num_list:
+                    if gpio is None:
+                        gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
+                    else:
+                        # pylint: disable=protected-access
+                        gpio._line = pin_num
+                        # pylint: disable=protected-access
+                        gpio._reopen(pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False)
+                    results += [gpio.read()]
+
+            finally:
+                try:
+                    gpio.close()
+                except Exception as exc:
+                    raise OSError(f"Failed to close {self.gpio_fd}") from exc
+
+        finally:
+            GpioDevice.lock_gpio.release()
+
+        return results
 
     def write_state(self, state: bool = None):
         """
