@@ -5,9 +5,7 @@
         bitstring_from_list(list)
 """
 
-
 from bitstring import BitArray
-
 
 def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
     """use for filtering an entry from a dictionary by key or value
@@ -62,3 +60,7 @@ def bitstring_from_list(data: list[int]) -> BitArray:
     """
     # bytes() will raise a ValueError if any items are not in the range [0, 255]
     return BitArray(bytes(data))
+
+
+def combine_to_uint32(a:int, b:int, c:int, d:int) -> int:
+    return (a << 24) + (b << 16) + (c << 8) + d

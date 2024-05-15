@@ -76,15 +76,15 @@ def generate_mux_opcodes(mux_updates: dict):
 def DEV_generate_mux_opcodes(key1, value1, key2, value2):
     mux_opcodes = []
 
-    def do_opcode(addx, mux_p, mux_n):
+    def do_opcode(addx, mux_p: CH, mux_n: CH):
         # not updating mux's for this adc_num (no args passed)
         if mux_p is None or mux_n is None:
             return []
 
+        # NOTE: for this function, we know that mux_p_val can never be larger than 15, because mux_p and mux_n are ADCChannel
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
 
-        adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
-
+        adc_x_ch_bits = (mux_p_val << 4) + mux_n_val
         return [OpCode(adc_x_ch_bits, addx.value, mask.value)]
 
     mux_opcodes += do_opcode(key1, value1[0], value1[1])

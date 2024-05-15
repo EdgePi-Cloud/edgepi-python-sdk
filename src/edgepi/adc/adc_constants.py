@@ -8,9 +8,9 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 
 ADC_NUM_REGS = 27  # number of ADC1263 registers
-ADC_VOLTAGE_READ_LEN = 6  # number of bytes per voltage read
-ADC1_NUM_DATA_BYTES = 4 # Number of data bytes for ADC 1
-ADC2_NUM_DATA_BYTES = 3 # Number of data bytes for ADC 2
+ADC_VOLTAGE_READ_LEN = 6 # number of bytes per voltage read
+ADC1_NUM_DATA_BYTES  = 4 # Number of data bytes for ADC 1
+ADC2_NUM_DATA_BYTES  = 3 # Number of data bytes for ADC 2
 
 
 @unique
