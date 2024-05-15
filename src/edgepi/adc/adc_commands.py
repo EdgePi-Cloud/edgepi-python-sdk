@@ -30,6 +30,11 @@ class ADCCommands:
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         return command + values
 
+    def unsafe_write_register_command(self, address, values):
+        """Trigger ADC register write - unsafe removes all checks"""
+        command = [ADCComs.COM_WREG.value + address, len(values) - 1]
+        return command + values
+
     def start_adc(self, adc_num: ADCNum):
         """Command to start ADC"""
         _logger.debug("Command to send is %s", ([adc_num.start_cmd]))

@@ -6,7 +6,7 @@ import logging
 from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list, DEV_bitstring_from_list
+from edgepi.utilities.utilities import bitstring_from_list, DEV_bitstring_from_list, combine_to_uint32
 
 
 # TODO: retrieve these values from EEPROM once added
@@ -42,7 +42,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
     voltage_range = v_ref / 2 ** (num_bits - 1)
-    _logger.debug(f" _code_to_input_voltage: code {code}")
+    _logger.debug(f"_code_to_input_voltage: code {code}")
     return float(code) * voltage_range
 
 
@@ -77,7 +77,6 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
         code_val = code_val - 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out
@@ -96,13 +95,15 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = DEV_bitstring_from_list(code[:adc_info.num_data_bytes])
+
+    code_bits = DEV_bitstring_from_list(code[:adc_info.num_data_bytes]) # 0.263
+    is_negative_voltage = code_bits[0] == 1
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
 
-    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+    if is_negative_voltage and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+    elif is_negative_voltage and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val - ADC2_UPPER_LIMIT
     elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val + ADC1_UPPER_LIMIT
@@ -110,6 +111,45 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
         code_val = code_val + ADC2_UPPER_LIMIT
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
+    v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
+
+    return v_out
+
+def DEV_code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam): # 0.049
+    """
+    Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
+
+    Args:
+        `code` (list[int]): code bytes retrieved from ADC voltage read
+
+        `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
+
+        `calibs` (CalibParam): voltage reading gain and offset calibration values
+
+    Returns:
+        `float`: voltage value (V) corresponding to `code`
+    """
+
+    num_bits = adc_info.num_data_bytes * 8
+    # TODO: confirm this for ADC2
+    is_negative_voltage = (code[0] & 0x80) != 0
+    if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(0, code[0], code[1], code[2]) # TODO: test this
+    else:
+        raise Exception("unexpected number of data bytes")
+
+    if is_negative_voltage and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = code_val - ADC1_UPPER_LIMIT
+    elif is_negative_voltage and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = code_val - ADC2_UPPER_LIMIT
+    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = code_val + ADC1_UPPER_LIMIT
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = code_val + ADC2_UPPER_LIMIT
+
+    v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits) # 0.062
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
 
     return v_out

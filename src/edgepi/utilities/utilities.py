@@ -67,3 +67,6 @@ def bitstring_from_list(data: list) -> BitArray:
 # NOTE: is 10x faster than the above, make sure to confirm they are identical & add a test case or something
 def DEV_bitstring_from_list(data: list) -> BitArray:
     return BitArray(bytes(data))
+
+def combine_to_uint32(a:int, b:int, c:int, d:int) -> int:
+    return (a << 24) + (b << 16) + (c << 8) + d

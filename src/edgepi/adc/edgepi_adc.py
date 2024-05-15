@@ -38,7 +38,8 @@ from edgepi.adc.adc_constants import (
 from edgepi.adc.adc_voltage import (
     code_to_voltage,
     code_to_temperature,
-    code_to_voltage_single_ended
+    code_to_voltage_single_ended,
+    DEV_code_to_voltage_single_ended
 )
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -237,11 +238,12 @@ class EdgePiADC(SPI):
         """
         if len(data) < 1:
             raise ValueError("Number of registers to write to must be at least 1")
-        code = self.adc_ops.write_register_command(start_addx.value, data)
+
+        code = self.adc_ops.unsafe_write_register_command(start_addx.value, data) # 0.201
         _logger.debug(f"__write_register: sending {code}")
+
         with self.spi_open():
-            out = self.transfer(code)
-        return out
+            return self.transfer(code)
 
     def __set_rtd_pin(self, enable: bool = False):
         """
@@ -318,9 +320,9 @@ class EdgePiADC(SPI):
                 f"filter_mode={hex(filter_mode.value.op_code)}\n"
             )
         )
-        self.__send_start_command(adc_num)
+        self.__send_start_command(adc_num) # 0.458
         # apply delay for first conversion
-        time.sleep(conv_delay / 1000)
+        time.sleep(conv_delay / 1000) # 0.580
 
     def clear_reset_bit(self):
         """
@@ -331,10 +333,10 @@ class EdgePiADC(SPI):
         """
         self.__config(reset_clear=ADCPower.RESET_CLEAR)
 
-    def __read_data(self, adc: ADCNum, data_size: int):
+    def __read_data(self, adc_num: ADCNum, data_size: int):
         """Sends command to ADC to get new voltage conversion data"""
         with self.spi_open():
-            return self.transfer([adc.value.read_cmd] + [255] * data_size)
+            return self.transfer([adc_num.value.read_cmd] + [255] * data_size)
 
     def __voltage_read(self, adc_num: ADCNum):
         """
@@ -354,6 +356,39 @@ class EdgePiADC(SPI):
         voltage_code = read_data[2 : (2 + adc_num.value.num_data_bytes)]
         check_code = read_data[6]
         check_crc(voltage_code, check_code)
+        return status_code, voltage_code, check_code
+
+    # NOTE: this function reduces the need for multiple spi calls by sending start & read in the same spi open context
+    def __start_and_read(self, adc_num: ADCNum):
+        # get state for configs relevant to conversion delay
+        state = self.get_state()
+        data_rate = (
+            state.adc_1.data_rate.code if adc_num == ADCNum.ADC_1 else state.adc_2.data_rate.code
+        )
+        filter_mode = state.filter_mode.code
+
+        conv_delay = expected_initial_time_delay(
+            adc_num, data_rate.value.op_code, filter_mode.value.op_code
+        )
+
+        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
+        read_cmd  = [adc_num.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
+        with self.spi_open():
+            self.transfer(start_cmd)
+            # apply delay for first conversion ?
+            time.sleep(conv_delay / 1000) # 0.580 # TODO: make sure this wait is absolutely neccesary
+            read_data = self.transfer(read_cmd)
+
+        if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
+            raise VoltageReadError(
+                f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
+            )
+
+        status_code = read_data[1]
+        voltage_code = read_data[2 : (2 + adc_num.value.num_data_bytes)]
+        check_code = read_data[6]
+        check_crc(voltage_code, check_code)
+
         return status_code, voltage_code, check_code
 
     @staticmethod
@@ -540,18 +575,15 @@ class EdgePiADC(SPI):
         Trigger a single ADC1 voltage sampling event, when performing single channel reading or
         differential reading. ADC1 must be in `PULSE` conversion mode before calling this method.
         """
-        # send command to trigger conversion
-        self.start_conversions(ADCNum.ADC_1)
-
-        # send command to read conversion data.
-        status_code, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1) # 0.524
+        # send command to trigger conversion & to read conversion data.
+        status_code, voltage_code, _ = self.__start_and_read(ADCNum.ADC_1) # 1.882
 
         # log STATUS byte
-        status = get_adc_status(status_code) # 0.828
-        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1) # 0.065
+        status = get_adc_status(status_code) # 0.002
+        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1) # 0.064
 
         # convert from code to voltage
-        return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) # 1.627
+        return DEV_code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) # 0.416
 
     def single_sample_rtd(self):
         """
@@ -684,7 +716,7 @@ class EdgePiADC(SPI):
             adc_2_mux_n = None
 
         # no multiplexer config to update
-        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], [None])
+        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], [None]) # 0.054
         if not args:
             return []
 
@@ -692,7 +724,7 @@ class EdgePiADC(SPI):
         if not override_rtd_validation:
             channels = list(args.values())
             rtd_enabled = self.rtd_state_cache
-            validate_channels_allowed(channels, rtd_enabled)
+            validate_channels_allowed(channels, rtd_enabled) # 0.029
 
         # NOTE: this is only commented so we can test caching the opcodes result (cannot hash dict)
         #adc_mux_updates = {
@@ -700,7 +732,7 @@ class EdgePiADC(SPI):
         #    ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
         #}
 
-        opcodes = DEV_generate_mux_opcodes(ADCReg.REG_INPMUX, (adc_1_mux_p, adc_1_mux_n), ADCReg.REG_ADC2MUX, (adc_2_mux_p, adc_2_mux_n))
+        opcodes = DEV_generate_mux_opcodes(ADCReg.REG_INPMUX, (adc_1_mux_p, adc_1_mux_n), ADCReg.REG_ADC2MUX, (adc_2_mux_p, adc_2_mux_n)) # 0.085
         return opcodes
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
@@ -909,7 +941,7 @@ class EdgePiADC(SPI):
 
         # get opcodes for mapping multiplexers
         mux_args = self.__extract_mux_args(args) # 0.019
-        ops_list = self.__get_channel_assign_opcodes(  # 0.738
+        ops_list = self.__get_channel_assign_opcodes(  # 0.184
             **mux_args, override_rtd_validation=override_rtd_validation
         )
 
@@ -922,23 +954,23 @@ class EdgePiADC(SPI):
         ]
 
         # get current register values
-        reg_values = self.__get_register_map()
+        reg_values = self.__get_register_map() # 0.017
         _logger.debug(f"__config: register values before updates:\n{reg_values}")
 
         # get codes to update register values
-        updated_reg_values = apply_opcodes(dict(reg_values), ops_list) # 1.842
+        updated_reg_values = apply_opcodes(dict(reg_values), ops_list) # 0.137
         _logger.debug(f"__config: register values after updates:\n{reg_values}")
 
         # write updated reg values to ADC using a single write.
         data = [entry["value"] for entry in updated_reg_values.values()]
-        self.__write_register(ADCReg.REG_ID, data) # 1.460
+        self.__write_register(ADCReg.REG_ID, data) # 1.501
 
         # update ADC state (for state caching)
         self.__update_cache_map(updated_reg_values) # 0.053
 
         # validate updates were applied correctly
         if not override_updates_validation:
-            self.__validate_updates(updated_reg_values) # 0.059
+            self.__validate_updates(updated_reg_values) # 0.062
 
         return updated_reg_values
 
