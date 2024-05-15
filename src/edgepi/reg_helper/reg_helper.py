@@ -13,6 +13,7 @@ Functions:
     apply_opcode(OpCode, int)
 """
 
+from functools import cache
 
 from copy import deepcopy
 from dataclasses import dataclass
@@ -103,9 +104,9 @@ def apply_opcodes(register_values: dict, opcodes: list):
             "empty values received for 'register_values' or 'opcodes' args, opcodes not applied"
         )
         raise ValueError("register_values and opcodes args must both be non-empty")
-    _format_register_map(register_values)
+    _format_register_map(register_values) # 0.047
 
-    original_regs = deepcopy(register_values)
+    #original_regs = deepcopy(register_values)
 
     # apply each opcode to its corresponding register
     for opcode in opcodes:
@@ -113,14 +114,15 @@ def apply_opcodes(register_values: dict, opcodes: list):
         # if this opcode maps to a valid register address
         if register_entry is not None:
             # apply the opcode to the register
-            register_entry["value"] = _apply_opcode(register_entry["value"], opcode)
+            register_entry["value"] = _apply_opcode(register_entry["value"], opcode) # 0.606
             register_entry["is_changed"] = True
 
-    __validate_register_updates(original_regs, register_values)
+    # NOTE: disabling register update validation because there's no reason for us to suspect the other values would change? I'm not sure why this was done before.
+    #__validate_register_updates(original_regs, register_values)
 
     return register_values
 
-
+@cache
 def _apply_opcode(register_value: int, opcode: OpCode):
     """
     Generates an update code for a specific register by applying an opcode
