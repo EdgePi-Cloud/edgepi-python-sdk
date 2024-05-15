@@ -5,7 +5,7 @@ from operator import attrgetter
 import logging
 import time
 
-from edgepi.adc.adc_query_lang import PropertyValue
+from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
@@ -1036,6 +1036,211 @@ class EdgePiADC(SPI):
                                         ["self", "adc_1_analog_in", "adc_2_analog_in"],
                                         [None])
         self.__config(**args)
+
+    # this function combines both calls, and tries to save performance where possible
+    def set_config_and_read_sample(
+        self,
+        adc_1_analog_in: AnalogIn = None,
+        adc_1_data_rate: ADC1DataRate = None,
+        adc_2_analog_in: AnalogIn = None,
+        adc_2_data_rate: ADC2DataRate = None,
+        filter_mode: FilterMode = None,
+        conversion_mode: ConvMode = None,
+        override_updates_validation: bool = False,
+        adc_1_pga: ADC1PGA = None,
+        secondary = False
+    ):
+        adc_1_ch  = self.__analog_in_to_adc_in_map.get(adc_1_analog_in)
+        adc_2_ch  = self.__analog_in_to_adc_in_map.get(adc_2_analog_in)
+
+        if adc_1_ch is None and adc_1_analog_in is not None:
+            raise TypeError(f"set_config: wrong type passed for adc_1_analog_in: {adc_1_analog_in}")
+        if adc_2_ch is None and adc_2_analog_in is not None:
+            raise TypeError(f"set_config: wrong type passed for adc_2_analog_in: {adc_2_analog_in}")
+
+        override_rtd_validation = False
+
+        # filter out self and None args
+        args = filter_dict_list_key_val(locals(), ["self", "adc_1_analog_in", "adc_2_analog_in", "secondary"], [None])
+
+        # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
+        if not override_rtd_validation:
+            self.__validate_no_rtd_conflict(args) # 0.020
+
+        # get opcodes for mapping multiplexers
+        #mux_args = self.__extract_mux_args(args) # 0.019
+        mux_args = {}
+        if "adc_1_ch" in args: mux_args["adc_1_mux_p"] = args["adc_1_ch"]
+        if "adc_2_ch" in args: mux_args["adc_2_mux_p"] = args["adc_2_ch"]
+        if "adc_1_mux_n" in args: mux_args["adc_1_mux_n"] = args["adc_1_mux_n"]
+        if "adc_2_mux_n" in args: mux_args["adc_2_mux_n"] = args["adc_2_mux_n"]
+
+        ops_list = self.__get_channel_assign_opcodes( # 0.184
+            **mux_args, override_rtd_validation=override_rtd_validation
+        )
+
+        # extract OpCode type args, since args may contain non-OpCode args
+        ops_list += [
+            entry.value
+            for entry in args.values()
+            if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
+        ]
+
+        # get current register values
+        reg_values = self.__get_register_map() # 0.017
+        #print(reg_values)
+        if len(reg_values.values()) < 1:
+            raise ValueError("Number of reg_values must be at least 1")
+
+        # get codes to update register values
+        updated_reg_values = apply_opcodes(dict(reg_values), ops_list) # 0.137
+        new_edgepi_register_state = { addx: entry["value"] for (addx, entry) in updated_reg_values.items() }
+
+        # get state for configs relevant to conversion delay
+        #state = ADCState(new_edgepi_register_state)
+        #data_rate = state.adc_1.data_rate.code
+        #filter_mode = state.filter_mode.code
+
+        # TODO: ensure this is equivalent to before
+        data_rate = ADCState.get_state(new_edgepi_register_state, ADCProperties.DATA_RATE_1).code
+        filter_mode = ADCState.get_state(new_edgepi_register_state, ADCProperties.FILTER_MODE).code
+        conv_delay = expected_initial_time_delay(
+            ADCNum.ADC_1, data_rate.value.op_code, filter_mode.value.op_code
+        )
+
+        # write updated reg values to ADC using a single write.
+        #self.__write_register(ADCReg.REG_ID, data) # 1.501
+        data = [entry["value"] for entry in updated_reg_values.values()]
+        if secondary:
+            write_reg_cmd = self.adc_ops.unsafe_write_register_command(0x06, data[6:7])
+        else:
+            write_reg_cmd = self.adc_ops.unsafe_write_register_command(ADCReg.REG_ID.value, data)
+        start_cmd     = self.adc_ops.start_adc(ADCNum.ADC_1.value) # TODO: what does this do? how can it be batched?
+        read_cmd      = [ADCNum.ADC_1.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
+
+        # send command to trigger conversion & to read conversion data.
+        read_data = self.custom_adc_open_and_transfer(write_reg_cmd + start_cmd, conv_delay / 1000, read_cmd)
+
+        #with self.spi_open():
+        #    self.transfer(write_reg_cmd + start_cmd)
+        #    time.sleep(conv_delay / 1000) # 0.580
+        #    read_data = self.transfer(read_cmd)
+
+        # update ADC state (for state caching)
+        EdgePiADC.__state = new_edgepi_register_state
+
+        if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
+            raise VoltageReadError(
+                f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
+            )
+
+        voltage_code = read_data[2 : (2 + ADCNum.ADC_1.value.num_data_bytes)]
+        check_code = read_data[6]
+        check_crc(voltage_code, check_code)
+
+        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1) # 0.064
+
+        # convert from code to voltage
+        return DEV_code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) # 0.116
+
+    def config_and_read_samples_batch(
+        self,
+        adc_1_analog_in_list: list[AnalogIn] = [],
+        adc_1_data_rate: ADC1DataRate = None,
+        adc_2_analog_in: AnalogIn = None,
+        adc_2_data_rate: ADC2DataRate = None,
+        conversion_mode: ConvMode = None
+    ):
+        adc_1_ch_list = []
+        for adc_1_analog_in in adc_1_analog_in_list:
+            adc_1_ch = self.__analog_in_to_adc_in_map.get(adc_1_analog_in)
+            if adc_1_ch is None and adc_1_analog_in is not None:
+                raise TypeError(f"set_config: wrong type passed in adc_1_analog_in_list: {adc_1_analog_in}")
+            adc_1_ch_list += [adc_1_ch]
+        
+        adc_2_ch = self.__analog_in_to_adc_in_map.get(adc_2_analog_in)
+        if adc_2_ch is None and adc_2_analog_in is not None:
+            raise TypeError(f"set_config: wrong type passed for adc_2_analog_in: {adc_2_analog_in}")
+
+        override_rtd_validation = False
+        
+        # filter out self and None args
+        args = filter_dict_list_key_val(locals(), ["self", "adc_1_analog_in_list", "adc_2_analog_in"], [None])
+
+        # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
+        if not override_rtd_validation:
+            self.__validate_no_rtd_conflict(args) # 0.020
+
+        # get instructions needed to send for each input
+        command_tup_list = []
+        for i, adc_1_ch in enumerate(adc_1_ch_list):
+            # get opcodes for mapping multiplexers
+            mux_args = {}
+            if "adc_1_ch" in args: mux_args["adc_1_mux_p"] = adc_1_ch
+            if "adc_2_ch" in args: mux_args["adc_2_mux_p"] = adc_2_ch
+            if "adc_1_mux_n" in args: mux_args["adc_1_mux_n"] = args["adc_1_mux_n"]
+            if "adc_2_mux_n" in args: mux_args["adc_2_mux_n"] = args["adc_2_mux_n"]
+
+            ops_list = self.__get_channel_assign_opcodes( # 0.184
+                **mux_args, override_rtd_validation=override_rtd_validation
+            )
+
+            # extract OpCode type args, since args may contain non-OpCode args
+            ops_list += [
+                entry.value
+                for entry in args.values()
+                if issubclass(entry.__class__, Enum) and isinstance(entry.value, OpCode)
+            ]
+
+            # get current register values
+            reg_values = self.__get_register_map() # 0.017
+            if len(reg_values.values()) < 1:
+                raise ValueError("Number of reg_values must be at least 1")
+
+            # get codes to update register values
+            updated_reg_values = apply_opcodes(dict(reg_values), ops_list) # 0.137
+            new_edgepi_register_state = { addx: entry["value"] for (addx, entry) in updated_reg_values.items() }
+
+            # TODO: ensure this is equivalent to before
+            data_rate = ADCState.get_state(new_edgepi_register_state, ADCProperties.DATA_RATE_1).code
+            filter_mode = ADCState.get_state(new_edgepi_register_state, ADCProperties.FILTER_MODE).code
+            conv_delay = expected_initial_time_delay(
+                ADCNum.ADC_1, data_rate.value.op_code, filter_mode.value.op_code
+            )
+
+            # write updated reg values to ADC using a single write.
+            data = [entry["value"] for entry in updated_reg_values.values()]
+            if i == 0:
+                write_reg_cmd = self.adc_ops.unsafe_write_register_command(ADCReg.REG_ID.value, data)
+            else:
+                write_reg_cmd = self.adc_ops.unsafe_write_register_command(0x06, data[6:7])
+
+            start_cmd = self.adc_ops.start_adc(ADCNum.ADC_1.value) # TODO: what does this do? how can it be batched?
+            read_cmd  = [ADCNum.ADC_1.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
+
+            command_tup_list += [(write_reg_cmd + start_cmd, conv_delay / 1000, read_cmd)]
+
+        data_list = self.custom_adc_batch_open_and_transfer(command_tup_list)
+
+        # update ADC state (for state caching)
+        EdgePiADC.__state = new_edgepi_register_state
+
+        voltage_list = []
+        for read_data in data_list:
+            if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
+                raise VoltageReadError(f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved")
+
+            voltage_code = read_data[2 : (2 + ADCNum.ADC_1.value.num_data_bytes)]
+            check_code = read_data[6]
+            check_crc(voltage_code, check_code)
+
+            calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1) # 0.064
+
+            # convert from code to voltage
+            voltage_list += [DEV_code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs)] # 0.116
+
+        return voltage_list
+
 
     def get_state(self, override_cache: bool = False) -> ADCState:
         """
