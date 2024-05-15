@@ -6,7 +6,7 @@ import logging
 from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list
+from edgepi.utilities.utilities import bitstring_from_list, DEV_bitstring_from_list
 
 
 # TODO: retrieve these values from EEPROM once added
@@ -96,7 +96,7 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
+    code_bits = DEV_bitstring_from_list(code[:adc_info.num_data_bytes])
     num_bits = adc_info.num_data_bytes * 8
     code_val = code_bits.uint
 

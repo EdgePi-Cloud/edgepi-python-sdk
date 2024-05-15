@@ -48,8 +48,6 @@ def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) 
     }
     return filtered_args
 
-
-
 def bitstring_from_list(data: list) -> BitArray:
     """
     Builds a bitstring from a list of uint byte values
@@ -65,3 +63,7 @@ def bitstring_from_list(data: list) -> BitArray:
         next_byte = pack("uint:8", value)
         code.append(next_byte)
     return code
+
+# NOTE: is 10x faster than the above, make sure to confirm they are identical & add a test case or something
+def DEV_bitstring_from_list(data: list) -> BitArray:
+    return BitArray(bytes(data))

@@ -47,6 +47,7 @@ from edgepi.utilities.utilities import filter_dict, filter_dict_list_key_val
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
     generate_mux_opcodes,
+    DEV_generate_mux_opcodes,
     validate_channels_allowed,
 )
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
@@ -102,7 +103,7 @@ class EdgePiADC(SPI):
         enable_cache: bool = False,
         rtd_sensor_resistance: float = None,
         rtd_sensor_resistance_variation: float = None
-        ):
+    ):
         """
         Args:
             `enable_cache` (bool): set to True to enable state-caching
@@ -116,6 +117,7 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
+        self.adc_state_cache = None # TODO: add enable/disable mechanism
 
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
@@ -126,6 +128,7 @@ class EdgePiADC(SPI):
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
+
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
         # If this call to __config is removed, replace with a call to get_register_map to
         # initialize __state.
@@ -133,6 +136,9 @@ class EdgePiADC(SPI):
         # TODO: adc reference should ba a config that customer passes depending on the range of
         # voltage they are measuring. To be changed later when range config is implemented
         # self.set_adc_reference(ADCReferenceSwitching.GND_SW1.value)
+
+        # uses gpio & checks the current state
+        self.rtd_state_cache = self.__is_rtd_on()
 
         # user updated rtd hardware constants
         self.rtd_sensor_resistance = (
@@ -248,6 +254,7 @@ class EdgePiADC(SPI):
         # pylint: disable=expression-not-assigned
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
+        self.rtd_state_cache = enable
 
 # TODO: To be deleted
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
@@ -459,7 +466,6 @@ class EdgePiADC(SPI):
         return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended\
             else code_to_voltage(voltage_code, adc_num.value, calibs)
 
-
     def read_rtd_temperature(self):
         """
         Read RTD temperature continuously. Note, to obtain valid temperature values,
@@ -527,6 +533,25 @@ class EdgePiADC(SPI):
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
         return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) if \
             single_ended  else code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
+
+    # NOTE: for this function, we assume single-ended mode, and that pulse mode is enabled
+    def DEV_single_sample(self) -> float:
+        """
+        Trigger a single ADC1 voltage sampling event, when performing single channel reading or
+        differential reading. ADC1 must be in `PULSE` conversion mode before calling this method.
+        """
+        # send command to trigger conversion
+        self.start_conversions(ADCNum.ADC_1)
+
+        # send command to read conversion data.
+        status_code, voltage_code, _ = self.__voltage_read(ADCNum.ADC_1) # 0.524
+
+        # log STATUS byte
+        status = get_adc_status(status_code) # 0.828
+        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1) # 0.065
+
+        # convert from code to voltage
+        return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) # 1.627
 
     def single_sample_rtd(self):
         """
@@ -611,9 +636,10 @@ class EdgePiADC(SPI):
             return True
         return False
 
+    # TODO: will this be updated when rtd is set to be on? will the state cache pick up hardware changes? probably not...
     def __get_rtd_state(self):
         """
-        Get RTD state this includes the corrent mode (on/off) and the adc type being used
+        Get RTD state this includes the current mode (on/off) and the adc type being used
         (adc1 or adc2).
         Returns:
             rtd_mode (dictionary): RTD mode dictionary {"name of config": op_codes}
@@ -665,16 +691,16 @@ class EdgePiADC(SPI):
         # allowed channels depend on RTD_EN status
         if not override_rtd_validation:
             channels = list(args.values())
-            rtd_enabled = self.__is_rtd_on()
+            rtd_enabled = self.rtd_state_cache
             validate_channels_allowed(channels, rtd_enabled)
 
-        adc_mux_updates = {
-            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
-            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
-        }
+        # NOTE: this is only commented so we can test caching the opcodes result (cannot hash dict)
+        #adc_mux_updates = {
+        #    ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
+        #    ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
+        #}
 
-        opcodes = generate_mux_opcodes(adc_mux_updates)
-
+        opcodes = DEV_generate_mux_opcodes(ADCReg.REG_INPMUX, (adc_1_mux_p, adc_1_mux_n), ADCReg.REG_ADC2MUX, (adc_2_mux_p, adc_2_mux_n))
         return opcodes
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
@@ -704,7 +730,7 @@ class EdgePiADC(SPI):
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
 
-    def  __validate_no_rtd_conflict(self, updates: dict):
+    def __validate_no_rtd_conflict(self, updates: dict):
         """
         Checks no RTD related properties are being updated if RTD mode is enabled
 
@@ -760,7 +786,6 @@ class EdgePiADC(SPI):
             (ADC1RtdConfig.ON.value if adc_num ==ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
         return updates
 
-
     def __get_rtd_off_update_config(self, adc_num: ADCNum):
         """
         generate update config dictionary to send to the config method
@@ -773,6 +798,7 @@ class EdgePiADC(SPI):
         (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
         return updates
 
+    # TODO: is this called by the edgepi portal when changes to the config shadow is made?
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
         """
         Enable/Disable RTD with ADC type passed as arguments.
@@ -789,11 +815,11 @@ class EdgePiADC(SPI):
             # default setting. And get RTD_ON configuration values
             updates = self.__get_rtd_on_update_config(
                            mux_2 if adc_num == ADCNum.ADC_1 else mux_1, adc_num)
-            # enable RTD pin to re-route internal circuit
-            self.__set_rtd_pin(set_rtd)
         else:
             updates = self.__get_rtd_off_update_config(adc_num)
-            self.__set_rtd_pin(set_rtd)
+
+        # enable RTD pin to re-route internal circuit
+        self.__set_rtd_pin(set_rtd)
 
         self.__config(**updates, override_rtd_validation=True)
 
@@ -879,11 +905,11 @@ class EdgePiADC(SPI):
 
         # permit updates by rtd_mode() to turn RTD off when it's on, validate other updates
         if not override_rtd_validation:
-            self.__validate_no_rtd_conflict(args)
+            self.__validate_no_rtd_conflict(args) # 0.020
 
         # get opcodes for mapping multiplexers
-        mux_args = self.__extract_mux_args(args)
-        ops_list = self.__get_channel_assign_opcodes(
+        mux_args = self.__extract_mux_args(args) # 0.019
+        ops_list = self.__get_channel_assign_opcodes(  # 0.738
             **mux_args, override_rtd_validation=override_rtd_validation
         )
 
@@ -900,19 +926,19 @@ class EdgePiADC(SPI):
         _logger.debug(f"__config: register values before updates:\n{reg_values}")
 
         # get codes to update register values
-        updated_reg_values = apply_opcodes(dict(reg_values), ops_list)
+        updated_reg_values = apply_opcodes(dict(reg_values), ops_list) # 1.842
         _logger.debug(f"__config: register values after updates:\n{reg_values}")
 
         # write updated reg values to ADC using a single write.
         data = [entry["value"] for entry in updated_reg_values.values()]
-        self.__write_register(ADCReg.REG_ID, data)
+        self.__write_register(ADCReg.REG_ID, data) # 1.460
 
         # update ADC state (for state caching)
-        self.__update_cache_map(updated_reg_values)
+        self.__update_cache_map(updated_reg_values) # 0.053
 
         # validate updates were applied correctly
         if not override_updates_validation:
-            self.__validate_updates(updated_reg_values)
+            self.__validate_updates(updated_reg_values) # 0.059
 
         return updated_reg_values
 
@@ -990,5 +1016,9 @@ class EdgePiADC(SPI):
         Returns:
             ADCState: information about the current ADC hardware state
         """
-        reg_values = self.__get_register_map(override_cache)
-        return ADCState(reg_values)
+        # TODO: combine this cache with __get_register_map
+        if self.adc_state_cache is None or not self.enable_cache:
+            reg_values = self.__get_register_map(override_cache)
+            self.adc_state_cache = ADCState(reg_values)
+
+        return self.adc_state_cache

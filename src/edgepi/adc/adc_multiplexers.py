@@ -2,6 +2,8 @@
 
 import logging
 
+from functools import cache
+
 from bitstring import pack
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
 from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
@@ -69,6 +71,26 @@ def generate_mux_opcodes(mux_updates: dict):
 
     return mux_opcodes
 
+# TODO: decide whether cache is needed here, it's helpful (significantly reduces number of calls) but still slows things down (memory size probably)
+#@cache 
+def DEV_generate_mux_opcodes(key1, value1, key2, value2):
+    mux_opcodes = []
+
+    def do_opcode(addx, mux_p, mux_n):
+        # not updating mux's for this adc_num (no args passed)
+        if mux_p is None or mux_n is None:
+            return []
+
+        mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
+
+        adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
+
+        return [OpCode(adc_x_ch_bits, addx.value, mask.value)]
+
+    mux_opcodes += do_opcode(key1, value1[0], value1[1])
+    mux_opcodes += do_opcode(key2, value2[0], value2[1])
+
+    return mux_opcodes
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
