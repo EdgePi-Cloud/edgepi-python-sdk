@@ -1,5 +1,7 @@
 """Digital Input Module"""
 
+from typing import Optional
+
 from edgepi.digital_input.digital_input_constants import DinPins, DIN_MIN_NUM, DIN_MAX_NUM
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
@@ -12,7 +14,7 @@ class EdgePiDigitalInput():
         # To limit access to input functionality, using composition rather than inheritance
         self.gpio = EdgePiGPIO()
 
-    def digital_input_state(self, pin_name: DinPins):
+    def digital_input_state(self, pin_name: Optional[DinPins] = None):
         """
         Read selected GPIO pin
         Args:
