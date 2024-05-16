@@ -46,7 +46,7 @@ def generate_mux_opcodes(mux_updates: dict):
     Returns:
         `list`: OpCodes for updated multiplexer mapping
     """
-    _logger.debug(f"generate_mux_opcodes: mux updates = {mux_updates}")
+    _logger.debug("generate_mux_opcodes: mux updates = {}".format(mux_updates))
 
     mux_opcodes = []
     # generate OpCodes for mux updates
@@ -62,8 +62,7 @@ def generate_mux_opcodes(mux_updates: dict):
 
         mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
 
-    _logger.debug(f"mux opcodes = {mux_opcodes}")
-
+    _logger.debug("mux opcodes = {}".format(mux_opcodes))
     return mux_opcodes
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):

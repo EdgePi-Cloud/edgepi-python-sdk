@@ -12,7 +12,7 @@ class EdgePiDigitalInput():
         # To limit access to input functionality, using composition rather than inheritance
         self.gpio = EdgePiGPIO()
 
-    def digital_input_state(self, pin_name: DinPins):
+    def digital_input_state(self, pin_name: DinPins = None):
         """
         Read selected GPIO pin
         Args:

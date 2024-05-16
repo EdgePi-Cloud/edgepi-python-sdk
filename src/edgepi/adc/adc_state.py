@@ -47,7 +47,8 @@ class ADCState:
 
     def get_state(reg_map: dict, adc_property: ADCProperties) -> PropertyValue:
         """
-        A static method that uses a provided register map to determine a single required adc_property
+        A static method that uses the provided register map to determine a single adc_property, 
+        rather than computing all of them
         """
         # value of this adc_property's register
         reg_value = reg_map[adc_property.value.addx]
@@ -76,14 +77,13 @@ class ADCState:
         adc_property_bits = (~adc_property.value.mask) & reg_value
         # name of current value of this adc_property
         adc_property_value = adc_property.value.values[adc_property_bits]
-        # this log statement is disabled because it affects performance a lot
-        #_logger.debug(
-        #    (
-        #        f"query_state: query_property='{adc_property}',"
-        #        " adc_property_bits={hex(adc_property_bits)},"
-        #        f" adc_property_value='{adc_property_value}'"
-        #    )
-        #)
+        _logger.debug(
+            (
+                "query_state: query_property='{}',".format(adc_property) +
+                " adc_property_bits={},".format(hex(adc_property_bits)) +
+                " adc_property_value='{}'".format(adc_property_value)
+            )
+        )
         return adc_property_value
 
     def __get_state(self, adc_property: ADCProperties) -> PropertyValue:

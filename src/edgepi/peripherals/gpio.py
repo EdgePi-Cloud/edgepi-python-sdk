@@ -78,6 +78,7 @@ class GpioDevice:
                     if gpio is None:
                         gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
                     else:
+                        # NOTE: we'll need to be careful when we update periphery, since we depend on private functionality
                         # pylint: disable=protected-access
                         gpio._line = pin_num
                         # pylint: disable=protected-access

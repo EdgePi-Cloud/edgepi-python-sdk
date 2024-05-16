@@ -21,11 +21,12 @@ ADC2_UPPER_LIMIT = 8388608
 _logger = logging.getLogger(__name__)
 
 
-def _is_negative_voltage(code: BitArray):
+def _is_negative_voltage(code: list[int]):
     """
     Determines if voltage code is negative value
     """
-    return code[0] == 1
+    # check if first bit of the first integer is a 1
+    return (code[0] & 0x80) != 0 
 
 
 def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
@@ -70,7 +71,6 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     """
 
     num_bits = adc_info.num_data_bytes * 8
-    is_negative_voltage = (code[0] & 0x80) != 0 # check if first bit of sequence is a 1
     if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
     elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
@@ -80,7 +80,7 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
             f"code has unexpected number of bytes {adc_info.num_data_bytes}, expected 4 for ADC1 or 3 for ADC2"
         )
 
-    if is_negative_voltage:
+    if _is_negative_voltage(code):
         code_val = code_val - 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
@@ -103,7 +103,6 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     """
 
     num_bits = adc_info.num_data_bytes * 8
-    is_negative_voltage = (code[0] & 0x80) != 0 # check if first bit of sequence is a 1
     if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
     elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
@@ -113,9 +112,9 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
             f"code has unexpected number of bytes {adc_info.num_data_bytes}, expected 4 for ADC1 or 3 for ADC2"
         )
 
-    if is_negative_voltage and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+    if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val - ADC1_UPPER_LIMIT
-    elif is_negative_voltage and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+    elif _is_negative_voltage(code) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val - ADC2_UPPER_LIMIT
     elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val + ADC1_UPPER_LIMIT

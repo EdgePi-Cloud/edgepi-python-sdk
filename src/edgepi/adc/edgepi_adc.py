@@ -236,10 +236,8 @@ class EdgePiADC(SPI):
         """
         if len(data) < 1:
             raise ValueError("Number of registers to write to must be at least 1")
-
-        code = self.adc_ops.unsafe_write_register_command(start_addx.value, data)
+        code = self.adc_ops.write_register_command(start_addx.value, data)
         _logger.debug(f"__write_register: sending {code}")
-
         with self.spi_open():
             return self.transfer(code)
 
@@ -675,7 +673,6 @@ class EdgePiADC(SPI):
             rtd_enabled = self.rtd_state_cache
             validate_channels_allowed(channels, rtd_enabled)
 
-        # NOTE: this is only commented so we can test caching the opcodes result (cannot hash dict)
         adc_mux_updates = {
             ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
             ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
@@ -779,7 +776,6 @@ class EdgePiADC(SPI):
         (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
         return updates
 
-    # TODO: is this called by the edgepi portal when changes to the config shadow is made?
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
         """
         Enable/Disable RTD with ADC type passed as arguments.

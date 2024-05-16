@@ -48,7 +48,7 @@ def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) 
     }
     return filtered_args
 
-def bitstring_from_list(data: list) -> BitArray:
+def bitstring_from_list(data: list[int]) -> BitArray:
     """
     Builds a bitstring from a list of uint byte values
 
@@ -58,12 +58,7 @@ def bitstring_from_list(data: list) -> BitArray:
     Returns:
         BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
     """
-    #code = BitArray()
-    #for value in data:
-    #    next_byte = pack("uint:8", value)
-    #    code.append(next_byte)
-    #return code
-    # TODO: add a test case to ensure these are equivalent - or just look into exception behaviour of pack
+    # bytes() will raise a ValueError if any ints in data are not in range(0, 256)
     return BitArray(bytes(data))
 
 def combine_to_uint32(a:int, b:int, c:int, d:int) -> int:
