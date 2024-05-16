@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from enum import Enum, unique
-from functools import lru_cache
 
 from bitstring import pack
 
@@ -87,7 +86,6 @@ _fault_msg_map = {
     ADCStatusBit.RESET: (ADCStatusMsg.RESET_FALSE, ADCStatusMsg.RESET_TRUE),
 }
 
-@lru_cache(maxsize=128)
 def get_adc_status(status_code: int) -> dict:
     """Generates a dictionary of ADC Status objects
 
