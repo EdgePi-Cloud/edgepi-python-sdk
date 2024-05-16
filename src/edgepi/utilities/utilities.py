@@ -58,14 +58,12 @@ def bitstring_from_list(data: list) -> BitArray:
     Returns:
         BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
     """
-    code = BitArray()
-    for value in data:
-        next_byte = pack("uint:8", value)
-        code.append(next_byte)
-    return code
-
-# NOTE: is 10x faster than the above, make sure to confirm they are identical & add a test case or something
-def DEV_bitstring_from_list(data: list) -> BitArray:
+    #code = BitArray()
+    #for value in data:
+    #    next_byte = pack("uint:8", value)
+    #    code.append(next_byte)
+    #return code
+    # TODO: add a test case to ensure these are equivalent - or just look into exception behaviour of pack
     return BitArray(bytes(data))
 
 def combine_to_uint32(a:int, b:int, c:int, d:int) -> int:
