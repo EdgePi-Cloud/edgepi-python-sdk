@@ -72,31 +72,6 @@ class SpiDevice:
         out = self.spi.transfer(data)
         return out
 
-    def custom_adc_open_and_transfer(self, data1:list, delay:int, data2:list) -> list:
-        try:
-            SpiDevice.lock_spi[self.dev_id].acquire()
-            self.spi = SPI(
-                self.devpath,
-                self.mode,
-                self.max_speed,
-                self.bit_order,
-                self.bits_per_word,
-                self.extra_flags,
-            )
-            self.spi.transfer(data1)
-            time.sleep(delay)
-            result = self.spi.transfer(data2)
-
-        finally:
-            try:
-                self.spi.close()
-            except Exception as exc:
-                raise OSError(f"Failed to close {self.devpath}") from exc
-            finally:
-                SpiDevice.lock_spi[self.dev_id].release()
-
-        return result
-
     def custom_adc_batch_open_and_transfer(self, command_tup_list):
         result_list = []
 
@@ -112,7 +87,7 @@ class SpiDevice:
             )
             for data1, delay, data2 in command_tup_list:
                 self.spi.transfer(data1)
-                time.sleep(delay) # TODO: make sure this wait is absolutely neccesary or if other delays might be needed
+                time.sleep(delay)
                 result_list += [self.spi.transfer(data2)]
 
         finally:

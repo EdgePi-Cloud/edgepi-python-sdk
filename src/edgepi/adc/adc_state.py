@@ -47,7 +47,8 @@ class ADCState:
 
     def get_state(reg_map: dict, adc_property: ADCProperties) -> PropertyValue:
         """
-        A static method that uses a provided register map to determine a single required adc_property
+        A static method that uses the provided register map to determine a single adc_property, 
+        rather than computing all of them
         """
         # value of this adc_property's register
         reg_value = reg_map[adc_property.value.addx]
