@@ -20,28 +20,24 @@ class EdgePiDigitalInput():
         Return:
             state (bool): corresponding pin state
         """
-        if pin_name is None:
+        if pin_name is None or not isinstance(pin_name, DinPins):
             raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
 
         pin_number = int(pin_name.value[3])
-        if pin_number > DIN_MAX_NUM or pin_number < DIN_MIN_NUM:
-            raise InvalidPinName(f'Invalid pin name passed: {pin_name}')
-        else:
-            return self.gpio.fast_read_din_state(pin_number)
+        return self.gpio.fast_read_din_state(pin_number)
 
     def digital_input_state_batch(self, pin_names: list[DinPins]) -> list:
         """
         Read multiple GPIO pins as digital inputs
         """
         if pin_names is None:
-            raise InvalidPinName('pin_names cannot be None')
-        elif pin_names is []:
-            # TODO: what is the correct exception to raise?
-            raise Exception('pin_names cannot be empty')
+            raise ValueError('pin_names cannot be None')
+        elif pin_names == []:
+            raise ValueError('pin_names cannot be empty')
 
+        invalid_pin_types = [False for pin_name in pin_names if not isinstance(pin_name, DinPins)]
+        if len(invalid_pin_types) > 0:
+            raise InvalidPinName(f'Invalid pin names passed in {pin_names}')
+        
         pin_numbers = [int(pin_name.value[3]) for pin_name in pin_names]
-        invalid_pin_numbers = [num for num in pin_numbers if (num > DIN_MAX_NUM) or (num < DIN_MIN_NUM)]
-        if len(invalid_pin_numbers) > 0:
-            raise InvalidPinName(f'Invalid pin names passed: {invalid_pin_numbers}')
-        else:
-            return self.gpio.fast_read_din_state_batch(pin_numbers)
+        return self.gpio.fast_read_din_state_batch(pin_numbers)

@@ -14,7 +14,7 @@ from edgepi.adc.adc_multiplexers import (
 
 
 @pytest.mark.parametrize(
-    "mux_updates, expected",
+    "adc1_reg, adc1_mux, adc2_reg, adc2_mux, expected",
     [
         (
             ADCReg.REG_INPMUX, (None, None), ADCReg.REG_ADC2MUX, (None, None),
