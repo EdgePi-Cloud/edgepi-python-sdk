@@ -116,7 +116,6 @@ class EdgePiADC(SPI):
         super().__init__(bus_num=6, dev_id=1)
         # declare instance vars before config call below
         self.enable_cache = enable_cache
-        self.adc_state_cache = None # TODO: add enable/disable mechanism
 
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
@@ -1009,7 +1008,6 @@ class EdgePiADC(SPI):
 
         # get current register values
         register_values = self.__get_register_map()
-        print(f"reg vals: {register_values}")
         if len(register_values.values()) < 1:
             raise ValueError("Number of reg_values must be at least 1")
 
@@ -1057,9 +1055,7 @@ class EdgePiADC(SPI):
             command_tup, register_values = create_commands(-1, register_values, mux_p, mux_n)
             command_tup_list += [command_tup]
 
-        print(command_tup_list)
         data_list = self.spi_apply_adc_commands(command_tup_list)
-        print(data_list)
         
         # update with final ADC state (for state caching)
         EdgePiADC.__state = register_values
@@ -1073,8 +1069,26 @@ class EdgePiADC(SPI):
             check_code = read_data[6]
             check_crc(voltage_code, check_code)
 
-            calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1)
+            mux_p = ADCState.get_state(EdgePiADC.__state, ADCProperties.ADC1_MUXP)
+            mux_n = ADCState.get_state(EdgePiADC.__state, ADCProperties.ADC1_MUXN)
+            
+            # assert neither mux is set to float mode
+            if CH.FLOAT in (mux_p.code, mux_n.code):
+                raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
+            calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
+            calibs = self.adc_calib_params[ADCNum.ADC_1][calib_key]
+
+            if calibs is None:
+                _logger.error("Failed to find ADC calibration values")
+                raise CalibKeyMissingError(
+                    (
+                        "Failed to retrieve calibration values from eeprom dictionary: "
+                        f"dict is missing key = {calib_key}"
+                        f"\neeprom_calibs = \n{self.adc_calib_params[ADCNum.ADC_1]}"
+                    )
+                )
+                
             # convert from code to voltage
             if i < len(channel_list):
                 voltage_list += [code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs)]
@@ -1092,9 +1106,5 @@ class EdgePiADC(SPI):
         Returns:
             ADCState: information about the current ADC hardware state
         """
-        # TODO: combine this cache with __get_register_map
-        # no, but make it equal?
-        if self.adc_state_cache is None or not self.enable_cache:
-            reg_values = self.__get_register_map(override_cache)
-            self.adc_state_cache = ADCState(reg_values)
-        return self.adc_state_cache
+        reg_values = self.__get_register_map(override_cache)
+        return ADCState(reg_values)
