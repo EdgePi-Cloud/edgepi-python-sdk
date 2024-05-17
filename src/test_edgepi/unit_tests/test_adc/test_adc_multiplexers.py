@@ -14,90 +14,54 @@ from edgepi.adc.adc_multiplexers import (
 
 
 @pytest.mark.parametrize(
-    "mux_updates, expected",
+    "adc1_reg, adc1_mux, adc2_reg, adc2_mux, expected",
     [
         (
-            {
-                ADCReg.REG_INPMUX: (None, None),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (None, None), ADCReg.REG_ADC2MUX, (None, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, CH.AIN2),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (None, CH.AIN2), ADCReg.REG_ADC2MUX, (None, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (CH.AIN1, CH.AINCOM),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (CH.AIN1, CH.AINCOM), ADCReg.REG_ADC2MUX, (None, None),
             [OpCode(0x1A, ADCReg.REG_INPMUX.value, BitMask.BYTE.value)],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (CH.AIN7, None),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (CH.AIN7, None), ADCReg.REG_ADC2MUX, (None, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, CH.AIN5),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (None, CH.AIN5), ADCReg.REG_ADC2MUX, (None, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, None),
-                ADCReg.REG_ADC2MUX: (CH.AIN5, None),
-            },
+            ADCReg.REG_INPMUX, (None, None), ADCReg.REG_ADC2MUX, (CH.AIN5, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, None),
-                ADCReg.REG_ADC2MUX: (None, CH.AIN6),
-            },
+            ADCReg.REG_INPMUX, (None, None), ADCReg.REG_ADC2MUX, (None, CH.AIN6),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, None),
-                ADCReg.REG_ADC2MUX: (CH.AIN5, CH.AIN6),
-            },
+            ADCReg.REG_INPMUX, (None, None), ADCReg.REG_ADC2MUX, (CH.AIN5, CH.AIN6),
             [OpCode(0x56, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value)],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (CH.AIN1, None),
-                ADCReg.REG_ADC2MUX: (None, None),
-            },
+            ADCReg.REG_INPMUX, (CH.AIN1, None), ADCReg.REG_ADC2MUX, (None, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (CH.AIN5, None),
-                ADCReg.REG_ADC2MUX: (None, CH.AIN6),
-            },
+            ADCReg.REG_INPMUX, (CH.AIN5, None), ADCReg.REG_ADC2MUX, (None, CH.AIN6),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (None, CH.AIN5),
-                ADCReg.REG_ADC2MUX: (CH.AIN6, None),
-            },
+            ADCReg.REG_INPMUX, (None, CH.AIN5), ADCReg.REG_ADC2MUX, (CH.AIN6, None),
             [],
         ),
         (
-            {
-                ADCReg.REG_INPMUX: (CH.AIN1, CH.AIN2),
-                ADCReg.REG_ADC2MUX: (CH.AIN3, CH.AIN4),
-            },
+            ADCReg.REG_INPMUX, (CH.AIN1, CH.AIN2), ADCReg.REG_ADC2MUX, (CH.AIN3, CH.AIN4),
             [
                 OpCode(0x12, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
                 OpCode(0x34, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
@@ -105,8 +69,8 @@ from edgepi.adc.adc_multiplexers import (
         ),
     ],
 )
-def test_generate_mux_opcodes(mux_updates, expected):
-    assert generate_mux_opcodes(mux_updates) == expected
+def test_generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux, expected):
+    assert generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux) == expected
 
 
 @pytest.mark.parametrize(

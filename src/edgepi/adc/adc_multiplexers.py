@@ -26,8 +26,7 @@ def _format_mux_values(mux_p: CH, mux_n: CH):
 
     return mux_p_val, mux_n_val, mask
 
-
-def generate_mux_opcodes(mux_updates: dict):
+def generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux):
     """
     Generates list of OpCodes for updating input multiplexer mapping.
     Updates both positive and negative multiplexers.
@@ -46,23 +45,22 @@ def generate_mux_opcodes(mux_updates: dict):
     Returns:
         `list`: OpCodes for updated multiplexer mapping
     """
-    _logger.debug("generate_mux_opcodes: mux updates = {}".format(mux_updates))
-
     mux_opcodes = []
-    # generate OpCodes for mux updates
-    for addx, (mux_p, mux_n) in mux_updates.items():
+
+    def do_opcode(addx, mux_p: CH, mux_n: CH):
         # not updating mux's for this adc_num (no args passed)
         if mux_p is None or mux_n is None:
-            continue
+            return []
 
-        # mux_p_val can never be larger than 15 (mux_p and mux_n are in ADCChannel), 
-        # so the bitops below will not fail
+        # NOTE: for this function, we know that mux_p_val can never be larger than 15, because mux_p and mux_n are ADCChannel
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
+
         adc_x_ch_bits = (mux_p_val << 4) + mux_n_val
+        return [OpCode(adc_x_ch_bits, addx.value, mask.value)]
 
-        mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
+    mux_opcodes += do_opcode(adc1_reg, adc1_mux[0], adc1_mux[1])
+    mux_opcodes += do_opcode(adc2_reg, adc2_mux[0], adc2_mux[1])
 
-    _logger.debug("mux opcodes = {}".format(mux_opcodes))
     return mux_opcodes
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):
