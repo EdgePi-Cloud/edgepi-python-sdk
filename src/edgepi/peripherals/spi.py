@@ -72,7 +72,7 @@ class SpiDevice:
         out = self.spi.transfer(data)
         return out
 
-    def custom_adc_batch_open_and_transfer(self, command_tup_list):
+    def spi_apply_adc_commands(self, command_tup_list):
         result_list = []
 
         try:
