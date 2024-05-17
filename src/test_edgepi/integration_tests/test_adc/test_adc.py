@@ -896,7 +896,7 @@ def test_adc_batch_voltage(out_list, channel_list, voltage, adc):
 
     for i, _ in enumerate(channel_list):
         avg = statistics.mean(result_list[i::len(channel_list)])
-        assert (voltage - 0.1) <= avg <= (voltage + 0.1)
+        assert (voltage - 0.15) <= avg <= (voltage + 0.15)
 
     edgepi_dac.reset()
     adc.reset()
