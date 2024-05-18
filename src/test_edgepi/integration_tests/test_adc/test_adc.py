@@ -881,7 +881,7 @@ def test_set_rtd(enable, rtd_mode, adc_num, expected, adc):
 def test_adc_batch_voltage(out_list, channel_list, voltage, adc):
     edgepi_dac = EdgePiDAC()
     edgepi_dac.set_dac_gain(False)
-
+    
     # write voltage values
     for out_channel in out_list:
         edgepi_dac.write_voltage(out_channel, voltage)
