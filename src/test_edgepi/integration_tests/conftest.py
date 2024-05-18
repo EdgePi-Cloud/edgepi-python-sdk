@@ -11,7 +11,7 @@ from edgepi.eeprom.eeprom_constants import DEFAULT_EEPROM_BIN_B64
 def eeprom_reset(request):
     edgepi_eeprom = EdgePiEEPROM()
 
-    if platform.node == "edgepi-intg2":
+    if platform.node() == "edgepi-intg2":
         print('loading default eeprom image ...')
         default_bin = base64.b64decode(DEFAULT_EEPROM_BIN_B64)
         hash_res = hashlib.md5(default_bin)

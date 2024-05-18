@@ -1,4 +1,4 @@
-'''integration test for access eeprom'''
+'''integration test for access eeprom. These will only run on the dedicated testing host.'''
 
 # pylint: disable=no-name-in-module
 # pylint: disable=wrong-import-position
@@ -33,22 +33,31 @@ def fixture_test_eeprom():
                         ])
 # pylint: disable=protected-access
 def test__page_write_register(data, address, eeprom):
-    # reset user space to make sure init vals are set to 255
-    eeprom.reset_user_space()
-    addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
-    with eeprom.i2c_open():
-        initial_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
-        eeprom._EdgePiEEPROM__page_write_register(addrx, data)
-        time.sleep(0.5)
-        new_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
-        time.sleep(0.5)
-        eeprom._EdgePiEEPROM__page_write_register(addrx, [255]*len(data))
-        _logger.info(f"data to write = {data}")
-        _logger.info(f"initial data  = {initial_data}")
-        _logger.info(f"new data      = {new_data}")
-    for indx, init_data in enumerate(initial_data):
-        assert init_data != new_data[indx]
-        assert new_data[indx] == data[indx]
+    if platform.node() != "edgepi-intg2":
+        pytest.skip("won't run dangerous test on user device")
+
+    original_data = eeprom.read_edgepi_data()
+    try:
+        # reset user space to make sure init vals are set to 255
+        eeprom.reset_user_space()
+        addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
+        with eeprom.i2c_open():
+            initial_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
+            eeprom._EdgePiEEPROM__page_write_register(addrx, data)
+            time.sleep(0.5)
+            new_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
+            time.sleep(0.5)
+            eeprom._EdgePiEEPROM__page_write_register(addrx, [255]*len(data))
+            _logger.info(f"data to write = {data}")
+            _logger.info(f"initial data  = {initial_data}")
+            _logger.info(f"new data      = {new_data}")
+        for indx, init_data in enumerate(initial_data):
+            assert init_data != new_data[indx]
+            assert new_data[indx] == data[indx]
+            
+    finally:
+        # Write the original data back
+        eeprom.write_edgepi_data(original_data)
 
 DUMMY_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLyk\
 Qcd6pE\nv7fji6ZoW/dl8dKwwdi/cfSS/J5Iv+5FwQU4KGNBbhVAnmJeLd+PMUT4bQTf9rVF\nHsDoIPoQLDH7jmBu8ai7jQ0hY\
@@ -70,44 +79,48 @@ h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyN
 TmZ\n-----END RSA PRIVATE KEY-----\n'
 
 def test_write_edgepi_data(eeprom):
+    if platform.node() != "edgepi-intg2":
+        pytest.skip("won't run dangerous test on user device")
+    
     original_data = eeprom.read_edgepi_data()
+    try:
+        for _ in range(10):
+            # initializing size of string
+            str_len = 100
+            # using random.choices()
+            # generating random strings
+            res = ''.join(random.choices(string.ascii_uppercase +
+                                        string.digits, k=str_len))
 
-    for _ in range(10):
-        # initializing size of string
-        str_len = 100
-        # using random.choices()
-        # generating random strings
-        res = ''.join(random.choices(string.ascii_uppercase +
-                                     string.digits, k=str_len))
+            # Modified data to write to memory
+            modified_data = eeprom.read_edgepi_data()
+            modified_data.config_key.certificate = DUMMY_KEY + res
+            modified_data.config_key.private_key = DUMMY_KEY + res
+            modified_data.data_key.certificate = DUMMY_KEY + res
+            modified_data.data_key.private_key = DUMMY_KEY + res
+            # Write modified data
+            eeprom.write_edgepi_data(modified_data)
+            # Read back the changed data
+            modified_data = eeprom.read_edgepi_data()
 
-        # Modified data to write to memory
-        modified_data = eeprom.read_edgepi_data()
-        modified_data.config_key.certificate = DUMMY_KEY + res
-        modified_data.config_key.private_key = DUMMY_KEY + res
-        modified_data.data_key.certificate = DUMMY_KEY + res
-        modified_data.data_key.private_key = DUMMY_KEY + res
-        # Write modified data
-        eeprom.write_edgepi_data(modified_data)
-        # Read back the changed data
-        modified_data = eeprom.read_edgepi_data()
+            assert modified_data.dac_calib_params == original_data.dac_calib_params
+            assert modified_data.adc1_calib_params == original_data.adc1_calib_params
+            assert modified_data.adc2_calib_params == original_data.adc2_calib_params
+            assert modified_data.rtd_calib_params == original_data.rtd_calib_params
+            assert modified_data.tc_calib_params == original_data.tc_calib_params
+            assert modified_data.config_key.certificate == DUMMY_KEY + res
+            assert modified_data.config_key.private_key == DUMMY_KEY + res
+            assert modified_data.config_key.certificate == DUMMY_KEY + res
+            assert modified_data.data_key.private_key == DUMMY_KEY + res
+            assert modified_data.serial == original_data.serial
+            assert modified_data.model == original_data.model
+            assert modified_data.cm_part_number == original_data.cm_part_number
+            assert modified_data.tb_part_number == original_data.tb_part_number
+            assert modified_data.cm4_part_number == original_data.cm4_part_number
 
-        assert modified_data.dac_calib_params == original_data.dac_calib_params
-        assert modified_data.adc1_calib_params == original_data.adc1_calib_params
-        assert modified_data.adc2_calib_params == original_data.adc2_calib_params
-        assert modified_data.rtd_calib_params == original_data.rtd_calib_params
-        assert modified_data.tc_calib_params == original_data.tc_calib_params
-        assert modified_data.config_key.certificate == DUMMY_KEY + res
-        assert modified_data.config_key.private_key == DUMMY_KEY + res
-        assert modified_data.config_key.certificate == DUMMY_KEY + res
-        assert modified_data.data_key.private_key == DUMMY_KEY + res
-        assert modified_data.serial == original_data.serial
-        assert modified_data.model == original_data.model
-        assert modified_data.cm_part_number == original_data.cm_part_number
-        assert modified_data.tb_part_number == original_data.tb_part_number
-        assert modified_data.cm4_part_number == original_data.cm4_part_number
-
-    # Write the original data back
-    eeprom.write_edgepi_data(original_data)
+    finally:
+        # Write the original data back
+        eeprom.write_edgepi_data(original_data)
 
 @pytest.mark.parametrize("bin_hash, error",
                         [
@@ -116,23 +129,28 @@ def test_write_edgepi_data(eeprom):
                          ("6b68b8e2dd2a6bec300ef91572270723", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
+    if platform.node() != "edgepi-intg2":
+        pytest.skip("won't run dangerous test on user device")
+        
     original_data = eeprom.read_edgepi_data()
-    with error:
-        eeprom.reset_edgepi_memory(bin_hash, base64.b64decode(DEFAULT_EEPROM_BIN_B64))
-        written_data = eeprom.read_edgepi_data()
-        default_data = eeprom.eeprom_pb.ParseFromString(base64.b64decode(DEFAULT_EEPROM_BIN_B64))
-        default_data = EepromDataClass.extract_eeprom_data(eeprom.eeprom_pb)
-        assert written_data.dac_calib_params == default_data.dac_calib_params
-        assert written_data.adc1_calib_params == default_data.adc1_calib_params
-        assert written_data.adc2_calib_params == default_data.adc2_calib_params
-        assert written_data.rtd_calib_params == default_data.rtd_calib_params
-        assert written_data.tc_calib_params == default_data.tc_calib_params
-        assert written_data.config_key == default_data.config_key
-        assert written_data.data_key == default_data.data_key
-        assert written_data.serial == default_data.serial
-        assert written_data.model == default_data.model
-        assert written_data.cm_part_number == default_data.cm_part_number
-        assert written_data.tb_part_number == default_data.tb_part_number
-        assert written_data.cm4_part_number == default_data.cm4_part_number
-        # Reset to origianl Data
+    try:
+        with error:
+            eeprom.reset_edgepi_memory(bin_hash, base64.b64decode(DEFAULT_EEPROM_BIN_B64))
+            written_data = eeprom.read_edgepi_data()
+            default_data = eeprom.eeprom_pb.ParseFromString(base64.b64decode(DEFAULT_EEPROM_BIN_B64))
+            default_data = EepromDataClass.extract_eeprom_data(eeprom.eeprom_pb)
+            assert written_data.dac_calib_params == default_data.dac_calib_params
+            assert written_data.adc1_calib_params == default_data.adc1_calib_params
+            assert written_data.adc2_calib_params == default_data.adc2_calib_params
+            assert written_data.rtd_calib_params == default_data.rtd_calib_params
+            assert written_data.tc_calib_params == default_data.tc_calib_params
+            assert written_data.config_key == default_data.config_key
+            assert written_data.data_key == default_data.data_key
+            assert written_data.serial == default_data.serial
+            assert written_data.model == default_data.model
+            assert written_data.cm_part_number == default_data.cm_part_number
+            assert written_data.tb_part_number == default_data.tb_part_number
+            assert written_data.cm4_part_number == default_data.cm4_part_number
+    finally:
+        # Reset to origina;l Data
         eeprom.write_edgepi_data(original_data)
