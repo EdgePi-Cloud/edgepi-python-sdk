@@ -20,6 +20,8 @@ def test_output_high(pin_name):
     dout.set_dout_state(pin_name, DoutTriState.HIGH)
     gpio_stat = dout.get_state(pin_name)
     assert gpio_stat == DoutTriState.HIGH
+    print("do some sneaky I/O")
+    assert False
 
 @pytest.mark.parametrize("pin_name", [
     (DoutPins.DOUT1),
