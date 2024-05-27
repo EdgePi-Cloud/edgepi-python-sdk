@@ -45,6 +45,7 @@ class ADCState:
         self.rtd_adc: ADCNum = self.__get_rtd_adc_num()
         self.rtd_mode: RTDModes = self.__get_rtd_mode()
 
+    @staticmethod
     def get_state(reg_map: dict, adc_property: ADCProperties) -> PropertyValue:
         """
         A static method that uses the provided register map to determine a single adc_property, 

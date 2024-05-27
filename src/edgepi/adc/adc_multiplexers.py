@@ -52,7 +52,8 @@ def generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux):
         if mux_p is None or mux_n is None:
             return []
 
-        # NOTE: for this function, we know that mux_p_val can never be larger than 15, because mux_p and mux_n are ADCChannel
+        # NOTE: for this function, we know that mux_p_val can never be larger than 15, 
+        # because mux_p and mux_n are ADCChannel
         mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
 
         adc_x_ch_bits = (mux_p_val << 4) + mux_n_val
@@ -78,8 +79,9 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
         if rtd_enabled
         else AllowedChannels.RTD_OFF.value
     )
-    for ch in channels:
-        if ch not in allowed_channels:
+    for chan in channels:
+        if chan not in allowed_channels:
             raise ChannelNotAvailableError(
-                f"Channel 'AIN{ch.value}' is currently not available. Disable RTD in order to use."
+                f"Channel 'AIN{chan.value}' is currently not available. "
+                "Disable RTD in order to use."
             )

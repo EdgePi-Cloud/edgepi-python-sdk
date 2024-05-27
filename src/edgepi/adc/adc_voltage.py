@@ -26,7 +26,7 @@ def _is_negative_voltage(code: list[int]):
     Determines if voltage code is negative value
     """
     # check if first bit of the first integer is a 1
-    return (code[0] & 0x80) != 0 
+    return (code[0] & 0x80) != 0
 
 
 def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
@@ -77,8 +77,9 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = combine_to_uint32(0, code[0], code[1], code[2])
     else:
-        raise Exception(
-            f"code has unexpected number of bytes {adc_info.num_data_bytes}, expected 4 for ADC1 or 3 for ADC2"
+        raise ValueError(
+            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
+            "expected 4 for ADC1 or 3 for ADC2"
         )
 
     if _is_negative_voltage(code):
@@ -109,8 +110,9 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = combine_to_uint32(0, code[0], code[1], code[2])
     else:
-        raise Exception(
-            f"code has unexpected number of bytes {adc_info.num_data_bytes}, expected 4 for ADC1 or 3 for ADC2"
+        raise ValueError(
+            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
+            "expected 4 for ADC1 or 3 for ADC2"
         )
 
     if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
