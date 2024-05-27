@@ -3,7 +3,7 @@
 import logging
 
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
-from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
+from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels, ADCReg
 
 _logger = logging.getLogger(__name__)
 
@@ -26,21 +26,18 @@ def _format_mux_values(mux_p: CH, mux_n: CH):
 
     return mux_p_val, mux_n_val, mask
 
-def generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux):
+def generate_mux_opcodes(adc1_mux: (CH, CH), adc2_mux: (CH, CH)) -> list:
     """
     Generates list of OpCodes for updating input multiplexer mapping.
     Updates both positive and negative multiplexers.
 
     Args:
-        `mux_updates` (dict): values for updating multiplexer mapping.
-            This should be formatted as {ADCReg: (ADCChannel, ADChannel)}.
+        `adc1_mux` (ADCChannel, ADCChannel): The new channel values for for updating
+            multiplexer mapping for adc1. The first is mux_p, the second is mux_n.
+        `adc2_mux` (ADCChannel, ADCChannel): The new channel values for for updating
+            multiplexer mapping for adc2. The first is mux_p, the second is mux_n.
 
-        `mux_values` (dict): current multiplexer mapping.
-            This should be formatted as {ADCReg: (int, int)}.
-
-        Note: both of the above must be dictionaries formatted as:
-
-            mux_reg_addx (ADCReg): (mux_p_val, mux_n_val)
+        Note: both of the above must be dictionaries formatted as (mux_p_val, mux_n_val)
 
     Returns:
         `list`: OpCodes for updated multiplexer mapping
@@ -59,8 +56,10 @@ def generate_mux_opcodes(adc1_reg, adc1_mux, adc2_reg, adc2_mux):
         adc_x_ch_bits = (mux_p_val << 4) + mux_n_val
         return [OpCode(adc_x_ch_bits, addx.value, mask.value)]
 
-    mux_opcodes += do_opcode(adc1_reg, adc1_mux[0], adc1_mux[1])
-    mux_opcodes += do_opcode(adc2_reg, adc2_mux[0], adc2_mux[1])
+    # ADCReg.REG_INPMUX controls multiplexing for ad1, whileADCReg.REG_ADC2MUX controls
+    # multiplexing for adc2
+    mux_opcodes += do_opcode(ADCReg.REG_INPMUX, adc1_mux[0], adc1_mux[1])
+    mux_opcodes += do_opcode(ADCReg.REG_ADC2MUX, adc2_mux[0], adc2_mux[1])
 
     return mux_opcodes
 
