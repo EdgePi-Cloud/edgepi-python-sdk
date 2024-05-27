@@ -575,8 +575,10 @@ class EdgePiADC(SPI):
             read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
             if adc_num is ADCNum.ADC_1:
                 ready = (read_data[1] & 0b01000000) == 0b01000000
-            if adc_num is ADCNum.ADC_2:
+            elif adc_num is ADCNum.ADC_2:
                 ready = (read_data[1] & 0b10000000) == 0b10000000
+            else:
+                raise ValueError("unexpected adc_num")
             return ready
 
     def __read_registers_to_map(self):
