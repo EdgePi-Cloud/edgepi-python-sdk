@@ -671,8 +671,7 @@ class EdgePiADC(SPI):
             validate_channels_allowed(channels, rtd_enabled)
 
         return generate_mux_opcodes(
-            ADCReg.REG_INPMUX, (adc_1_mux_p, adc_1_mux_n), 
-            ADCReg.REG_ADC2MUX, (adc_2_mux_p, adc_2_mux_n)
+            (adc_1_mux_p, adc_1_mux_n), (adc_2_mux_p, adc_2_mux_n)
         )
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
