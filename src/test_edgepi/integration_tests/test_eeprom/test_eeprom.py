@@ -10,6 +10,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 import string
 import random
 import base64
+import platform
 
 import time
 import logging
@@ -54,7 +55,7 @@ def test__page_write_register(data, address, eeprom):
         for indx, init_data in enumerate(initial_data):
             assert init_data != new_data[indx]
             assert new_data[indx] == data[indx]
-            
+
     finally:
         # Write the original data back
         eeprom.write_edgepi_data(original_data)
