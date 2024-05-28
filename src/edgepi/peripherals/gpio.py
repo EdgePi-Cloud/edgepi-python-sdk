@@ -83,8 +83,8 @@ class GpioDevice:
                         # NOTE: we'll need to be careful when we update periphery, since we depend on a
                         # private functionality
 
-                        # pylint: disable=protected-access
-                        gpio._line = pin_num
+                        gpio._line = pin_num # pylint: disable=protected-access
+
                         # pylint: disable=protected-access
                         gpio._reopen(pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False)
                     results += [gpio.read()]
