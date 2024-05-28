@@ -6,7 +6,7 @@
 """
 
 
-from bitstring import BitArray, pack
+from bitstring import BitArray
 
 
 def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
@@ -27,6 +27,7 @@ def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
         key: value for (key, value) in dictionary.items() if key != entry_key and value != entry_val
     }
     return filtered_args
+
 
 def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) -> dict:
     """use for filtering an entry from a dictionary by key or value
@@ -49,8 +50,7 @@ def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) 
     return filtered_args
 
 
-
-def bitstring_from_list(data: list) -> BitArray:
+def bitstring_from_list(data: list[int]) -> BitArray:
     """
     Builds a bitstring from a list of uint byte values
 
@@ -60,8 +60,5 @@ def bitstring_from_list(data: list) -> BitArray:
     Returns:
         BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
     """
-    code = BitArray()
-    for value in data:
-        next_byte = pack("uint:8", value)
-        code.append(next_byte)
-    return code
+    # bytes() will raise a ValueError if any ints in data are not in range(0, 256)
+    return BitArray(bytes(data))

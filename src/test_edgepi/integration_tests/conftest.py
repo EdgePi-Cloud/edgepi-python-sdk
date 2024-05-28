@@ -3,12 +3,12 @@ import hashlib
 import platform
 
 import pytest
-    
+
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 from edgepi.eeprom.eeprom_constants import DEFAULT_EEPROM_BIN_B64
-   
+
 @pytest.fixture(scope="session", autouse=True)
-def eeprom_reset(request):
+def eeprom_reset():
     edgepi_eeprom = EdgePiEEPROM()
 
     if platform.node() == "edgepi-intg2":
@@ -20,5 +20,3 @@ def eeprom_reset(request):
         print('done!')
     else:
         print("dont reset eeprom")
- 
-    # request.addfinalizer()

@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from edgepi.digital_input.digital_input_constants import DinPins, DIN_MIN_NUM, DIN_MAX_NUM
+from edgepi.digital_input.digital_input_constants import DinPins
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
 
 class InvalidPinName(Exception):
@@ -40,6 +40,6 @@ class EdgePiDigitalInput():
         invalid_pin_types = [False for pin_name in pin_names if not isinstance(pin_name, DinPins)]
         if len(invalid_pin_types) > 0:
             raise InvalidPinName(f'Invalid pin names passed in {pin_names}')
-        
+
         pin_numbers = [int(pin_name.value[3]) for pin_name in pin_names]
         return self.gpio.fast_read_din_state_batch(pin_numbers)

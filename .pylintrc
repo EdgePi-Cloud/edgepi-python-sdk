@@ -5,7 +5,9 @@ disable=logging-fstring-interpolation,
         too-many-arguments,
         fixme,
         too-few-public-methods,
-        duplicate-code
+        duplicate-code,
+        no-else-return,
+        no-else-raise
 
 [LOGGING]
 
