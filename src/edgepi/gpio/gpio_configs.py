@@ -433,6 +433,9 @@ def generate_pin_info(config: Union[GpioExpanderConfig, GpioChipConfig] = None):
         pin_dict = _generate_DOUT_expander_pins()
     elif config.name == GpioConfigs.PWM.value.name:
         pin_dict = _generate_PWM_expander_pins()
+    else:
+        raise ValueError(f"generate_pin_info received unknown config name {config.name}")
+
     return pin_dict
 
 def generate_expander_pin_info():

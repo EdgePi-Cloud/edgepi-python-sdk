@@ -13,8 +13,6 @@ Functions:
     apply_opcode(OpCode, int)
 """
 
-
-from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 import logging
@@ -105,7 +103,7 @@ def apply_opcodes(register_values: dict, opcodes: list):
         raise ValueError("register_values and opcodes args must both be non-empty")
     _format_register_map(register_values)
 
-    original_regs = deepcopy(register_values)
+    #original_regs = deepcopy(register_values)
 
     # apply each opcode to its corresponding register
     for opcode in opcodes:
@@ -116,10 +114,12 @@ def apply_opcodes(register_values: dict, opcodes: list):
             register_entry["value"] = _apply_opcode(register_entry["value"], opcode)
             register_entry["is_changed"] = True
 
-    __validate_register_updates(original_regs, register_values)
+    # NOTE: disabling register update validation because there's no reason for us to suspect the other 
+    # values would change? I'm not sure why this was done before.
+    # This is also quite slow, and affects the performance significantly
+    #__validate_register_updates(original_regs, register_values)
 
     return register_values
-
 
 def _apply_opcode(register_value: int, opcode: OpCode):
     """

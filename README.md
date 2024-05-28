@@ -112,7 +112,7 @@ Use [GitHub Issues Page](https://github.com/EdgePi-Cloud/edgepi-python-sdk/issue
 
 # Get involved
 Follow [@edgepi_cloud on Twitter](https://twitter.com/edgepi_cloud/).
-Read and subscribe to the [EdgePi blog](https://www.edgepi.com/blog).
+See the [EdgePi wiki](https://wiki.edgepi.com/) for more information on how to get started with your EdgePi.
 If you have a specific question, please check out our [discussion forums](https://www.edgepi.com/forums).
 
 # License

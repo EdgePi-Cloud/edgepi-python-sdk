@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum, unique
 
-import bitstring
-
+from bitstring import pack
 
 @unique
 class ADCStatusBit(Enum):
@@ -87,7 +86,6 @@ _fault_msg_map = {
     ADCStatusBit.RESET: (ADCStatusMsg.RESET_FALSE, ADCStatusMsg.RESET_TRUE),
 }
 
-
 def get_adc_status(status_code: int) -> dict:
     """Generates a dictionary of ADC Status objects
 
@@ -99,7 +97,7 @@ def get_adc_status(status_code: int) -> dict:
     """
     status_dict = {}
 
-    status_byte = bitstring.pack("uint:8", status_code)
+    status_byte = pack("uint:8", status_code)
 
     # check each bit in status_byte
     for bit_num in ADCStatusBit:

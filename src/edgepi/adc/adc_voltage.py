@@ -3,10 +3,9 @@
 
 import logging
 
-from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list
+from edgepi.utilities.utilities import bitstring_from_list, combine_to_uint32
 
 
 # TODO: retrieve these values from EEPROM once added
@@ -21,11 +20,12 @@ ADC2_UPPER_LIMIT = 8388608
 _logger = logging.getLogger(__name__)
 
 
-def _is_negative_voltage(code: BitArray):
+def _is_negative_voltage(code: list[int]):
     """
     Determines if voltage code is negative value
     """
-    return code[0] == 1
+    # check if first bit of the first integer is a 1
+    return (code[0] & 0x80) != 0
 
 
 def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
@@ -41,8 +41,9 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
 
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
+
     voltage_range = v_ref / 2 ** (num_bits - 1)
-    _logger.debug(f" _code_to_input_voltage: code {code}")
+    _logger.debug(f"_code_to_input_voltage: code {code}")
     return float(code) * voltage_range
 
 
@@ -53,7 +54,6 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     """
     step_up_ratio = (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
     return v_in * step_up_ratio * gain + offset
-
 
 def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
     """
@@ -69,17 +69,23 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
-    num_bits = adc_info.num_data_bytes * 8
-    code_val = code_bits.uint
 
-    if _is_negative_voltage(code_bits):
+    num_bits = adc_info.num_data_bytes * 8
+    if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(0, code[0], code[1], code[2])
+    else:
+        raise ValueError(
+            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
+            "expected 4 for ADC1 or 3 for ADC2"
+        )
+
+    if _is_negative_voltage(code):
         code_val = code_val - 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
-
     return v_out
 
 def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam):
@@ -96,13 +102,21 @@ def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs:
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
-    num_bits = adc_info.num_data_bytes * 8
-    code_val = code_bits.uint
 
-    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+    num_bits = adc_info.num_data_bytes * 8
+    if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
+    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(0, code[0], code[1], code[2])
+    else:
+        raise ValueError(
+            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
+            "expected 4 for ADC1 or 3 for ADC2"
+        )
+
+    if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+    elif _is_negative_voltage(code) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
         code_val = code_val - ADC2_UPPER_LIMIT
     elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
         code_val = code_val + ADC1_UPPER_LIMIT
@@ -122,7 +136,7 @@ def code_to_temperature(
     rtd_calib_gain: float,
     rtd_calib_offset: float,
     adc_num: ADCNum
-    ) -> float:
+) -> float:
     """
     Converts ADC voltage read digital code to temperature. Intended for use in RTD sampling.
 

@@ -3,7 +3,6 @@
 import pytest
 
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list
 from edgepi.adc.adc_constants import ADCNum
 from edgepi.adc.adc_voltage import (
     _code_to_input_voltage,
@@ -26,8 +25,7 @@ OFFSET = 0
                          ([0x7F,0xFF,0xFF,0xFF], False),
                         ])
 def test_is_negative_voltage(code, result):
-    code_bits = bitstring_from_list(code)
-    assert _is_negative_voltage(code_bits) ==result
+    assert _is_negative_voltage(code) == result
 
 
 @pytest.mark.parametrize(
