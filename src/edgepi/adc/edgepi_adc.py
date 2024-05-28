@@ -978,8 +978,8 @@ class EdgePiADC(SPI):
     def adc1_config_and_read_samples_batch(
         self,
         data_rate: ADC1DataRate,
-        analog_in_list: list[AnalogIn],
-        differential_pairs: list[DiffMode],
+        analog_in_list: list[AnalogIn] = None,
+        differential_pairs: list[DiffMode] = None,
     ) -> list:
         """
         This function sets the config, and rb
@@ -988,7 +988,10 @@ class EdgePiADC(SPI):
         Will reset any prior config made to the ADC. Does not work with RTD mode, and may override configs if RTD mode 
         is active.
         """
-
+        if analog_in_list is None:
+            analog_in_list = []
+        if differential_pairs is None:
+            differential_pairs = []
         if analog_in_list == [] and differential_pairs == []:
             raise ValueError("Both analog_in_list and differential_pairs can't be empty")
 
