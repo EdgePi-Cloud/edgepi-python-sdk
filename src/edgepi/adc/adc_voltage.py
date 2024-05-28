@@ -3,7 +3,6 @@
 
 import logging
 
-from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list, combine_to_uint32

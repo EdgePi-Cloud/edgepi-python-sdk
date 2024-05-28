@@ -37,7 +37,7 @@ def generate_mux_opcodes(adc1_mux: (CH, CH), adc2_mux: (CH, CH)) -> list:
         `adc2_mux` (ADCChannel, ADCChannel): The new channel values for for updating
             multiplexer mapping for adc2. The first is mux_p, the second is mux_n.
 
-        Note: both of the above must be dictionaries formatted as (mux_p_val, mux_n_val)
+        Note: both of the above must be tuples must be formatted as (mux_p_val, mux_n_val)
 
     Returns:
         `list`: OpCodes for updated multiplexer mapping
