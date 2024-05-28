@@ -79,10 +79,11 @@ class ADCState:
         # name of current value of this adc_property
         adc_property_value = adc_property.value.values[adc_property_bits]
         _logger.debug(
+
             (
-                "query_state: query_property='{}',".format(adc_property) +
-                " adc_property_bits={},".format(hex(adc_property_bits)) +
-                " adc_property_value='{}'".format(adc_property_value)
+                f"query_state: query_property='{adc_property}',"
+                f" adc_property_bits={hex(adc_property_bits)},"
+                f" adc_property_value='{adc_property_value}'"
             )
         )
         return adc_property_value
