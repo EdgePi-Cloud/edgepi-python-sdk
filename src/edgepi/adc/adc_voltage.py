@@ -3,7 +3,6 @@
 
 import logging
 
-from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.utilities.utilities import bitstring_from_list, combine_to_uint32
@@ -43,7 +42,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
     voltage_range = v_ref / 2 ** (num_bits - 1)
-    _logger.debug("_code_to_input_voltage: code {}".format(code))
+    _logger.debug("_code_to_input_voltage: code %d" % code)
     return float(code) * voltage_range
 
 

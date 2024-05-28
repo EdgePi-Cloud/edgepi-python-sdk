@@ -976,11 +976,13 @@ class EdgePiADC(SPI):
                                         [None])
         self.__config(**args)
 
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     def adc1_config_and_read_samples_batch(
         self,
         data_rate: ADC1DataRate,
-        analog_in_list: list[AnalogIn] = [],
-        differential_pairs: list[DiffMode] = [],
+        analog_in_list: list[AnalogIn],
+        differential_pairs: list[DiffMode],
     ) -> list:
         """
         This function sets the config, and rb

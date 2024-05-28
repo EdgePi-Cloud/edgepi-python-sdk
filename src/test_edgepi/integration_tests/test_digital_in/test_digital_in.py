@@ -35,7 +35,7 @@ def test_input_state_speed(pin_names):
     start = time.time()
     
     pin_states = []
-    for i in range(500):
+    for _ in range(500):
         tmp = din.digital_input_state_batch(pin_names)
         pin_states += tmp
         

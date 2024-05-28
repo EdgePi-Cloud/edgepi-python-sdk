@@ -3,7 +3,6 @@
 import pytest
 
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list
 from edgepi.adc.adc_constants import ADCNum
 from edgepi.adc.adc_voltage import (
     _code_to_input_voltage,

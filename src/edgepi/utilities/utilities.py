@@ -6,7 +6,7 @@
 """
 
 
-from bitstring import BitArray, pack
+from bitstring import BitArray
 
 
 def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:

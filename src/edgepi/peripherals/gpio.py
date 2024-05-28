@@ -50,6 +50,7 @@ class GpioDevice:
         To minimize issues with the lock, we open & read in a single function call
         '''
         try:
+            # pylint: disable=consider-using-with
             GpioDevice.lock_gpio.acquire()
             gpio   = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
             result = gpio.read()
@@ -71,6 +72,7 @@ class GpioDevice:
         '''
         results = []
         try:
+            # pylint: disable=consider-using-with
             GpioDevice.lock_gpio.acquire()
             gpio = None
             try:
@@ -80,6 +82,7 @@ class GpioDevice:
                     else:
                         # NOTE: we'll need to be careful when we update periphery, since we depend on a
                         # private functionality
+
                         # pylint: disable=protected-access
                         gpio._line = pin_num
                         # pylint: disable=protected-access

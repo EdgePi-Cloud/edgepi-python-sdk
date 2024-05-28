@@ -15,6 +15,3 @@ class DinPins(Enum):
     DIN6 = 'DIN6'
     DIN7 = 'DIN7'
     DIN8 = 'DIN8'
-
-DIN_MIN_NUM = 1
-DIN_MAX_NUM = 8

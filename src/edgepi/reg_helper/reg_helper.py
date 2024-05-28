@@ -13,7 +13,6 @@ Functions:
     apply_opcode(OpCode, int)
 """
 
-from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 import logging
