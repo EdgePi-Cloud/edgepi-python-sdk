@@ -7,11 +7,13 @@ import pytest
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
 from edgepi.eeprom.eeprom_constants import DEFAULT_EEPROM_BIN_B64
 
+TEST_DEVICE_NAME = "edgepi-intg2"
+
 @pytest.fixture(scope="session", autouse=True)
 def eeprom_reset():
     edgepi_eeprom = EdgePiEEPROM()
 
-    if platform.node() == "edgepi-intg2":
+    if platform.node() == TEST_DEVICE_NAME:
         print('loading default eeprom image ...')
         default_bin = base64.b64decode(DEFAULT_EEPROM_BIN_B64)
         hash_res = hashlib.md5(default_bin)

@@ -46,9 +46,9 @@ class GpioDevice:
         return self.gpio.read()
 
     def open_read_state(self, pin_num:int, pin_dir:str, pin_bias:str):
-        '''
+        """
         To minimize issues with the lock, we open & read in a single function call
-        '''
+        """
         try:
             # pylint: disable=consider-using-with
             GpioDevice.lock_gpio.acquire()
@@ -65,11 +65,16 @@ class GpioDevice:
 
         return result
 
-    def open_read_state_batch(self, pin_num_list:list[int], pin_dir:str, pin_bias:str) -> list:
-        '''
+    def open_read_state_batch(
+        self,
+        pin_num_list: list[int],
+        pin_dir: str,
+        pin_bias: str,
+    ) -> list:
+        """
         Batch several gpio reads into a single lock / unlock. We can also take advantage of the fact we're accessing
         the gpio only from different pins, and so we can open & close just a single time.
-        '''
+        """
         results = []
         try:
             # pylint: disable=consider-using-with

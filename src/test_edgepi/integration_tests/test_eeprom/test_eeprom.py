@@ -22,6 +22,8 @@ from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, DEFAULT_EEPROM_BIN_
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 
+from ..conftest import TEST_DEVICE_NAME
+
 @pytest.fixture(name="eeprom")
 def fixture_test_eeprom():
     eeprom = EdgePiEEPROM()
@@ -34,7 +36,7 @@ def fixture_test_eeprom():
                         ])
 # pylint: disable=protected-access
 def test__page_write_register(data, address, eeprom):
-    if platform.node() != "edgepi-intg2":
+    if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
 
     original_data = eeprom.read_edgepi_data()
@@ -80,7 +82,7 @@ h4/6JBWKdpKfX6qm88MpID0arS+jJkQBuMNIafI\nGqnLR1sn5N91UjPItE3NPhYX5LvQMjIuHt8AiyN
 TmZ\n-----END RSA PRIVATE KEY-----\n'
 
 def test_write_edgepi_data(eeprom):
-    if platform.node() != "edgepi-intg2":
+    if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
     
     original_data = eeprom.read_edgepi_data()
@@ -130,7 +132,7 @@ def test_write_edgepi_data(eeprom):
                          ("6b68b8e2dd2a6bec300ef91572270723", does_not_raise())
                         ])
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
-    if platform.node() != "edgepi-intg2":
+    if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
         
     original_data = eeprom.read_edgepi_data()
