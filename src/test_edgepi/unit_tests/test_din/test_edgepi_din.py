@@ -38,7 +38,7 @@ def fixture_test_dac(mocker):
                          (GpioPins.DOUT2, False, False, pytest.raises(InvalidPinName)),
                          (None, False, False, pytest.raises(InvalidPinName))])
 def test_edgepi_digital_input_state(mocker, pin_name, mock_value, result, error, din):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.fast_read_din_state",
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.read_din_state",
                  return_value = mock_value)
     with error:
         state = din.digital_input_state(pin_name)
@@ -73,7 +73,7 @@ def test_edgepi_digital_input_state(mocker, pin_name, mock_value, result, error,
 )
 def test_edgepi_digital_input_state_batch(mocker, pin_names, mock_values, error, din):
     mocker.patch(
-        "edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.fast_read_din_state_batch",
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.batch_read_din_state",
         return_value = mock_values
     )
     with error:
