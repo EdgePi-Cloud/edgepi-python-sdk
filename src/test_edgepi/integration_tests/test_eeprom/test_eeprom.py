@@ -84,16 +84,15 @@ TmZ\n-----END RSA PRIVATE KEY-----\n'
 def test_write_edgepi_data(eeprom):
     if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
-    
+
     original_data = eeprom.read_edgepi_data()
     try:
         for _ in range(10):
-            # initializing size of string
+            # generate random strings
             str_len = 100
-            # using random.choices()
-            # generating random strings
-            res = ''.join(random.choices(string.ascii_uppercase +
-                                        string.digits, k=str_len))
+            res = ''.join(
+                random.choices(string.ascii_uppercase + string.digits, k=str_len)
+            )
 
             # Modified data to write to memory
             modified_data = eeprom.read_edgepi_data()
@@ -134,13 +133,15 @@ def test_write_edgepi_data(eeprom):
 def test_reset_edgepi_memory(bin_hash, error, eeprom):
     if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
-        
+
     original_data = eeprom.read_edgepi_data()
     try:
         with error:
             eeprom.reset_edgepi_memory(bin_hash, base64.b64decode(DEFAULT_EEPROM_BIN_B64))
             written_data = eeprom.read_edgepi_data()
-            default_data = eeprom.eeprom_pb.ParseFromString(base64.b64decode(DEFAULT_EEPROM_BIN_B64))
+            default_data = eeprom.eeprom_pb.ParseFromString(
+                base64.b64decode(DEFAULT_EEPROM_BIN_B64)
+            )
             default_data = EepromDataClass.extract_eeprom_data(eeprom.eeprom_pb)
             assert written_data.dac_calib_params == default_data.dac_calib_params
             assert written_data.adc1_calib_params == default_data.adc1_calib_params
@@ -155,5 +156,5 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
             assert written_data.tb_part_number == default_data.tb_part_number
             assert written_data.cm4_part_number == default_data.cm4_part_number
     finally:
-        # Reset to origina;l Data
+        # Reset to original data
         eeprom.write_edgepi_data(original_data)

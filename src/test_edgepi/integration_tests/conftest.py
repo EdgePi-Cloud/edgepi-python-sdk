@@ -1,3 +1,5 @@
+"""Main test config file for integration tests"""
+
 import base64
 import hashlib
 import platform
@@ -11,6 +13,7 @@ TEST_DEVICE_NAME = "edgepi-intg2"
 
 @pytest.fixture(scope="session", autouse=True)
 def eeprom_reset():
+    """Automatically restart the eeprom after each test"""
     edgepi_eeprom = EdgePiEEPROM()
 
     if platform.node() == TEST_DEVICE_NAME:
