@@ -7,70 +7,43 @@ import pytest
 from edgepi.adc.adc_constants import ADCChannel as CH, ADCReg
 from edgepi.reg_helper.reg_helper import BitMask, OpCode
 from edgepi.adc.adc_multiplexers import (
-    generate_mux_opcodes,
+    generate_mux_opcode,
     ChannelNotAvailableError,
     validate_channels_allowed,
 )
 
 
 @pytest.mark.parametrize(
-    "adc1_mux, adc2_mux, expected",
+    "addx, adc1_mux, adc2_mux, expected",
     [
         (
-            (None, None), (None, None),
-            [],
+            ADCReg.REG_INPMUX,
+            CH.AIN1,
+            CH.AINCOM,
+            OpCode(0x1A, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
         ),
         (
-            (None, CH.AIN2), (None, None),
-            [],
+            ADCReg.REG_ADC2MUX,
+            CH.AIN5,
+            CH.AIN6,
+            OpCode(0x56, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
         ),
         (
-            (CH.AIN1, CH.AINCOM), (None, None),
-            [OpCode(0x1A, ADCReg.REG_INPMUX.value, BitMask.BYTE.value)],
+            ADCReg.REG_INPMUX,
+            CH.AIN1,
+            CH.AIN2,
+            OpCode(0x12, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
         ),
         (
-            (CH.AIN7, None), (None, None),
-            [],
-        ),
-        (
-            (None, CH.AIN5), (None, None),
-            [],
-        ),
-        (
-            (None, None), (CH.AIN5, None),
-            [],
-        ),
-        (
-            (None, None), (None, CH.AIN6),
-            [],
-        ),
-        (
-            (None, None), (CH.AIN5, CH.AIN6),
-            [OpCode(0x56, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value)],
-        ),
-        (
-            (CH.AIN1, None), (None, None),
-            [],
-        ),
-        (
-            (CH.AIN5, None), (None, CH.AIN6),
-            [],
-        ),
-        (
-            (None, CH.AIN5), (CH.AIN6, None),
-            [],
-        ),
-        (
-            (CH.AIN1, CH.AIN2), (CH.AIN3, CH.AIN4),
-            [
-                OpCode(0x12, ADCReg.REG_INPMUX.value, BitMask.BYTE.value),
-                OpCode(0x34, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
-            ],
+            ADCReg.REG_ADC2MUX,
+            CH.AIN3,
+            CH.AIN4,
+            OpCode(0x34, ADCReg.REG_ADC2MUX.value, BitMask.BYTE.value),
         ),
     ],
 )
-def test_generate_mux_opcodes(adc1_mux, adc2_mux, expected):
-    assert generate_mux_opcodes(adc1_mux, adc2_mux) == expected
+def test_generate_mux_opcode(adc1_mux, adc2_mux, expected):
+    assert generate_mux_opcode(adc1_mux, adc2_mux) == expected
 
 
 @pytest.mark.parametrize(

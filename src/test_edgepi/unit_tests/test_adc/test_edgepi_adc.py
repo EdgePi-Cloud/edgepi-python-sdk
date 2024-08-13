@@ -1171,7 +1171,7 @@ def test__is_rtd_on(mocker, mock_value, result):
         ),
     ]
 )
-def test_adc1_config_and_read_samples_batch(
+def test_batch_config_and_read_samples_adc1(
     mocker,
     
     ain_list: list,
@@ -1204,7 +1204,7 @@ def test_adc1_config_and_read_samples_batch(
         return mock.DEFAULT
     spi_apply_commands.side_effect = check_commands
 
-    result_voltages = adc.adc1_config_and_read_samples_batch(
+    result_voltages = adc.batch_config_and_read_samples_adc1(
         data_rate=ADC1DataRate.SPS_38400,
         analog_in_list=ain_list,
         differential_pairs=diff_list,

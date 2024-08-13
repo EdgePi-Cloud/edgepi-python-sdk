@@ -73,6 +73,15 @@ class SpiDevice:
         return out
 
     def spi_apply_adc_commands(self, command_tup_list):
+        """
+        This function applies a list of SPI commands for use in the ADC module,
+        such as sending & reading data.
+
+        Each "command tuple" in the list contains a command, a delay (often required!),
+        then another command.
+
+        See the `unsafe_write_register_command` for creating commands.
+        """
         result_list = []
 
         try:
