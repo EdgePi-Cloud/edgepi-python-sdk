@@ -72,8 +72,9 @@ class GpioDevice:
         pin_bias: str,
     ) -> list:
         """
-        Batch several gpio reads into a single lock / unlock. We can also take advantage of the fact we're accessing
-        the gpio only from different pins, and so we can open & close just a single time.
+        Batch several gpio reads into a single lock / unlock. We can also take advantage of
+        the fact we're accessing the gpio only from different pins, and so we can open & close
+        just a single time.
         """
         results = []
         try:
@@ -85,12 +86,13 @@ class GpioDevice:
                     if gpio is None:
                         gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
                     else:
-                        # NOTE: we'll need to be careful when we update periphery, since we depend on a
-                        # private functionality
+                        # NOTE: we'll need to be careful when we update periphery, since we depend
+                        # on private functionality
+                        gpio._line = pin_num # pylint: disable=protected-access
                         # pylint: disable=protected-access
-                        gpio._line = pin_num
-                        # pylint: disable=protected-access
-                        gpio._reopen(pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False)
+                        gpio._reopen(
+                            pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False
+                        )
                     results += [gpio.read()]
 
             finally:
