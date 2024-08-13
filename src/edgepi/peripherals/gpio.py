@@ -92,7 +92,7 @@ class GpioDevice:
                         gpio._reopen(
                             pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False
                         )
-                    results += [gpio.read()]
+                    results.append(gpio.read())
             finally:
                 try:
                     gpio.close()
