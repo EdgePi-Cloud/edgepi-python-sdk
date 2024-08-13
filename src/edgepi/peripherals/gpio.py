@@ -6,7 +6,6 @@ import threading
 from contextlib import contextmanager
 from periphery import GPIO
 
-
 class GpioDevice:
     """Class for representing a GPIO device"""
     lock_gpio=threading.Lock()
@@ -35,7 +34,7 @@ class GpioDevice:
             finally:
                 GpioDevice.lock_gpio.release()
 
-    def read_state(self):
+    def read_state(self) -> bool:
         """
         Read the GPIO pin state
         Args:
@@ -45,7 +44,7 @@ class GpioDevice:
         """
         return self.gpio.read()
 
-    def open_read_state(self, pin_num:int, pin_dir:str, pin_bias:str):
+    def open_read_state(self, pin_num:int, pin_dir:str, pin_bias:str) -> bool:
         """
         To minimize issues with the lock, we open & read in a single function call
         """
@@ -70,7 +69,7 @@ class GpioDevice:
         pin_num_list: list[int],
         pin_dir: str,
         pin_bias: str,
-    ) -> list:
+    ) -> list[bool]:
         """
         Batch several gpio reads into a single lock / unlock. We can also take advantage of
         the fact we're accessing the gpio only from different pins, and so we can open & close
@@ -94,7 +93,6 @@ class GpioDevice:
                             pin_dir, edge="none", bias=pin_bias, drive="default", inverted=False
                         )
                     results += [gpio.read()]
-
             finally:
                 try:
                     gpio.close()
