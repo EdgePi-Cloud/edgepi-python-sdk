@@ -33,7 +33,7 @@ class EdgePiDigitalInput():
         Read multiple GPIO pins as digital inputs
         """
         if not pin_names:
-            raise ValueError('Unexpected value pin_names={pin_names}')
+            raise ValueError(f'Unexpected value pin_names={pin_names}')
 
         invalid_pin_types = [False for pin_name in pin_names if not isinstance(pin_name, DinPins)]
         if len(invalid_pin_types) > 0:
