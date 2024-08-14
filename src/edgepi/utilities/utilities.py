@@ -60,5 +60,5 @@ def bitstring_from_list(data: list[int]) -> BitArray:
     Returns:
         BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
     """
-    # bytes() will raise a ValueError if any ints in data are not in range(0, 256)
+    # bytes() will raise a ValueError if any items are not in the range [0, 255]
     return BitArray(bytes(data))
