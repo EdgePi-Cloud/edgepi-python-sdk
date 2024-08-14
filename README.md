@@ -107,6 +107,18 @@ password: <token-value>
 ```
 Make sure to include the `pypi-` prefix for your token value.
 
+# Performance
+
+The following benchmarks were measured on the Rasberry Pi 4b (TODO: ensure the version is correct)
+
+The **Performance** column represents how long it takes to call one function, while the **Max Frequency** column represents how many times that function could be called every second.
+
+| Feature | Performance | Max Frequency | Function | Example | Desc |
+| -- | -- | -- | -- | -- | -- |
+| Single DIN | 0.13ms to read 1 DIN (TODO: measure) | 7692 Hz | `digital_input_state(pin)` | [examples/single_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_din.py) | |
+| Batched DIN | 0.6ms to read 8 DIN (TODO: measure) | 1666 Hz | `digital_input_state_batch(pin_list)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
+| Thermocouple (TC) | 100ms (TODO: measure) | 10 Hz | `read_temperatures()` | [examples/single_tc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_tc.py) | Limited by [hardware](https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31856.pdf) (see conversion mode). 100ms is needed to get accurate (19 bit) readings |
+
 # Bug Reports / Feature Requests
 Use [GitHub Issues Page](https://github.com/EdgePi-Cloud/edgepi-python-sdk/issues) to report any issues or feature requests.
 
