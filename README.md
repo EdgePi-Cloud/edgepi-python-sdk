@@ -111,9 +111,9 @@ Make sure to include the `pypi-` prefix for your token value.
 
 The following benchmarks were measured on the Rasberry Pi 4, with all edgepi daemons disabled.
 
-The **Performance** column represents how long it takes to call one function, while the **Max Frequency** column represents how many times that function could be called every second.
+The **Performance** column represents how long it takes to call one function, while the **Max Read Frequency** column represents how many times that function could be called every second.
 
-| Feature | Performance | Max Frequency | Function | Example | Desc |
+| Feature | Performance | Max Read Frequency | Function | Example | Desc |
 | -- | -- | -- | -- | -- | -- |
 | Single DIN | 0.85ms per 8 DIN | 1171 Hz | `digital_input_state(pin)` | [examples/single_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_din.py) | |
 | Batched DIN | 0.49ms per 8 DIN | 2010 Hz | `digital_input_state_batch(pin_list)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
