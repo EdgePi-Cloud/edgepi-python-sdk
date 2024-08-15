@@ -97,6 +97,8 @@ def apply_opcodes(register_values: dict, opcodes: list):
     Raises:
         ValueError: if either register_values or opcodes is empty
     """
+    #print("register_values:")
+    #print(register_values)
     if len(register_values) < 1 or len(opcodes) < 1:
         _logger.error(
             "empty values received for 'register_values' or 'opcodes' args, opcodes not applied"
@@ -117,10 +119,11 @@ def apply_opcodes(register_values: dict, opcodes: list):
 
     # NOTE: disabling register update validation because there's no reason for us to suspect the other
     # values would change? I'm not sure why this was done before.
-    # This is also quite slow, and affects the performance significantly
+    # The deepcopy which depends on this is quite slow & affects performance significantly
     __validate_register_updates(original_regs, register_values)
 
     return register_values
+
 
 def _apply_opcode(register_value: int, opcode: OpCode):
     """

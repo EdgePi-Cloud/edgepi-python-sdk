@@ -3,8 +3,11 @@
 
 import logging
 
-from edgepi.adc.adc_constants import ADCComs, ADCNum
-
+from edgepi.adc.adc_constants import (
+    ADCComs,
+    ADCReadInfo,
+    ADC_VOLTAGE_READ_LEN,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -35,17 +38,22 @@ class ADCCommands:
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         return command + values
 
-    def start_adc(self, adc_num: ADCNum):
-        """Command to start ADC"""
+    def start_adc(self, adc_num: ADCReadInfo):
+        """Command to start ADC conversions"""
         _logger.debug("Command to send is %s", ([adc_num.start_cmd]))
         return [adc_num.start_cmd]
 
+    def read_adc(self, adc_num: ADCReadInfo):
+        """
+        Returns the command to read from the ADC, after waiting the required time for
+        conversions to take effect
+        """
+        return [adc_num.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
 
-    def stop_adc(self, adc_num: ADCNum):
+    def stop_adc(self, adc_num: ADCReadInfo):
         """Command to stop ADC"""
         _logger.debug("Command to send is %s", ([adc_num.stop_cmd]))
         return [adc_num.stop_cmd]
-
 
     def reset_adc(self):
         """Command to reset ADC"""

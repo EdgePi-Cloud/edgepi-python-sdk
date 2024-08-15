@@ -51,11 +51,10 @@ class ADCState:
         A static method that uses the provided register map to determine a single adc_property, 
         rather than computing all of them
         """
-        # value of this adc_property's register
-        reg_value = reg_map[adc_property.value.addx]
+        register_value = reg_map[adc_property.value.addx]
         # get value of bits corresponding to this property by letting through only the bits
         # that were "masked" when setting this property (clear all bits except the property bits)
-        adc_property_bits = (~adc_property.value.mask) & reg_value
+        adc_property_bits = (~adc_property.value.mask) & register_value
         # name of current value of this adc_property
         adc_property_value = adc_property.value.values[adc_property_bits]
         return adc_property_value
