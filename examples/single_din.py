@@ -1,3 +1,5 @@
+"""Example reading from individual DIN pins"""
+
 import time
 
 from edgepi.digital_input.digital_input_constants import DinPins

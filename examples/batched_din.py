@@ -1,3 +1,5 @@
+"""Example reading from DIN using the batched function"""
+
 import time
 
 from edgepi.digital_input.digital_input_constants import DinPins
