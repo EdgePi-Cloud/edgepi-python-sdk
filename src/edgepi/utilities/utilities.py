@@ -42,7 +42,7 @@ def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) 
         key or value matches either the entry_key or entry_val, respectively.
     """
     filtered_args = {
-        key: value for (key, value) in dictionary.items() \
+        key: value for (key, value) in dictionary.items()
         if key not in entry_key and value not in entry_val
     }
     return filtered_args
