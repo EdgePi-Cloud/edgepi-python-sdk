@@ -3,6 +3,8 @@ import time
 from edgepi.digital_input.digital_input_constants import DinPins
 from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput
 
+ITER = 250
+
 def run_test():
     """
     This test performs 2000 Digital input reads, batched 8 reads at a time.
@@ -16,14 +18,15 @@ def run_test():
     ]
 
     start = time.time()
-    for i in range(250):
+    for i in range(ITER):
         pin_states = digital_input.digital_input_state_batch(choices)
         state_list += pin_states
         if i % 100 == 99:
             print(f"DIN Pins: {pin_states}")
 
-    print("elapsed {:.4f}s".format(time.time() - start))
+    elapsed = time.time() - start
+    print(f"Time elapsed {elapsed/ITER:.6f} s")
+    print(f"Frequency {ITER/elapsed:.4f} hz")
 
 if __name__ == "__main__":
-    # TODO: evaluate this on the edgepi hardware
     run_test()

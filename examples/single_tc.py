@@ -1,29 +1,39 @@
 import time
 
-from edgepi.digital_input.digital_input_constants import DinPins
-from edgepi.digital_input.edgepi_digital_input import EdgePiDigitalInput
+from edgepi.tc.edgepi_tc import EdgePiTC
+from edgepi.tc.tc_constants import ConvMode
+
+ITER = 25
 
 def run_test():
     """
     This test 
     """
-    digital_input = EdgePiDigitalInput()
+    edgepi_tc = EdgePiTC()
+    edgepi_tc.set_config(conversion_mode=ConvMode.AUTO)
 
-    state_list = []
-    choices = [
-        DinPins.DIN1, DinPins.DIN2, DinPins.DIN3, DinPins.DIN4,
-        DinPins.DIN5, DinPins.DIN6, DinPins.DIN7, DinPins.DIN8,
-    ]
+    cj_temperatures = []
+    lin_temperatures = []
 
     start = time.time()
-    for i in range(250):
-        for din in choices:
-            pin_state = digital_input.digital_input_state(din)
-            state_list += [pin_state]
-        if i % 100 == 99:
-            print(f"DIN Pins: {state_list[-9:-1]}")
+    for _ in range(ITER):
+        iter_start = time.time()
+        
+        # make a single temperature measurement
+        cold_junction, linearized = edgepi_tc.read_temperatures()
+        cj_temperatures += [cold_junction]
+        lin_temperatures += [linearized]
 
-    print("elapsed {:.4f}s".format(time.time() - start))
+        # It doesn't make sense to read thermocoupler values faster than 10hz as they won't be updated.
+        # You can try it here if you'd like!
+        sleep_time = 0.1 - (time.time() - iter_start)
+        time.sleep(0.0 if sleep_time < 0.0 else sleep_time)
+
+    elapsed = time.time() - start
+
+    print(lin_temperatures)
+    print(f"Time elapsed {elapsed/ITER:.6f} s")
+    print(f"Frequency {ITER/elapsed:.4f} hz")
 
 if __name__ == "__main__":
     # TODO: evaluate this on the edgepi hardware
