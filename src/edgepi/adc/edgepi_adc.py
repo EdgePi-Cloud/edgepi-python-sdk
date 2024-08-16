@@ -1004,7 +1004,7 @@ class EdgePiADC(SPI):
         is active.
 
         This function only supports ADC 1, and changes the conversion mode to PULSE automatically.
-        
+
         This function will not cache it's resulting register values. # TODO: change this?
         
         TODO: if even more performance is needed, continuous mode might only need to sleep for the first conversion!
