@@ -276,13 +276,13 @@ class EdgePiADC(SPI):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        stop_cmd = self.adc_ops.stop_adc(adc_num=adc_num.value)
+        stop_cmd = self.adc_ops.stop_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(stop_cmd)
 
     def __send_start_command(self, adc_num: ADCNum):
         """Triggers ADC conversion(s)"""
-        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
+        start_cmd = self.adc_ops.start_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(start_cmd)
 
@@ -568,7 +568,7 @@ class EdgePiADC(SPI):
         application of custom power-on configurations required by EdgePi.
         """
         with self.spi_open():
-            self.transfer(self.adc_ops.reset_adc())
+            self.transfer(self.adc_ops.reset_adc_command())
         self.__reapply_config()
 
     def __is_data_ready(self, adc_num: ADCNum):
@@ -1005,8 +1005,6 @@ class EdgePiADC(SPI):
 
         This function only supports ADC 1, and changes the conversion mode to PULSE automatically.
 
-        This function will not cache it's resulting register values. # TODO: change this?
-        
         TODO: if even more performance is needed, continuous mode might only need to sleep for the first conversion!
         """
         analog_in_list     = [] if analog_in_list is None else analog_in_list
@@ -1054,9 +1052,9 @@ class EdgePiADC(SPI):
 
             # write config registers, start the adc's conversions, wait, then read registers
             return (
-                write_reg_cmd + self.adc_ops.start_adc(ADCNum.ADC_1.value),
+                write_reg_cmd + self.adc_ops.start_adc_command(ADCNum.ADC_1.value),
                 conversion_delay,
-                self.adc_ops.read_adc(ADCNum.ADC_1.value),
+                self.adc_ops.read_adc_command(ADCNum.ADC_1.value),
             )
 
         mux_pairs = (

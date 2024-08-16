@@ -38,12 +38,12 @@ class ADCCommands:
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         return command + values
 
-    def start_adc(self, adc_num: ADCReadInfo):
+    def start_adc_command(self, adc_num: ADCReadInfo):
         """Command to start ADC conversions"""
         _logger.debug("Command to send is %s", ([adc_num.start_cmd]))
         return [adc_num.start_cmd]
 
-    def read_adc(self, adc_num: ADCReadInfo):
+    def read_adc_command(self, adc_num: ADCReadInfo):
         """
         Returns the command to read from the ADC, after waiting the required time for
         conversions to take effect
@@ -53,12 +53,12 @@ class ADCCommands:
         # the 6 results bytes we care about.
         return [adc_num.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
 
-    def stop_adc(self, adc_num: ADCReadInfo):
+    def stop_adc_command(self, adc_num: ADCReadInfo):
         """Command to stop ADC"""
         _logger.debug("Command to send is %s", ([adc_num.stop_cmd]))
         return [adc_num.stop_cmd]
 
-    def reset_adc(self):
+    def reset_adc_command(self):
         """Command to reset ADC"""
         _logger.debug("Command to send is %s", ([ADCComs.COM_RESET.value]))
         return [ADCComs.COM_RESET.value]
