@@ -25,9 +25,9 @@ pin_8_state = digital_input.digital_input_state(DinPins.DIN8)
 # Functionalities
 
 ```python
-    def digital_input_state(self, pin: DinPins = None)
+    def digital_input_state(self, pin_name: DinPins = None)
 ```
-Take `pin` as a parameter and returns a boolean value of the corresponding state.
+Take `pin_name` as a parameter and returns a boolean value of the corresponding state.
 
 # User Guide
 - In order to read A/DIN1-8, use DinPins.DIN1-8 enum as shown in the example code
