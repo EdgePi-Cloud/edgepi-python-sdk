@@ -9,7 +9,6 @@ from edgepi.adc.adc_voltage import (
     _is_negative_voltage,
     _adc_voltage_to_input_voltage,
     code_to_voltage,
-    code_to_voltage_single_ended,
     code_to_temperature,
 )
 
@@ -96,7 +95,7 @@ def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
     ],
 )
 def test_code_to_voltage(code, adc_num, calibs, result):
-    assert pytest.approx(code_to_voltage(code, adc_num, calibs),0.0001) == result
+    assert pytest.approx(code_to_voltage(code, adc_num, calibs, single_ended=False),0.0001) == result
 
 @pytest.mark.parametrize(
     "code, adc_num, calibs, result",
@@ -115,7 +114,7 @@ def test_code_to_voltage(code, adc_num, calibs, result):
     ],
 )
 def test_code_to_voltage_single_ended(code, adc_num, calibs, result):
-    assert pytest.approx(code_to_voltage_single_ended(code, adc_num, calibs),0.0001) == result
+    assert pytest.approx(code_to_voltage(code, adc_num, calibs, single_ended=True),0.0001) == result
 
 @pytest.mark.parametrize(
     "code, ref_resistance, temp_offset, rtd_conv_constant,rtd_gain,rtd_offset,adc_num,expected",

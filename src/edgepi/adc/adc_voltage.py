@@ -36,9 +36,7 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
 
     Args:
         `code` (int): uint value of ADC voltage read bytes
-
         `v_ref` (float): ADC reference voltage in Volts
-
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
 
@@ -55,16 +53,16 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     step_up_ratio = (STEP_DOWN_RESISTOR_1 + STEP_DOWN_RESISTOR_2) / STEP_DOWN_RESISTOR_2
     return v_in * step_up_ratio * gain + offset
 
-def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
+
+def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam, single_ended: bool) -> float:
     """
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
     Args:
         `code` (list[int]): code bytes retrieved from ADC voltage read
-
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
-
         `calibs` (CalibParam): voltage reading gain and offset calibration values
+        `single_ended` (bool): whether the mode should be single ended or not single ended (differential)
 
     Returns:
         `float`: voltage value (V) corresponding to `code`
@@ -81,52 +79,23 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) 
             "expected 4 for ADC1 or 3 for ADC2"
         )
 
-    if _is_negative_voltage(code):
-        code_val = code_val - 2**num_bits
-
-    v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-    v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
-    return v_out
-
-def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam):
-    """
-    Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
-
-    Args:
-        `code` (list[int]): code bytes retrieved from ADC voltage read
-
-        `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
-
-        `calibs` (CalibParam): voltage reading gain and offset calibration values
-
-    Returns:
-        `float`: voltage value (V) corresponding to `code`
-    """
-
-    num_bits = adc_info.num_data_bytes * 8
-    if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
-        code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
-    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
-        code_val = combine_to_uint32(0, code[0], code[1], code[2])
+    if single_ended:
+        if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+            code_val -= ADC1_UPPER_LIMIT
+        elif _is_negative_voltage(code) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+            code_val -= ADC2_UPPER_LIMIT
+        elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+            code_val += ADC1_UPPER_LIMIT
+        elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+            code_val += ADC2_UPPER_LIMIT
     else:
-        raise ValueError(
-            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
-            "expected 4 for ADC1 or 3 for ADC2"
-        )
-
-    if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
-        code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
-        code_val = code_val - ADC2_UPPER_LIMIT
-    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
-        code_val = code_val + ADC1_UPPER_LIMIT
-    elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
-        code_val = code_val + ADC2_UPPER_LIMIT
+        if _is_negative_voltage(code):
+            code_val -= 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
-
     return v_out
+
 
 def code_to_temperature(
     code: list[int],
@@ -142,12 +111,9 @@ def code_to_temperature(
 
     Args:
         `code` (list[int]): code bytes retrieved from ADC voltage read
-
-       `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
-
-       `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
-
-       `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
+        `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
+        `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
+        `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
 
     Returns:
         `float`: temperature value (°C) corresponding to `code`

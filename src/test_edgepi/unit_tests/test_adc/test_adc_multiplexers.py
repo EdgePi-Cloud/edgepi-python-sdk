@@ -42,8 +42,8 @@ from edgepi.adc.adc_multiplexers import (
         ),
     ],
 )
-def test_generate_mux_opcode(adc1_mux, adc2_mux, expected):
-    assert generate_mux_opcode(adc1_mux, adc2_mux) == expected
+def test_generate_mux_opcode(addx, adc1_mux, adc2_mux, expected):
+    assert generate_mux_opcode(addx, adc1_mux, adc2_mux) == expected
 
 
 @pytest.mark.parametrize(

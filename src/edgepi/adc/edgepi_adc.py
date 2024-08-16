@@ -39,7 +39,6 @@ from edgepi.adc.adc_constants import (
 from edgepi.adc.adc_voltage import (
     code_to_voltage,
     code_to_temperature,
-    code_to_voltage_single_ended,
 )
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -457,10 +456,8 @@ class EdgePiADC(SPI):
 
         calibs = self.__get_calibration_values(self.adc_calib_params[adc_num], adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        # convert from code to voltage
 
-        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended\
-            else code_to_voltage(voltage_code, adc_num.value, calibs)
+        return code_to_voltage(voltage_code, adc_num.value, calibs, single_ended)
 
     def read_rtd_temperature(self):
         """
@@ -525,11 +522,7 @@ class EdgePiADC(SPI):
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        return (
-            code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs)
-            if single_ended
-            else code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
-        )
+        return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs, single_ended)
 
     def single_sample_rtd(self):
         """
@@ -743,7 +736,7 @@ class EdgePiADC(SPI):
         adc_2_muxs = [state.adc_2.mux_n.code.value, state.adc_2.mux_p.code.value]
         return adc_1_muxs, adc_2_muxs
 
-    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum):
+    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum) -> dict:
         """
         generate a dictionary of config parameters to enable RTD using specified ADC
         Args:
@@ -756,13 +749,13 @@ class EdgePiADC(SPI):
         if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
             return (
                 RTDModes.RTD_ON.value
-                | ADC2RtdConfig.OFF.value if adc_num == ADCNum.ADC_1 else ADC1RtdConfig.OFF.value
-                | ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value
+                | (ADC2RtdConfig.OFF.value if adc_num == ADCNum.ADC_1 else ADC1RtdConfig.OFF.value)
+                | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
             )
         else:
             return (
                 RTDModes.RTD_ON.value
-                | ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value
+                | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
             )
 
     def __get_rtd_off_update_config(self, adc_num: ADCNum):
@@ -1075,7 +1068,7 @@ class EdgePiADC(SPI):
         # update with final ADC state (for state caching)
         EdgePiADC.__state[ADCReg.REG_MODE2.value] = mode2_register_value
         mux_p, mux_n = mux_pairs[-1]
-        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = (mux_p << 4) + mux_n
+        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = generate_mux_opcode(ADCReg.REG_INPMUX, mux_p, mux_n).op_code
 
         voltage_list = []
         for i, read_data in enumerate(data_list):
@@ -1108,10 +1101,8 @@ class EdgePiADC(SPI):
                 )
 
             # convert from voltage_code to voltage value (float)
-            if i < len(channel_list):
-                voltage_list += [code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs)]
-            else:
-                voltage_list += [code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)]
+            single_ended = (i < len(channel_list))
+            voltage_list += [code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs, single_ended)]
 
         return voltage_list
 
