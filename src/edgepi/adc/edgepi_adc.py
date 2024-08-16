@@ -279,13 +279,13 @@ class EdgePiADC(SPI):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        stop_cmd = self.adc_ops.stop_adc_command(adc_num=adc_num.value)
+        stop_cmd = ADCCommands.stop_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(stop_cmd)
 
     def __send_start_command(self, adc_num: ADCNum):
         """Triggers ADC conversion(s)"""
-        start_cmd = self.adc_ops.start_adc_command(adc_num=adc_num.value)
+        start_cmd = ADCCommands.start_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(start_cmd)
 
@@ -329,7 +329,7 @@ class EdgePiADC(SPI):
     def __read_data(self, adc_num: ADCNum, data_size: int):
         """Sends command to ADC to get new voltage conversion data"""
         with self.spi_open():
-            return self.transfer([adc_num.value.read_cmd] + [255] * data_size)
+            return self.transfer(ADCCommands.read_adc_command(adc_num, data_size))
 
     def __voltage_read(self, adc_num: ADCNum):
         """
@@ -565,7 +565,7 @@ class EdgePiADC(SPI):
         application of custom power-on configurations required by EdgePi.
         """
         with self.spi_open():
-            self.transfer(self.adc_ops.reset_adc_command())
+            self.transfer(ADCCommands.reset_adc_command())
         self.__reapply_config()
 
     def __is_data_ready(self, adc_num: ADCNum):
@@ -573,7 +573,7 @@ class EdgePiADC(SPI):
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
         with self.spi_open():
-            read_data = self.transfer([adc_num.value.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN)
+            read_data = self.transfer(ADCCommands.read_adc_command(adc_num, ADC_VOLTAGE_READ_LEN))
             if adc_num is ADCNum.ADC_1:
                 return (read_data[1] & 0b01000000) == 0b01000000
             elif adc_num is ADCNum.ADC_2:
@@ -1019,54 +1019,39 @@ class EdgePiADC(SPI):
         if len(register_values.values()) < 1:
             raise ValueError("Number of reg_values must be at least 1")
 
-        # determine the conversion delay using the table from the datasheet (best case is sleep of 0.207ms)
-        filter_mode_op_code = (~ADCProperties.FILTER_MODE.value.mask) & register_values[ADCProperties.FILTER_MODE.value.addx]
+        # determine the conversion delay using the table from the datasheet
+        # (best case is sleep of 0.207ms)
+        filter_mode_op_code = (
+            (~ADCProperties.FILTER_MODE.value.mask) 
+            & register_values[ADCProperties.FILTER_MODE.value.addx]
+        )
         conversion_delay = expected_initial_time_delay(
             ADCNum.ADC_1, data_rate.value.op_code, filter_mode_op_code
         ) / 1000
 
-        # this is the register value of MODE2 that contains the updated data rate
+        # this is the register value of MODE2 that contains the new data_rate
         mode2_register_value = (
             register_values[ADCReg.REG_MODE2.value]
             & data_rate.value.op_mask
         ) | data_rate.value.op_code
 
-        def create_read_command_tup(is_first: bool, mux_p: CH, mux_n: CH) -> tuple:
-            inpmux_register_value = generate_mux_opcode(ADCReg.REG_INPMUX, mux_p, mux_n).op_code
-            if is_first:
-                # update only data rate & input multiplexing (luckily they are right beside eachother)
-                start_addr = ADCReg.REG_MODE2.value
-                register_list = [mode2_register_value, inpmux_register_value]
-            else:
-                # Only write the register value 0x06 (INPMUX), which stores info
-                # about how the multiplexer should read from the ADC channels (input pins).
-                start_addr = ADCReg.REG_INPMUX.value
-                register_list = [inpmux_register_value]
-
-            write_reg_cmd = self.adc_ops.unsafe_write_register_command(
-                start_addr, register_list
-            )
-
-            # write config registers, start the adc's conversions, wait, then read registers
-            return (
-                write_reg_cmd + self.adc_ops.start_adc_command(ADCNum.ADC_1.value),
-                conversion_delay,
-                self.adc_ops.read_adc_command(ADCNum.ADC_1.value),
-            )
-
         mux_pairs = (
             [(channel, CH.AINCOM) for channel in channel_list] +
             [(diff_mode.value.mux_p, diff_mode.value.mux_n) for diff_mode in differential_pairs]
         )
-        # get instructions needed to send for each input
-        command_tup_list = [
-            create_read_command_tup(i == 0, mux_p, mux_n)
-            for i, (mux_p, mux_n) in enumerate(mux_pairs)
-        ]
 
         # TODO: what happens if the SPI read fails (or something else fails in ADC during)?
         # Register values will be unknown until we read from it again?
-        data_list = self.spi_apply_adc_commands(command_tup_list)
+        data_list = self.spi_apply_adc_commands([
+            # get instructions we need to send to perform a read of each pin
+            ADCCommands.read_command_tuple(
+                # the first command tuple should write the mode2 register to contain the data rate
+                mode2_register_value if i == 0 else None,
+                conversion_delay,
+                mux_p,
+                mux_n
+            ) for i, (mux_p, mux_n) in enumerate(mux_pairs)
+        ])
 
         # TODO: make sure these updates work correctly
         # update with final ADC state (for state caching)
