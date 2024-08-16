@@ -27,7 +27,7 @@ def run_test():
 
     elapsed = time.time() - start
 
-    print(state_list[-9:-1])
+    print(f"DIN Pins: {state_list[-9:-1]}")
     print(f"Time elapsed {elapsed/ITER:.6f} s")
     print(f"Frequency {ITER/elapsed:.4f} hz")
 

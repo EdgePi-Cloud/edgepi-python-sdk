@@ -116,7 +116,7 @@ The **Performance** column represents how long it takes to call one function, wh
 | Feature | Performance | Max Read Frequency | Function | Example | Desc |
 | -- | -- | -- | -- | -- | -- |
 | Single DIN | 0.85ms per 8 DIN | 1171 Hz | `digital_input_state(pin)` | [examples/single_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_din.py) | |
-| Batched DIN | 0.49ms per 8 DIN | 2010 Hz | `digital_input_state_batch(pin_list)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
+| Batched DIN | 0.52ms per 8 DIN | 1936 Hz | `digital_input_state_batch(pin_list)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
 | Thermocouple (TC) | 100.2ms | 9.98 hz | `read_temperatures()` | [examples/single_tc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_tc.py) | Limited by [hardware](https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31856.pdf) (see conversion mode). 100ms is needed to get accurate (19 bit) readings |
 
 # Bug Reports / Feature Requests

@@ -20,13 +20,13 @@ def run_test():
     ]
 
     start = time.time()
-    for i in range(ITER):
+    for _ in range(ITER):
         pin_states = digital_input.digital_input_state_batch(choices)
-        state_list += pin_states
-        if i % 100 == 99:
-            print(f"DIN Pins: {pin_states}")
+        state_list += [pin_states]
 
     elapsed = time.time() - start
+
+    print(f"DIN Pins: {state_list[217]}")
     print(f"Time elapsed {elapsed/ITER:.6f} s")
     print(f"Frequency {ITER/elapsed:.4f} hz")
 

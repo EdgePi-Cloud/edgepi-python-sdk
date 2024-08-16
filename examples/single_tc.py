@@ -33,7 +33,7 @@ def run_test():
 
     elapsed = time.time() - start
 
-    print(lin_temperatures)
+    print(f"TC Reads: {lin_temperatures}")
     print(f"Time elapsed {elapsed/ITER:.6f} s")
     print(f"Frequency {ITER/elapsed:.4f} hz")
 
