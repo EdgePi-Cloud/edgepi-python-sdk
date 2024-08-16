@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Optional
 
-from edgepi.adc.adc_query_lang import PropertyValue, ADCProperties
+from edgepi.adc.adc_query_lang import ADCProperties
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
@@ -52,6 +52,7 @@ from edgepi.adc.adc_multiplexers import (
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_adc_module import AdcCalibParamKeys
 from edgepi.adc.adc_state import ADCState
 from edgepi.adc.adc_exceptions import (
     ADCRegisterUpdateError,
@@ -61,6 +62,7 @@ from edgepi.adc.adc_exceptions import (
     InvalidDifferentialPairError,
     CalibKeyMissingError
 )
+
 
 _logger = logging.getLogger(__name__)
 
@@ -120,8 +122,10 @@ class EdgePiADC(SPI):
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
         eeprom_data  = eeprom.read_edgepi_data()
-        self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
-                                 ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
+        self.adc_calib_params = {
+            ADCNum.ADC_1: eeprom_data.adc1_calib_params.extract_ch_dict(),
+            ADCNum.ADC_2: eeprom_data.adc2_calib_params.extract_ch_dict(),
+        }
         self.rtd_calib = eeprom_data.rtd_calib_params
 
         self.adc_ops = ADCCommands()
@@ -355,13 +359,13 @@ class EdgePiADC(SPI):
         # return values are the keys from adc_calib_params
         diff_pair = DifferentialPair(mux_p, mux_n)
         if diff_pair == DiffMode.DIFF_1.value:
-            return 8
+            return AdcCalibParamKeys.ADC_DIFF_1
         elif diff_pair == DiffMode.DIFF_2.value:
-            return 9
+            return AdcCalibParamKeys.ADC_DIFF_2
         elif diff_pair == DiffMode.DIFF_3.value:
-            return 10
+            return AdcCalibParamKeys.ADC_DIFF_3
         elif diff_pair == DiffMode.DIFF_4.value:
-            return 11
+            return AdcCalibParamKeys.ADC_DIFF_4
         else:
             raise InvalidDifferentialPairError(
                 f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"

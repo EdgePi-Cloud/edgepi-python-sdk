@@ -3,6 +3,23 @@ from dataclasses import dataclass
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.eeprom.protobuf_assets.generated_pb2 import adc_module_pb2
 
+class AdcCalibParamKeys:
+    """Keys for the ADC Callibration Parameters dictionary"""
+    ADC_CH_1 = 0
+    ADC_CH_2 = 1
+    ADC_CH_3 = 2
+    ADC_CH_4 = 3
+
+    ADC_CH_5 = 4
+    ADC_CH_6 = 5
+    ADC_CH_7 = 6
+    ADC_CH_8 = 7
+
+    ADC_DIFF_1 = 8
+    ADC_DIFF_2 = 9
+    ADC_DIFF_3 = 10
+    ADC_DIFF_4 = 11
+
 @dataclass
 class ADCModule:
     """ADC Module Dataclass"""
@@ -104,17 +121,19 @@ class ADCModule:
     def extract_ch_dict(self):
         """create channel to calibration param dictionary"""
         ch_dict = {
-            0:self.adc_ch_1,
-            1:self.adc_ch_2,
-            2:self.adc_ch_3,
-            3:self.adc_ch_4,
-            4:self.adc_ch_5,
-            5:self.adc_ch_6,
-            6:self.adc_ch_7,
-            7:self.adc_ch_8,
-            8:self.adc_diff_1,
-            9:self.adc_diff_2,
-            10:self.adc_diff_3,
-            11:self.adc_diff_4,
+            AdcCalibParamKeys.ADC_CH_1: self.adc_ch_1,
+            AdcCalibParamKeys.ADC_CH_2: self.adc_ch_2,
+            AdcCalibParamKeys.ADC_CH_3: self.adc_ch_3,
+            AdcCalibParamKeys.ADC_CH_4: self.adc_ch_4,
+
+            AdcCalibParamKeys.ADC_CH_5: self.adc_ch_5,
+            AdcCalibParamKeys.ADC_CH_6: self.adc_ch_6,
+            AdcCalibParamKeys.ADC_CH_7: self.adc_ch_7,
+            AdcCalibParamKeys.ADC_CH_8: self.adc_ch_8,
+
+            AdcCalibParamKeys.ADC_DIFF_1: self.adc_diff_1,
+            AdcCalibParamKeys.ADC_DIFF_2: self.adc_diff_2,
+            AdcCalibParamKeys.ADC_DIFF_3: self.adc_diff_3,
+            AdcCalibParamKeys.ADC_DIFF_4: self.adc_diff_4,
         }
         return ch_dict
