@@ -135,4 +135,4 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
         assert written_data.tb_part_number == default_data.tb_part_number
         assert written_data.cm4_part_number == default_data.cm4_part_number
         # Reset to origianl Data
-        eeprom.write_edgepi_data(original_data)a
+        eeprom.write_edgepi_data(original_data)
