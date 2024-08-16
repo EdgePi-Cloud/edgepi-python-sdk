@@ -18,7 +18,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 _logger = logging.getLogger(__name__)
 
-from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, DEFAULT_EEPROM_BIN_B64
+from edgepi.eeprom.eeprom_constants import EdgePiMemoryInfo, DEFAULT_EEPROM_BIN_B64, PAGE_WRITE_CYCLE_TIME
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM, PermissionDenied
 from edgepi.eeprom.edgepi_eeprom_data import EepromDataClass
 

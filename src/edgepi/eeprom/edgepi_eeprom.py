@@ -129,7 +129,6 @@ class EdgePiEEPROM(I2CDevice):
             for page in pages:
                 self.__page_write_register(mem_offset, page)
                 mem_offset = mem_offset+len(page)
-                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
     def __read_edgepi_reserved_memory(self):
         '''
@@ -207,6 +206,7 @@ class EdgePiEEPROM(I2CDevice):
     def __page_write_register(self, mem_addr: int = None, data: list = None):
         '''
         Write operation writes a page of data to the specified address
+        
         Args:
             mem_addr: starting memory address to read from
             data: data to write to the location
@@ -219,6 +219,10 @@ class EdgePiEEPROM(I2CDevice):
         self.log.debug(f"__page_write_register: writing {data} to memory address of {mem_addr},"
                        f"{len(msg[0].data)}")
         self.transfer(EEPROMInfo.DEV_ADDR.value, msg)
+
+        # must sleep of 10ms (PAGE_WRITE_CYCLE_TIME) after every page write
+        time.sleep(PAGE_WRITE_CYCLE_TIME)
+        
 
     def __parameter_sanity_check(self, mem_addr: int = None,
                                  length: int = None,
@@ -322,7 +326,6 @@ class EdgePiEEPROM(I2CDevice):
             for page in pages:
                 self.__page_write_register(mem_offset, page)
                 mem_offset = mem_offset+len(page)
-                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
 # TODO why not separate it into a class
     def init_memory(self):
@@ -390,7 +393,6 @@ class EdgePiEEPROM(I2CDevice):
             for _ in range(tatal_page):
                 self.__page_write_register(mem_offset, reset_vals)
                 mem_offset = mem_offset+page_size
-                time.sleep(PAGE_WRITE_CYCLE_TIME)
 
     def reset_edgepi_memory(self, bin_hash: str = None, bin_bytes: bytes = None):
         """
