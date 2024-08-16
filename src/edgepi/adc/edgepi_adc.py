@@ -349,12 +349,12 @@ class EdgePiADC(SPI):
         return status_code, voltage_code, check_code
 
     @staticmethod
-    def __get_diff_id(mux_p: PropertyValue, mux_n: PropertyValue) -> int:
+    def __get_diff_id(mux_p: CH, mux_n: CH) -> int:
         """
         Get differential pair id number for retrieving differential pair calibration values
         """
         # return values are the keys from adc_calib_params
-        diff_pair = DifferentialPair(mux_p.code, mux_n.code)
+        diff_pair = DifferentialPair(mux_p, mux_n)
         if diff_pair == DiffMode.DIFF_1.value:
             return 8
         elif diff_pair == DiffMode.DIFF_2.value:
@@ -388,7 +388,11 @@ class EdgePiADC(SPI):
         if CH.FLOAT in (mux_p.code, mux_n.code):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
-        calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
+        calib_key = (
+            mux_p.value 
+            if mux_n.code == CH.AINCOM 
+            else self.__get_diff_id(mux_p.code, mux_n.code)
+        )
         calibs = adc_calibs[calib_key]
 
         if calibs is None:
@@ -769,8 +773,11 @@ class EdgePiADC(SPI):
         Return:
             updates (dictionary): configuration dictionary for disabling RTD
         """
-        updates = RTDModes.RTD_OFF.value |\
-        (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
+        updates = RTDModes.RTD_OFF.value | (
+            ADC1RtdConfig.OFF.value
+            if adc_num == ADCNum.ADC_1 
+            else ADC2RtdConfig.OFF.value
+        )
         return updates
 
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
@@ -982,7 +989,7 @@ class EdgePiADC(SPI):
 
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-    def batch_config_and_read_samples_adc1(
+    def batch_read_samples_adc1(
         self,
         data_rate: ADC1DataRate,
         analog_in_list: Optional[list[AnalogIn]] = None,
@@ -1066,13 +1073,11 @@ class EdgePiADC(SPI):
         # Register values will be unknown until we read from it again?
         data_list = self.spi_apply_adc_commands(command_tup_list)
 
-        # get codes to update register values
-        # updated_reg_values = apply_opcodes(dict(register_values), opcode_list)
-        # register_values = { addx: entry["value"] for (addx, entry) in updated_reg_values.items() }
-
-        # TODO: do I even need to do this?
+        # TODO: make sure these updates work correctly
         # update with final ADC state (for state caching)
-        # EdgePiADC.__state = register_values
+        EdgePiADC.__state[ADCReg.REG_MODE2.value] = mode2_register_value
+        mux_p, mux_n = mux_pairs[-1]
+        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = (mux_p << 4) + mux_n
 
         voltage_list = []
         for i, read_data in enumerate(data_list):
@@ -1109,6 +1114,7 @@ class EdgePiADC(SPI):
                 voltage_list += [code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs)]
             else:
                 voltage_list += [code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)]
+
         return voltage_list
 
     def get_state(self, override_cache: bool = False) -> ADCState:

@@ -48,6 +48,9 @@ class ADCCommands:
         Returns the command to read from the ADC, after waiting the required time for
         conversions to take effect
         """
+        # Since this is full duplex SPI, we have to write something every time we expect
+        # to read something as well, so we add the 6 0xff bytes so that periphery will read
+        # the 6 results bytes we care about.
         return [adc_num.read_cmd] + [255] * ADC_VOLTAGE_READ_LEN
 
     def stop_adc(self, adc_num: ADCReadInfo):
