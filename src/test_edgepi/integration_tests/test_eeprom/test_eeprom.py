@@ -33,7 +33,10 @@ def fixture_test_eeprom():
                         ])
 # pylint: disable=protected-access
 def test__page_write_register(data, address, eeprom):
+    time.sleep(1)
     original_data = eeprom.read_edgepi_data()
+    time.sleep(1)
+    
     try:
         # reset user space to make sure init vals are set to 255
         eeprom.reset_user_space()
@@ -53,8 +56,10 @@ def test__page_write_register(data, address, eeprom):
             assert new_data[indx] == data[indx]
 
     finally:
+        time.sleep(1)
         # Write the original data back
         eeprom.write_edgepi_data(original_data)
+        time.sleep(1)
 
 DUMMY_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLyk\
 Qcd6pE\nv7fji6ZoW/dl8dKwwdi/cfSS/J5Iv+5FwQU4KGNBbhVAnmJeLd+PMUT4bQTf9rVF\nHsDoIPoQLDH7jmBu8ai7jQ0hY\
