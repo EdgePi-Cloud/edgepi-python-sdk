@@ -33,8 +33,13 @@ class ADCCommands:
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         return command + values
 
-    def unsafe_write_register_command(self, address, values):
-        """Trigger ADC register write - unsafe removes all checks"""
+    def unsafe_write_register_command(self, address: int, values: list[int]):
+        """
+        Trigger ADC register write - unsafe removes all arguments validation. 
+
+        Please ensure that values contains only bytes, and that address is a 
+        valid address.
+        """
         command = [ADCComs.COM_WREG.value + address, len(values) - 1]
         return command + values
 
