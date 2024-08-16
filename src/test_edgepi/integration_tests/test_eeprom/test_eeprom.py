@@ -5,6 +5,7 @@
 # https://github.com/protocolbuffers/protobuf/issues/10372
 # TODO: I2C Transaction fails without 0.002ms delay
 
+
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 import string
