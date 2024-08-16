@@ -371,7 +371,7 @@ class EdgePiADC(SPI):
                 f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
             )
 
-    def __get_calibration_values(self, adc_calibs: dict, adc_num: ADCNum) -> CalibParam:
+    def __get_calibration_params(self, adc_num: ADCNum) -> CalibParam:
         """
         Retrieve voltage reading calibration values based on currently configured
         input multiplexer channels
@@ -387,28 +387,31 @@ class EdgePiADC(SPI):
         mux_p = attrgetter(f"adc_{adc_num.value.id_num}.mux_p")(state)
         mux_n = attrgetter(f"adc_{adc_num.value.id_num}.mux_n")(state)
 
-        # assert neither mux is set to float mode
-        if CH.FLOAT in (mux_p.code, mux_n.code):
-            raise ValueError("Cannot retrieve calibration values for channel in float mode")
+        return self.__get_calibration_params_mux(mux_p.code, mux_n, adc_num)
 
+    def __get_calibration_params_mux(self, adc_num: ADCNum, mux_p: CH, mux_n: CH) -> float:
+        """
+        Get calibration parameters using the multiplexing channels and without reading from state
+        """
+        # assert neither mux is set to float mode
+        if CH.FLOAT in (mux_p, mux_n):
+            raise ValueError("Cannot retrieve calibration values for channel in float mode")
+        
+        adc_mux = ADCProperties.ADC1_MUXP if adc_num == ADCNum.ADC_1 else ADCProperties.ADC2_MUXP
         calib_key = (
-            mux_p.value 
-            if mux_n.code == CH.AINCOM 
-            else self.__get_diff_id(mux_p.code, mux_n.code)
+            adc_mux.value.values[mux_p.value << 4].value
+            if mux_n == CH.AINCOM
+            else EdgePiADC.__get_diff_id(mux_p, mux_n)
         )
-        calibs = adc_calibs[calib_key]
+        calibs = self.adc_calib_params[adc_num][calib_key]
 
         if calibs is None:
             _logger.error("Failed to find ADC calibration values")
             raise CalibKeyMissingError(
-                (
-                    "Failed to retrieve calibration values from eeprom dictionary: "
-                    f"dict is missing key = {calib_key}"
-                    f"\neeprom_calibs = \n{adc_calibs}"
-                )
+                "Failed to retrieve calibration values from eeprom dictionary: "
+                f"dict is missing key = {calib_key}"
+                f"\neeprom_calibs = \n{self.adc_calib_params[adc_num]}"
             )
-
-        return calibs
 
     def __continuous_time_delay(self, adc_num: ADCNum, state: ADCState):
         """Compute and enforce continuous conversion time delay"""
@@ -458,7 +461,7 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f" read_voltage: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params[adc_num], adc_num)
+        calibs = self.__get_calibration_params(adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
 
         return code_to_voltage(voltage_code, adc_num.value, calibs, single_ended)
@@ -521,7 +524,7 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1)
+        calibs = self.__get_calibration_params(ADCNum.ADC_1)
 
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
@@ -1011,7 +1014,7 @@ class EdgePiADC(SPI):
             raise ValueError("Both analog_in_list and differential_pairs cannot be empty")
 
         channel_list = [self.__analog_in_to_adc_in_map.get(analog_in) for analog_in in analog_in_list]
-        if any(True for ch in channel_list if ch is None):
+        if any(ch is None for ch in channel_list):
             raise ValueError(f"Invalid analog_in_list={analog_in_list}")
 
         # get current register values by doing an SPI read
@@ -1064,32 +1067,14 @@ class EdgePiADC(SPI):
             if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
                 raise VoltageReadError(f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved")
 
-            # status_code = read_data[1]
             voltage_code = read_data[2 : (2 + ADCNum.ADC_1.value.num_data_bytes)]
             check_code = read_data[6]
             check_crc(voltage_code, check_code)
 
-            # assert neither mux is set to float mode
             mux_p, mux_n = mux_pairs[i]
-            if CH.FLOAT in (mux_p, mux_n):
-                raise ValueError("Cannot retrieve calibration values for channel in float mode")
-
-            calib_key = (
-                ADCProperties.ADC1_MUXP.value.values[mux_p.value << 4].value
-                if mux_n == CH.AINCOM
-                else self.__get_diff_id(mux_p, mux_n)
-            )
-            calibs = self.adc_calib_params[ADCNum.ADC_1][calib_key]
-
-            if calibs is None:
-                _logger.error("Failed to find ADC calibration values")
-                raise CalibKeyMissingError(
-                    "Failed to retrieve calibration values from eeprom dictionary: "
-                    f"dict is missing key = {calib_key}"
-                    f"\neeprom_calibs = \n{self.adc_calib_params[ADCNum.ADC_1]}"
-                )
 
             # convert from voltage_code to voltage value (float)
+            calibs = self.__get_calibration_params_mux(ADCNum.ADC_1, mux_p, mux_n)
             single_ended = (i < len(channel_list))
             voltage_list += [code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs, single_ended)]
 
