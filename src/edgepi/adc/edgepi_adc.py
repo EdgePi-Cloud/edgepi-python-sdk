@@ -249,7 +249,7 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
-# TODO: To be deleted
+    # TODO: To be deleted
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
         Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
@@ -304,12 +304,10 @@ class EdgePiADC(SPI):
             adc_num, data_rate.value.op_code, filter_mode.value.op_code
         )
         _logger.debug(
-            (
-                f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
-                f"data_rate={hex(data_rate.value.op_code)}, "
-                f"filter_mode={hex(filter_mode.value.op_code)}\n"
-            )
+            f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
+            f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
+            f"data_rate={hex(data_rate.value.op_code)}, "
+            f"filter_mode={hex(filter_mode.value.op_code)}\n"
         )
         self.__send_start_command(adc_num)
         # apply delay for first conversion
@@ -356,17 +354,17 @@ class EdgePiADC(SPI):
         """
         #  values are the keys from adc_calib_params
         diff_ids = {
-                DiffMode.DIFF_1.value: 8,
-                DiffMode.DIFF_2.value: 9,
-                DiffMode.DIFF_3.value: 10,
-                DiffMode.DIFF_4.value: 11,
-            }
+            DiffMode.DIFF_1.value: 8,
+            DiffMode.DIFF_2.value: 9,
+            DiffMode.DIFF_3.value: 10,
+            DiffMode.DIFF_4.value: 11,
+        }
         diff_pair = DifferentialPair(mux_p.code, mux_n.code)
         diff_id = diff_ids.get(diff_pair)
         if diff_id is None:
             raise InvalidDifferentialPairError(
-                    f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
-                    )
+                f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
+            )
         return diff_id
 
     def __get_calibration_values(self, adc_calibs: dict, adc_num: ADCNum) -> CalibParam:
@@ -575,10 +573,11 @@ class EdgePiADC(SPI):
         with self.spi_open():
             read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
             if adc_num is ADCNum.ADC_1:
-                ready = (read_data[1] & 0b01000000) == 0b01000000
-            if adc_num is ADCNum.ADC_2:
-                ready = (read_data[1] & 0b10000000) == 0b10000000
-            return ready
+                return (read_data[1] & 0b01000000) == 0b01000000
+            elif adc_num is ADCNum.ADC_2:
+                return (read_data[1] & 0b10000000) == 0b10000000
+            else:
+                raise ValueError(f"Unexpected parameter adc_num of {adc_num}")
 
     def __read_registers_to_map(self):
         """

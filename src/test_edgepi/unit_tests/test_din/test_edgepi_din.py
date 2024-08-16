@@ -38,9 +38,44 @@ def fixture_test_dac(mocker):
                          (GpioPins.DOUT2, False, False, pytest.raises(InvalidPinName)),
                          (None, False, False, pytest.raises(InvalidPinName))])
 def test_edgepi_digital_input_state(mocker, pin_name, mock_value, result, error, din):
-    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.read_gpio_pin_state",
+    mocker.patch("edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.read_din_state",
                  return_value = mock_value)
     with error:
         state = din.digital_input_state(pin_name)
         assert state == result
-    
+
+@pytest.mark.parametrize(
+    "pin_names, mock_values, error",
+    [
+        ([DinPins.DIN1], [True], does_not_raise()),
+        ([DinPins.DIN2], [True], does_not_raise()),
+        ([DinPins.DIN3, DinPins.DIN4, DinPins.DIN5], [True, False, True], does_not_raise()),
+        (
+            [DinPins.DIN1, DinPins.DIN6, DinPins.DIN7, DinPins.DIN8],
+            [True, True, True, True],
+            does_not_raise(),
+        ),
+        (
+            [
+                DinPins.DIN1, DinPins.DIN2, DinPins.DIN3, DinPins.DIN4,
+                DinPins.DIN5, DinPins.DIN6, DinPins.DIN7, DinPins.DIN8,
+            ],
+            [True, True, True, True, True, False, True, False],
+            does_not_raise(),
+        ),
+        ([DinPins.DIN2, DinPins.DIN2, DinPins.DIN2], [False, False, False], does_not_raise()),
+        ([], [], pytest.raises(ValueError)),
+        (None, [], pytest.raises(ValueError)),
+        ([GpioPins.DOUT2], [], pytest.raises(InvalidPinName)),
+        ([DinPins.DIN2, GpioPins.DOUT2], [False], pytest.raises(InvalidPinName)),
+        ([DinPins.DIN2, None, DinPins.DIN3], [False, False], pytest.raises(InvalidPinName)),
+    ]
+)
+def test_edgepi_digital_input_state_batch(mocker, pin_names, mock_values, error, din):
+    mocker.patch(
+        "edgepi.gpio.edgepi_gpio.EdgePiGPIOChip.batch_read_din_state",
+        return_value = mock_values
+    )
+    with error:
+        state_list = din.digital_input_state_batch(pin_names)
+        assert state_list == mock_values
