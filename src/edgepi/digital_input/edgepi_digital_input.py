@@ -14,7 +14,7 @@ class EdgePiDigitalInput():
         # To limit access to input functionality, using composition rather than inheritance
         self.gpio = EdgePiGPIO()
 
-    def digital_input_state(self, pin: Optional[DinPins] = None):
+    def digital_input_state(self, pin_name: Optional[DinPins] = None):
         """
         Read selected GPIO pin
         Args:
@@ -22,10 +22,10 @@ class EdgePiDigitalInput():
         Return:
             state (bool): corresponding pin state
         """
-        if not isinstance(pin, DinPins):
-            raise InvalidPinName(f'Invalid pin={pin}')
+        if not isinstance(pin_name, DinPins):
+            raise InvalidPinName(f'Invalid pin={pin_name}')
 
-        return self.gpio.read_din_state(pin)
+        return self.gpio.read_din_state(pin_name)
 
     def digital_input_state_batch(self, pin_list: list[DinPins]) -> list:
         """
@@ -34,9 +34,9 @@ class EdgePiDigitalInput():
         if not pin_list:
             raise ValueError(f'Unexpected pin_list={pin_list}')
 
-        if any(not isinstance(pin, DinPins) for pin in pin_list):
+        if any(not isinstance(pin_name, DinPins) for pin_name in pin_list):
             raise InvalidPinName(
-                f'Got invalid pin names {pin for pin in pin_list if not isinstance(pin, DinPins)}'
+                f'Got invalid pin names {pin_name for pin_name in pin_list if not isinstance(pin_name, DinPins)}'
             )
 
         return self.gpio.batch_read_din_state(pin_list)

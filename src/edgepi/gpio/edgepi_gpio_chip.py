@@ -52,7 +52,7 @@ class EdgePiGPIOChip(GpioDevice):
             state = self.read_state()
         return state
 
-    def read_din_state(self, pin: DINPins) -> bool:
+    def read_din_state(self, pin_name: DINPins) -> bool:
         """
         A faster alternative to `read_gpio_pin_state` for reading only DIN pins.
 
@@ -60,7 +60,7 @@ class EdgePiGPIOChip(GpioDevice):
         reading into a single operation.
         """
         return self.open_read_state(
-            pin_num  = self.__pin_name_dict[pin.value],
+            pin_num  = self.__pin_name_dict[pin_name.value],
             pin_dir  = self.__din_pin_dir,
             pin_bias = self.__din_pin_bias,
         )
@@ -72,7 +72,7 @@ class EdgePiGPIOChip(GpioDevice):
         """
         return self.open_read_state_batch(
             pin_num_list = [
-                self.__pin_name_dict[pin.value] for pin in pin_list
+                self.__pin_name_dict[pin_name.value] for pin_name in pin_list
             ],
             pin_dir      = self.__din_pin_dir,
             pin_bias     = self.__din_pin_bias,
