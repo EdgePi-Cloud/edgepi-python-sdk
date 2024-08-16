@@ -60,7 +60,6 @@ def test__page_write_register(data, address, eeprom):
 
     finally:
         # Write the original data back
-        time.sleep(1)
         eeprom.write_edgepi_data(original_data)
 
 DUMMY_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLyk\
@@ -120,7 +119,6 @@ def test_write_edgepi_data(eeprom):
 
     finally:
         # Write the original data back
-        time.sleep(1)
         eeprom.write_edgepi_data(original_data)
 
 @pytest.mark.parametrize("bin_hash, error",
@@ -156,5 +154,4 @@ def test_reset_edgepi_memory(bin_hash, error, eeprom):
             assert written_data.cm4_part_number == default_data.cm4_part_number
     finally:
         # Reset to original data
-        time.sleep(1)
         eeprom.write_edgepi_data(original_data)
