@@ -81,6 +81,13 @@ class GpioDevice:
             GpioDevice.lock_gpio.acquire()
             gpio = None
             try:
+                # Performance Notes:
+
+                # GPIO(), gpio._reopen(), gpio.read(), and gpio.close() all take roughly the same
+                # amount of time (read() is the shortest, but luckily required). When we batch the
+                # reads, the main performance improvement comes from the fact that we don't call
+                # GPIO() (posix.open()) and gpio.close() 8 times. Instead, they're only called once
+
                 for pin_num in pin_num_list:
                     if gpio is None:
                         gpio = GPIO(self.gpio_fd, pin_num, pin_dir, bias=pin_bias)
