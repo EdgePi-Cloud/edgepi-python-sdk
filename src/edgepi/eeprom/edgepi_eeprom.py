@@ -222,7 +222,6 @@ class EdgePiEEPROM(I2CDevice):
 
         # must sleep of 10ms (PAGE_WRITE_CYCLE_TIME) after every page write
         time.sleep(PAGE_WRITE_CYCLE_TIME)
-        
 
     def __parameter_sanity_check(self, mem_addr: int = None,
                                  length: int = None,

@@ -36,7 +36,8 @@ class EdgePiDigitalInput():
 
         if any(not isinstance(pin_name, DinPins) for pin_name in pin_list):
             raise InvalidPinName(
-                f'Got invalid pin names {pin_name for pin_name in pin_list if not isinstance(pin_name, DinPins)}'
+                'Got invalid pin names '
+                f'{pin_name for pin_name in pin_list if not isinstance(pin_name, DinPins)}'
             )
 
         return self.gpio.batch_read_din_state(pin_list)
