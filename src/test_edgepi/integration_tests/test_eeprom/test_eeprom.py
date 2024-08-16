@@ -33,22 +33,28 @@ def fixture_test_eeprom():
                         ])
 # pylint: disable=protected-access
 def test__page_write_register(data, address, eeprom):
-    # reset user space to make sure init vals are set to 255
-    eeprom.reset_user_space()
-    addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
-    with eeprom.i2c_open():
-        initial_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
-        eeprom._EdgePiEEPROM__page_write_register(addrx, data)
-        time.sleep(0.5)
-        new_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
-        time.sleep(0.5)
-        eeprom._EdgePiEEPROM__page_write_register(addrx, [255]*len(data))
-        _logger.info(f"data to write = {data}")
-        _logger.info(f"initial data  = {initial_data}")
-        _logger.info(f"new data      = {new_data}")
-    for indx, init_data in enumerate(initial_data):
-        assert init_data != new_data[indx]
-        assert new_data[indx] == data[indx]
+    original_data = eeprom.read_edgepi_data()
+    try:
+        # reset user space to make sure init vals are set to 255
+        eeprom.reset_user_space()
+        addrx = EdgePiMemoryInfo.USER_SPACE_START_BYTE.value + address
+        with eeprom.i2c_open():
+            initial_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
+            eeprom._EdgePiEEPROM__page_write_register(addrx, data)
+            time.sleep(0.5)
+            new_data = eeprom._EdgePiEEPROM__sequential_read(addrx,len(data))
+            time.sleep(0.5)
+            eeprom._EdgePiEEPROM__page_write_register(addrx, [255]*len(data))
+            _logger.info(f"data to write = {data}")
+            _logger.info(f"initial data  = {initial_data}")
+            _logger.info(f"new data      = {new_data}")
+        for indx, init_data in enumerate(initial_data):
+            assert init_data != new_data[indx]
+            assert new_data[indx] == data[indx]
+
+    finally:
+        # Write the original data back
+        eeprom.write_edgepi_data(original_data)
 
 DUMMY_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnwu+S/OI3Hl0BCNQASv0HU5Jc4KUT2X4/tLyk\
 Qcd6pE\nv7fji6ZoW/dl8dKwwdi/cfSS/J5Iv+5FwQU4KGNBbhVAnmJeLd+PMUT4bQTf9rVF\nHsDoIPoQLDH7jmBu8ai7jQ0hY\
