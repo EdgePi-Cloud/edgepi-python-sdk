@@ -42,9 +42,9 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
         if rtd_enabled
         else AllowedChannels.RTD_OFF.value
     )
-    for chan in channels:
-        if chan not in allowed_channels:
-            raise ChannelNotAvailableError(
-                f"Channel 'AIN{chan.value}' is currently not available. "
-                "Disable RTD in order to use."
-            )
+    if any((chan not in allowed_channels) for chan in channels):
+        unavaliable_channel = next(chan for chan in channels if (chan not in allowed_channels))
+        raise ChannelNotAvailableError(
+            f"Channel 'AIN{unavaliable_channel.value}' is currently not available. "
+            "Disable RTD in order to use."
+        )
