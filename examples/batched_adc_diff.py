@@ -1,30 +1,36 @@
-"""Example reading from ADC using the batched function"""
+"""Example reading from from individual ADC pins"""
 
 import time
 
 from edgepi.adc.edgepi_adc import EdgePiADC
-from edgepi.adc.adc_constants import AnalogIn, ADC1DataRate
+from edgepi.adc.adc_constants import AnalogIn, ADC1DataRate, DiffMode
 
 ITER = 50
 
 def run_test():
     """
-    This test performs 400 Analog input reads, batched 8 reads at a time.
+    This test performs 300 analog input reads, with 50 for each of 4 analog pins, and
+    50 for each of 2 differential analog pairs.
     """
-
+    
     edgepi_adc = EdgePiADC(enable_cache=False)
 
     start = time.time()
     result_list = []
     adc_choices = [
-        AnalogIn.AIN1, AnalogIn.AIN2, AnalogIn.AIN3, AnalogIn.AIN4,
-        AnalogIn.AIN5, AnalogIn.AIN6, AnalogIn.AIN7, AnalogIn.AIN8,
+        AnalogIn.AIN1, AnalogIn.AIN2,
+        AnalogIn.AIN5, AnalogIn.AIN6,
+    ]
+    differential_pairs = [
+        DiffMode.DIFF_2,
+        DiffMode.DIFF_4,
     ]
 
     for _ in range(ITER):
         tmp = edgepi_adc.batch_read_samples_adc1(
-            data_rate=ADC1DataRate.SPS_38400,
-            analog_in_list=adc_choices,
+            ADC1DataRate.SPS_38400,
+            adc_choices,
+            differential_pairs,
         )
         result_list += [tmp]
 
