@@ -120,10 +120,11 @@ class EdgePiEEPROM(I2CDevice):
         # generate list of data: used mem_size + length of data + filler
         data = self.__generate_data_list(pb_serial_list)
         # length of data + # of CRC to be added, # of CRC = # of pages
-        expected_data_size = len(data) + len(data)/(EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
+        expected_data_size = len(data) + len(data) / (EEPROMInfo.PAGE_SIZE.value-CRC_BYTE_SIZE)
         self.__parameter_sanity_check(start_mem, expected_data_size, False)
         pages = self.__generate_list_of_pages_crc(data)
 
+        time.sleep(PAGE_WRITE_CYCLE_TIME)
         mem_offset = start_mem
         with self.i2c_open():
             for page in pages:
