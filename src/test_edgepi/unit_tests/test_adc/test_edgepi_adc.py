@@ -1004,7 +1004,7 @@ def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.get_state", return_value=mock_state)
 
     with err:
-        out = adc._EdgePiADC__get_calibration_params(adc.adc_calib_params[adc_num], adc_num)
+        out = adc._EdgePiADC__get_calibration_params(adc_num)
         assert out == expected
 
 
