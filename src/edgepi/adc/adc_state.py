@@ -24,7 +24,7 @@ class ADCReadFields:
 
 class ADCState:
     """ADC state intended for reading by users"""
-# pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, reg_map: dict):
         self.__reg_map = reg_map
         self.adc_1: ADCReadFields = ADCReadFields(

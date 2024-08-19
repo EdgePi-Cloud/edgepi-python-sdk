@@ -4,6 +4,7 @@
 import sys
 from copy import deepcopy
 from unittest import mock
+from unittest.mock import ANY
 from contextlib import nullcontext as does_not_raise
 
 sys.modules["periphery"] = mock.MagicMock()
@@ -831,7 +832,7 @@ ADC2_RTD_ON_2 = RTDModes.RTD_ON.value | ADC2RtdConfig.ON.value
                           ([0, 3], ADCNum.ADC_2, ADC2_RTD_ON_2),
                           ])
 def test__get_rtd_on_update_config(mux_list, adc_num, result, adc):
-    update= adc._EdgePiADC__get_rtd_on_update_config(mux_list, adc_num)
+    update = adc._EdgePiADC__get_rtd_on_update_config(mux_list, adc_num)
     assert update == result
 
 @pytest.mark.parametrize(
@@ -1003,7 +1004,7 @@ def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.get_state", return_value=mock_state)
 
     with err:
-        out = adc._EdgePiADC__get_calibration_values(adc.adc_calib_params[adc_num], adc_num)
+        out = adc._EdgePiADC__get_calibration_params(adc_num)
         assert out == expected
 
 
@@ -1019,7 +1020,7 @@ def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, ad
     )
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
     mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.read_voltage(adc_to_read)
@@ -1052,22 +1053,21 @@ def test_adc_voltage_read_mode(mocker, adc_to_read, ch, adc):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__check_adc_1_conv_mode")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
-    differential = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
-    single = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage_single_ended")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
+    _code_to_voltage = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.read_voltage(adc_to_read)
     if ch == CH.AINCOM:
-        single.assert_called_once()
+        _code_to_voltage.assert_called_once_with(ANY, ANY, ANY, True)
     else:
-        differential.assert_called_once()
+        _code_to_voltage.assert_called_once_with(ANY, ANY, ANY, False)
 
 @pytest.mark.parametrize("adc_to_read, ch",
     [
         (ADCNum.ADC_1, CH.AINCOM), #single-ended
         (ADCNum.ADC_1, CH.AIN1), #differential
         (ADCNum.ADC_1, CH.AIN2), #differential
-        (ADCNum.ADC_2, CH.AINCOM), #differential
+        (ADCNum.ADC_2, CH.AINCOM), #single-ended
         (ADCNum.ADC_2, CH.AIN1),#differential
         (ADCNum.ADC_2, CH.AIN2),#differential
     ]
@@ -1078,24 +1078,23 @@ def test_adc_single_sample_mode(mocker, adc_to_read, ch, adc):
     # ADC2 channel shouldn't return differential as well since single sampel only cares about
     # ADC1
     if adc_to_read == ADCNum.ADC_1:
-        adc_default_vals[6] = 0x10 + ch.value
+        adc_default_vals[ADCReg.REG_INPMUX.value] = 0x10 + ch.value
     else:
-        adc_default_vals[22] = 0x10 + ch.value
+        adc_default_vals[ADCReg.REG_ADC2MUX.value] = 0x10 + ch.value
     mocker.patch(
         "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__read_register",
         return_value=deepcopy(adc_default_vals)
     )
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.start_conversions")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
-    differential = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
-    single = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage_single_ended")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
+    _code_to_voltage = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.single_sample()
     if ch == CH.AINCOM and adc_to_read == ADCNum.ADC_1:
-        single.assert_called_once()
+        _code_to_voltage.assert_called_once_with(ANY, ANY, ANY, True)
     else:
-        differential.assert_called_once()
+        _code_to_voltage.assert_called_once_with(ANY, ANY, ANY, False)
 
 @pytest.mark.parametrize("adc_num, mock_val, expected",
     [
@@ -1126,6 +1125,91 @@ def test__is_rtd_on(mocker, mock_value, result):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.read_pin_state", return_value=mock_value[0])
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiGPIO.get_pin_direction", return_value=mock_value[1])
     assert adc._EdgePiADC__is_rtd_on() == result
+
+@pytest.mark.parametrize("ain_list, diff_list, gt_command_tup_list, data_list, gt_result_voltages",
+    [
+        (
+            [
+                AnalogIn.AIN1,
+                AnalogIn.AIN2,
+                AnalogIn.AIN5,
+                AnalogIn.AIN6,
+                AnalogIn.AIN7,
+                AnalogIn.AIN8,
+            ],
+            [
+                DiffMode.DIFF_2,
+            ],
+            [
+                ([69, 1, 15, 10, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 26, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 74, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 90, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 106, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 122, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+                ([70, 0, 35, 9], 0.000207, [18, 255, 255, 255, 255, 255, 255]),
+            ],
+            [ # list of data returned from the spi port
+                [232, 233, 129, 25, 121, 83, 30],
+                [224, 225, 146, 108, 19, 147, 221],
+                [232, 233, 129, 17, 161, 110, 238],
+                [232, 233, 129, 21, 238, 222, 196],
+                [232, 233, 129, 24, 34, 197, 5],
+                [232, 233, 129, 1, 128, 85, 86],
+                [232, 233, 21, 46, 25, 48, 60]
+            ],
+            [
+                0.1036727201741353,
+                1.7370293866017112,
+                0.10078385509158633,
+                0.10236855203897985,
+                0.10317986845300124,
+                0.09484310180204501,
+                1.9970719971300246,
+            ]
+        ),
+    ]
+)
+def test_batch_read_samples_adc1(
+    mocker,
+
+    ain_list: list,
+    diff_list: list,
+    gt_command_tup_list: list,
+    data_list: list[list[int]],
+    gt_result_voltages: list[int],
+
+    adc,
+):
+    mocker.patch(
+        # NOTE: the name _EdgePiADC__get_register_map is due to python name mangling, caused
+        # by the __ before get_register_map
+        "edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_register_map",
+        return_value = {
+            0: 35, 1: 17, 2: 6, 3: 64, 4: 128, 5: 15, 6: 35, 7: 0,
+            8: 0, 9: 0, 10: 0, 11: 0, 12: 64, 13: 187, 14: 0, 15: 0,
+            16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 1, 23: 0,
+            24: 0, 25: 0, 26: 64
+        }
+    )
+
+    spi_apply_commands = mocker.patch(
+        "edgepi.adc.edgepi_adc.EdgePiADC.spi_apply_adc_commands",
+        return_value = data_list,
+    )
+    # check value of command_tup_list sent to spi_apply_adc_commands by overriding the mock
+    def check_commands(command_tup_list):
+        assert command_tup_list == gt_command_tup_list
+        return mock.DEFAULT
+    spi_apply_commands.side_effect = check_commands
+
+    result_voltages = adc.read_samples_adc1_batch(
+        data_rate=ADC1DataRate.SPS_38400,
+        analog_in_list=ain_list,
+        differential_pairs=diff_list,
+    )
+
+    assert result_voltages == gt_result_voltages
 
 @pytest.mark.parametrize("param, error",
                     [

@@ -5,7 +5,6 @@ from enum import Enum, unique
 
 import bitstring
 
-
 @unique
 class ADCStatusBit(Enum):
     """
@@ -86,7 +85,6 @@ _fault_msg_map = {
     ADCStatusBit.PGAD_ALM: (ADCStatusMsg.PGAD_ALM_OK, ADCStatusMsg.PGAD_ALM_BAD),
     ADCStatusBit.RESET: (ADCStatusMsg.RESET_FALSE, ADCStatusMsg.RESET_TRUE),
 }
-
 
 def get_adc_status(status_code: int) -> dict:
     """Generates a dictionary of ADC Status objects

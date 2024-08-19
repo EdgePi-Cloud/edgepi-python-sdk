@@ -2,14 +2,10 @@
 
 import logging
 
-from bitstring import pack
 from edgepi.reg_helper.reg_helper import OpCode, BitMask
-from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels
+from edgepi.adc.adc_constants import ADCChannel as CH, AllowedChannels, ADCReg
 
 _logger = logging.getLogger(__name__)
-
-MUXS_PER_ADC = 2
-NUM_CHANNELS = 11
 
 
 class ChannelNotAvailableError(ValueError):
@@ -18,57 +14,18 @@ class ChannelNotAvailableError(ValueError):
     due to RTD_EN status.
     """
 
-
-def _format_mux_values(mux_p: CH, mux_n: CH):
-    # all use cases will always update both mux_n and mux_p
-    mask = BitMask.BYTE
-    mux_p_val = mux_p.value
-    mux_n_val = mux_n.value
-
-    return mux_p_val, mux_n_val, mask
-
-
-def generate_mux_opcodes(mux_updates: dict):
+def generate_mux_opcode(addx:ADCReg, mux_p:CH, mux_n:CH) -> OpCode:
     """
-    Generates list of OpCodes for updating input multiplexer mapping.
-    Updates both positive and negative multiplexers.
+    Generates OpCode for updating input multiplexer mapping.
 
-    Args:
-        `mux_updates` (dict): values for updating multiplexer mapping.
-            This should be formatted as {ADCReg: (ADCChannel, ADChannel)}.
-
-        `mux_values` (dict): current multiplexer mapping.
-            This should be formatted as {ADCReg: (int, int)}.
-
-        Note: both of the above must be dictionaries formatted as:
-
-            mux_reg_addx (ADCReg): (mux_p_val, mux_n_val)
-
-    Returns:
-        `list`: OpCodes for updated multiplexer mapping
+    We know that mux_p_val can never be larger than 15 (are a byte),
+    because mux_p and mux_n are ADCChannel.
     """
-    _logger.debug(f"generate_mux_opcodes: mux updates = {mux_updates}")
-
-    mux_opcodes = []
-    # generate OpCodes for mux updates
-    for addx, byte in mux_updates.items():
-        mux_p = byte[0]
-        mux_n = byte[1]
-
-        # not updating mux's for this adc_num (no args passed)
-        if mux_p is None or mux_n is None:
-            continue
-
-        mux_p_val, mux_n_val, mask = _format_mux_values(mux_p, mux_n)
-
-        adc_x_ch_bits = pack("uint:4, uint:4", mux_p_val, mux_n_val).uint
-
-        mux_opcodes.append(OpCode(adc_x_ch_bits, addx.value, mask.value))
-
-    _logger.debug(f"mux opcodes = {mux_opcodes}")
-
-    return mux_opcodes
-
+    return OpCode(
+        op_code=(mux_p.value << 4) + mux_n.value,
+        reg_address=addx.value,
+        op_mask=BitMask.BYTE.value
+    )
 
 def validate_channels_allowed(channels: list, rtd_enabled: bool):
     """
@@ -85,8 +42,12 @@ def validate_channels_allowed(channels: list, rtd_enabled: bool):
         if rtd_enabled
         else AllowedChannels.RTD_OFF.value
     )
-    for ch in channels:
-        if ch not in allowed_channels:
-            raise ChannelNotAvailableError(
-                f"Channel 'AIN{ch.value}' is currently not available. Disable RTD in order to use."
-            )
+    if any((chan not in allowed_channels) for chan in channels):
+        unavaliable_channels = ",".join(
+            f"AIN{chan.value}" for chan in channels 
+            if chan not in allowed_channels
+        )
+        raise ChannelNotAvailableError(
+            f"The following channels are currently not avaliable: {unavaliable_channels}. "
+            "Disable RTD in order to use."
+        )

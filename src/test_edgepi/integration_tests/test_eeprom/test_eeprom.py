@@ -84,7 +84,6 @@ TmZ\n-----END RSA PRIVATE KEY-----\n'
 def test_write_edgepi_data(eeprom):
     if platform.node() != TEST_DEVICE_NAME:
         pytest.skip("won't run dangerous test on user device")
-
     original_data = eeprom.read_edgepi_data()
     try:
         for _ in range(10):
@@ -93,7 +92,6 @@ def test_write_edgepi_data(eeprom):
             res = ''.join(
                 random.choices(string.ascii_uppercase + string.digits, k=str_len)
             )
-
             # Modified data to write to memory
             modified_data = eeprom.read_edgepi_data()
             modified_data.config_key.certificate = DUMMY_KEY + res
@@ -104,7 +102,6 @@ def test_write_edgepi_data(eeprom):
             eeprom.write_edgepi_data(modified_data)
             # Read back the changed data
             modified_data = eeprom.read_edgepi_data()
-
             assert modified_data.dac_calib_params == original_data.dac_calib_params
             assert modified_data.adc1_calib_params == original_data.adc1_calib_params
             assert modified_data.adc2_calib_params == original_data.adc2_calib_params

@@ -158,7 +158,7 @@ class EdgePiEEPROM(I2CDevice):
                 time.sleep(0.01)
         return bytes(buff[2:buff_and_len])
 
-    def read_edgepi_data(self):
+    def read_edgepi_data(self) -> EepromDataClass:
         """
         Read Edgepi reserved memory space and populate dataclass
         Args:

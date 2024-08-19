@@ -1,5 +1,7 @@
 """ Integration tests for EdgePi ADC module """
 
+import time
+import statistics
 import logging
 import pytest
 
@@ -19,8 +21,12 @@ from edgepi.adc.adc_constants import (
     DiffMode,
     RTDModes,
     ADC1PGA,
+    AnalogIn,
 )
 from edgepi.adc.edgepi_adc import EdgePiADC
+
+from edgepi.dac.edgepi_dac import EdgePiDAC
+from edgepi.dac.dac_constants import DACChannel
 
 _logger = logging.getLogger(__name__)
 
@@ -791,7 +797,6 @@ def test_voltage_individual(ch, adc):
     _logger.info(f"test_voltage_individual: voltage  = {out}")
     assert out != 0
 
-
 @pytest.mark.parametrize(
     "adc_num, ch",
     [
@@ -834,7 +839,6 @@ def test_voltage_continuous(adc_num, ch, adc):
     finally:
         adc.stop_conversions(adc_num)
 
-
 @pytest.mark.parametrize('adc_num, diff, mux_reg, mux_reg_val',
     [
         (ADCNum.ADC_1, DiffMode.DIFF_1, ADCReg.REG_INPMUX, 0x01),
@@ -865,3 +869,69 @@ def test_set_rtd(enable, rtd_mode, adc_num, expected, adc):
     adc.set_rtd(set_rtd=enable, adc_num=adc_num)
     assert adc.get_state().rtd_mode == rtd_mode
     assert adc.get_state().rtd_adc == expected
+
+@pytest.mark.parametrize(
+    "out_list, channel_list, voltage",
+    [
+        ([DACChannel.AOUT2], [AnalogIn.AIN2], 3.0),
+        ([DACChannel.AOUT3], [AnalogIn.AIN3], 2.0),
+        ([DACChannel.AOUT2, DACChannel.AOUT3], [AnalogIn.AIN2, AnalogIn.AIN3], 1.0),
+    ],
+)
+def test_adc_batch_voltage(out_list, channel_list, voltage, adc):
+    edgepi_dac = EdgePiDAC()
+    edgepi_dac.set_dac_gain(False)
+
+    # write voltage values
+    for out_channel in out_list:
+        edgepi_dac.write_voltage(out_channel, voltage)
+
+    # sample
+    result_list = []
+    for i in range(250):
+        result_list += adc.read_samples_adc1_batch(
+            data_rate=ADC1DataRate.SPS_38400,
+            analog_in_list=channel_list,
+        )
+
+    for i, _ in enumerate(channel_list):
+        avg = statistics.mean(result_list[i::len(channel_list)])
+        assert (voltage - 0.15) <= avg <= (voltage + 0.15)
+
+    edgepi_dac.reset()
+    adc.reset()
+
+AVG_SPEED_TARGET_MS = 10
+NUM_ITER = 500
+
+@pytest.mark.parametrize(
+    "channel_list",
+    [
+        ([
+            AnalogIn.AIN2, AnalogIn.AIN3,
+        ]),
+        ([
+            AnalogIn.AIN1, AnalogIn.AIN2, AnalogIn.AIN3, AnalogIn.AIN4,
+            AnalogIn.AIN5, AnalogIn.AIN6, AnalogIn.AIN7, AnalogIn.AIN8,
+        ]),
+    ],
+)
+def test_adc_batch_speed(channel_list, adc):
+    '''
+    This is a speed test, making sure that all ADC inputs can be read at a rate of 100hz (10ms)
+    '''
+    start = time.time()
+
+    # do samples
+    result_list = []
+    for _ in range(NUM_ITER):
+        result_list += adc.read_samples_adc1_batch(
+            data_rate=ADC1DataRate.SPS_38400,
+            analog_in_list=channel_list,
+        )
+
+    avg = 1000.0 * ((time.time() - start) / NUM_ITER)
+    assert avg <= AVG_SPEED_TARGET_MS
+
+    # reset adc registers to pre-test values
+    adc.reset()

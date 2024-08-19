@@ -109,15 +109,18 @@ Make sure to include the `pypi-` prefix for your token value.
 
 # Performance
 
-The following benchmarks were measured on the Rasberry Pi 4, with all edgepi daemons disabled.
+The following benchmarks were measured on the Rasberry Pi 4, with all edgepi daemons disabled. They're also the slowest average of 3 runs.
 
 The **Performance** column represents how long it takes to call one function, while the **Max Read Frequency** column represents how many times that function could be called every second.
 
-| Feature | Performance | Max Read Frequency | Function | Example | Desc |
+| Feature | Performance | Max Read Frequency | Function | Example | Description |
 | -- | -- | -- | -- | -- | -- |
-| Single DIN | 0.85ms per 8 DIN | 1171 Hz | `digital_input_state(pin)` | [examples/single_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_din.py) | |
-| Batched DIN | 0.52ms per 8 DIN | 1936 Hz | `digital_input_state_batch(pin_list)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
-| Thermocouple (TC) | 100.2ms | 9.98 hz | `read_temperatures()` | [examples/single_tc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_tc.py) | Limited by [hardware](https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31856.pdf) (see conversion mode). 100ms is needed to get accurate (19 bit) readings |
+| Single DIN | 0.85ms per 8 DIN | 1171 Hz | `digital_input_state(...)` | [examples/single_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_din.py) | |
+| Batched DIN | 0.52ms per 8 DIN | 1936 Hz | `digital_input_state_batch(...)` | [examples/batched_din.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_din.py) | |
+| Single ADC | 97.3 ms per 8 ADC | 10.3 Hz | `set_config(...)` <br><br> `single_sample()` | [examples/single_adc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_adc.py) | Reads from ADC1 only |
+| Batched ADC | 6.49 ms per 8 ADC | 154 Hz | `read_samples_adc1_batch(...)` | [examples/batched_adc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_adc.py) | Reads from ADC1 only |
+| Batched ADC/Diff | 5.467 ms per 4 ADC, 2 Diff | 183 Hz | `read_samples_adc1_batch(...)` | [examples/batched_adc_diff.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/batched_adc_diff.py) | Differential ADC inputs each use two pins. Reads from ADC1 only |
+| Thermocouple (TC) | 100.2ms | 9.98 hz | `read_temperatures()` | [examples/single_tc.py](https://github.com/EdgePi-Cloud/edgepi-python-sdk/tree/main/examples/single_tc.py) | Limited by [hardware](https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31856.pdf) (see conversion mode). 100ms is needed for accurate (19 bit) readings |
 
 # Bug Reports / Feature Requests
 Use [GitHub Issues Page](https://github.com/EdgePi-Cloud/edgepi-python-sdk/issues) to report any issues or feature requests.

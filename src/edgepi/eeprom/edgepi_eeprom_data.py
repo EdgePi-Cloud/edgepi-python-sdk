@@ -17,7 +17,7 @@ from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_key_module import 
 
 @dataclass
 class EepromDataClass:
-    """EEPROM Dataclass"""
+    """Stores data read from the EdgePi's non-volatile EEPROM"""
     # pylint: disable=too-many-instance-attributes
     dac_calib_params: DACModule = None
     adc1_calib_params: ADCModule = None
