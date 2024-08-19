@@ -889,7 +889,7 @@ def test_adc_batch_voltage(out_list, channel_list, voltage, adc):
     # sample
     result_list = []
     for i in range(250):
-        result_list += adc.batch_read_samples_adc1(
+        result_list += adc.read_samples_adc1_batch(
             data_rate=ADC1DataRate.SPS_38400,
             analog_in_list=channel_list,
         )
@@ -925,7 +925,7 @@ def test_adc_batch_speed(channel_list, adc):
     # do samples
     result_list = []
     for _ in range(NUM_ITER):
-        result_list += adc.batch_read_samples_adc1(
+        result_list += adc.read_samples_adc1_batch(
             data_rate=ADC1DataRate.SPS_38400,
             analog_in_list=channel_list,
         )

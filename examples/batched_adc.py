@@ -22,7 +22,7 @@ def run_test():
     ]
 
     for _ in range(ITER):
-        tmp = edgepi_adc.batch_read_samples_adc1(
+        tmp = edgepi_adc.read_samples_adc1_batch(
             data_rate=ADC1DataRate.SPS_38400,
             analog_in_list=adc_choices,
         )

@@ -1203,7 +1203,7 @@ def test_batch_read_samples_adc1(
         return mock.DEFAULT
     spi_apply_commands.side_effect = check_commands
 
-    result_voltages = adc.batch_read_samples_adc1(
+    result_voltages = adc.read_samples_adc1_batch(
         data_rate=ADC1DataRate.SPS_38400,
         analog_in_list=ain_list,
         differential_pairs=diff_list,

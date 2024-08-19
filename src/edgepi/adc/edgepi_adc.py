@@ -988,7 +988,7 @@ class EdgePiADC(SPI):
 
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-    def batch_read_samples_adc1(
+    def read_samples_adc1_batch(
         self,
         data_rate: ADC1DataRate,
         analog_in_list: Optional[list[AnalogIn]] = None,
