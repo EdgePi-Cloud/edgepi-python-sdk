@@ -45,20 +45,6 @@ class ADCState:
         self.rtd_adc: ADCNum = self.__get_rtd_adc_num()
         self.rtd_mode: RTDModes = self.__get_rtd_mode()
 
-    @staticmethod
-    def get_state(reg_map: dict, adc_property: ADCProperties) -> PropertyValue:
-        """
-        A static method that uses the provided register map to determine a single adc_property, 
-        rather than computing all of them
-        """
-        register_value = reg_map[adc_property.value.addx]
-        # get value of bits corresponding to this property by letting through only the bits
-        # that were "masked" when setting this property (clear all bits except the property bits)
-        adc_property_bits = (~adc_property.value.mask) & register_value
-        # name of current value of this adc_property
-        adc_property_value = adc_property.value.values[adc_property_bits]
-        return adc_property_value
-
     def __query_state(self, adc_property: ADCProperties) -> PropertyValue:
         """
         Read the current state of configurable ADC properties
