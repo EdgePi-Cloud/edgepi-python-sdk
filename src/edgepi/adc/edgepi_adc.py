@@ -388,7 +388,7 @@ class EdgePiADC(SPI):
         mux_p = attrgetter(f"adc_{adc_num.value.id_num}.mux_p")(state)
         mux_n = attrgetter(f"adc_{adc_num.value.id_num}.mux_n")(state)
 
-        return self.__get_calibration_params_mux(mux_p.code, mux_n, adc_num)
+        return self.__get_calibration_params_mux(adc_num, mux_p.code, mux_n.code)
 
     def __get_calibration_params_mux(self, adc_num: ADCNum, mux_p: CH, mux_n: CH) -> CalibParam:
         """
