@@ -330,7 +330,7 @@ class EdgePiADC(SPI):
     def __read_data(self, adc_num: ADCNum, data_size: int):
         """Sends command to ADC to get new voltage conversion data"""
         with self.spi_open():
-            return self.transfer(ADCCommands.read_adc_command(adc_num, data_size))
+            return self.transfer(ADCCommands.read_adc_command(adc_num.value, data_size))
 
     def __voltage_read(self, adc_num: ADCNum):
         """
@@ -579,7 +579,7 @@ class EdgePiADC(SPI):
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
         with self.spi_open():
-            read_data = self.transfer(ADCCommands.read_adc_command(adc_num, ADC_VOLTAGE_READ_LEN))
+            read_data = self.transfer(ADCCommands.read_adc_command(adc_num.value, ADC_VOLTAGE_READ_LEN))
             if adc_num is ADCNum.ADC_1:
                 return (read_data[1] & 0b01000000) == 0b01000000
             elif adc_num is ADCNum.ADC_2:

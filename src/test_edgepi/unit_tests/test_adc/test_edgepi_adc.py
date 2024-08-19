@@ -1004,7 +1004,7 @@ def test_get_calibration_values(mocker, reg_updates, adc_num, expected, err, adc
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.get_state", return_value=mock_state)
 
     with err:
-        out = adc._EdgePiADC__get_calibration_values(adc.adc_calib_params[adc_num], adc_num)
+        out = adc._EdgePiADC__get_calibration_params(adc.adc_calib_params[adc_num], adc_num)
         assert out == expected
 
 
@@ -1020,7 +1020,7 @@ def test_adc_voltage_read_conv_mode_validation(mocker, adc_to_read, validate, ad
     )
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
     mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.read_voltage(adc_to_read)
@@ -1053,7 +1053,7 @@ def test_adc_voltage_read_mode(mocker, adc_to_read, ch, adc):
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__check_adc_1_conv_mode")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__continuous_time_delay")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
     _code_to_voltage = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.read_voltage(adc_to_read)
@@ -1087,7 +1087,7 @@ def test_adc_single_sample_mode(mocker, adc_to_read, ch, adc):
     )
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC.start_conversions")
     mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__voltage_read", return_value=[0,0,0])
-    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_values")
+    mocker.patch("edgepi.adc.edgepi_adc.EdgePiADC._EdgePiADC__get_calibration_params")
     _code_to_voltage = mocker.patch("edgepi.adc.edgepi_adc.code_to_voltage")
     mocker.patch("edgepi.adc.edgepi_adc.get_adc_status")
     adc.single_sample()
