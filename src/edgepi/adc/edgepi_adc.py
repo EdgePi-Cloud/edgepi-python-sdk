@@ -613,7 +613,6 @@ class EdgePiADC(SPI):
             return True
         return False
 
-    # TODO: will this be updated when rtd is set to be on? will the state cache pick up hardware changes? probably not...
     def __get_rtd_state(self):
         """
         Get RTD state this includes the current mode (on/off) and the adc type being used
@@ -1043,21 +1042,17 @@ class EdgePiADC(SPI):
             [(diff_mode.value.mux_p, diff_mode.value.mux_n) for diff_mode in differential_pairs]
         )
 
-        # TODO: what happens if the SPI read fails (or something else fails in ADC during)?
-        # Register values will be unknown until we read from it again?
         data_list = self.spi_apply_adc_commands([
             # get instructions we need to send to perform a read of each pin
             ADCCommands.read_command_tuple(
                 # the first command tuple should write the mode2 register to contain the data rate
                 mode2_register_value if i == 0 else None,
                 conversion_delay,
-                mux_p,
-                mux_n
+                mux_p, mux_n
             ) for i, (mux_p, mux_n) in enumerate(mux_pairs)
         ])
 
-        # TODO: make sure these updates work correctly
-        # update with final ADC state (for state caching)
+        # update with final ADC state we wrote (for state caching)
         EdgePiADC.__state[ADCReg.REG_MODE2.value] = mode2_register_value
         mux_p, mux_n = mux_pairs[-1]
         EdgePiADC.__state[ADCReg.REG_INPMUX.value] = generate_mux_opcode(ADCReg.REG_INPMUX, mux_p, mux_n).op_code
