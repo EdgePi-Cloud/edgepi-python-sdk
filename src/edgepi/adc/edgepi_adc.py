@@ -389,7 +389,7 @@ class EdgePiADC(SPI):
 
         return self.__get_calibration_params_mux(mux_p.code, mux_n, adc_num)
 
-    def __get_calibration_params_mux(self, adc_num: ADCNum, mux_p: CH, mux_n: CH) -> float:
+    def __get_calibration_params_mux(self, adc_num: ADCNum, mux_p: CH, mux_n: CH) -> CalibParam:
         """
         Get calibration parameters using the multiplexing channels and without reading from state
         """
@@ -403,8 +403,8 @@ class EdgePiADC(SPI):
             if mux_n == CH.AINCOM
             else EdgePiADC.__get_diff_id(mux_p, mux_n)
         )
-        calibs = self.adc_calib_params[adc_num][calib_key]
 
+        calibs = self.adc_calib_params[adc_num][calib_key]
         if calibs is None:
             _logger.error("Failed to find ADC calibration values")
             raise CalibKeyMissingError(
@@ -412,6 +412,8 @@ class EdgePiADC(SPI):
                 f"dict is missing key = {calib_key}"
                 f"\neeprom_calibs = \n{self.adc_calib_params[adc_num]}"
             )
+            
+        return calibs
 
     def __continuous_time_delay(self, adc_num: ADCNum, state: ADCState):
         """Compute and enforce continuous conversion time delay"""
