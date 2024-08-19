@@ -62,6 +62,6 @@ def bitstring_from_list(data: list[int]) -> BitArray:
     return BitArray(bytes(data))
 
 
-def combine_to_uint32(a:int, b:int, c:int, d:int) -> int:
+def combine_to_uint32(a: int, b: int, c: int, d: int) -> int:
     """simply packs 4 bytes into a uint32 (BE)"""
     return (a << 24) + (b << 16) + (c << 8) + d

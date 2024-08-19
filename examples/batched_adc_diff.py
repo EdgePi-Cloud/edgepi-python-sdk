@@ -12,7 +12,7 @@ def run_test():
     This test performs 300 analog input reads, with 50 for each of 4 analog pins, and
     50 for each of 2 differential analog pairs.
     """
-    
+
     edgepi_adc = EdgePiADC(enable_cache=False)
 
     start = time.time()

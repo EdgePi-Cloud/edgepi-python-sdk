@@ -77,7 +77,7 @@ class ADCCommands:
         """Command to reset ADC"""
         _logger.debug("Command to send is %s", ([ADCComs.COM_RESET.value]))
         return [ADCComs.COM_RESET.value]
-    
+
     @staticmethod
     def read_command_tuple(
         mode2_register_value: Optional[int],

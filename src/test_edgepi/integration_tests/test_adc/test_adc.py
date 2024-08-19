@@ -901,6 +901,9 @@ def test_adc_batch_voltage(out_list, channel_list, voltage, adc):
     edgepi_dac.reset()
     adc.reset()
 
+AVG_SPEED_TARGET_MS = 10
+NUM_ITER = 500
+
 @pytest.mark.parametrize(
     "channel_list",
     [
@@ -917,9 +920,6 @@ def test_adc_batch_speed(channel_list, adc):
     '''
     This is a speed test, making sure that all ADC inputs can be read at a rate of 100hz (10ms)
     '''
-    AVG_SPEED_TARGET_MS = 10
-    NUM_ITER = 500
-
     start = time.time()
 
     # do samples
@@ -931,7 +931,6 @@ def test_adc_batch_speed(channel_list, adc):
         )
 
     avg = 1000.0 * ((time.time() - start) / NUM_ITER)
-    # print(avg)
     assert avg <= AVG_SPEED_TARGET_MS
 
     # reset adc registers to pre-test values

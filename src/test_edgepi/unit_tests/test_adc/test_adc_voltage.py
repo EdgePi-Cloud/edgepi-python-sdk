@@ -95,7 +95,10 @@ def test__adc_voltage_to_input_voltage(voltage, gain, offset, result):
     ],
 )
 def test_code_to_voltage(code, adc_num, calibs, result):
-    assert pytest.approx(code_to_voltage(code, adc_num, calibs, single_ended=False),0.0001) == result
+    assert pytest.approx(
+        code_to_voltage(code, adc_num, calibs, single_ended=False),
+        0.0001,
+    ) == result
 
 @pytest.mark.parametrize(
     "code, adc_num, calibs, result",

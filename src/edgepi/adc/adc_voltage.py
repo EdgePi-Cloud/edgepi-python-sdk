@@ -54,7 +54,12 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     return v_in * step_up_ratio * gain + offset
 
 
-def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam, single_ended: bool) -> float:
+def code_to_voltage(
+    code: list[int],
+    adc_info: ADCReadInfo,
+    calibs: CalibParam,
+    single_ended: bool,
+) -> float:
     """
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
@@ -62,7 +67,8 @@ def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam, 
         `code` (list[int]): code bytes retrieved from ADC voltage read
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
         `calibs` (CalibParam): voltage reading gain and offset calibration values
-        `single_ended` (bool): whether the mode should be single ended or not single ended (differential)
+        `single_ended` (bool): whether the mode should be single ended or not single ended
+                               (differential)
 
     Returns:
         `float`: voltage value (V) corresponding to `code`
@@ -113,7 +119,8 @@ def code_to_temperature(
         `code` (list[int]): code bytes retrieved from ADC voltage read
         `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
         `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
-        `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
+        `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation
+                                                   (Ohms/°C)
 
     Returns:
         `float`: temperature value (°C) corresponding to `code`

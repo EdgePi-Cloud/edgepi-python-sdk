@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """ User interface for EdgePi ADC """
 
 from enum import Enum
@@ -396,7 +397,7 @@ class EdgePiADC(SPI):
         # assert neither mux is set to float mode
         if CH.FLOAT in (mux_p, mux_n):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
-        
+
         adc_mux = ADCProperties.ADC1_MUXP if adc_num == ADCNum.ADC_1 else ADCProperties.ADC2_MUXP
         calib_key = (
             adc_mux.value.values[mux_p.value << 4].value
@@ -412,7 +413,7 @@ class EdgePiADC(SPI):
                 f"dict is missing key = {calib_key}"
                 f"\neeprom_calibs = \n{self.adc_calib_params[adc_num]}"
             )
-            
+
         return calibs
 
     def __continuous_time_delay(self, adc_num: ADCNum, state: ADCState):
@@ -512,7 +513,7 @@ class EdgePiADC(SPI):
         """
         state = self.get_state()
         # Check whether the ADC is either in single-ended or differential
-        single_ended = (state.adc_1.mux_n.code == CH.AINCOM)
+        single_ended = state.adc_1.mux_n.code == CH.AINCOM
 
         self.__enforce_pulse_mode(state)
 
@@ -662,7 +663,7 @@ class EdgePiADC(SPI):
                 adc_2_mux_n = None
             channels = [adc_1_mux_p, adc_1_mux_n, adc_2_mux_p, adc_2_mux_n]
             channels = [ch for ch in channels if ch is not None]
- 
+
             rtd_enabled = self.__is_rtd_on()
             validate_channels_allowed(channels, rtd_enabled)
 
@@ -677,7 +678,7 @@ class EdgePiADC(SPI):
             # while ADCReg.REG_ADC2MUX controls multiplexing for adc2
             opcode = generate_mux_opcode(ADCReg.REG_ADC2MUX, adc_2_mux_p, adc_2_mux_n)
             opcode_list.append(opcode)
-            
+
         return opcode_list
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
@@ -776,7 +777,7 @@ class EdgePiADC(SPI):
         """
         updates = RTDModes.RTD_OFF.value | (
             ADC1RtdConfig.OFF.value
-            if adc_num == ADCNum.ADC_1 
+            if adc_num == ADCNum.ADC_1
             else ADC2RtdConfig.OFF.value
         )
         return updates
@@ -1001,8 +1002,8 @@ class EdgePiADC(SPI):
         differential pairs to read from. The differential pairs & analog_in elements may overlap,
         but usecases are be uncommon.
 
-        Will reset any prior config made to the ADC. Does not work with RTD mode, and may override configs if RTD mode
-        is active.
+        Will reset any prior config made to the ADC. Does not work with RTD mode, and may override
+        configs if RTD mode is active.
 
         This function only supports ADC 1, and changes the conversion mode to PULSE automatically.
         """
@@ -1012,7 +1013,10 @@ class EdgePiADC(SPI):
         if analog_in_list == [] and differential_pairs == []:
             raise ValueError("Both analog_in_list and differential_pairs cannot be empty")
 
-        channel_list = [self.__analog_in_to_adc_in_map.get(analog_in) for analog_in in analog_in_list]
+        channel_list = [
+            self.__analog_in_to_adc_in_map.get(analog_in)
+            for analog_in in analog_in_list
+        ]
         if any(ch is None for ch in channel_list):
             raise ValueError(f"Invalid analog_in_list={analog_in_list}")
 
@@ -1024,7 +1028,7 @@ class EdgePiADC(SPI):
         # determine the conversion delay using the table from the datasheet
         # (best case is sleep of 0.207ms)
         filter_mode_op_code = (
-            (~ADCProperties.FILTER_MODE.value.mask) 
+            (~ADCProperties.FILTER_MODE.value.mask)
             & register_values[ADCProperties.FILTER_MODE.value.addx]
         )
         conversion_delay = expected_initial_time_delay(
@@ -1055,12 +1059,16 @@ class EdgePiADC(SPI):
         # update with final ADC state we wrote (for state caching)
         EdgePiADC.__state[ADCReg.REG_MODE2.value] = mode2_register_value
         mux_p, mux_n = mux_pairs[-1]
-        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = generate_mux_opcode(ADCReg.REG_INPMUX, mux_p, mux_n).op_code
+        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = generate_mux_opcode(
+            ADCReg.REG_INPMUX, mux_p, mux_n
+        ).op_code
 
         voltage_list = []
         for i, read_data in enumerate(data_list):
             if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
-                raise VoltageReadError(f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved")
+                raise VoltageReadError(
+                    f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
+                )
 
             voltage_code = read_data[2 : (2 + ADCNum.ADC_1.value.num_data_bytes)]
             check_code = read_data[6]
@@ -1070,8 +1078,10 @@ class EdgePiADC(SPI):
 
             # convert from voltage_code to voltage value (float)
             calibs = self.__get_calibration_params_mux(ADCNum.ADC_1, mux_p, mux_n)
-            single_ended = (i < len(channel_list))
-            voltage_list += [code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs, single_ended)]
+            single_ended = i < len(channel_list)
+            voltage_list += [code_to_voltage(
+                voltage_code, ADCNum.ADC_1.value, calibs, single_ended
+            )]
 
         return voltage_list
 

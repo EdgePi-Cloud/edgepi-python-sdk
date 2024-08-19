@@ -5,12 +5,13 @@ Classes:
     SpiDevice
 """
 #pylint:disable=too-many-instance-attributes
+from contextlib import contextmanager
 import logging
 import threading
-from contextlib import contextmanager
+import time
+
 from periphery import SPI
 
-import time
 
 _logger = logging.getLogger(__name__)
 
