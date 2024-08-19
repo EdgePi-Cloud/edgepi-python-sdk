@@ -1005,8 +1005,6 @@ class EdgePiADC(SPI):
         is active.
 
         This function only supports ADC 1, and changes the conversion mode to PULSE automatically.
-
-        TODO: if even more performance is needed, continuous mode might only need to sleep for the first conversion!
         """
         analog_in_list     = [] if analog_in_list is None else analog_in_list
         differential_pairs = [] if differential_pairs is None else differential_pairs
