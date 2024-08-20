@@ -3,10 +3,9 @@
 
 import logging
 
-from bitstring import BitArray
 from edgepi.adc.adc_constants import ADCReadInfo, ADCNum, ADC1_NUM_DATA_BYTES, ADC2_NUM_DATA_BYTES
 from edgepi.calibration.calibration_constants import CalibParam
-from edgepi.utilities.utilities import bitstring_from_list
+from edgepi.utilities.utilities import bitstring_from_list, combine_to_uint32
 
 
 # TODO: retrieve these values from EEPROM once added
@@ -21,11 +20,12 @@ ADC2_UPPER_LIMIT = 8388608
 _logger = logging.getLogger(__name__)
 
 
-def _is_negative_voltage(code: BitArray):
+def _is_negative_voltage(code: list[int]):
     """
     Determines if voltage code is negative value
     """
-    return code[0] == 1
+    # check if first bit of the first integer is a 1
+    return (code[0] & 0x80) != 0
 
 
 def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
@@ -36,13 +36,12 @@ def _code_to_input_voltage(code: int, v_ref: float, num_bits: int):
 
     Args:
         `code` (int): uint value of ADC voltage read bytes
-
         `v_ref` (float): ADC reference voltage in Volts
-
         `num_bits` (int): number of bits in ADC voltage read (24 or 32)
     """
+
     voltage_range = v_ref / 2 ** (num_bits - 1)
-    _logger.debug(f" _code_to_input_voltage: code {code}")
+    _logger.debug(f"_code_to_input_voltage: code {code}")
     return float(code) * voltage_range
 
 
@@ -55,64 +54,54 @@ def _adc_voltage_to_input_voltage(v_in: float, gain: float, offset: float):
     return v_in * step_up_ratio * gain + offset
 
 
-def code_to_voltage(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam) -> float:
+def code_to_voltage(
+    code: list[int],
+    adc_info: ADCReadInfo,
+    calibs: CalibParam,
+    single_ended: bool,
+) -> float:
     """
     Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
 
     Args:
         `code` (list[int]): code bytes retrieved from ADC voltage read
-
         `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
-
         `calibs` (CalibParam): voltage reading gain and offset calibration values
+        `single_ended` (bool): whether the mode should be single ended or not single ended
+                               (differential)
 
     Returns:
         `float`: voltage value (V) corresponding to `code`
     """
-    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
+
     num_bits = adc_info.num_data_bytes * 8
-    code_val = code_bits.uint
-
-    if _is_negative_voltage(code_bits):
-        code_val = code_val - 2**num_bits
-
-    v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
-
-    v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
-
-    return v_out
-
-def code_to_voltage_single_ended(code: list[int], adc_info: ADCReadInfo, calibs: CalibParam):
-    """
-    Converts ADC voltage read digital code to output voltage (voltage measured at terminal block)
-
-    Args:
-        `code` (list[int]): code bytes retrieved from ADC voltage read
-
-        `adc_info` (ADCReadInfo): data about this adc's voltage reading configuration
-
-        `calibs` (CalibParam): voltage reading gain and offset calibration values
-
-    Returns:
-        `float`: voltage value (V) corresponding to `code`
-    """
-    code_bits = bitstring_from_list(code[:adc_info.num_data_bytes])
-    num_bits = adc_info.num_data_bytes * 8
-    code_val = code_bits.uint
-
-    if _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
-        code_val = code_val - ADC1_UPPER_LIMIT
-    elif _is_negative_voltage(code_bits) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
-        code_val = code_val - ADC2_UPPER_LIMIT
-    elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
-        code_val = code_val + ADC1_UPPER_LIMIT
+    if adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+        code_val = combine_to_uint32(code[0], code[1], code[2], code[3])
     elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
-        code_val = code_val + ADC2_UPPER_LIMIT
+        code_val = combine_to_uint32(0, code[0], code[1], code[2])
+    else:
+        raise ValueError(
+            f"code has unexpected number of bytes {adc_info.num_data_bytes}, "
+            "expected 4 for ADC1 or 3 for ADC2"
+        )
+
+    if single_ended:
+        if _is_negative_voltage(code) and adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+            code_val -= ADC1_UPPER_LIMIT
+        elif _is_negative_voltage(code) and adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+            code_val -= ADC2_UPPER_LIMIT
+        elif adc_info.num_data_bytes == ADC1_NUM_DATA_BYTES:
+            code_val += ADC1_UPPER_LIMIT
+        elif adc_info.num_data_bytes == ADC2_NUM_DATA_BYTES:
+            code_val += ADC2_UPPER_LIMIT
+    else:
+        if _is_negative_voltage(code):
+            code_val -= 2**num_bits
 
     v_in = _code_to_input_voltage(code_val, REFERENCE_VOLTAGE, num_bits)
     v_out = _adc_voltage_to_input_voltage(v_in, calibs.gain, calibs.offset)
-
     return v_out
+
 
 def code_to_temperature(
     code: list[int],
@@ -122,18 +111,16 @@ def code_to_temperature(
     rtd_calib_gain: float,
     rtd_calib_offset: float,
     adc_num: ADCNum
-    ) -> float:
+) -> float:
     """
     Converts ADC voltage read digital code to temperature. Intended for use in RTD sampling.
 
     Args:
         `code` (list[int]): code bytes retrieved from ADC voltage read
-
-       `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
-
-       `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
-
-       `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation (Ohms/°C)
+        `ref_resistance` (float): EdgePi-specific RTD reference resistance (Ohms)
+        `rtd_sensor_resistance` (float): RTD material-dependent resistance value (Ohms)
+        `rtd_sensor_resistance_variation` (float): RTD model-dependent resistance variation
+                                                   (Ohms/°C)
 
     Returns:
         `float`: temperature value (°C) corresponding to `code`

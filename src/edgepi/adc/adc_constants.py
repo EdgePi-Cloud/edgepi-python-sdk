@@ -8,7 +8,7 @@ from edgepi.reg_helper.reg_helper import BitMask, OpCode
 
 
 ADC_NUM_REGS = 27  # number of ADC1263 registers
-ADC_VOLTAGE_READ_LEN = 6  # number of bytes per voltage read
+ADC_VOLTAGE_READ_LEN = 6 # number of bytes per voltage read
 ADC1_NUM_DATA_BYTES = 4 # Number of data bytes for ADC 1
 ADC2_NUM_DATA_BYTES = 3 # Number of data bytes for ADC 2
 
@@ -164,6 +164,8 @@ class ConvMode(Enum):
 class ADC1DataRate(Enum):
     """ADS1263 data rates for ADC1"""
 
+    # NOTE: the op_code values (0x0, 0x1, ...) refer to the value that's read from
+    # the ADC after applying the mask.
     SPS_2P5 = OpCode(0x0, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
     SPS_5 = OpCode(0x1, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)
     SPS_10 = OpCode(0x2, ADCReg.REG_MODE2.value, BitMask.LOW_NIBBLE.value)

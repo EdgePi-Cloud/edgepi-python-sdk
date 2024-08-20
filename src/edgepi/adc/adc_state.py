@@ -24,7 +24,7 @@ class ADCReadFields:
 
 class ADCState:
     """ADC state intended for reading by users"""
-# pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, reg_map: dict):
         self.__reg_map = reg_map
         self.adc_1: ADCReadFields = ADCReadFields(
@@ -64,11 +64,9 @@ class ADCState:
         # name of current value of this adc_property
         adc_property_value = adc_property.value.values[adc_property_bits]
         _logger.debug(
-            (
-                f"query_state: query_property='{adc_property}',"
-                " adc_property_bits={hex(adc_property_bits)},"
-                f" adc_property_value='{adc_property_value}'"
-            )
+            f"query_state: query_property='{adc_property}',"
+            f" adc_property_bits={hex(adc_property_bits)},"
+            f" adc_property_value='{adc_property_value}'"
         )
         return adc_property_value
 

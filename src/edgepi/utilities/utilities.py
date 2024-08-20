@@ -5,9 +5,7 @@
         bitstring_from_list(list)
 """
 
-
-from bitstring import BitArray, pack
-
+from bitstring import BitArray
 
 def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
     """use for filtering an entry from a dictionary by key or value
@@ -28,6 +26,7 @@ def filter_dict(dictionary: dict, entry_key="", entry_val="") -> dict:
     }
     return filtered_args
 
+
 def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) -> dict:
     """use for filtering an entry from a dictionary by key or value
 
@@ -43,14 +42,13 @@ def filter_dict_list_key_val(dictionary: dict, entry_key: list, entry_val:list) 
         key or value matches either the entry_key or entry_val, respectively.
     """
     filtered_args = {
-        key: value for (key, value) in dictionary.items() \
+        key: value for (key, value) in dictionary.items()
         if key not in entry_key and value not in entry_val
     }
     return filtered_args
 
 
-
-def bitstring_from_list(data: list) -> BitArray:
+def bitstring_from_list(data: list[int]) -> BitArray:
     """
     Builds a bitstring from a list of uint byte values
 
@@ -60,8 +58,10 @@ def bitstring_from_list(data: list) -> BitArray:
     Returns:
         BitArray: bitstring of bytes ordered from data[0], data[1], ..., data[n-1]
     """
-    code = BitArray()
-    for value in data:
-        next_byte = pack("uint:8", value)
-        code.append(next_byte)
-    return code
+    # bytes() will raise a ValueError if any items are not in the range [0, 255]
+    return BitArray(bytes(data))
+
+
+def combine_to_uint32(a: int, b: int, c: int, d: int) -> int:
+    """simply packs 4 bytes into a uint32 (BE)"""
+    return (a << 24) + (b << 16) + (c << 8) + d

@@ -1,11 +1,13 @@
+# pylint: disable=too-many-lines
 """ User interface for EdgePi ADC """
 
 from enum import Enum
 from operator import attrgetter
 import logging
 import time
+from typing import Optional
 
-from edgepi.adc.adc_query_lang import PropertyValue
+from edgepi.adc.adc_query_lang import ADCProperties
 from edgepi.calibration.calibration_constants import CalibParam
 from edgepi.peripherals.spi import SpiDevice as SPI
 from edgepi.adc.adc_commands import ADCCommands
@@ -38,7 +40,6 @@ from edgepi.adc.adc_constants import (
 from edgepi.adc.adc_voltage import (
     code_to_voltage,
     code_to_temperature,
-    code_to_voltage_single_ended
 )
 from edgepi.utilities.crc_8_atm import check_crc
 from edgepi.gpio.edgepi_gpio import EdgePiGPIO
@@ -46,12 +47,13 @@ from edgepi.gpio.gpio_configs import ADCPins, RTDPins
 from edgepi.utilities.utilities import filter_dict, filter_dict_list_key_val
 from edgepi.reg_helper.reg_helper import OpCode, apply_opcodes
 from edgepi.adc.adc_multiplexers import (
-    generate_mux_opcodes,
+    generate_mux_opcode,
     validate_channels_allowed,
 )
 from edgepi.adc.adc_conv_time import expected_initial_time_delay, expected_continuous_time_delay
 from edgepi.adc.adc_status import get_adc_status
 from edgepi.eeprom.edgepi_eeprom import EdgePiEEPROM
+from edgepi.eeprom.protobuf_assets.eeprom_data_classes.eeprom_adc_module import AdcCalibParamKeys
 from edgepi.adc.adc_state import ADCState
 from edgepi.adc.adc_exceptions import (
     ADCRegisterUpdateError,
@@ -61,6 +63,7 @@ from edgepi.adc.adc_exceptions import (
     InvalidDifferentialPairError,
     CalibKeyMissingError
 )
+
 
 _logger = logging.getLogger(__name__)
 
@@ -102,7 +105,7 @@ class EdgePiADC(SPI):
         enable_cache: bool = False,
         rtd_sensor_resistance: float = None,
         rtd_sensor_resistance_variation: float = None
-        ):
+    ):
         """
         Args:
             `enable_cache` (bool): set to True to enable state-caching
@@ -120,12 +123,15 @@ class EdgePiADC(SPI):
         # Load eeprom data and generate dictionary of calibration dataclass
         eeprom = EdgePiEEPROM()
         eeprom_data  = eeprom.read_edgepi_data()
-        self.adc_calib_params = {ADCNum.ADC_1:eeprom_data.adc1_calib_params.extract_ch_dict(),
-                                 ADCNum.ADC_2:eeprom_data.adc2_calib_params.extract_ch_dict(),}
+        self.adc_calib_params = {
+            ADCNum.ADC_1: eeprom_data.adc1_calib_params.extract_ch_dict(),
+            ADCNum.ADC_2: eeprom_data.adc2_calib_params.extract_ch_dict(),
+        }
         self.rtd_calib = eeprom_data.rtd_calib_params
 
         self.adc_ops = ADCCommands()
         self.gpio = EdgePiGPIO()
+
         # ADC always needs to be in CRC check mode. This also updates the internal __state.
         # If this call to __config is removed, replace with a call to get_register_map to
         # initialize __state.
@@ -234,8 +240,7 @@ class EdgePiADC(SPI):
         code = self.adc_ops.write_register_command(start_addx.value, data)
         _logger.debug(f"__write_register: sending {code}")
         with self.spi_open():
-            out = self.transfer(code)
-        return out
+            return self.transfer(code)
 
     def __set_rtd_pin(self, enable: bool = False):
         """
@@ -249,7 +254,7 @@ class EdgePiADC(SPI):
         self.gpio.set_pin_state(RTDPins.RTD_EN.value) if enable else \
         self.gpio.clear_pin_state(RTDPins.RTD_EN.value)
 
-# TODO: To be deleted
+    # TODO: To be deleted
     def set_adc_reference(self, reference_config: ADCReferenceSwitching = None):
         """
         Setting ADC referene terminal state. pin 18 and 23 labeled IN GND on the enclosure. It can
@@ -275,13 +280,13 @@ class EdgePiADC(SPI):
         """
         Halt voltage read conversions when ADC is set to perform continuous conversions
         """
-        stop_cmd = self.adc_ops.stop_adc(adc_num=adc_num.value)
+        stop_cmd = ADCCommands.stop_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(stop_cmd)
 
     def __send_start_command(self, adc_num: ADCNum):
         """Triggers ADC conversion(s)"""
-        start_cmd = self.adc_ops.start_adc(adc_num=adc_num.value)
+        start_cmd = ADCCommands.start_adc_command(adc_num=adc_num.value)
         with self.spi_open():
             self.transfer(start_cmd)
 
@@ -304,12 +309,10 @@ class EdgePiADC(SPI):
             adc_num, data_rate.value.op_code, filter_mode.value.op_code
         )
         _logger.debug(
-            (
-                f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
-                f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
-                f"data_rate={hex(data_rate.value.op_code)}, "
-                f"filter_mode={hex(filter_mode.value.op_code)}\n"
-            )
+            f"\nComputed time delay = {conv_delay} (ms) with the following config opcodes:\n"
+            f"adc_num={adc_num}, conv_mode={hex(conv_mode.value.op_code)}, "
+            f"data_rate={hex(data_rate.value.op_code)}, "
+            f"filter_mode={hex(filter_mode.value.op_code)}\n"
         )
         self.__send_start_command(adc_num)
         # apply delay for first conversion
@@ -324,10 +327,10 @@ class EdgePiADC(SPI):
         """
         self.__config(reset_clear=ADCPower.RESET_CLEAR)
 
-    def __read_data(self, adc: ADCNum, data_size: int):
+    def __read_data(self, adc_num: ADCNum, data_size: int):
         """Sends command to ADC to get new voltage conversion data"""
         with self.spi_open():
-            return self.transfer([adc.value.read_cmd] + [255] * data_size)
+            return self.transfer(ADCCommands.read_adc_command(adc_num.value, data_size))
 
     def __voltage_read(self, adc_num: ADCNum):
         """
@@ -350,26 +353,26 @@ class EdgePiADC(SPI):
         return status_code, voltage_code, check_code
 
     @staticmethod
-    def __get_diff_id(mux_p: PropertyValue, mux_n: PropertyValue) -> int:
+    def __get_diff_id(mux_p: CH, mux_n: CH) -> int:
         """
         Get differential pair id number for retrieving differential pair calibration values
         """
-        #  values are the keys from adc_calib_params
-        diff_ids = {
-                DiffMode.DIFF_1.value: 8,
-                DiffMode.DIFF_2.value: 9,
-                DiffMode.DIFF_3.value: 10,
-                DiffMode.DIFF_4.value: 11,
-            }
-        diff_pair = DifferentialPair(mux_p.code, mux_n.code)
-        diff_id = diff_ids.get(diff_pair)
-        if diff_id is None:
+        # return values are the keys from adc_calib_params
+        diff_pair = DifferentialPair(mux_p, mux_n)
+        if diff_pair == DiffMode.DIFF_1.value:
+            return AdcCalibParamKeys.ADC_DIFF_1
+        elif diff_pair == DiffMode.DIFF_2.value:
+            return AdcCalibParamKeys.ADC_DIFF_2
+        elif diff_pair == DiffMode.DIFF_3.value:
+            return AdcCalibParamKeys.ADC_DIFF_3
+        elif diff_pair == DiffMode.DIFF_4.value:
+            return AdcCalibParamKeys.ADC_DIFF_4
+        else:
             raise InvalidDifferentialPairError(
-                    f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
-                    )
-        return diff_id
+                f"Cannot retrieve calibration values for invalid differential pair {diff_pair}"
+            )
 
-    def __get_calibration_values(self, adc_calibs: dict, adc_num: ADCNum) -> CalibParam:
+    def __get_calibration_params(self, adc_num: ADCNum) -> CalibParam:
         """
         Retrieve voltage reading calibration values based on currently configured
         input multiplexer channels
@@ -385,21 +388,30 @@ class EdgePiADC(SPI):
         mux_p = attrgetter(f"adc_{adc_num.value.id_num}.mux_p")(state)
         mux_n = attrgetter(f"adc_{adc_num.value.id_num}.mux_n")(state)
 
+        return self.__get_calibration_params_mux(adc_num, mux_p.code, mux_n.code)
+
+    def __get_calibration_params_mux(self, adc_num: ADCNum, mux_p: CH, mux_n: CH) -> CalibParam:
+        """
+        Get calibration parameters using the multiplexing channels and without reading from state
+        """
         # assert neither mux is set to float mode
-        if CH.FLOAT in (mux_p.code, mux_n.code):
+        if CH.FLOAT in (mux_p, mux_n):
             raise ValueError("Cannot retrieve calibration values for channel in float mode")
 
-        calib_key = mux_p.value if mux_n.code == CH.AINCOM else self.__get_diff_id(mux_p, mux_n)
-        calibs = adc_calibs[calib_key]
+        adc_mux = ADCProperties.ADC1_MUXP if adc_num == ADCNum.ADC_1 else ADCProperties.ADC2_MUXP
+        calib_key = (
+            adc_mux.value.values[mux_p.value << 4].value
+            if mux_n == CH.AINCOM
+            else EdgePiADC.__get_diff_id(mux_p, mux_n)
+        )
 
+        calibs = self.adc_calib_params[adc_num][calib_key]
         if calibs is None:
             _logger.error("Failed to find ADC calibration values")
             raise CalibKeyMissingError(
-                (
-                    "Failed to retrieve calibration values from eeprom dictionary: "
-                    f"dict is missing key = {calib_key}"
-                    f"\neeprom_calibs = \n{adc_calibs}"
-                )
+                "Failed to retrieve calibration values from eeprom dictionary: "
+                f"dict is missing key = {calib_key}"
+                f"\neeprom_calibs = \n{self.adc_calib_params[adc_num]}"
             )
 
         return calibs
@@ -452,13 +464,10 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f" read_voltage: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params[adc_num], adc_num)
+        calibs = self.__get_calibration_params(adc_num)
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        # convert from code to voltage
 
-        return code_to_voltage_single_ended(voltage_code, adc_num.value, calibs) if single_ended\
-            else code_to_voltage(voltage_code, adc_num.value, calibs)
-
+        return code_to_voltage(voltage_code, adc_num.value, calibs, single_ended)
 
     def read_rtd_temperature(self):
         """
@@ -503,10 +512,8 @@ class EdgePiADC(SPI):
             `float`: input voltage (V) read from ADC1
         """
         state = self.get_state()
-        single_ended = False
         # Check whether the ADC is either in single-ended or differential
-        if state.adc_1.mux_n.code == CH.AINCOM:
-            single_ended = True
+        single_ended = state.adc_1.mux_n.code == CH.AINCOM
 
         self.__enforce_pulse_mode(state)
 
@@ -520,13 +527,12 @@ class EdgePiADC(SPI):
         status = get_adc_status(status_code)
         _logger.debug(f"single_sample: Logging STATUS byte:\n{status}")
 
-        calibs = self.__get_calibration_values(self.adc_calib_params[ADCNum.ADC_1], ADCNum.ADC_1)
+        calibs = self.__get_calibration_params(ADCNum.ADC_1)
 
         # convert from code to voltage
         _logger.debug(f" read_voltage: code {voltage_code}")
         _logger.debug(f" read_voltage: gain {calibs.gain}, offset {calibs.offset}")
-        return code_to_voltage_single_ended(voltage_code, ADCNum.ADC_1.value, calibs) if \
-            single_ended  else code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs)
+        return code_to_voltage(voltage_code, ADCNum.ADC_1.value, calibs, single_ended)
 
     def single_sample_rtd(self):
         """
@@ -565,7 +571,7 @@ class EdgePiADC(SPI):
         application of custom power-on configurations required by EdgePi.
         """
         with self.spi_open():
-            self.transfer(self.adc_ops.reset_adc())
+            self.transfer(ADCCommands.reset_adc_command())
         self.__reapply_config()
 
     def __is_data_ready(self, adc_num: ADCNum):
@@ -573,12 +579,15 @@ class EdgePiADC(SPI):
         # required for integration testing in test_conversion_times.py
         """Utility for testing conversion times, returns True if ADC indicates new voltage data"""
         with self.spi_open():
-            read_data = self.transfer([adc_num.value.read_cmd] + [255] * 6)
+            read_data = self.transfer(
+                ADCCommands.read_adc_command(adc_num.value, ADC_VOLTAGE_READ_LEN)
+            )
             if adc_num is ADCNum.ADC_1:
-                ready = (read_data[1] & 0b01000000) == 0b01000000
-            if adc_num is ADCNum.ADC_2:
-                ready = (read_data[1] & 0b10000000) == 0b10000000
-            return ready
+                return (read_data[1] & 0b01000000) == 0b01000000
+            elif adc_num is ADCNum.ADC_2:
+                return (read_data[1] & 0b10000000) == 0b10000000
+            else:
+                raise ValueError(f"Unexpected parameter adc_num of {adc_num}")
 
     def __read_registers_to_map(self):
         """
@@ -593,8 +602,6 @@ class EdgePiADC(SPI):
 
         # build dict with (register addx : register_value) pairs.
         reg_dict = {addx + i: reg_values[i] for i in range(ADC_NUM_REGS)}
-        # _logger.debug(f"__read_registers_to_map: {reg_dict}")
-
         return reg_dict
 
     def __is_rtd_on(self):
@@ -613,7 +620,7 @@ class EdgePiADC(SPI):
 
     def __get_rtd_state(self):
         """
-        Get RTD state this includes the corrent mode (on/off) and the adc type being used
+        Get RTD state this includes the current mode (on/off) and the adc type being used
         (adc1 or adc2).
         Returns:
             rtd_mode (dictionary): RTD mode dictionary {"name of config": op_codes}
@@ -628,14 +635,14 @@ class EdgePiADC(SPI):
     # Case 3: user sets any differential mode -> mux_n pass in as arg
     def __get_channel_assign_opcodes(
         self,
-        adc_1_mux_p: CH = None,
-        adc_2_mux_p: CH = None,
-        adc_1_mux_n: CH = CH.AINCOM,
-        adc_2_mux_n: CH = CH.AINCOM,
+        adc_1_mux_p: Optional[CH] = None,
+        adc_2_mux_p: Optional[CH] = None,
+        adc_1_mux_n: Optional[CH] = CH.AINCOM,
+        adc_2_mux_n: Optional[CH] = CH.AINCOM,
         override_rtd_validation: bool = False
     ):
         """
-        Generates OpCodes for assigning positive and negative multiplexers
+        Generates list of OpCodes for updating positive and negative multiplexer mapping
         of either ADC1 or ADC2 to an ADC input channel. This is needed to allow
         users to assign multiplexers to both ADCs using the same input channel
         number enums.
@@ -650,32 +657,31 @@ class EdgePiADC(SPI):
             `list`: if not empty, contains OpCode(s) for updating multiplexer
                 channel assignment for ADC1, ADC2, or both.
         """
-        # only update mux_n if mux_p is updated
-        if adc_1_mux_p is None:
-            adc_1_mux_n = None
-
-        if adc_2_mux_p is None:
-            adc_2_mux_n = None
-
-        # no multiplexer config to update
-        args = filter_dict_list_key_val(locals(), ["self", "override_rtd_validation"], [None])
-        if not args:
-            return []
-
         # allowed channels depend on RTD_EN status
         if not override_rtd_validation:
-            channels = list(args.values())
+            if adc_1_mux_p is None:
+                adc_1_mux_n = None
+            if adc_2_mux_p is None:
+                adc_2_mux_n = None
+            channels = [adc_1_mux_p, adc_1_mux_n, adc_2_mux_p, adc_2_mux_n]
+            channels = [ch for ch in channels if ch is not None]
+
             rtd_enabled = self.__is_rtd_on()
             validate_channels_allowed(channels, rtd_enabled)
 
-        adc_mux_updates = {
-            ADCReg.REG_INPMUX: (adc_1_mux_p, adc_1_mux_n),
-            ADCReg.REG_ADC2MUX: (adc_2_mux_p, adc_2_mux_n),
-        }
+        opcode_list = []
 
-        opcodes = generate_mux_opcodes(adc_mux_updates)
+        if adc_1_mux_p is not None and adc_1_mux_n is not None:
+            # ADCReg.REG_INPMUX controls multiplexing for ad1,
+            opcode = generate_mux_opcode(ADCReg.REG_INPMUX, adc_1_mux_p, adc_1_mux_n)
+            opcode_list.append(opcode)
 
-        return opcodes
+        if adc_2_mux_p is not None and adc_2_mux_n is not None:
+            # while ADCReg.REG_ADC2MUX controls multiplexing for adc2
+            opcode = generate_mux_opcode(ADCReg.REG_ADC2MUX, adc_2_mux_p, adc_2_mux_n)
+            opcode_list.append(opcode)
+
+        return opcode_list
 
     def select_differential(self, adc: ADCNum, diff_mode: DiffMode):
         """
@@ -704,7 +710,7 @@ class EdgePiADC(SPI):
         diff_update = mux_properties[adc]
         self.__config(**diff_update)
 
-    def  __validate_no_rtd_conflict(self, updates: dict):
+    def __validate_no_rtd_conflict(self, updates: dict):
         """
         Checks no RTD related properties are being updated if RTD mode is enabled
 
@@ -741,7 +747,7 @@ class EdgePiADC(SPI):
         adc_2_muxs = [state.adc_2.mux_n.code.value, state.adc_2.mux_p.code.value]
         return adc_1_muxs, adc_2_muxs
 
-    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum):
+    def __get_rtd_on_update_config(self, muxs: list, adc_num: ADCNum) -> dict:
         """
         generate a dictionary of config parameters to enable RTD using specified ADC
         Args:
@@ -752,14 +758,16 @@ class EdgePiADC(SPI):
                                     {name_of_config : op_codes}
         """
         if any(mux not in [x.value for x in AllowedChannels.RTD_ON.value] for mux in muxs):
-            updates = RTDModes.RTD_ON.value |\
-            (ADC2RtdConfig.OFF.value if adc_num == ADCNum.ADC_1 else ADC1RtdConfig.OFF.value) |\
-            (ADC1RtdConfig.ON.value if adc_num ==ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
+            return (
+                RTDModes.RTD_ON.value
+                | (ADC2RtdConfig.OFF.value if adc_num == ADCNum.ADC_1 else ADC1RtdConfig.OFF.value)
+                | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
+            )
         else:
-            updates = RTDModes.RTD_ON.value |\
-            (ADC1RtdConfig.ON.value if adc_num ==ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
-        return updates
-
+            return (
+                RTDModes.RTD_ON.value
+                | (ADC1RtdConfig.ON.value if adc_num == ADCNum.ADC_1 else ADC2RtdConfig.ON.value)
+            )
 
     def __get_rtd_off_update_config(self, adc_num: ADCNum):
         """
@@ -769,8 +777,11 @@ class EdgePiADC(SPI):
         Return:
             updates (dictionary): configuration dictionary for disabling RTD
         """
-        updates = RTDModes.RTD_OFF.value |\
-        (ADC1RtdConfig.OFF.value if adc_num == ADCNum.ADC_1  else ADC2RtdConfig.OFF.value)
+        updates = RTDModes.RTD_OFF.value | (
+            ADC1RtdConfig.OFF.value
+            if adc_num == ADCNum.ADC_1
+            else ADC2RtdConfig.OFF.value
+        )
         return updates
 
     def set_rtd(self, set_rtd: bool, adc_num: ADCNum = ADCNum.ADC_2):
@@ -789,11 +800,11 @@ class EdgePiADC(SPI):
             # default setting. And get RTD_ON configuration values
             updates = self.__get_rtd_on_update_config(
                            mux_2 if adc_num == ADCNum.ADC_1 else mux_1, adc_num)
-            # enable RTD pin to re-route internal circuit
-            self.__set_rtd_pin(set_rtd)
         else:
             updates = self.__get_rtd_off_update_config(adc_num)
-            self.__set_rtd_pin(set_rtd)
+
+        # enable RTD pin to re-route internal circuit
+        self.__set_rtd_pin(set_rtd)
 
         self.__config(**updates, override_rtd_validation=True)
 
@@ -979,6 +990,102 @@ class EdgePiADC(SPI):
                                         ["self", "adc_1_analog_in", "adc_2_analog_in"],
                                         [None])
         self.__config(**args)
+
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
+    def read_samples_adc1_batch(
+        self,
+        data_rate: ADC1DataRate,
+        analog_in_list: Optional[list[AnalogIn]] = None,
+        differential_pairs: Optional[list[DiffMode]] = None,
+    ) -> list:
+        """
+        This function gets a data rate (to set ADC1 to), and a list of analog in and
+        differential pairs to read from. The differential pairs & analog_in elements may overlap,
+        but usecases are be uncommon.
+
+        Will reset any prior config made to the ADC. Does not work with RTD mode, and may override
+        configs if RTD mode is active.
+
+        This function only supports ADC 1, and changes the conversion mode to PULSE automatically.
+        """
+        analog_in_list     = [] if analog_in_list is None else analog_in_list
+        differential_pairs = [] if differential_pairs is None else differential_pairs
+
+        if analog_in_list == [] and differential_pairs == []:
+            raise ValueError("Both analog_in_list and differential_pairs cannot be empty")
+
+        channel_list = [
+            self.__analog_in_to_adc_in_map.get(analog_in)
+            for analog_in in analog_in_list
+        ]
+        if any(ch is None for ch in channel_list):
+            raise ValueError(f"Invalid analog_in_list={analog_in_list}")
+
+        # get current register values by doing an SPI read
+        register_values = self.__get_register_map()
+        if len(register_values.values()) < 1:
+            raise ValueError("Number of reg_values must be at least 1")
+
+        # determine the conversion delay using the table from the datasheet
+        # (best case is sleep of 0.207ms)
+        filter_mode_op_code = (
+            (~ADCProperties.FILTER_MODE.value.mask)
+            & register_values[ADCProperties.FILTER_MODE.value.addx]
+        )
+        conversion_delay = expected_initial_time_delay(
+            ADCNum.ADC_1, data_rate.value.op_code, filter_mode_op_code
+        ) / 1000
+
+        # this is the register value of MODE2 that contains the new data_rate
+        mode2_register_value = (
+            register_values[ADCReg.REG_MODE2.value]
+            & data_rate.value.op_mask
+        ) | data_rate.value.op_code
+
+        mux_pairs = (
+            [(channel, CH.AINCOM) for channel in channel_list] +
+            [(diff_mode.value.mux_p, diff_mode.value.mux_n) for diff_mode in differential_pairs]
+        )
+
+        data_list = self.spi_apply_adc_commands([
+            # get instructions we need to send to perform a read of each pin
+            ADCCommands.read_command_tuple(
+                # the first command tuple should write the mode2 register to contain the data rate
+                mode2_register_value if i == 0 else None,
+                conversion_delay,
+                mux_p, mux_n
+            ) for i, (mux_p, mux_n) in enumerate(mux_pairs)
+        ])
+
+        # update with final ADC state we wrote (for state caching)
+        EdgePiADC.__state[ADCReg.REG_MODE2.value] = mode2_register_value
+        mux_p, mux_n = mux_pairs[-1]
+        EdgePiADC.__state[ADCReg.REG_INPMUX.value] = generate_mux_opcode(
+            ADCReg.REG_INPMUX, mux_p, mux_n
+        ).op_code
+
+        voltage_list = []
+        for i, read_data in enumerate(data_list):
+            if (len(read_data) - 1) != ADC_VOLTAGE_READ_LEN:
+                raise VoltageReadError(
+                    f"Voltage read failed: incorrect number of bytes ({len(read_data)}) retrieved"
+                )
+
+            voltage_code = read_data[2 : (2 + ADCNum.ADC_1.value.num_data_bytes)]
+            check_code = read_data[6]
+            check_crc(voltage_code, check_code)
+
+            mux_p, mux_n = mux_pairs[i]
+
+            # convert from voltage_code to voltage value (float)
+            calibs = self.__get_calibration_params_mux(ADCNum.ADC_1, mux_p, mux_n)
+            single_ended = i < len(channel_list)
+            voltage_list += [code_to_voltage(
+                voltage_code, ADCNum.ADC_1.value, calibs, single_ended
+            )]
+
+        return voltage_list
 
     def get_state(self, override_cache: bool = False) -> ADCState:
         """
