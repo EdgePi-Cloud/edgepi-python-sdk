@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     name: Dummy Test
-    runs-on: [self-hosted, linux, ARM64, edgepi-intg2]
+    runs-on: [self-hosted, linux, ARM64, integration]
     strategy:
       fail-fast: false
       matrix:
