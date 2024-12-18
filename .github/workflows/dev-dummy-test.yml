@@ -15,17 +15,17 @@ jobs:
 
     steps:
       - name: step-1
-      - run: |
+        run: |
           echo "Test Step 1"
       - name: step-2
-      - run: |
+        run: |
           echo "Test Step 2"
           exit 1
       - name: step-3
-      - run: |
+        run: |
           echo "Test Step 3"
       - name: step-4
-      - if: failure()
-      - run: |
+        if: failure()
+        run: |
           echo "one of step failed"
 
