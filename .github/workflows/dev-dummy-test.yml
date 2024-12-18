@@ -1,0 +1,31 @@
+name: PyTest Integration Test
+
+on:
+  push:
+    branches:
+      - 'dev-dummy'
+jobs:
+  test:
+    name: Dummy Test
+    runs-on: [self-hosted, linux, ARM64, integration]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+      - name: step-1
+      - run: |
+          echo "Test Step 1"
+      - name: step-2
+      - run: |
+          echo "Test Step 2"
+          exit 1
+      - name: step-3
+      - run: |
+          echo "Test Step 3"
+      - name: step-4
+      - if: failure()
+      - run: |
+          echo "one of step failed"
+
