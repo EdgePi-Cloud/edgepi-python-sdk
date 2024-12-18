@@ -1,0 +1,99 @@
+# This workflow will increment version patch number, cherry pick this new version to dev,
+# and build and publish the package to TestPyPI upon push or merge to staging branch
+
+name: Staging Dummy Publish
+
+on:
+  push:
+    branches:
+      - 'staging-dummy'
+    # needed to stop endless commit loop by auto-bump
+    paths-ignore:
+      - setup.py
+      - .bumpversion.cfg
+
+jobs:
+  publish:
+    name: Staging Publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+          persist-credentials: false
+      # cut assumes version number is surrounded by double-quotes.
+    - name: Get Current Version
+      run: echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+    - name: Auto Bump Package Version
+      uses: FragileTech/bump-version@main
+      with:
+        current_version: "${{ env.current_version }}"
+        files: setup.py
+        part: patch
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+        login: bot-edgepi
+        token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+    # - name: Set up Python
+    #   uses: actions/setup-python@v3
+    #   with:
+    #     python-version: '3.10'
+    # - name: Install Dependencies
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     if [ -f requirements_build.txt ]; then python -m pip install -r requirements_build.txt; fi
+    # - name: Build Package
+    #   run: |
+    #     python -m build
+    # - name: Publish Distribution to TestPyPI
+    #   uses: pypa/gh-action-pypi-publish@v1.9.0
+    #   with:
+    #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+    #     repository_url: https://test.pypi.org/legacy/
+    # - name: Checkout Dev
+    #   uses: actions/checkout@v3
+    #   with:
+    #     ref: dev-dummy
+    #     token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+    #     fetch-depth: 0
+    # - name: Auto Bump Commit SHA
+    #   run: |
+    #     echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
+    # - name: Cherry Pick
+    #   env:
+    #     commit_name: bot-edgepi
+    #     commit_email: bot@edgepi.com
+    #   run: |
+    #     echo ${{ env.bump_commit }}
+    #     git config user.name ${{ env.commit_name }}
+    #     git config user.email ${{ env.commit_email }}
+    #     git cherry-pick ${{ env.bump_commit }}
+    #     git push origin dev
+    # - name: Handling Failure
+    #   if: failure()
+
+
+
+  # Hardware_Test:
+  #   needs: publish
+  #   name: Hardware Tests
+  #   runs-on: [self-hosted, linux, ARM64, hw-test]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.9"]
+
+    # steps:
+    #   - name: Checkout
+    #     uses: actions/checkout@v3
+    #   - name: Install Dependencies
+    #     run: |
+    #       python -m venv venv_hardware_test
+    #       source venv_hardware_test/bin/activate
+    #       python -m pip install --upgrade pip
+    #       python -m pip install pytest
+    #       if [ -f requirements_hw_test.txt ]; then pip install -r requirements_hw_test.txt; fi
+    #   - name: Test with pytest
+    #     run: |
+    #       source venv_hardware_test/bin/activate
+    #       python -m pytest ./tests/hardware_tests
