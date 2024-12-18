@@ -70,7 +70,7 @@ jobs:
     #     git cherry-pick ${{ env.bump_commit }}
     #     git push origin dev
     - name: Handling Failure
-      if: failure() || succeeded()
+      if: failure() || success()
       run: |
         echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
         echo ${{ env.current_version }}
