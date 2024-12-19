@@ -69,7 +69,6 @@ jobs:
         git config user.email ${{ env.commit_email }}
         git config --global pull.rebase false
         BRANCH=${GITHUB_REF#refs/heads/}
-        git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
         git pull --no-edit ${{ env.login }} $BRANCH
         git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
         # merge done by git pull does not update submodules changed in $BRANCH
