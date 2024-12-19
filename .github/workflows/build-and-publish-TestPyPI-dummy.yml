@@ -75,16 +75,16 @@ jobs:
         # Delete Git tags
         git tag -d rc/v${{ env.current_version }}
         git push origin --delete rc/v${{ env.current_version }}
-
-        # # Decrementing the current version number
-        my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
-        my_var=$(echo $((my_var-1)))
-        # Write the reverted version number back to setup file and
-        sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
-        sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
-        git add . && git commit -m "Failed Publish Job --- decremented version" && git push
         git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
-    
+
+
+# Decrementing the current version number
+# my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
+# my_var=$(echo $((my_var-1)))
+Write the reverted version number back to setup file and
+# sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
+# sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
+# git add . && git commit -m "Failed Publish Job --- decremented version" && git push
   
   Hardware_Test:
     needs: publish
@@ -144,15 +144,6 @@ jobs:
           # Delete Git tags
           git tag -d rc/v${{ env.expected_sdk_version }}
           git push origin --delete rc/v${{ env.expected_sdk_version }}
-
-          # Decrementing the current version number
-          my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
-          my_var=$(echo $((my_var-1)))
-          # Write the reverted version number back to setup file and
-          sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
-          sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
-
-          git add . && git commit -m "Failed Hardware Test Job ---- decremented version" && git push
           git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
   Bump_version_on_dev:
