@@ -77,8 +77,7 @@ jobs:
         git push origin --delete rc/v${{ env.current_version }}
         git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
-
-# Decrementing the current version number
+# Decrementing the current version number, this may be needed later.
 # my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
 # my_var=$(echo $((my_var-1)))
 # Write the reverted version number back to setup file and
