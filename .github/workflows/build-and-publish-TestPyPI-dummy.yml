@@ -22,18 +22,18 @@ jobs:
       with:
           persist-credentials: false
       # cut assumes version number is surrounded by double-quotes.
-    # - name: Get Current Version
-    #   run: echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-    # - name: Auto Bump Package Version
-    #   uses: FragileTech/bump-version@main
-    #   with:
-    #     current_version: "${{ env.current_version }}"
-    #     files: setup.py
-    #     part: patch
-    #     commit_name: bot-edgepi
-    #     commit_email: bot@edgepi.com
-    #     login: bot-edgepi
-    #     token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+    - name: Get Current Version
+      run: echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+    - name: Auto Bump Package Version
+      uses: FragileTech/bump-version@main
+      with:
+        current_version: "${{ env.current_version }}"
+        files: setup.py
+        part: patch
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+        login: bot-edgepi
+        token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
     # - name: Set up Python
     #   uses: actions/setup-python@v3
     #   with:
