@@ -70,14 +70,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: staging
+          ref: staging-dummy
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           fetch-depth: 0
-      - run: |
-          set -x
-          git fetch origin
-          BRANCH=${GITHUB_REF#refs/heads/}
-          git pull --no-edit $BRANCH
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
