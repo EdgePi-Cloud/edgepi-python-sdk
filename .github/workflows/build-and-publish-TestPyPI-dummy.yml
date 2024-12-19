@@ -16,6 +16,8 @@ jobs:
   publish:
     name: Staging Publish
     runs-on: ubuntu-latest
+    outputs:
+      latest_sha: ${{ steps.get_sha.outputs.sha }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -34,6 +36,10 @@ jobs:
         commit_email: bot@edgepi.com
         login: bot-edgepi
         token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+    - name: Get the latest commit with the bum version
+      id: get_sha
+      run: |
+        echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
     # - name: Set up Python
     #   uses: actions/setup-python@v3
     #   with:
@@ -67,7 +73,10 @@ jobs:
           ref: staging
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           fetch-depth: 0
-      - run: git pull 
+      - run: |
+          set -x
+          git fetch origin
+          git checkout  ${{ needs.publish.outputs.latest_sha }}
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
