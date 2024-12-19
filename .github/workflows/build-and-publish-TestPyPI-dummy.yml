@@ -106,12 +106,12 @@ jobs:
           git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
           # merge done by git pull does not update submodules changed in $BRANCH
           git submodule update --init --recursive
-          
+
           # Delete Git tags
           git tag -d rc/v$current_version
           git push origin --delete rc/v$current_version
           git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
-          
+
           # # Decrementing the current version number
           # my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
           # echo $((my_var-1))
@@ -119,6 +119,7 @@ jobs:
 
   Bump_version_on_dev:
     name: Bump version numbers in Dev
+    needs: Hardware_Test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Dev
