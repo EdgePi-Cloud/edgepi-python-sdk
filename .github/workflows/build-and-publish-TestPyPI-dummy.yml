@@ -73,9 +73,9 @@ jobs:
       if: failure() || success()
       run: |
         echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-        echo ${{ env.current_version }}
-        git tag -d rc/v${{ env.current_version }}
-        git push origin --delete rc/v${{ env.current_version }}
+        echo ${ env.current_version }
+        git tag -d rc/v${ env.current_version }
+        git push origin --delete rc/v${ env.current_version }
 
 
 
