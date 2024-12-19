@@ -120,10 +120,10 @@ jobs:
             echo "SDK Version Mismatch"
             exit 1
           fi
-      # - name: Test with pytest
-      #   run: |
-      #     source venv_hardware_test/bin/activate
-      #     python -m pytest ./tests/hardware_tests
+      - name: Test with pytest
+        run: |
+          source venv_hardware_test/bin/activate
+          python -m pytest ./tests/hardware_tests
       - name: Handling Failure Delete tag
         if: failure()
         env:
