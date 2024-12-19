@@ -8,6 +8,7 @@ disable=logging-fstring-interpolation,
         duplicate-code,
         no-else-return,
         no-else-raise,
+        too-many-positional-arguments,
         logging-fstring-interpolation
 
 [LOGGING]
