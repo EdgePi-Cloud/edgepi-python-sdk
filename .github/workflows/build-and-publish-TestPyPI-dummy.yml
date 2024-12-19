@@ -22,97 +22,44 @@ jobs:
       with:
           persist-credentials: false
       # cut assumes version number is surrounded by double-quotes.
-    # - name: Get Current Version
-    #   run: echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-    # - name: Auto Bump Package Version
-    #   uses: FragileTech/bump-version@main
-    #   with:
-    #     current_version: "${{ env.current_version }}"
-    #     files: setup.py
-    #     part: patch
-    #     commit_name: bot-edgepi
-    #     commit_email: bot@edgepi.com
-    #     login: bot-edgepi
-    #     token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
-    # - name: Set up Python
-    #   uses: actions/setup-python@v3
-    #   with:
-    #     python-version: '3.10'
-    # - name: Install Dependencies
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     if [ -f requirements_build.txt ]; then python -m pip install -r requirements_build.txt; fi
-    # - name: Build Package
-    #   run: |
-    #     python -m build
-    # - name: Publish Distribution to TestPyPI
-    #   uses: pypa/gh-action-pypi-publish@v1.9.0
-    #   with:
-    #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-    #     repository_url: https://test.pypi.org/legacy/
-    # - name: Checkout Dev
-    #   uses: actions/checkout@v3
-    #   with:
-    #     ref: dev-dummy
-    #     token: ${{ secrets.ACTIONS_BOT_TOKEN }}
-    #     fetch-depth: 0
-    # - name: Auto Bump Commit SHA
-    #   run: |
-    #     echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
-    # - name: Cherry Pick
-    #   env:
-    #     commit_name: bot-edgepi
-    #     commit_email: bot@edgepi.com
-    #   run: |
-    #     echo ${{ env.bump_commit }}
-    #     git config user.name ${{ env.commit_name }}
-    #     git config user.email ${{ env.commit_email }}
-    #     git cherry-pick ${{ env.bump_commit }}
-    #     git push origin dev
-    # - name: Handling Failure Get Version
-    #   if: failure() || success()
-    #   run: |
-    #     # current_version should be changed to something else. the new version should be compared to the current version from previous step and revert if it was incremented.
-    #     echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-    # - name: Handling Failure Delete tag
-    #   env:
-    #     commit_name: bot-edgepi
-    #     commit_email: bot@edgepi.com
-    #     login: bot-edgepi
-    #     token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
-    #   run: |
-    #     set -x
-    #     # Setup Git env and user
-    #     git config user.name ${{ env.commit_name }}
-    #     git config user.email ${{ env.commit_email }}
-    #     git config --global pull.rebase false
-    #     BRANCH=${GITHUB_REF#refs/heads/}
-    #     git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
-    #     git pull --no-edit ${{ env.login }} $BRANCH
-    #     git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
-    #     # merge done by git pull does not update submodules changed in $BRANCH
-    #     git submodule update --init --recursive
-        
-    #     # Delete Git tags
-    #     git tag -d rc/v$current_version
-    #     git push origin --delete rc/v$current_version
-    #     git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
-        
-    #     # Decrementing the current version number
-    #     my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
-    #     echo $((my_var-1))
-    #     # Write the reverted version number back to setup file and 
-
+    - name: Get Current Version
+      run: echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+    - name: Auto Bump Package Version
+      uses: FragileTech/bump-version@main
+      with:
+        current_version: "${{ env.current_version }}"
+        files: setup.py
+        part: patch
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+        login: bot-edgepi
+        token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements_build.txt ]; then python -m pip install -r requirements_build.txt; fi
+    - name: Build Package
+      run: |
+        python -m build
+    - name: Publish Distribution to TestPyPI
+      uses: pypa/gh-action-pypi-publish@v1.9.0
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
 
   Hardware_Test:
-    # needs: publish
+    needs: publish
     name: Hardware Tests
-    runs-on: [self-hosted, linux, ARM64, hw-test]
+    runs-on: ubuntu-latest
+    # runs-on: [self-hosted, linux, ARM64, hw-test]
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9"]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -123,7 +70,75 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pytest
           if [ -f requirements_hw_test.txt ]; then pip install -r requirements_hw_test.txt; fi
-      - name: Test with pytest
+      - name: Get Expected and actual SDK Version
         run: |
-          source venv_hardware_test/bin/activate
-          python -m pytest ./tests/hardware_tests
+          echo "expected_sdk_version=$(pip list | grep edgepi | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo "actual_sdk_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+      - name: Compare versions
+        run: |
+          if ["$expected_sdk_version" != "$actual_sdk_version"]; then
+            echo "SDK Version Mismatch"
+            exit 1
+          fi
+      # - name: Test with pytest
+      #   run: |
+      #     source venv_hardware_test/bin/activate
+      #     python -m pytest ./tests/hardware_tests
+    - name: Handling Failure Get Version
+      if: failure() || success()
+      run: |
+        # current_version should be changed to something else. the new version should be compared to the current version from previous step and revert if it was incremented.
+        echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+    - name: Handling Failure Delete tag
+      env:
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+        login: bot-edgepi
+        token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+      run: |
+        set -x
+        # Setup Git env and user
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
+        git config --global pull.rebase false
+        BRANCH=${GITHUB_REF#refs/heads/}
+        git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
+        git pull --no-edit ${{ env.login }} $BRANCH
+        git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
+        # merge done by git pull does not update submodules changed in $BRANCH
+        git submodule update --init --recursive
+        
+        # Delete Git tags
+        git tag -d rc/v$current_version
+        git push origin --delete rc/v$current_version
+        git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
+        
+        # # Decrementing the current version number
+        # my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
+        # echo $((my_var-1))
+        # # Write the reverted version number back to setup file and 
+
+
+  Bump_version_on_dev:
+    name: Bump version numbers in Dev
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Dev
+      uses: actions/checkout@v3
+      with:
+        ref: dev-dummy
+        token: ${{ secrets.ACTIONS_BOT_TOKEN }}
+        fetch-depth: 0
+    - name: Auto Bump Commit SHA
+      run: |
+        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
+    - name: Cherry Pick
+      env:
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+      run: |
+        echo ${{ env.bump_commit }}
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
+        git cherry-pick ${{ env.bump_commit }}
+        git push origin dev
