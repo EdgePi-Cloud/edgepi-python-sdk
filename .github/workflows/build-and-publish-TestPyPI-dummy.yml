@@ -62,12 +62,12 @@ jobs:
         python-version: ["3.9"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           ref: staging
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           fetch-depth: 0
-        run: git pull
+      - run: git pull
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
