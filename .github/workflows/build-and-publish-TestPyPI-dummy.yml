@@ -95,9 +95,9 @@ jobs:
       matrix:
         python-version: ["3.9"]
     steps:
-      # Wait for 3 minutes for TestPyPI to be updated 
-      - name: Sleep for 3 minutes
-        run: sleep 180s
+      # Wait for 1 minutes for TestPyPI to be updated 
+      - name: Sleep for 1 minute
+        run: sleep 60s
         shell: bash
       - name: Checkout
         uses: actions/checkout@v3
@@ -162,14 +162,14 @@ jobs:
         fetch-depth: 0
     - name: Auto Bump Commit SHA
       run: |
-        echo "bump_commit=$(git log -n 1 origin/staging --pretty=format:'%H')" >> $GITHUB_ENV
-    # - name: Cherry Pick
-    #   env:
-    #     commit_name: bot-edgepi
-    #     commit_email: bot@edgepi.com
-    #   run: |
-    #     echo ${{ env.bump_commit }}
-    #     git config user.name ${{ env.commit_name }}
-    #     git config user.email ${{ env.commit_email }}
-    #     git cherry-pick ${{ env.bump_commit }}
-    #     git push origin dev
+        echo "bump_commit=$(git log -n 1 origin/staging-dummy --pretty=format:'%H')" >> $GITHUB_ENV
+    - name: Cherry Pick
+      env:
+        commit_name: bot-edgepi
+        commit_email: bot@edgepi.com
+      run: |
+        echo ${{ env.bump_commit }}
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
+        git cherry-pick ${{ env.bump_commit }}
+        git push origin dev-dummy
