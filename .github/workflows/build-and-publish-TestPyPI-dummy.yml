@@ -67,6 +67,7 @@ jobs:
           ref: staging
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           fetch-depth: 0
+        run: git pull
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
@@ -87,10 +88,11 @@ jobs:
       #     source venv_hardware_test/bin/activate
       #     python -m pytest ./tests/hardware_tests
       - name: Handling Failure Get Version
-        if: failure() || success()
+        if: failure()
         run: |
           # current_version should be changed to something else. the new version should be compared to the current version from previous step and revert if it was incremented.
           echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo $current_version
       - name: Handling Failure Delete tag
         env:
           commit_name: bot-edgepi
