@@ -73,8 +73,7 @@ jobs:
       if: failure() || success()
       run: |
         echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-    - name: Handling Failure Get Version
-      if: failure() || success()
+    - name: Handling Failure Delete tag
       run: |
         echo $current_version
         git tag -d rc/v$current_version
