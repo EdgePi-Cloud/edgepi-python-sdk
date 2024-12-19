@@ -91,9 +91,9 @@ jobs:
         git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
         # merge done by git pull does not update submodules changed in $BRANCH
         git submodule update --init --recursive
-        git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
         git push origin --delete rc/v$current_version
+        git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
 
   # git tag -d rc/v$current_version
