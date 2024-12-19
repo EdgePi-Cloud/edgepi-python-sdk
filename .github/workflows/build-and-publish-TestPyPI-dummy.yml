@@ -67,7 +67,7 @@ jobs:
           ref: staging
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           fetch-depth: 0
-      - run: git pull
+        run: git pull
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
