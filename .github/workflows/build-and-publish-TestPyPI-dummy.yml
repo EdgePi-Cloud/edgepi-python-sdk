@@ -64,6 +64,17 @@ jobs:
         token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
       run: |
         set -x
+        # Setup Git env and user
+        git config user.name ${{ env.commit_name }}
+        git config user.email ${{ env.commit_email }}
+        git config --global pull.rebase false
+        BRANCH=${GITHUB_REF#refs/heads/}
+        git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
+        git pull --no-edit ${{ env.login }} $BRANCH
+        git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
+        # merge done by git pull does not update submodules changed in $BRANCH
+        git submodule update --init --recursive
+        
         # Delete Git tags
         git tag -d rc/v${{ env.current_version }}
         git push origin --delete rc/v${{ env.current_version }}
@@ -75,6 +86,7 @@ jobs:
         sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
         sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
         git add . && git commit -m "decremented version" && git push
+        git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
     
   
   Hardware_Test:
