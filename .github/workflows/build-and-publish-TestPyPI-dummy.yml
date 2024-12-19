@@ -69,10 +69,12 @@ jobs:
     #     git config user.email ${{ env.commit_email }}
     #     git cherry-pick ${{ env.bump_commit }}
     #     git push origin dev
-    - name: Handling Failure
+    - name: Handling Failure Get Version
       if: failure() || success()
       run: |
         echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
+    - name: Handling Failure Get Version
+      if: failure() || success()
       run: |
         echo $current_version
         git tag -d rc/v$current_version
