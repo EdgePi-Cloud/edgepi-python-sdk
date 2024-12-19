@@ -89,7 +89,7 @@ jobs:
     needs: publish
     name: Hardware Tests
     runs-on: ubuntu-latest
-    # runs-on: [self-hosted, linux, ARM64, hw-test]
+    runs-on: [self-hosted, linux, ARM64, integration]
     strategy:
       fail-fast: false
       matrix:
