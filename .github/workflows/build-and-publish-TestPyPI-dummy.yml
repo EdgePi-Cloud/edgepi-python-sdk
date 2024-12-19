@@ -50,6 +50,7 @@ jobs:
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
+  
   Hardware_Test:
     needs: publish
     name: Hardware Tests
@@ -75,7 +76,7 @@ jobs:
           echo "actual_sdk_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
       - name: Compare versions
         run: |
-          if ["$expected_sdk_version" != "$actual_sdk_version"]; then
+          if [ ${{env.expected_sdk_version}} != ${{env.actual_sdk_version}} ]; then
             echo "SDK Version Mismatch"
             exit 1
           fi
