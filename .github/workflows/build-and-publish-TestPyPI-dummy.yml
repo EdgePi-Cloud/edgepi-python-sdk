@@ -76,7 +76,8 @@ jobs:
       - run: |
           set -x
           git fetch origin
-          git checkout  ${{ needs.publish.outputs.latest_sha }}
+          BRANCH=${GITHUB_REF#refs/heads/}
+          git pull --no-edit $BRANCH
       - name: Install Dependencies and check SDK versions
         run: |
           python -m venv venv_hardware_test
@@ -101,37 +102,40 @@ jobs:
         run: |
           # current_version should be changed to something else. the new version should be compared to the current version from previous step and revert if it was incremented.
           echo "current_version=$(grep "version" setup.py | cut -d '"' -f2)" >> $GITHUB_ENV
-          echo $current_version
-      - name: Handling Failure Delete tag
-        env:
-          commit_name: bot-edgepi
-          commit_email: bot@edgepi.com
-          login: bot-edgepi
-          token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
-        run: |
-          set -x
-          # Setup Git env and user
-          git config user.name ${{ env.commit_name }}
-          git config user.email ${{ env.commit_email }}
-          git config --global pull.rebase false
-          BRANCH=${GITHUB_REF#refs/heads/}
-          git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
-          git pull --no-edit ${{ env.login }} $BRANCH
-          git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
-          # merge done by git pull does not update submodules changed in $BRANCH
-          git submodule update --init --recursive
+          echo ${{ env.current_version }}
+      # - name: Handling Failure Delete tag
+      #   if: failure()
+      #   env:
+      #     commit_name: bot-edgepi
+      #     commit_email: bot@edgepi.com
+      #     login: bot-edgepi
+      #     token: "${{ secrets.ACTIONS_BOT_TOKEN }}"
+      #   run: |
+      #     set -x
+      #     # Setup Git env and user
+      #     git config user.name ${{ env.commit_name }}
+      #     git config user.email ${{ env.commit_email }}
+      #     git config --global pull.rebase false
+      #     BRANCH=${GITHUB_REF#refs/heads/}
+      #     git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
+      #     git pull --no-edit ${{ env.login }} $BRANCH
+      #     git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
+      #     # merge done by git pull does not update submodules changed in $BRANCH
+      #     git submodule update --init --recursive
 
-          # # Delete Git tags
-          # git tag -d rc/v$current_version
-          # git push origin --delete rc/v$current_version
-          # git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
+      #     # Delete Git tags
+      #     git tag -d rc/v${{ env.current_version }}
+      #     git push origin --delete rc/v${{ env.current_version }}
 
-          # # Decrementing the current version number
-          # my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
-          # echo $((my_var-1))
-          # # Write the reverted version number back to setup file and
-          # sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
-          # sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
+      #     # Decrementing the current version number
+      #     my_var=$(echo $(grep "version" setup.py | cut -d '"' -f2 | cut -d '.' -f3))
+      #     my_var=$(echo $((my_var-1)))
+      #     # Write the reverted version number back to setup file and
+      #     sed -i "s/\(version=\"[0-9]\+\.[0-9]\+\.\)[0-9]\+\"/\1$my_var\"/" setup.py
+      #     sed -i "s/\(current_version = [0-9]\+\.[0-9]\+\.\)[0-9]\+/\1$my_var/" .bumpversion.cfg
+
+      #     git add . && git commit -m "decremented version" && git push
+      #     git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
   Bump_version_on_dev:
     name: Bump version numbers in Dev
