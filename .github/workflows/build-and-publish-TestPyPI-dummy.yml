@@ -93,12 +93,10 @@ jobs:
         git submodule update --init --recursive
         git config --global --unset url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf
 
-        git tag
-        git tag -d rc/v$current_version
         git push origin --delete rc/v$current_version
 
 
-
+  # git tag -d rc/v$current_version
   # Hardware_Test:
   #   needs: publish
   #   name: Hardware Tests
