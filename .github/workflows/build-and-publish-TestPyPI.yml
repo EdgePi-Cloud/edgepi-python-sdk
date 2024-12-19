@@ -53,6 +53,8 @@ jobs:
         verbose: true
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
+    #  Handling Failure Delete Tag: this step only gets executed when there's a failed step. 
+    #  When the job finishes with failed step, the tag created from bump version acrtion gets deleted
     - name: Handling Failure Delete tag
       if: failure()
       env:
@@ -123,6 +125,8 @@ jobs:
         run: |
           source venv_hardware_test/bin/activate
           python -m pytest ./tests/hardware_tests
+      #  Handling Failure Delete Tag: this step only gets executed when there's a failed step. 
+      #  When the job finishes with failed step, the tag created from bump version acrtion gets deleted
       - name: Handling Failure Delete tag
         if: failure()
         env:
