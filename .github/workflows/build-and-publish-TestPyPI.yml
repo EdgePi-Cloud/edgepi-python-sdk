@@ -97,8 +97,8 @@ jobs:
         python-version: ["3.9"]
     steps:
       # Wait for 1 minutes for TestPyPI to be updated 
-      - name: Sleep for 1 minute
-        run: sleep 60s
+      - name: Sleep for 1.5 minute
+        run: sleep 90s
         shell: bash
       - name: Checkout
         uses: actions/checkout@v3
@@ -141,7 +141,6 @@ jobs:
           git config user.email ${{ env.commit_email }}
           git config --global pull.rebase false
           BRANCH=${GITHUB_REF#refs/heads/}
-          git remote add ${{ env.login }} https://${{ env.login }}:${{ env.token }}@github.com/$GITHUB_REPOSITORY
           git pull --no-edit ${{ env.login }} $BRANCH
           git config --global url."https://${{ env.login }}:${{ env.token }}@github.com/".insteadOf "https://github.com/"
           # merge done by git pull does not update submodules changed in $BRANCH

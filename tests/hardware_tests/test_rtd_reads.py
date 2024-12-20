@@ -6,7 +6,7 @@ from edgepi.adc.adc_constants import ADCNum, ConvMode
 
 
 # This has to be manually set with temperature machine. Use this value for testing.
-RTD_TEMP = 28
+RTD_TEMP = 23
 ERROR = 4
 
 
